@@ -1,0 +1,7 @@
+version: '3'
+services:
+  voicevox:
+    build: .
+    ports:
+      - "50021:50021"
+    init: true 
