@@ -14,38 +14,61 @@ export async function GET(request) {
   }
 
   try {
-    // Step 1: Generate audio query
-    const queryResponse = await axios.post(
-      `${VOICEVOX_API}/audio_query`,
-      null,
-      {
-        params: {
-          text,
-          speaker: NANAMI_SPEAKER_ID
+    // Split text into manageable chunks if it's too long
+    const maxChunkLength = 500;
+    const textChunks = [];
+    let currentChunk = '';
+
+    for (const sentence of text.split(/([。！？])/)) {
+      if (currentChunk.length + sentence.length > maxChunkLength) {
+        if (currentChunk) textChunks.push(currentChunk);
+        currentChunk = sentence;
+      } else {
+        currentChunk += sentence;
+      }
+    }
+    if (currentChunk) textChunks.push(currentChunk);
+
+    // Process each chunk and combine the audio
+    const audioBuffers = [];
+    for (const chunk of textChunks) {
+      // Generate audio query for chunk
+      const queryResponse = await axios.post(
+        `${VOICEVOX_API}/audio_query`,
+        null,
+        {
+          params: {
+            text: chunk,
+            speaker: NANAMI_SPEAKER_ID
+          }
         }
-      }
-    );
+      );
 
-    // Step 2: Modify speed in query parameters
-    const audioQuery = queryResponse.data;
-    audioQuery.speedScale = Math.max(0.6, Math.min(1.5, speed)); // Clamp between 0.6 and 1.5
+      const audioQuery = queryResponse.data;
+      audioQuery.speedScale = Math.max(0.6, Math.min(1.2, speed));
 
-    // Step 3: Synthesize voice with modified parameters
-    const synthesisResponse = await axios.post(
-      `${VOICEVOX_API}/synthesis`,
-      audioQuery,
-      {
-        params: {
-          speaker: NANAMI_SPEAKER_ID
-        },
-        responseType: 'arraybuffer'
-      }
-    );
+      // Synthesize voice for chunk
+      const synthesisResponse = await axios.post(
+        `${VOICEVOX_API}/synthesis`,
+        audioQuery,
+        {
+          params: {
+            speaker: NANAMI_SPEAKER_ID
+          },
+          responseType: 'arraybuffer'
+        }
+      );
 
-    return new NextResponse(synthesisResponse.data, {
+      audioBuffers.push(Buffer.from(synthesisResponse.data));
+    }
+
+    // Combine all audio buffers
+    const combinedBuffer = Buffer.concat(audioBuffers);
+
+    return new NextResponse(combinedBuffer, {
       headers: {
         'Content-Type': 'audio/wav',
-        'Content-Length': synthesisResponse.data.length.toString()
+        'Content-Length': combinedBuffer.length.toString()
       }
     });
 

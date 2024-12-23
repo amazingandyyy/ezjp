@@ -10,7 +10,7 @@ export default function NewsReader() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioError, setAudioError] = useState('');
   const [autoPlay, setAutoPlay] = useState(false);
-  const [speed, setSpeed] = useState(1.0);
+  const [speed, setSpeed] = useState('1.0');
   const [isLoading, setIsLoading] = useState(false);
   const [audioElement, setAudioElement] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -19,9 +19,11 @@ export default function NewsReader() {
   const [fontSize, setFontSize] = useState('medium');
   const [theme, setTheme] = useState('light'); // light, dark, yellow
   const [showSettings, setShowSettings] = useState(false);
+  const [isRepeatMode, setIsRepeatMode] = useState(false);
+  const [repeatCountdown, setRepeatCountdown] = useState(0);
 
   const splitIntoSentences = (text) => {
-    // Split by common Japanese sentence endings (。, ！, ？)
+    // Split by common Japanese sentence endings (, ！, ？)
     return text.split(/([。！？])/).reduce((acc, current, i, arr) => {
       if (i % 2 === 0) {
         if (arr[i + 1]) {
@@ -116,7 +118,7 @@ export default function NewsReader() {
         setIsVoiceLoading(true);
         
         try {
-          const response = await fetch(`/api/tts?text=${encodeURIComponent(sentences[index])}&speed=${speed}`);
+          const response = await fetch(`/api/tts?text=${encodeURIComponent(sentences[index])}&speed=${parseFloat(speed)}`);
           if (!response.ok) throw new Error('Failed to fetch audio');
           
           const audioBlob = await response.blob();
@@ -149,7 +151,25 @@ export default function NewsReader() {
         setIsPlaying(false);
         setIsPaused(false);
         setIsVoiceLoading(false);
-        if (autoPlay && index < sentences.length - 1) {
+        if (isRepeatMode) {
+          // Start countdown
+          setRepeatCountdown(1);
+          const countdownInterval = setInterval(() => {
+            setRepeatCountdown(prev => {
+              if (prev <= 0) {
+                clearInterval(countdownInterval);
+                // Only replay if still in repeat mode
+                if (isRepeatMode) {
+                  setIsPlaying(true);
+                  audio.currentTime = 0;
+                  audio.play();
+                }
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        } else if (autoPlay && index < sentences.length - 1) {
           setCurrentSentence(prev => prev + 1);
           setTimeout(() => playCurrentSentence(index + 1), 500);
         } else if (index === sentences.length - 1) {
@@ -249,23 +269,25 @@ export default function NewsReader() {
     }
   };
 
-  const handleSpeedChange = (newSpeed) => {
-    // Clean up existing cache when speed changes
+  const handleSpeedChange = async (newSpeed) => {
+    // Stop current playback
+    if (audioElement) {
+      audioElement.pause();
+    }
+
+    // Clean up existing cache
     Object.values(audioCache).forEach(url => {
       URL.revokeObjectURL(url);
     });
     setAudioCache({});
-    
-    // Update speed
-    setSpeed(parseFloat(newSpeed));
 
-    // If currently playing, restart with new speed
-    if (isPlaying) {
-      if (audioElement) {
-        audioElement.pause();
-      }
-      playCurrentSentence(currentSentence);
-    }
+    // Reset all play states
+    setIsPlaying(false);
+    setIsPaused(false);
+    setAutoPlay(false);
+
+    // Update speed
+    setSpeed(newSpeed);
   };
 
   const handleFontSizeChange = (size) => {
@@ -467,15 +489,36 @@ export default function NewsReader() {
             <select
               value={speed}
               onChange={(e) => handleSpeedChange(e.target.value)}
-              disabled={isPlaying}
-              className={`p-2 border rounded disabled:bg-gray-700 disabled:text-gray-400 ${themeClasses.select}`}
+              className={`p-2 border rounded ${themeClasses.select}`}
             >
-              <option value="0.6">Slower (0.6x)</option>
+              <option value="0.6">Super Slow (0.6x)</option>
               <option value="0.8">Slow (0.8x)</option>
               <option value="1.0">Normal (1.0x)</option>
               <option value="1.2">Fast (1.2x)</option>
             </select>
           </div>
+
+          <button
+            onClick={() => setIsRepeatMode(!isRepeatMode)}
+            className={`px-3 py-1 rounded flex items-center gap-1 ${
+              isRepeatMode 
+                ? theme === 'dark'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-purple-500 text-white'
+                : theme === 'dark'
+                  ? 'bg-gray-700 text-gray-300'
+                  : 'bg-gray-200'
+            }`}
+            title={isRepeatMode ? 'Disable Repeat' : 'Enable Repeat'}
+          >
+            <span>🔁</span>
+            {isRepeatMode 
+              ? repeatCountdown > 0 
+                ? `Repeat in ${repeatCountdown}s` 
+                : 'Repeating'
+              : 'Repeat'
+            }
+          </button>
         </div>
 
         {sentences.length > 0 && (
