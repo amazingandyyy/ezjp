@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Docker
 .docker/
+
+# NHK Easy News data
+public/nhk-easy-jp-news/
