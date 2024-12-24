@@ -1,93 +1,58 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import { FaCog, FaSun, FaMoon, FaGoogle, FaUserCircle, FaSpinner, FaHeart } from 'react-icons/fa';
-import { useAuth } from '../lib/AuthContext';
-import { supabase } from '../lib/supabase';
+'use client';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { 
+  FaHeart, 
+  FaCog, 
+  FaSun, 
+  FaMoon, 
+  FaBook, 
+  FaUserCircle,
+  FaGoogle 
+} from 'react-icons/fa';
+import { useAuth } from '../../lib/AuthContext';
+import { supabase } from '../../lib/supabase';
 
-// Add LoadingIndicator component before NewsList
-const LoadingIndicator = ({ loading }) => {
+// Add LoadingIndicator component
+const LoadingIndicator = ({ loading, theme }) => {
   if (!loading) return null;
+  
+  const spinnerColors = {
+    dark: 'border-gray-300 border-r-transparent',
+    light: 'border-gray-400 border-r-transparent',
+    yellow: 'border-yellow-500 border-r-transparent'
+  };
+
+  const textColors = {
+    dark: 'text-gray-500',
+    light: 'text-gray-500',
+    yellow: 'text-yellow-700'
+  };
   
   return (
     <div className="inline-flex items-center gap-2 ml-2">
       <div className="w-4 h-4 relative">
-        <div className="absolute inset-0 rounded-full border-2 border-gray-300 border-r-transparent animate-spin"></div>
+        <div className={`absolute inset-0 rounded-full border-2 animate-spin ${spinnerColors[theme]}`}></div>
       </div>
-      <span className="text-xs text-gray-500">Updating preference...</span>
+      <span className={`text-xs ${textColors[theme]}`}>Updating preference...</span>
     </div>
   );
 };
 
-export default function NewsList() {
-  const [newsList, setNewsList] = useState([]);
+export default function SavedNews() {
+  const [savedNews, setSavedNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [archivedUrls, setArchivedUrls] = useState(new Set());
   const router = useRouter();
+  const { user, profile, loading: authLoading, signInWithGoogle, signOut, updateProfile } = useAuth();
+  const theme = profile?.theme || 'light';
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
-  const { user, profile, loading: authLoading, signInWithGoogle, signOut, updateProfile } = useAuth();
-
-  // Get theme from profile if available, otherwise from localStorage
-  const [theme, setTheme] = useState('light');
 
   const [updatingPreferences, setUpdatingPreferences] = useState({
     theme: false
   });
-
-  useEffect(() => {
-    if (profile) {
-      // If user has a profile, use their saved theme
-      setTheme(profile.theme);
-    } else if (typeof window !== 'undefined') {
-      // Otherwise, use localStorage
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme && savedTheme !== 'yellow') {
-        setTheme(savedTheme);
-      }
-    }
-  }, [profile]);
-
-  // Helper function to ensure minimum loading duration
-  const updatePreferenceWithMinDuration = async (key, updateFn) => {
-    setUpdatingPreferences(prev => ({ ...prev, [key]: true }));
-    const startTime = Date.now();
-    
-    try {
-      await updateFn();
-    } catch (error) {
-      console.error(`Error updating ${key} preference:`, error);
-    } finally {
-      // Ensure loading state shows for at least 500ms
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, 500 - elapsedTime);
-      
-      setTimeout(() => {
-        setUpdatingPreferences(prev => ({ ...prev, [key]: false }));
-      }, remainingTime);
-    }
-  };
-
-  // Handle theme change
-  const handleThemeChange = async (newTheme) => {
-    if (newTheme === 'yellow') return;
-    
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    // If user is logged in, update their profile
-    if (user) {
-      await updatePreferenceWithMinDuration('theme', async () => {
-        await updateProfile({
-          theme: newTheme
-        });
-      });
-    }
-  };
 
   // Handle click outside settings and profile
   useEffect(() => {
@@ -109,59 +74,86 @@ export default function NewsList() {
     };
   }, [showSettings, showProfile]);
 
-  useEffect(() => {
-    fetchNewsList();
-  }, []); // Remove user dependency since we want to fetch for all users
-
-  // Add function to fetch archived URLs
-  const fetchArchivedUrls = async () => {
-    if (!user) return;
+  // Helper function to ensure minimum loading duration
+  const updatePreferenceWithMinDuration = async (key, updateFn) => {
+    setUpdatingPreferences(prev => ({ ...prev, [key]: true }));
+    const startTime = Date.now();
+    
     try {
-      const { data, error } = await supabase
-        .from('saved_news')
-        .select('url');
-      
-      if (error) throw error;
-      setArchivedUrls(new Set(data.map(item => item.url)));
+      await updateFn();
     } catch (error) {
-      console.error('Error fetching archived URLs:', error);
+      console.error(`Error updating ${key} preference:`, error);
+    } finally {
+      // Ensure loading state shows for at least 500ms
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 500 - elapsedTime);
+      
+      setTimeout(() => {
+        setUpdatingPreferences(prev => ({ ...prev, [key]: false }));
+      }, remainingTime);
     }
   };
 
-  // Add this useEffect to fetch archived URLs when user changes
-  useEffect(() => {
-    if (user) {
-      fetchArchivedUrls();
-    } else {
-      setArchivedUrls(new Set());
-    }
-  }, [user]);
+  const handleThemeChange = async (newTheme) => {
+    if (newTheme === 'yellow') return;
+    
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
 
-  const fetchNewsList = async () => {
+    // If user is logged in, update their profile
+    if (user) {
+      await updatePreferenceWithMinDuration('theme', async () => {
+        await updateProfile({
+          theme: newTheme
+        });
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Only redirect if auth is finished loading and there's no user
+    if (!authLoading && !user) {
+      router.push('/');
+      return;
+    }
+
+    // Only fetch news if we have a user
+    if (user) {
+      fetchSavedNews();
+    }
+  }, [user, authLoading]);
+
+  const fetchSavedNews = async () => {
     try {
-      const response = await axios.get("/api/fetch-news-list");
-      if (response.data.success) {
-        setNewsList(response.data.newsList);
-        // Refresh archived URLs when fetching news
-        if (user) {
-          fetchArchivedUrls();
-        }
-      } else {
-        throw new Error("Failed to fetch news list");
-      }
+      const { data, error } = await supabase
+        .from('saved_news')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Parse any JSON strings in the data
+      const parsedData = data?.map(news => ({
+        ...news,
+        title: typeof news.title === 'string' ? 
+          (news.title.startsWith('[') ? JSON.parse(news.title) : news.title) : 
+          news.title
+      })) || [];
+      
+      setSavedNews(parsedData);
     } catch (error) {
-      console.error("Error fetching news list:", error);
-      setError("Failed to load news list");
+      console.error('Error fetching saved news:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNewsClick = (originalLink) => {
-    router.push(`/read?source=${encodeURIComponent(originalLink)}`);
+  const handleNewsClick = (url) => {
+    router.push(`/read?source=${encodeURIComponent(url)}`);
   };
 
-  if (authLoading) {
+  // Show loading state while auth is loading
+  if (authLoading || isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
         theme === 'dark' ? 'bg-gray-900' : 'bg-white'
@@ -172,6 +164,39 @@ export default function NewsList() {
       </div>
     );
   }
+
+  // If auth is loaded and there's no user, we'll redirect (handled in useEffect)
+  if (!user) {
+    return null;
+  }
+
+  const RubyText = ({ kanji, reading, showReading = true }) => (
+    <ruby className="group">
+      {kanji}
+      <rt className={`${showReading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+        {reading}
+      </rt>
+    </ruby>
+  );
+
+  const renderTitle = (title) => {
+    if (Array.isArray(title)) {
+      return title.map((part, i) => {
+        if (part.type === "ruby") {
+          return (
+            <RubyText
+              key={i}
+              kanji={part.kanji}
+              reading={part.reading}
+            />
+          );
+        } else {
+          return <span key={i}>{part.content}</span>;
+        }
+      });
+    }
+    return title;
+  };
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
@@ -214,12 +239,13 @@ export default function NewsList() {
                 <div className="space-y-2">
                   <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
                     Theme
-                    <LoadingIndicator loading={updatingPreferences.theme} />
+                    <LoadingIndicator loading={updatingPreferences.theme} theme={theme} />
                   </label>
                   <div className="flex gap-1">
                     {[
                       { id: "light", icon: <FaSun />, title: "Light" },
                       { id: "dark", icon: <FaMoon />, title: "Dark" },
+                      { id: "yellow", icon: <FaBook />, title: "Yellow" },
                     ].map((themeOption) => (
                       <button
                         key={themeOption.id}
@@ -291,15 +317,15 @@ export default function NewsList() {
                     {user.email}
                   </p>
                   <button
-                    onClick={() => router.push('/saved')}
+                    onClick={() => router.push('/')}
                     className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
                       theme === "dark"
                         ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
                         : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                     }`}
                   >
-                    <FaHeart className="w-4 h-4" />
-                    View Saved
+                    <FaBook className="w-4 h-4" />
+                    View News List
                   </button>
                   <button
                     onClick={signOut}
@@ -319,54 +345,64 @@ export default function NewsList() {
       </div>
 
       <div className="container mx-auto p-4">
-        <h1 className={`text-3xl font-bold mb-8 ${
-          theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-        }`}>
-          NHK Easy News
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {newsList.map((news, index) => (
-            <div
-              key={index}
-              onClick={() => handleNewsClick(news.url)}
-              className={`border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group ${
-                theme === 'dark'
-                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                  : 'bg-white border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              <div className="relative">
+        <div className="flex items-center gap-2 mb-8">
+          <h1 className={`text-3xl font-bold ${
+            theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+          }`}>
+            Saved News
+          </h1>
+          <FaHeart className={`w-6 h-6 ${
+            theme === 'dark' ? 'text-red-400' : 'text-red-500'
+          }`} />
+        </div>
+
+        {savedNews.length === 0 ? (
+          <p className={`text-lg ${
+            theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            No saved news yet. Click the heart icon while reading to save articles here.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {savedNews.map((news) => (
+              <div
+                key={news.id}
+                onClick={() => handleNewsClick(news.url)}
+                className={`border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                    : 'bg-white border-gray-200 hover:bg-gray-50'
+                }`}
+              >
                 {news.image && (
                   <div className="aspect-video relative overflow-hidden">
                     <img
                       src={news.image}
-                      alt={news.title}
+                      alt=""
                       className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
-                {archivedUrls.has(news.url) && (
-                  <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1.5 shadow-lg">
-                    <FaHeart className="w-4 h-4 text-white" />
-                  </div>
-                )}
+                <div className="p-4">
+                  <h2 className={`text-xl font-semibold mb-2 ${
+                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                  }`}>
+                    {renderTitle(news.title)}
+                  </h2>
+                  <p className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {news.date}
+                  </p>
+                </div>
               </div>
-              <div className="p-4">
-                <h2 className={`text-xl font-semibold mb-2 ${
-                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>
-                  {news.title}
-                </h2>
-                <p className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  {news.date}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
-}
+} 

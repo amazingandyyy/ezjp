@@ -12,18 +12,53 @@ import {
   FaSun,
   FaMoon,
   FaBook,
-  FaRedo
+  FaRedo,
+  FaUserCircle,
+  FaGoogle,
+  FaSpinner,
+  FaHeart,
+  FaRegHeart
 } from 'react-icons/fa';
+import { useAuth } from '../../lib/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 // Add this helper function at the top level
 const isBrowser = typeof window !== 'undefined';
+
+// Add LoadingIndicator component before NewsReaderContent
+const LoadingIndicator = ({ loading, theme }) => {
+  if (!loading) return null;
+  
+  const spinnerColors = {
+    dark: 'border-gray-300 border-r-transparent',
+    light: 'border-gray-400 border-r-transparent',
+    yellow: 'border-yellow-500 border-r-transparent'
+  };
+
+  const textColors = {
+    dark: 'text-gray-500',
+    light: 'text-gray-500',
+    yellow: 'text-yellow-700'
+  };
+  
+  return (
+    <div className="inline-flex items-center gap-2 ml-2">
+      <div className="w-4 h-4 relative">
+        <div className={`absolute inset-0 rounded-full border-2 animate-spin ${spinnerColors[theme]}`}></div>
+      </div>
+      <span className={`text-xs ${textColors[theme]}`}>Updating preference...</span>
+    </div>
+  );
+};
 
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sourceUrl = searchParams.get('source');
+  const { user, loading: authLoading, signInWithGoogle, signOut, profile, updateProfile } = useAuth();
 
   const [url, setUrl] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (sourceUrl) {
@@ -60,13 +95,86 @@ function NewsReaderContent() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [recentNews, setRecentNews] = useState([]);
   const [recentNewsError, setRecentNewsError] = useState(false);
+  const [archivedUrls, setArchivedUrls] = useState(new Set());
   const sidebarRef = useRef(null);
 
   const settingsRef = useRef(null);
   const repeatModeRef = useRef(false);
+  const profileRef = useRef(null);
 
   // Add new state for image visibility
   const [showImages, setShowImages] = useState(true);
+
+  // Add new state for preference updates
+  const [updatingPreferences, setUpdatingPreferences] = useState({
+    theme: false,
+    fontSize: false,
+    furigana: false,
+    speed: false,
+    voice: false
+  });
+
+  const [isArchived, setIsArchived] = useState(false);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+
+  // Add function to check if news is saved
+  const checkSaveStatus = async () => {
+    if (!user || !url) return;
+
+    try {
+      const { data } = await supabase
+        .from('saved_news')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('url', url)
+        .single();
+      
+      setIsArchived(!!data);
+    } catch (error) {
+      console.error('Error checking save status:', error);
+    }
+  };
+
+  // Add function to toggle save status
+  const toggleSave = async () => {
+    if (!user || !url || archiveLoading) return;
+
+    setArchiveLoading(true);
+    try {
+      if (isArchived) {
+        // Remove from saved
+        await supabase
+          .from('saved_news')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('url', url);
+        setIsArchived(false);
+      } else {
+        // Add to saved
+        await supabase
+          .from('saved_news')
+          .insert([{
+            user_id: user.id,
+            url,
+            title: newsTitle,
+            date: newsDate,
+            image: newsImages[0]?.src || null
+          }]);
+        setIsArchived(true);
+      }
+    } catch (error) {
+      console.error('Error toggling save status:', error);
+    } finally {
+      setArchiveLoading(false);
+    }
+  };
+
+  // Add effect to check save status when page loads
+  useEffect(() => {
+    if (user && url) {
+      checkSaveStatus();
+    }
+  }, [user, url]);
 
   // Add useMediaQuery hook
   const useMediaQuery = (query) => {
@@ -109,7 +217,7 @@ function NewsReaderContent() {
       : 'translate-x-0'
     }
     max-w-3xl mx-auto
-    p-4 pb-32
+    pt-8 p-4 pb-32
   `;
 
   // Update the main wrapper classes
@@ -476,6 +584,48 @@ function NewsReaderContent() {
     }
   };
 
+  // Helper function to ensure minimum loading duration
+  const updatePreferenceWithMinDuration = async (key, updateFn) => {
+    setUpdatingPreferences(prev => ({ ...prev, [key]: true }));
+    const startTime = Date.now();
+    
+    try {
+      await updateFn();
+    } catch (error) {
+      console.error(`Error updating ${key} preference:`, error);
+    } finally {
+      // Ensure loading state shows for at least 500ms
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 500 - elapsedTime);
+      
+      setTimeout(() => {
+        setUpdatingPreferences(prev => ({ ...prev, [key]: false }));
+      }, remainingTime);
+    }
+  };
+
+  const handleThemeChange = async (newTheme) => {
+    setTheme(newTheme);
+    if (user) {
+      await updatePreferenceWithMinDuration('theme', async () => {
+        await updateProfile({
+          theme: newTheme
+        });
+      });
+    }
+  };
+
+  const handleFontSizeChange = async (size) => {
+    setFontSize(size);
+    if (user) {
+      await updatePreferenceWithMinDuration('fontSize', async () => {
+        await updateProfile({
+          font_size: size
+        });
+      });
+    }
+  };
+
   const handleSpeedChange = async (newSpeed) => {
     // Stop current playback
     if (audioElement) {
@@ -495,14 +645,44 @@ function NewsReaderContent() {
 
     // Update speed
     setSpeed(newSpeed);
+
+    // Update profile if user is logged in
+    if (user) {
+      await updatePreferenceWithMinDuration('speed', async () => {
+        await updateProfile({
+          preferred_speed: parseFloat(newSpeed)
+        });
+      });
+    }
   };
 
-  const handleFontSizeChange = (size) => {
-    setFontSize(size);
+  const handleVoiceChange = async (voiceURI) => {
+    const voice = availableVoices.find(v => v.voiceURI === voiceURI);
+    setSelectedVoice(voice);
+    speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+
+    // Update profile if user is logged in
+    if (user) {
+      await updatePreferenceWithMinDuration('voice', async () => {
+        await updateProfile({
+          preferred_voice: voiceURI
+        });
+      });
+    }
   };
 
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
+  const toggleFurigana = async () => {
+    const newValue = !showFurigana;
+    setShowFurigana(newValue);
+    if (user) {
+      await updatePreferenceWithMinDuration('furigana', async () => {
+        await updateProfile({
+          show_furigana: newValue
+        });
+      });
+    }
   };
 
   const getThemeClasses = () => {
@@ -688,14 +868,42 @@ function NewsReaderContent() {
     });
   };
 
-  // Add this function to fetch recent news
+  // Add function to fetch archived URLs
+  const fetchArchivedUrls = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('saved_news')
+        .select('url');
+      
+      if (error) throw error;
+      setArchivedUrls(new Set(data.map(item => item.url)));
+    } catch (error) {
+      console.error('Error fetching archived URLs:', error);
+    }
+  };
+
+  // Add this useEffect to fetch archived URLs when user changes
+  useEffect(() => {
+    if (user) {
+      fetchArchivedUrls();
+    } else {
+      setArchivedUrls(new Set());
+    }
+  }, [user]);
+
+  // Update the fetchRecentNews function
   const fetchRecentNews = async () => {
     try {
       const response = await axios.get('/api/fetch-news-list', {
-        params: { limit: 30 }
+        params: { limit: 100 }
       });
       if (response.data.success && Array.isArray(response.data.newsList)) {
         setRecentNews(response.data.newsList);
+        // Refresh archived URLs when fetching news
+        if (user) {
+          fetchArchivedUrls();
+        }
       } else {
         console.error('Invalid response format from fetch-news-list');
         setRecentNews([]);
@@ -738,6 +946,55 @@ function NewsReaderContent() {
     }
   `;
 
+  // Handle click outside settings and profile
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettings(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
+      }
+    }
+
+    if (showSettings || showProfile) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSettings, showProfile]);
+
+  // Initialize preferences from profile if available
+  useEffect(() => {
+    if (profile) {
+      setFontSize(profile.font_size);
+      setTheme(profile.theme);
+      setShowFurigana(profile.show_furigana);
+      setSpeed(profile.preferred_speed.toString());
+      if (profile.preferred_voice) {
+        const savedVoice = availableVoices.find(v => v.voiceURI === profile.preferred_voice);
+        if (savedVoice) {
+          setSelectedVoice(savedVoice);
+        }
+      }
+    }
+  }, [profile, availableVoices]);
+
+  // Update the repeat countdown styles
+  const getRepeatCountdownClasses = () => {
+    const baseClasses = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-medium z-50';
+    switch (theme) {
+      case 'dark':
+        return `${baseClasses} bg-gray-800 text-gray-100`;
+      case 'yellow':
+        return `${baseClasses} bg-yellow-100 text-yellow-800 border-2 border-yellow-400`;
+      default: // light
+        return `${baseClasses} bg-white text-gray-900 shadow-md`;
+    }
+  };
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       {/* Overlay */}
@@ -769,197 +1026,288 @@ function NewsReaderContent() {
         </svg>
       </button>
 
-      {/* Settings button - top right */}
-      <div className="fixed top-4 right-4 z-50" ref={settingsRef}>
-        <button
-          onClick={toggleSettings}
-          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
-            theme === "dark"
-              ? showSettings
-                ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
-                : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
-              : showSettings
-                ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-                : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-          }`}
-          title="Settings"
-        >
-          <FaCog className={`w-5 h-5 ${
-            theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
-          }`} />
-        </button>
-
-        {/* Settings panel - opens below the button */}
-        {showSettings && (
-          <div 
-            className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
-            ${theme === "dark"
-              ? "bg-gray-800 border-gray-700 text-gray-100"
-              : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+      {/* Settings and Profile buttons - top right */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        {/* Settings Button */}
+        <div ref={settingsRef}>
+          <button
+            onClick={() => {
+              setShowSettings(!showSettings);
+              setShowProfile(false);
+            }}
+            className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
+              theme === "dark"
+                ? showSettings
+                  ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                  : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                : showSettings
+                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
             }`}
+            title="Settings"
           >
-            <div className="space-y-4">
-              {/* Font size controls */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Font Size</label>
-                <div className="flex gap-1">
-                  {[
-                    { size: "medium", class: "text-lg" },
-                    { size: "large", class: "text-xl" },
-                    { size: "x-large", class: "text-2xl" },
-                    { size: "xx-large", class: "text-3xl" }
-                  ].map(({ size, class: sizeClass }) => (
-                    <button
-                      key={size}
-                      onClick={() => handleFontSizeChange(size)}
-                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
-                        fontSize === size
-                          ? theme === "dark"
-                            ? "bg-gray-600 text-white"
-                            : "[color-scheme:light] bg-gray-700 text-white"
-                          : theme === "dark"
-                          ? "bg-gray-700 text-gray-300"
-                          : "[color-scheme:light] bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      A
-                    </button>
-                  ))}
+            <FaCog className={`w-5 h-5 ${
+              theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
+            }`} />
+          </button>
+
+          {/* Settings panel */}
+          {showSettings && (
+            <div 
+              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
+              ${theme === "dark"
+                ? "bg-gray-800 border-gray-700 text-gray-100"
+                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+              }`}
+            >
+              <div className="space-y-4">
+                {/* Font size controls */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                    Font Size
+                    <LoadingIndicator loading={updatingPreferences.fontSize} theme={theme} />
+                  </label>
+                  <div className="flex gap-1">
+                    {[
+                      { size: "medium", class: "text-lg" },
+                      { size: "large", class: "text-xl" },
+                      { size: "x-large", class: "text-2xl" },
+                      { size: "xx-large", class: "text-3xl" }
+                    ].map(({ size, class: sizeClass }) => (
+                      <button
+                        key={size}
+                        onClick={() => handleFontSizeChange(size)}
+                        disabled={updatingPreferences.fontSize}
+                        className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
+                          fontSize === size
+                            ? theme === "dark"
+                              ? "bg-gray-600 text-white"
+                              : "[color-scheme:light] bg-gray-700 text-white"
+                            : theme === "dark"
+                            ? "bg-gray-700 text-gray-300"
+                            : "[color-scheme:light] bg-gray-200 text-gray-600"
+                        } ${updatingPreferences.fontSize ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        A
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Speed control */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Speed</label>
-                <select
-                  value={speed}
-                  onChange={(e) => handleSpeedChange(e.target.value)}
-                  className={`w-full p-2 border rounded ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
-                  }`}
-                >
-                  <option value="0.6">Very Slow (0.6x)</option>
-                  <option value="0.8">Slow (0.8x)</option>
-                  <option value="1.0">Normal (1.0x)</option>
-                  <option value="1.2">Faster (1.2x)</option>
-                </select>
-              </div>
-
-              {/* Theme controls */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Theme</label>
-                <div className="flex gap-1">
-                  {[
-                    { id: "light", icon: <FaSun />, title: "Light" },
-                    { id: "dark", icon: <FaMoon />, title: "Dark" },
-                    { id: "yellow", icon: <FaBook />, title: "Yellow" },
-                  ].map((themeOption) => (
-                    <button
-                      key={themeOption.id}
-                      onClick={() => handleThemeChange(themeOption.id)}
-                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center gap-2 ${
-                        theme === themeOption.id
-                          ? theme === "dark"
-                            ? "bg-gray-600 text-white"
-                            : "[color-scheme:light] bg-gray-700 text-white"
-                          : theme === "dark"
-                          ? "bg-gray-700 text-gray-300"
-                          : "[color-scheme:light] bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {themeOption.icon}
-                      <span className="text-sm">{themeOption.title}</span>
-                    </button>
-                  ))}
+                {/* Speed control */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                    Speed
+                    <LoadingIndicator loading={updatingPreferences.speed} theme={theme} />
+                  </label>
+                  <select
+                    value={speed}
+                    onChange={(e) => handleSpeedChange(e.target.value)}
+                    disabled={updatingPreferences.speed}
+                    className={`w-full p-2 border rounded ${
+                      theme === "dark"
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
+                    } ${updatingPreferences.speed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="0.6">Very Slow (0.6x)</option>
+                    <option value="0.8">Slow (0.8x)</option>
+                    <option value="1.0">Normal (1.0x)</option>
+                    <option value="1.2">Faster (1.2x)</option>
+                  </select>
                 </div>
-              </div>
 
-              {/* Furigana control */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Furigana</label>
-                <button
-                  onClick={() => setShowFurigana(!showFurigana)}
-                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                    showFurigana
-                      ? theme === "dark"
-                        ? "bg-gray-600 text-white"
-                        : "[color-scheme:light] bg-gray-700 text-white"
-                      : theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "[color-scheme:light] bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {showFurigana ? "Hide Furigana" : "Show Furigana"}
-                </button>
-                <span className={`text-xs block text-center ${
-                  theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
-                }`}>
-                  (Hover to show when hidden)
-                </span>
-              </div>
+                {/* Theme controls */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                    Theme
+                    <LoadingIndicator loading={updatingPreferences.theme} theme={theme} />
+                  </label>
+                  <div className="flex gap-1">
+                    {[
+                      { id: "light", icon: <FaSun />, title: "Light" },
+                      { id: "dark", icon: <FaMoon />, title: "Dark" },
+                      { id: "yellow", icon: <FaBook />, title: "Yellow" },
+                    ].map((themeOption) => (
+                      <button
+                        key={themeOption.id}
+                        onClick={() => handleThemeChange(themeOption.id)}
+                        disabled={updatingPreferences.theme}
+                        className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center gap-2 ${
+                          theme === themeOption.id
+                            ? theme === "dark"
+                              ? "bg-gray-600 text-white"
+                              : "[color-scheme:light] bg-gray-700 text-white"
+                            : theme === "dark"
+                            ? "bg-gray-700 text-gray-300"
+                            : "[color-scheme:light] bg-gray-200 text-gray-600"
+                        } ${updatingPreferences.theme ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {themeOption.icon}
+                        <span className="text-sm">{themeOption.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Voice selection control */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Voice</label>
-                <select
-                  value={selectedVoice?.voiceURI || ''}
-                  onChange={(e) => {
-                    const voice = availableVoices.find(v => v.voiceURI === e.target.value);
-                    setSelectedVoice(voice);
-                    speechSynthesis.cancel();
-                    setIsPlaying(false);
-                    setIsPaused(false);
-                  }}
-                  className={`w-full p-2 border rounded ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
-                  }`}
-                >
-                  {availableVoices.map((voice) => (
-                    <option key={voice.voiceURI} value={voice.voiceURI}>
-                      {voice.name} ({voice.lang})
-                    </option>
-                  ))}
+                {/* Furigana control */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                    Furigana
+                    <LoadingIndicator loading={updatingPreferences.furigana} theme={theme} />
+                  </label>
+                  <button
+                    onClick={toggleFurigana}
+                    disabled={updatingPreferences.furigana}
+                    className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
+                      showFurigana
+                        ? theme === "dark"
+                          ? "bg-gray-600 text-white"
+                          : "[color-scheme:light] bg-gray-700 text-white"
+                        : theme === "dark"
+                        ? "bg-gray-700 text-gray-300"
+                        : "[color-scheme:light] bg-gray-200 text-gray-600"
+                    } ${updatingPreferences.furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {showFurigana ? "Hide Furigana" : "Show Furigana"}
+                  </button>
+                  <span className={`text-xs block text-center ${
+                    theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
+                  }`}>
+                    (Hover to show when hidden)
+                  </span>
+                </div>
+
+                {/* Voice selection control */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                    Voice
+                    <LoadingIndicator loading={updatingPreferences.voice} theme={theme} />
+                  </label>
+                  <select
+                    value={selectedVoice?.voiceURI || ''}
+                    onChange={(e) => handleVoiceChange(e.target.value)}
+                    disabled={updatingPreferences.voice}
+                    className={`w-full p-2 border rounded ${
+                      theme === "dark"
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
+                    } ${updatingPreferences.voice ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {availableVoices.map((voice) => (
+                      <option key={voice.voiceURI} value={voice.voiceURI}>
+                        {voice.name} ({voice.lang})
+                      </option>
+                    ))}
+                    {availableVoices.length === 0 && (
+                      <option value="" disabled>No Japanese voices available</option>
+                    )}
+                  </select>
                   {availableVoices.length === 0 && (
-                    <option value="" disabled>No Japanese voices available</option>
+                    <p className={`text-xs text-red-500 ${theme === "dark" ? "" : "[color-scheme:light]"}`}>
+                      No Japanese voices found. Please install Japanese language support in your system.
+                    </p>
                   )}
-                </select>
-                {availableVoices.length === 0 && (
-                  <p className={`text-xs text-red-500 ${theme === "dark" ? "" : "[color-scheme:light]"}`}>
-                    No Japanese voices found. Please install Japanese language support in your system.
-                  </p>
-                )}
-              </div>
+                </div>
 
-              {/* Image control */}
-              <div className="space-y-2">
-                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Images</label>
-                <button
-                  onClick={() => setShowImages(!showImages)}
-                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                    showImages
-                      ? theme === "dark"
-                        ? "bg-gray-600 text-white"
-                        : "[color-scheme:light] bg-gray-700 text-white"
-                      : theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "[color-scheme:light] bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {showImages ? "Hide Images" : "Show Images"}
-                </button>
-                <span className={`text-xs block text-center ${
-                  theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
-                }`}>
-                  (Toggle article images)
-                </span>
+                {/* Image control */}
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Images</label>
+                  <button
+                    onClick={() => setShowImages(!showImages)}
+                    className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
+                      showImages
+                        ? theme === "dark"
+                          ? "bg-gray-600 text-white"
+                          : "[color-scheme:light] bg-gray-700 text-white"
+                        : theme === "dark"
+                        ? "bg-gray-700 text-gray-300"
+                        : "[color-scheme:light] bg-gray-200 text-gray-600"
+                    } ${updatingPreferences.furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {showImages ? "Hide Images" : "Show Images"}
+                  </button>
+                  <span className={`text-xs block text-center ${
+                    theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
+                  }`}>
+                    (Toggle article images)
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Profile Button */}
+        <div ref={profileRef}>
+          <button
+            onClick={() => {
+              if (!user) {
+                signInWithGoogle();
+              } else {
+                setShowProfile(!showProfile);
+                setShowSettings(false);
+              }
+            }}
+            className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
+              theme === "dark"
+                ? showProfile
+                  ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                  : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                : showProfile
+                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+            }`}
+            title={user ? "Profile" : "Sign In"}
+          >
+            <FaUserCircle className={`w-5 h-5 ${
+              theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
+            }`} />
+          </button>
+
+          {/* Profile panel - only shown when user is logged in and panel is open */}
+          {user && showProfile && (
+            <div 
+              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
+              ${theme === "dark"
+                ? "bg-gray-800 border-gray-700 text-gray-100"
+                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+              }`}
+            >
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                    Signed in as
+                  </p>
+                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
+                    {user.email}
+                  </p>
+                  <button
+                    onClick={() => router.push('/saved')}
+                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
+                      theme === "dark"
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaHeart className="w-4 h-4" />
+                    View Saved
+                  </button>
+                  <button
+                    onClick={signOut}
+                    className={`w-full px-3 py-1.5 rounded text-sm ${
+                      theme === "dark"
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={mainWrapperClasses}>
@@ -1001,18 +1349,25 @@ function NewsReaderContent() {
                           : 'hover:bg-gray-50'
                       }`}
                   >
-                    {article.image && (
-                      <div className="flex-shrink-0 w-20 h-20 relative rounded-md overflow-hidden">
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="object-cover w-full h-full"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
+                    <div className="flex-shrink-0 relative">
+                      {article.image && (
+                        <div className="w-20 h-20 relative rounded-md overflow-hidden">
+                          <img
+                            src={article.image}
+                            alt=""
+                            className="object-cover w-full h-full"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
+                      {archivedUrls.has(article.url) && (
+                        <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-lg">
+                          <FaHeart className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className={`font-medium mb-1 line-clamp-2 ${
                         theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
@@ -1272,83 +1627,111 @@ function NewsReaderContent() {
             : "[color-scheme:light] bg-white border-gray-200"
           }`}>
           <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={handlePrevious}
-              disabled={currentSentence <= 0 || isVoiceLoading || !isPlaying && !isPaused && !autoPlay}
-              className={`p-2 rounded-full flex items-center justify-center 
-                ${theme === "dark"
-                  ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
-                  : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
-                } text-white w-10 h-10 transition-all duration-150`}
-              title="Previous"
-            >
-              <FaArrowLeft className="w-4 h-4" />
-            </button>
+            {/* Archive button */}
+            {user && (
+              <button
+                onClick={toggleSave}
+                disabled={archiveLoading}
+                className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+                  ${theme === "dark"
+                    ? "hover:bg-gray-700/50"
+                    : "hover:bg-gray-100/50"
+                  }
+                  ${archiveLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+                title={isArchived ? "Remove from Saved" : "Save Article"}
+              >
+                {archiveLoading ? (
+                  <div className="w-4 h-4 relative">
+                    <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                      theme === "dark"
+                        ? "border-gray-300 border-r-transparent"
+                        : theme === "yellow"
+                          ? "border-yellow-500 border-r-transparent"
+                          : "border-gray-400 border-r-transparent"
+                    }`}></div>
+                  </div>
+                ) : isArchived ? (
+                  <FaHeart className={`w-4 h-4 ${
+                    theme === "dark"
+                      ? "text-red-400"
+                      : theme === "yellow"
+                        ? "text-red-500"
+                        : "text-red-500"
+                  }`} />
+                ) : (
+                  <FaRegHeart className={`w-4 h-4 ${
+                    theme === "dark"
+                      ? "text-gray-300 hover:text-red-400"
+                      : theme === "yellow"
+                        ? "text-gray-600 hover:text-red-500"
+                        : "text-gray-600 hover:text-red-500"
+                  }`} />
+                )}
+              </button>
+            )}
 
-            <button
-              onClick={() => {
-                if (audioElement) {
-                  audioElement.pause();
-                  audioElement.currentTime = 0;
+            {/* Play controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevious}
+                disabled={currentSentence === 0 || isVoiceLoading}
+                className={`p-2 rounded-full flex items-center justify-center 
+                  ${theme === "dark"
+                    ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                    : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                  } text-white w-10 h-10 transition-all duration-150`}
+                title="Previous"
+              >
+                <FaArrowLeft className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={handlePlay}
+                disabled={!newsContent || isLoading}
+                className={`p-2 rounded-full flex items-center justify-center ${
+                  isVoiceLoading
+                    ? "bg-purple-600 hover:enabled:bg-purple-500 active:enabled:bg-purple-400"
+                    : isPlaying
+                    ? "bg-yellow-600 hover:enabled:bg-yellow-500 active:enabled:bg-yellow-400"
+                    : "bg-green-600 hover:enabled:bg-green-500 active:enabled:bg-green-400"
+                } text-white disabled:${theme === "dark" ? "opacity-40" : "bg-gray-600"} w-12 h-12 transition-all duration-150`}
+                title={
+                  isVoiceLoading
+                    ? "Loading Voice"
+                    : isPlaying
+                    ? "Pause"
+                    : "Play"
                 }
-                setIsPlaying(false);
-                setIsPaused(false);
-                setAutoPlay(false);
-                setCurrentSentence(-1);
-                if (isRepeatMode) {
-                  setIsRepeatMode(false);
-                  setRepeatCountdown(0);
-                }
-              }}
-              disabled={!newsContent || isLoading || (!isPlaying && !isPaused && !autoPlay && currentSentence === -1)}
-              className={`p-2 rounded-full flex items-center justify-center 
-                ${theme === "dark"
-                  ? "bg-red-600 hover:enabled:bg-red-500 active:enabled:bg-red-400 disabled:opacity-40"
-                  : "bg-red-500 hover:enabled:bg-red-400 active:enabled:bg-red-300 disabled:bg-gray-300"
-                } text-white w-10 h-10 transition-all duration-150`}
-              title="Stop and Reset"
-            >
-              <FaStop className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={handlePlay}
-              disabled={!newsContent || isLoading}
-              className={`p-2 rounded-full flex items-center justify-center ${
-                isVoiceLoading
-                  ? "bg-purple-600 hover:enabled:bg-purple-500 active:enabled:bg-purple-400"
+              >
+                {isVoiceLoading
+                  ? playIcons.loading
                   : isPlaying
-                  ? "bg-yellow-600 hover:enabled:bg-yellow-500 active:enabled:bg-yellow-400"
-                  : "bg-green-600 hover:enabled:bg-green-500 active:enabled:bg-green-400"
-              } text-white disabled:${theme === "dark" ? "opacity-40" : "bg-gray-600"} w-12 h-12 transition-all duration-150`}
-              title={
-                isVoiceLoading
-                  ? "Loading Voice"
-                  : isPlaying
-                  ? "Pause"
-                  : "Play"
-              }
-            >
-              {isVoiceLoading
-                ? playIcons.loading
-                : isPlaying
-                ? playIcons.pause
-                : playIcons.play}
-            </button>
+                  ? playIcons.pause
+                  : playIcons.play}
+              </button>
 
-            <button
-              onClick={handleNext}
-              disabled={currentSentence === sentences.length - 1 || isVoiceLoading}
-              className={`p-2 rounded-full flex items-center justify-center 
-                ${theme === "dark"
-                  ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
-                  : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
-                } text-white w-10 h-10 transition-all duration-150`}
-              title="Next"
-            >
-              <FaArrowRight className="w-4 h-4" />
-            </button>
+              <button
+                onClick={handleNext}
+                disabled={currentSentence === sentences.length - 1 || isVoiceLoading}
+                className={`p-2 rounded-full flex items-center justify-center 
+                  ${theme === "dark"
+                    ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                    : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                  } text-white w-10 h-10 transition-all duration-150`}
+                title="Next"
+              >
+                <FaArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+
+      {/* Repeat countdown */}
+      {repeatCountdown > 0 && (
+        <div className={getRepeatCountdownClasses()}>
+          Repeating in {repeatCountdown}...
         </div>
       )}
     </div>
