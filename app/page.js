@@ -119,7 +119,7 @@ export default function NewsList() {
     if (!user) return;
     try {
       const { data, error } = await supabase
-        .from('saved_news')
+        .from('saved_articles')
         .select('url');
       
       if (error) throw error;
@@ -184,10 +184,10 @@ export default function NewsList() {
   if (authLoading || (isLoading && !newsList.length)) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
-        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+        theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'
       }`}>
         <div className={`animate-spin rounded-full h-32 w-32 border-b-2 ${
-          theme === 'dark' ? 'border-gray-200' : 'border-gray-900'
+          theme === 'dark' ? 'border-gray-200' : 'border-[rgb(19,31,36)]'
         }`}></div>
       </div>
     );
@@ -197,7 +197,7 @@ export default function NewsList() {
   if (error) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
-        theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'
+        theme === 'dark' ? 'bg-[rgb(19,31,36)] text-white' : 'bg-white text-black'
       }`}>
         <div className="text-center">
           <p className="text-xl mb-4">{error}</p>
@@ -219,7 +219,7 @@ export default function NewsList() {
   return (
     <div
       className={`min-h-screen ${
-        theme === "dark" ? "bg-gray-900" : "bg-white"
+        theme === "dark" ? "bg-[rgb(19,31,36)]" : "bg-white"
       }`}
     >
       {/* Settings and Profile buttons - top right */}
@@ -235,7 +235,7 @@ export default function NewsList() {
               theme === "dark"
                 ? showSettings
                   ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
-                  : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                  : "bg-[rgb(19,31,36)]/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                 : showSettings
                 ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
                 : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
@@ -257,8 +257,8 @@ export default function NewsList() {
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
               ${
                 theme === "dark"
-                  ? "bg-gray-800 border-gray-700 text-gray-100"
-                  : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                  ? "bg-[rgb(19,31,36)] border-gray-700 text-gray-100"
+                  : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
@@ -268,7 +268,7 @@ export default function NewsList() {
                     className={`text-sm font-medium flex items-center ${
                       theme === "dark"
                         ? ""
-                        : "[color-scheme:light] text-gray-900"
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
                     Theme
@@ -346,7 +346,7 @@ export default function NewsList() {
               ${
                 theme === "dark"
                   ? "bg-gray-800 border-gray-700 text-gray-100"
-                  : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                  : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
@@ -360,7 +360,7 @@ export default function NewsList() {
                   </p>
                   <p
                     className={`font-medium ${
-                      theme === "dark" ? "text-gray-100" : "text-gray-900"
+                      theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
                     }`}
                   >
                     {profile?.username || user.email}
@@ -413,7 +413,7 @@ export default function NewsList() {
       <div className="container mx-auto p-4 pt-16">
         <h1
           className={`text-3xl font-bold mb-8 ${
-            theme === "dark" ? "text-gray-100" : "text-gray-900"
+            theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
           }`}
         >
           Explore Easy JP News
@@ -425,7 +425,7 @@ export default function NewsList() {
               onClick={() => handleNewsClick(news.url)}
               className={`border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group ${
                 theme === "dark"
-                  ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                  ? "bg-[rgb(19,31,36)] border-gray-700 hover:bg-[rgb(29,41,46)]"
                   : "bg-white border-gray-200 hover:bg-gray-50"
               }`}
             >
@@ -467,7 +467,7 @@ export default function NewsList() {
               <div className="p-4">
                 <h2
                   className={`text-xl font-semibold mb-2 ${
-                    theme === "dark" ? "text-gray-100" : "text-gray-900"
+                    theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
                   }`}
                 >
                   {news.title}

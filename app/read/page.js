@@ -17,7 +17,8 @@ import {
   FaGoogle,
   FaSpinner,
   FaHeart,
-  FaRegHeart
+  FaRegHeart,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -49,6 +50,55 @@ const LoadingIndicator = ({ loading, theme }) => {
       <span className={`text-xs ${textColors[theme]}`}>Updating preference...</span>
     </div>
   );
+};
+
+// Add RubyText component
+const RubyText = ({ part, showReading = true }) => {
+  if (!part || part.type !== 'ruby' || !part.kanji || !part.reading) {
+    return null;
+  }
+  return (
+    <ruby className="group">
+      {part.kanji}
+      <rt className={`${showReading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+        {part.reading}
+      </rt>
+    </ruby>
+  );
+};
+
+// Add helper function to process content
+const processContent = (content) => {
+  if (!Array.isArray(content)) return [];
+  return content.map((part, index) => {
+    if (part?.type === 'ruby') {
+      return {
+        type: 'ruby',
+        kanji: part.kanji,
+        reading: part.reading
+      };
+    } else if (part?.type === 'text') {
+      return {
+        type: 'text',
+        content: part.content
+      };
+    }
+    return null;
+  }).filter(Boolean);
+};
+
+// Add helper function to render content
+const renderContent = (content, showFurigana = true) => {
+  if (!Array.isArray(content)) return null;
+  
+  return content.map((part, index) => {
+    if (part?.type === 'ruby') {
+      return <RubyText key={index} part={part} showReading={showFurigana} />;
+    } else if (part?.type === 'text') {
+      return <span key={index}>{part.content}</span>;
+    }
+    return null;
+  });
 };
 
 // Add custom RepeatIcon component
@@ -94,9 +144,8 @@ const formatJapaneseDate = (dateStr) => {
 const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
   const parseTitle = (title) => {
     try {
-      if (typeof title === 'string' && title.startsWith('[')) {
-        const parsed = JSON.parse(title);
-        return parsed.map(part => part.type === 'ruby' ? part.kanji : part.content).join('');
+      if (Array.isArray(title)) {
+        return title.map(part => part.type === 'ruby' ? part.kanji : part.content).join('');
       }
       return title;
     } catch (e) {
@@ -106,15 +155,8 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
 
   const formatDate = (dateStr) => {
     try {
-      // Try to parse the date string
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) {
-        // If the date is invalid, try to parse it as a Japanese date string
-        const match = dateStr.match(/(\d+)年(\d+)月(\d+)日\s*(\d+)時(\d+)分/);
-        if (match) {
-          const [_, year, month, day, hour, minute] = match;
-          return `${year}年${month}月${day}日 ${hour}時${minute}分`;
-        }
         return dateStr;
       }
       return formatJapaneseDate(date);
@@ -153,10 +195,10 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
             }`}
         >
           <div className="flex-shrink-0">
-            {article.image && (
+            {article.article?.images?.[0] && (
               <div className="w-20 h-20 relative rounded-md overflow-hidden">
                 <img
-                  src={article.image}
+                  src={article.article.images[0]}
                   alt=""
                   className="object-cover w-full h-full"
                   onError={(e) => {
@@ -168,14 +210,14 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`font-medium mb-1 line-clamp-2 ${
-              theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
+              theme === 'dark' ? 'text-gray-200' : 'text-[rgb(19,31,36)]'
             }`}>
-              {parseTitle(article.title)}
+              {parseTitle(article.article?.title)}
             </h3>
             <p className={`text-sm ${
               theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
             }`}>
-              {formatDate(article.date)}
+              {formatDate(article.article?.publish_date)}
             </p>
           </div>
         </button>
@@ -192,49 +234,134 @@ function NewsReaderContent() {
 
   const [url, setUrl] = useState('');
   const [showProfile, setShowProfile] = useState(false);
+  const [theme, setTheme] = useState('light'); // Add theme state
+  const [fontSize, setFontSize] = useState('medium'); // Add fontSize state
+  const [showFurigana, setShowFurigana] = useState(true); // Add furigana state
+  const [speed, setSpeed] = useState('1.0'); // Add speed state
+
+  // Load user preferences
+  useEffect(() => {
+    if (user) {
+      const loadPreferences = async () => {
+        const { data: preferences } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (preferences) {
+          setTheme(preferences.theme || 'light');
+          setFontSize(preferences.font_size || 'medium');
+          setShowFurigana(preferences.show_furigana ?? true);
+          setSpeed(preferences.speed || '1.0');
+        }
+      };
+
+      loadPreferences();
+    }
+  }, [user]);
+
+  // Save user preferences
+  const savePreferences = async (key, value) => {
+    if (!user) return;
+
+    try {
+      setUpdatingPreferences(prev => ({ ...prev, [key]: true }));
+      console.log('Saving preference:', key, value); // Debug log
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          [key]: value,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error); // Debug log
+        throw error;
+      }
+      console.log('Preference saved:', data); // Debug log
+    } catch (error) {
+      console.error(`Error saving ${key} preference:`, error);
+      throw error;
+    } finally {
+      setUpdatingPreferences(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Theme toggle handler
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    savePreferences('theme', newTheme);
+  };
 
   useEffect(() => {
     if (sourceUrl) {
-      fetchNews(sourceUrl);
-      setUrl(sourceUrl);
+      // Stop any playing audio before fetching new article
+      if (isPlaying) {
+        speechSynthesis.cancel();
+        setIsPlaying(false);
+        setIsPaused(false);
+      }
+      // Reset states before fetching new article
+      setNewsTitle([]);
+      setNewsContent([]);
+      setNewsDate(null);
+      setNewsImages([]);
+      setCurrentSentence(0);
+      setSentences([]);
+      setError(null);
+      
+      // Decode the URL before using it
+      const decodedUrl = decodeURIComponent(sourceUrl);
+      setLoading(true);
+      fetchNews(decodedUrl)
+        .catch(error => {
+          console.error('Error in fetchNews:', error);
+          setError('Failed to load article');
+        })
+        .then(() => {
+          console.log('fetchNews finished');
+          setLoading(false);
+        });
+      setUrl(decodedUrl);
     } else {
       router.push('/');
     }
-  }, [sourceUrl, router]);
+  }, [sourceUrl]);  // Remove router from dependencies to prevent double fetches
 
-  const [newsContent, setNewsContent] = useState('');
-  const [sentences, setSentences] = useState([]);
-  const [currentSentence, setCurrentSentence] = useState(-1);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audioError, setAudioError] = useState('');
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [speed, setSpeed] = useState('1.0');
-  const [isLoading, setIsLoading] = useState(false);
-  const [audioElement, setAudioElement] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isVoiceLoading, setIsVoiceLoading] = useState(false);
-  const [audioCache, setAudioCache] = useState({});
-  const [fontSize, setFontSize] = useState('large');
-  const [theme, setTheme] = useState('light'); // light, dark, yellow
-  const [showSettings, setShowSettings] = useState(false);
-  const [isRepeatMode, setIsRepeatMode] = useState(false);
-  const [repeatCountdown, setRepeatCountdown] = useState(0);
-  const [showFurigana, setShowFurigana] = useState(true);
-  const [newsTitle, setNewsTitle] = useState('');
-  const [newsDate, setNewsDate] = useState('');
+  const [newsTitle, setNewsTitle] = useState([]);
+  const [newsContent, setNewsContent] = useState([]);
+  const [newsDate, setNewsDate] = useState(null);
   const [newsImages, setNewsImages] = useState([]);
-  const [availableVoices, setAvailableVoices] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);  // Add this near other state declarations
+  const [isVoiceLoading, setIsVoiceLoading] = useState(false);  // Add this line
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [currentSentence, setCurrentSentence] = useState(0);
+  const [sentences, setSentences] = useState([]);
+  const [audioCache, setAudioCache] = useState({});
+  const [audioElement, setAudioElement] = useState(null);
   const [selectedVoice, setSelectedVoice] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [recentNews, setRecentNews] = useState([]);
   const [recentNewsError, setRecentNewsError] = useState(false);
   const [archivedUrls, setArchivedUrls] = useState(new Set());
   const [finishedUrls, setFinishedUrls] = useState(new Set());
-  const sidebarRef = useRef(null);
+  const [audioError, setAudioError] = useState('');
+  const [isRepeatMode, setIsRepeatMode] = useState(false);
+  const [repeatCountdown, setRepeatCountdown] = useState(0);
+  const repeatModeRef = useRef(false);
 
   const settingsRef = useRef(null);
-  const repeatModeRef = useRef(false);
   const profileRef = useRef(null);
+  const sidebarRef = useRef(null);  // Add this line
 
   // Add new state for image visibility
   const [showImages, setShowImages] = useState(true);
@@ -242,10 +369,10 @@ function NewsReaderContent() {
   // Add new state for preference updates
   const [updatingPreferences, setUpdatingPreferences] = useState({
     theme: false,
-    fontSize: false,
-    furigana: false,
-    speed: false,
-    voice: false
+    font_size: false,
+    show_furigana: false,
+    preferred_speed: false,
+    preferred_voice: false
   });
 
   const [isArchived, setIsArchived] = useState(false);
@@ -257,21 +384,22 @@ function NewsReaderContent() {
   // Add these states near the other state declarations
   const [sidebarView, setSidebarView] = useState('latest'); // 'latest' or 'saved'
   const [savedNews, setSavedNews] = useState([]);
-
-  // Add these states near other state declarations
   const [isFinished, setIsFinished] = useState(false);
   const [finishLoading, setFinishLoading] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState([]); // Add this line
 
   // Add function to check if news is saved
   const checkSaveStatus = async () => {
     if (!user || !url) return;
 
     try {
+      // Ensure we're using the decoded URL
+      const decodedUrl = decodeURIComponent(url);
       const { data } = await supabase
-        .from('saved_news')
+        .from('saved_articles')
         .select('id')
         .eq('user_id', user.id)
-        .eq('url', url)
+        .eq('url', decodedUrl)
         .single();
       
       setIsArchived(!!data);
@@ -280,7 +408,7 @@ function NewsReaderContent() {
     }
   };
 
-  // Add function to toggle save status
+  // Update toggleSave function
   const toggleSave = async () => {
     if (!user || !url || archiveLoading) return;
 
@@ -289,28 +417,38 @@ function NewsReaderContent() {
       if (isArchived) {
         // Remove from saved
         await supabase
-          .from('saved_news')
+          .from('saved_articles')
           .delete()
           .eq('user_id', user.id)
           .eq('url', url);
         setIsArchived(false);
       } else {
-        // Convert title to plain text if it's an array
-        const plainTitle = Array.isArray(newsTitle) 
-          ? newsTitle.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
-          : newsTitle;
+        // Get article ID from the database
+        const { data: article, error: articleError } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('url', url)
+          .single();
 
-        // Add to saved
+        if (articleError) {
+          console.error('Error getting article:', articleError);
+          throw articleError;
+        }
+
+        // Add to saved news with article reference
         await supabase
-          .from('saved_news')
+          .from('saved_articles')
           .insert([{
             user_id: user.id,
             url,
-            title: plainTitle,
-            date: newsDate,
-            image: newsImages[0]?.src || null
+            article_id: article.id
           }]);
         setIsArchived(true);
+      }
+
+      // Refresh saved articles list if sidebar is showing saved articles
+      if (sidebarView === 'saved') {
+        fetchSavedNews();
       }
     } catch (error) {
       console.error('Error toggling save status:', error);
@@ -353,7 +491,7 @@ function NewsReaderContent() {
     fixed top-0 h-screen transform transition-all duration-300 ease-in-out z-50
     ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
     ${isLargeScreen ? 'lg:fixed lg:top-0' : ''}
-    ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} 
+    ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'} 
     border-r ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}
     overflow-y-auto
     w-[400px]
@@ -458,73 +596,76 @@ function NewsReaderContent() {
     };
   }, [showSidebar]);
 
+  // Helper function to split content into sentences
   const splitIntoSentences = (content) => {
-    // Initialize variables for sentence building
-    let currentSentence = [];
-    const sentences = [];
+    if (!Array.isArray(content)) return [];
     
-    // Process each content part
-    content.forEach((part) => {
-      currentSentence.push(part);
-      
-      // If this part is text and ends with a sentence ending
-      if (part.type === 'text' && /[。！？]$/.test(part.content)) {
-        sentences.push([...currentSentence]);
-        currentSentence = [];
+    const sentences = [];
+    let currentSentence = [];
+
+    content.forEach((paragraph) => {
+      if (paragraph.type === 'paragraph') {
+        const paragraphContent = paragraph.content;
+        let lastWasRuby = false;
+
+        paragraphContent.forEach((part, index) => {
+          currentSentence.push(part);
+          
+          // Check if this is the end of a sentence
+          if (part.type === 'text' && 
+              part.content.match(/[。！？]$/) && 
+              !lastWasRuby && 
+              index < paragraphContent.length - 1) {
+            sentences.push([...currentSentence]);
+            currentSentence = [];
+          }
+          
+          lastWasRuby = part.type === 'ruby';
+        });
+
+        // Add remaining content as a sentence at paragraph end
+        if (currentSentence.length > 0) {
+          sentences.push([...currentSentence]);
+          currentSentence = [];
+        }
       }
     });
-    
-    // Add any remaining content as the last sentence
-    if (currentSentence.length > 0) {
-      sentences.push(currentSentence);
-    }
-    
+
     return sentences;
   };
 
-  const fetchNews = async (targetUrl = url) => {
-    setIsLoading(true);
-    setAudioError('');
-    
-    // Reset voice-related states
-    if (isBrowser) {
-      speechSynthesis.cancel();
-    }
-    setIsPlaying(false);
-    setIsPaused(false);
-    setAutoPlay(false);
-    setCurrentSentence(-1);
-    setRepeatCountdown(0);
-    setIsRepeatMode(false);
-    repeatModeRef.current = false;
-    
-    // Clean up existing cache
-    Object.values(audioCache).forEach(url => {
-      URL.revokeObjectURL(url);
-    });
-    setAudioCache({});
+  // Fetch news content
+  const fetchNews = async (url) => {
+    if (!url) return;
     
     try {
-      const response = await axios.get('/api/fetch-news', {
-        params: { url: targetUrl }
-      });
-      
-      if (response.data.success) {
-        console.log("response", response.data);
-        setNewsContent(response.data.content);
-        setSentences(splitIntoSentences(response.data.content));
-        setUrl(targetUrl);
-        setNewsTitle(response.data.title);
-        setNewsDate(response.data.date);
-        setNewsImages(response.data.images);
-      } else {
-        throw new Error('Failed to fetch news');
+      console.log('Fetching article from API');
+      const response = await fetch(`/api/fetch-news?source=${encodeURIComponent(url)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!Array.isArray(data.title) || !Array.isArray(data.content)) {
+        throw new Error('Invalid API response format');
+      }
+
+      console.log('Received API response');
+      // Update all states at once
+      setNewsTitle(data.title);
+      setNewsContent(data.content);
+      setNewsDate(data.published_date || data.date);
+      setNewsImages(data.images || []);
+      setCurrentSentence(0);
+      setSentences(splitIntoSentences(data.content));
+      
     } catch (error) {
       console.error('Error fetching news:', error);
-      setAudioError('Failed to fetch news content. Please check the URL and try again.');
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -757,52 +898,33 @@ function NewsReaderContent() {
   const handleThemeChange = async (newTheme) => {
     setTheme(newTheme);
     if (user) {
-      await updatePreferenceWithMinDuration('theme', async () => {
-        await updateProfile({
-          theme: newTheme
-        });
-      });
+      try {
+        await savePreferences('theme', newTheme);
+      } catch (error) {
+        console.error('Error saving theme:', error);
+      }
     }
   };
 
   const handleFontSizeChange = async (size) => {
     setFontSize(size);
     if (user) {
-      await updatePreferenceWithMinDuration('fontSize', async () => {
-        await updateProfile({
-          font_size: size
-        });
-      });
+      try {
+        await savePreferences('font_size', size);
+      } catch (error) {
+        console.error('Error saving font size:', error);
+      }
     }
   };
 
   const handleSpeedChange = async (newSpeed) => {
-    // Stop current playback
-    if (audioElement) {
-      audioElement.pause();
-    }
-
-    // Clean up existing cache
-    Object.values(audioCache).forEach(url => {
-      URL.revokeObjectURL(url);
-    });
-    setAudioCache({});
-
-    // Reset all play states
-    setIsPlaying(false);
-    setIsPaused(false);
-    setAutoPlay(false);
-
-    // Update speed
     setSpeed(newSpeed);
-
-    // Update profile if user is logged in
     if (user) {
-      await updatePreferenceWithMinDuration('speed', async () => {
-        await updateProfile({
-          preferred_speed: parseFloat(newSpeed)
-        });
-      });
+      try {
+        await savePreferences('preferred_speed', parseFloat(newSpeed));
+      } catch (error) {
+        console.error('Error saving speed:', error);
+      }
     }
   };
 
@@ -813,13 +935,12 @@ function NewsReaderContent() {
     setIsPlaying(false);
     setIsPaused(false);
 
-    // Update profile if user is logged in
     if (user) {
-      await updatePreferenceWithMinDuration('voice', async () => {
-        await updateProfile({
-          preferred_voice: voiceURI
-        });
-      });
+      try {
+        await savePreferences('preferred_voice', voiceURI);
+      } catch (error) {
+        console.error('Error saving voice:', error);
+      }
     }
   };
 
@@ -827,11 +948,11 @@ function NewsReaderContent() {
     const newValue = !showFurigana;
     setShowFurigana(newValue);
     if (user) {
-      await updatePreferenceWithMinDuration('furigana', async () => {
-        await updateProfile({
-          show_furigana: newValue
-        });
-      });
+      try {
+        await savePreferences('show_furigana', newValue);
+      } catch (error) {
+        console.error('Error saving furigana preference:', error);
+      }
     }
   };
 
@@ -839,7 +960,7 @@ function NewsReaderContent() {
     switch (theme) {
       case 'dark':
         return {
-          main: 'bg-gray-900 text-gray-100',
+          main: 'bg-[rgb(19,31,36)] text-gray-100',
           input: 'bg-gray-800 border-gray-700 text-gray-100 focus:border-gray-500',
           button: 'bg-gray-700 hover:bg-gray-600',
           select: 'bg-gray-800 border-gray-700 text-gray-100',
@@ -847,18 +968,18 @@ function NewsReaderContent() {
         };
       case 'yellow':
         return {
-          main: '[color-scheme:light] bg-yellow-50 text-gray-900',
-          input: '[color-scheme:light] bg-white border-yellow-200 text-gray-900',
+          main: '[color-scheme:light] bg-yellow-50 text-[rgb(19,31,36)]',
+          input: '[color-scheme:light] bg-white border-yellow-200 text-[rgb(19,31,36)]',
           button: '[color-scheme:light]',
-          select: '[color-scheme:light] bg-white border-yellow-200 text-gray-900',
+          select: '[color-scheme:light] bg-white border-yellow-200 text-[rgb(19,31,36)]',
           controlBg: '[color-scheme:light] bg-gray-200'
         };
       default: // light theme
         return {
-          main: '[color-scheme:light] bg-white text-gray-900',
-          input: '[color-scheme:light] bg-white border-gray-300 text-gray-900',
+          main: '[color-scheme:light] bg-white text-[rgb(19,31,36)]',
+          input: '[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]',
           button: '[color-scheme:light]',
-          select: '[color-scheme:light] bg-white border-gray-300 text-gray-900',
+          select: '[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]',
           controlBg: '[color-scheme:light] bg-gray-200'
         };
     }
@@ -888,41 +1009,6 @@ function NewsReaderContent() {
 
   const toggleSettings = () => {
     setShowSettings(!showSettings);
-  };
-
-  const RubyText = ({ kanji, reading, showReading }) => (
-    <ruby className="group">
-      {kanji}
-      <rt className={`${showReading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-        {reading}
-      </rt>
-    </ruby>
-  );
-
-  // Add helper function to process sentence for display
-  const processForDisplay = (sentence) => {
-    const result = [];
-    let skipNext = false;
-
-    sentence.forEach((part, index) => {
-      if (skipNext) {
-        skipNext = false;
-        return;
-      }
-
-      if (part.type === 'ruby') {
-        const nextPart = sentence[index + 1];
-        // If next part is the hiragana reading of this kanji, skip it
-        if (nextPart?.type === 'text' && nextPart.content === part.reading) {
-          skipNext = true;
-        }
-        result.push(part);
-      } else {
-        result.push(part);
-      }
-    });
-
-    return result;
   };
 
   // Add play button icons
@@ -997,7 +1083,7 @@ function NewsReaderContent() {
 
   // Update the sentence rendering to use chunks
   const renderSentence = (sentence, index) => {
-    return processForDisplay(sentence).map((part, i) => {
+    return processContent(sentence).map((part, i) => {
       if (part.type === "ruby") {
         return (
           <span key={i}>
@@ -1023,13 +1109,20 @@ function NewsReaderContent() {
     if (!user) return;
     try {
       const { data, error } = await supabase
-        .from('saved_news')
-        .select('url');
+        .from('saved_articles')
+        .select(`
+          url,
+          article:articles (
+            id,
+            url
+          )
+        `);
       
       if (error) throw error;
       setArchivedUrls(new Set(data.map(item => item.url)));
     } catch (error) {
       console.error('Error fetching archived URLs:', error);
+      setArchivedUrls(new Set());
     }
   };
 
@@ -1052,7 +1145,7 @@ function NewsReaderContent() {
   useEffect(() => {
     if (user) {
       fetchArchivedUrls();
-      fetchFinishedUrls();
+      fetchFinishedArticles();
     } else {
       setArchivedUrls(new Set());
       setFinishedUrls(new Set());
@@ -1076,8 +1169,9 @@ function NewsReaderContent() {
       });
       if (response.data.success && Array.isArray(response.data.newsList)) {
         setRecentNews(response.data.newsList);
-        // Refresh archived URLs when fetching news
+        // Refresh finished and archived URLs when fetching news
         if (user) {
+          fetchFinishedArticles();
           fetchArchivedUrls();
         }
       } else {
@@ -1167,7 +1261,7 @@ function NewsReaderContent() {
       case 'yellow':
         return `${baseClasses} bg-yellow-100 text-yellow-800 border-2 border-yellow-400`;
       default: // light
-        return `${baseClasses} bg-white text-gray-900 shadow-md`;
+        return `${baseClasses} bg-white text-[rgb(19,31,36)] shadow-md`;
     }
   };
 
@@ -1225,8 +1319,17 @@ function NewsReaderContent() {
     if (!user) return;
     try {
       const { data, error } = await supabase
-        .from('saved_news')
-        .select('*')
+        .from('saved_articles')
+        .select(`
+          *,
+          article:articles (
+            id,
+            url,
+            title,
+            publish_date,
+            images
+          )
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -1251,7 +1354,13 @@ function NewsReaderContent() {
     try {
       const { data } = await supabase
         .from('finished_articles')
-        .select('id')
+        .select(`
+          id,
+          article:articles (
+            id,
+            url
+          )
+        `)
         .eq('user_id', user.id)
         .eq('url', url)
         .single();
@@ -1262,7 +1371,42 @@ function NewsReaderContent() {
     }
   };
 
-  // Add this function near other toggle functions
+  // Add function to fetch finished articles
+  const fetchFinishedArticles = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('finished_articles')
+        .select(`
+          *,
+          article:articles (
+            id,
+            url,
+            title,
+            publish_date,
+            images
+          )
+        `)
+        .order('finished_at', { ascending: false });
+      
+      if (error) throw error;
+      setFinishedUrls(new Set(data?.map(item => item.url) || []));
+    } catch (error) {
+      console.error('Error fetching finished articles:', error);
+      setFinishedUrls(new Set());
+    }
+  };
+
+  // Update the useEffect to fetch finished articles
+  useEffect(() => {
+    if (user) {
+      fetchFinishedArticles();
+    } else {
+      setFinishedUrls(new Set());
+    }
+  }, [user]);
+
+  // Update toggleFinished function
   const toggleFinished = async () => {
     if (!user || !url || finishLoading) return;
 
@@ -1270,36 +1414,86 @@ function NewsReaderContent() {
     try {
       if (isFinished) {
         // Remove from finished
-        const { error } = await supabase
+        await supabase
           .from('finished_articles')
           .delete()
           .eq('user_id', user.id)
           .eq('url', url);
         
-        if (error) throw error;
         setIsFinished(false);
-        // Update finishedUrls
         setFinishedUrls(prev => {
           const newSet = new Set(prev);
           newSet.delete(url);
           return newSet;
         });
       } else {
-        // Add to finished
-        const { error } = await supabase
+        // Get article ID from the database
+        const { data: article } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('url', url)
+          .single();
+
+        if (!article) {
+          throw new Error('Article not found');
+        }
+
+        // Add to finished articles
+        await supabase
           .from('finished_articles')
           .insert([{
             user_id: user.id,
             url,
-            title: Array.isArray(newsTitle) 
-              ? newsTitle.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
-              : newsTitle,
+            article_id: article.id,
             finished_at: new Date().toISOString()
           }]);
-        
-        if (error) throw error;
+
+        // If article is saved, update its reading progress
+        if (isArchived) {
+          // Get the current saved article first
+          const { data: savedArticle } = await supabase
+            .from('saved_articles')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('url', url)
+            .single();
+
+          if (savedArticle) {
+            // Update only the reading progress
+            await supabase
+              .from('saved_articles')
+              .update({
+                reading_progress: {
+                  current_sentence: sentences.length,
+                  total_sentences: sentences.length
+                }
+              })
+              .eq('id', savedArticle.id);
+
+            // Refresh saved articles list without affecting current article
+            if (sidebarView === 'saved') {
+              const { data: updatedSavedNews } = await supabase
+                .from('saved_articles')
+                .select(`
+                  *,
+                  article:articles (
+                    id,
+                    url,
+                    title,
+                    publish_date,
+                    images
+                  )
+                `)
+                .order('created_at', { ascending: false });
+
+              if (updatedSavedNews) {
+                setSavedNews(updatedSavedNews);
+              }
+            }
+          }
+        }
+
         setIsFinished(true);
-        // Update finishedUrls
         setFinishedUrls(prev => new Set([...prev, url]));
       }
     } catch (error) {
@@ -1315,6 +1509,41 @@ function NewsReaderContent() {
       checkFinishStatus();
     }
   }, [user, url]);
+
+  // Add these utility functions near the top with other utility functions
+  const renderTitle = (title, showFurigana = true) => {
+    if (!Array.isArray(title)) return null;
+    return title.map((part, index) => {
+      if (part.type === 'ruby') {
+        return <RubyText key={index} part={part} showReading={showFurigana} />;
+      } else if (part.type === 'text') {
+        return <span key={index}>{part.content}</span>;
+      }
+      return null;
+    });
+  };
+
+  const renderContent = (content, showFurigana = true) => {
+    if (!Array.isArray(content)) return null;
+    return content.map((paragraph, pIndex) => {
+      if (paragraph.type !== 'paragraph') return null;
+      return (
+        <p
+          key={pIndex}
+          className="mb-6"
+        >
+          {paragraph.content.map((part, index) => {
+            if (part.type === 'ruby') {
+              return <RubyText key={index} part={part} showReading={showFurigana} />;
+            } else if (part.type === 'text') {
+              return <span key={index}>{part.content}</span>;
+            }
+            return null;
+          })}
+        </p>
+      );
+    });
+  };
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
@@ -1393,15 +1622,15 @@ function NewsReaderContent() {
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
               ${theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
                 {/* Font size controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Font Size
-                    <LoadingIndicator loading={updatingPreferences.fontSize} theme={theme} />
+                    <LoadingIndicator loading={updatingPreferences.font_size} theme={theme} />
                   </label>
                   <div className="flex gap-1">
                     {[
@@ -1413,7 +1642,7 @@ function NewsReaderContent() {
                       <button
                         key={size}
                         onClick={() => handleFontSizeChange(size)}
-                        disabled={updatingPreferences.fontSize}
+                        disabled={updatingPreferences.font_size}
                         className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
                           fontSize === size
                             ? theme === "dark"
@@ -1422,7 +1651,7 @@ function NewsReaderContent() {
                             : theme === "dark"
                             ? "bg-gray-700 text-gray-300"
                             : "[color-scheme:light] bg-gray-200 text-gray-600"
-                        } ${updatingPreferences.fontSize ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } ${updatingPreferences.font_size ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         A
                       </button>
@@ -1432,19 +1661,19 @@ function NewsReaderContent() {
 
                 {/* Speed control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Speed
-                    <LoadingIndicator loading={updatingPreferences.speed} theme={theme} />
+                    <LoadingIndicator loading={updatingPreferences.preferred_speed} theme={theme} />
                   </label>
                   <select
                     value={speed}
                     onChange={(e) => handleSpeedChange(e.target.value)}
-                    disabled={updatingPreferences.speed}
+                    disabled={updatingPreferences.preferred_speed}
                     className={`w-full p-2 border rounded ${
                       theme === "dark"
                         ? "bg-gray-800 border-gray-700 text-gray-100"
-                        : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
-                    } ${updatingPreferences.speed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
+                    } ${updatingPreferences.preferred_speed ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <option value="0.6">Very Slow (0.6x)</option>
                     <option value="0.8">Slow (0.8x)</option>
@@ -1455,7 +1684,7 @@ function NewsReaderContent() {
 
                 {/* Theme controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Theme
                     <LoadingIndicator loading={updatingPreferences.theme} theme={theme} />
                   </label>
@@ -1488,13 +1717,13 @@ function NewsReaderContent() {
 
                 {/* Furigana control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Furigana
-                    <LoadingIndicator loading={updatingPreferences.furigana} theme={theme} />
+                    <LoadingIndicator loading={updatingPreferences.show_furigana} theme={theme} />
                   </label>
                   <button
                     onClick={toggleFurigana}
-                    disabled={updatingPreferences.furigana}
+                    disabled={updatingPreferences.show_furigana}
                     className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
                       showFurigana
                         ? theme === "dark"
@@ -1503,7 +1732,7 @@ function NewsReaderContent() {
                         : theme === "dark"
                         ? "bg-gray-700 text-gray-300"
                         : "[color-scheme:light] bg-gray-200 text-gray-600"
-                    } ${updatingPreferences.furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${updatingPreferences.show_furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {showFurigana ? "Hide Furigana" : "Show Furigana"}
                   </button>
@@ -1516,19 +1745,19 @@ function NewsReaderContent() {
 
                 {/* Voice selection control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Voice
-                    <LoadingIndicator loading={updatingPreferences.voice} theme={theme} />
+                    <LoadingIndicator loading={updatingPreferences.preferred_voice} theme={theme} />
                   </label>
                   <select
                     value={selectedVoice?.voiceURI || ''}
                     onChange={(e) => handleVoiceChange(e.target.value)}
-                    disabled={updatingPreferences.voice}
+                    disabled={updatingPreferences.preferred_voice}
                     className={`w-full p-2 border rounded ${
                       theme === "dark"
                         ? "bg-gray-800 border-gray-700 text-gray-100"
-                        : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
-                    } ${updatingPreferences.voice ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
+                    } ${updatingPreferences.preferred_voice ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {availableVoices.map((voice) => (
                       <option key={voice.voiceURI} value={voice.voiceURI}>
@@ -1548,7 +1777,7 @@ function NewsReaderContent() {
 
                 {/* Image control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Images</label>
+                  <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>Images</label>
                   <button
                     onClick={() => setShowImages(!showImages)}
                     className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
@@ -1559,7 +1788,7 @@ function NewsReaderContent() {
                         : theme === "dark"
                         ? "bg-gray-700 text-gray-300"
                         : "[color-scheme:light] bg-gray-200 text-gray-600"
-                    } ${updatingPreferences.furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${updatingPreferences.show_furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {showImages ? "Hide Images" : "Show Images"}
                   </button>
@@ -1607,7 +1836,7 @@ function NewsReaderContent() {
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
               ${theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
@@ -1615,7 +1844,7 @@ function NewsReaderContent() {
                   <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                     Signed in as
                   </p>
-                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
+                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"}`}>
                     {profile?.username || user.email}
                   </p>
                   <button
@@ -1691,7 +1920,7 @@ function NewsReaderContent() {
                       ${sidebarView === 'latest'
                         ? theme === 'dark'
                           ? 'bg-gray-700 text-white shadow-sm'
-                          : 'bg-white text-gray-900 shadow-sm'
+                          : 'bg-white text-[rgb(19,31,36)] shadow-sm'
                         : theme === 'dark'
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-500 hover:text-gray-700'
@@ -1718,7 +1947,7 @@ function NewsReaderContent() {
                       ${sidebarView === 'saved'
                         ? theme === 'dark'
                           ? 'bg-gray-700 text-white shadow-sm'
-                          : 'bg-white text-gray-900 shadow-sm'
+                          : 'bg-white text-[rgb(19,31,36)] shadow-sm'
                         : theme === 'dark'
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-500 hover:text-gray-700'
@@ -1790,7 +2019,7 @@ function NewsReaderContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className={`font-medium mb-1 line-clamp-2 ${
-                            theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
+                            theme === 'dark' ? 'text-gray-200' : 'text-[rgb(19,31,36)]'
                           }`}>
                             {Array.isArray(article.title) 
                               ? article.title.map((part, i) => 
@@ -1815,7 +2044,7 @@ function NewsReaderContent() {
                   ) : (
                     <div className="flex flex-col items-center justify-center h-32">
                       <svg className={`animate-spin h-6 w-6 mb-2 ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-900'
+                        theme === 'dark' ? 'text-gray-400' : 'text-[rgb(19,31,36)]'
                       }`} viewBox="0 0 24 24">
                         <circle 
                           className="opacity-25" 
@@ -1862,49 +2091,43 @@ function NewsReaderContent() {
               {/* Title section with padding for controls */}
               <div className="pt-4">
                 <div className="mb-6">
-                  <h2 className={`text-2xl font-bold mb-2 ${
-                    theme === "dark" ? "text-gray-100" : "text-gray-900"
-                  }`}>
-                    {Array.isArray(newsTitle)
-                      ? processForDisplay(newsTitle).map((part, i) =>
-                          part.type === "ruby" ? (
-                            <RubyText
-                              key={i}
-                              kanji={part.kanji}
-                              reading={part.reading}
-                              showReading={showFurigana}
-                            />
-                          ) : (
-                            <span key={i}>{part.content}</span>
-                          )
-                        )
-                      : newsTitle}
-                  </h2>
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <h2 className={`text-2xl font-bold ${
+                      theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
+                    }`}>
+                      {renderTitle(newsTitle, showFurigana)}
+                    </h2>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
+                        ${theme === "dark"
+                          ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        }`}
+                      title={url ? new URL(url).hostname : 'Open original article'}
+                    >
+                      <FaExternalLinkAlt className="w-4 h-4" />
+                      <span className="text-sm font-medium hidden sm:inline">Original</span>
+                    </a>
+                  </div>
                   <div
                     className={`text-sm ${
                       theme === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {newsDate}
+                    {formatJapaneseDate(newsDate)}
                   </div>
 
                   {/* News image */}
                   {newsImages?.length > 0 && showImages && (
                     <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-w-xl mx-auto">
                       <img
-                        src={newsImages[0].src}
-                        alt={newsImages[0].alt || ''}
+                        src={newsImages[0]}
+                        alt=""
                         className="w-full h-auto"
                       />
-                      {newsImages[0].caption && (
-                        <p className={`p-3 text-sm ${
-                          theme === "dark" 
-                            ? "bg-gray-800 text-gray-300" 
-                            : "bg-gray-50 text-gray-600"
-                        }`}>
-                          {newsImages[0].caption}
-                        </p>
-                      )}
                     </div>
                   )}
 
@@ -1944,8 +2167,8 @@ function NewsReaderContent() {
                 {newsImages.length > 0 && (
                   <div className={imageContainerClass}>
                     <img
-                      src={newsImages[0].src}
-                      alt={newsImages[0].alt}
+                      src={newsImages[0]}
+                      alt={newsImages[0].alt || ''}
                       className="w-full h-auto"
                     />
                     {newsImages[0].caption && (
@@ -1957,21 +2180,10 @@ function NewsReaderContent() {
                 )}
 
                 <div>
-                  {sentences.map((sentence, index) => (
+                  {newsContent.map((paragraph, pIndex) => (
                     <p
-                      key={index}
-                      onClick={() => handleSentenceClick(index)}
-                      className={`mb-2 px-2 py-1 rounded-md leading-relaxed cursor-pointer hover:bg-opacity-75 
-                        ${index === currentSentence
-                          ? theme === "dark"
-                            ? "bg-gray-700 p-4"
-                            : theme === "yellow"
-                              ? "bg-yellow-200 p-4"
-                              : "bg-emerald-50 p-4"
-                          : theme === "dark"
-                          ? "hover:bg-gray-800"
-                          : "hover:bg-gray-50"
-                        } 
+                      key={pIndex}
+                      className={`mb-6 px-2 py-1 rounded-md leading-relaxed
                         ${fontSize === "medium"
                           ? "text-lg leading-loose"
                           : fontSize === "large"
@@ -1980,16 +2192,56 @@ function NewsReaderContent() {
                           ? "text-2xl leading-loose"
                           : "text-3xl leading-loose"
                         }
-                        ${isRepeatMode && index !== currentSentence 
-                          ? theme === "dark"
-                            ? "opacity-50"
-                            : "opacity-40"
-                          : ""
-                        }
-                        transition-opacity duration-200
                       `}
                     >
-                      {renderSentence(sentence, index)}
+                      {sentences.map((sentence, sIndex) => {
+                        // Find if this sentence belongs to this paragraph
+                        const sentenceBelongsToParagraph = sentence.some(part => 
+                          paragraph.content.includes(part)
+                        );
+
+                        if (!sentenceBelongsToParagraph) return null;
+
+                        return (
+                          <span
+                            key={sIndex}
+                            onClick={() => handleSentenceClick(sIndex)}
+                            className={`inline cursor-pointer rounded px-1
+                              ${sIndex === currentSentence
+                                ? theme === "dark"
+                                  ? "bg-gray-700"
+                                  : theme === "yellow"
+                                    ? "bg-yellow-200"
+                                    : "bg-emerald-50"
+                                : theme === "dark"
+                                  ? "hover:bg-gray-700/50"
+                                  : "hover:bg-gray-100"
+                              }
+                              ${isRepeatMode && sIndex !== currentSentence 
+                                ? theme === "dark"
+                                  ? "opacity-50"
+                                  : "opacity-40"
+                                : ""
+                              }
+                              transition-all duration-200
+                            `}
+                          >
+                            {sentence.map((part, index) => {
+                              if (part.type === "ruby") {
+                                return (
+                                  <RubyText
+                                    key={index}
+                                    part={part}
+                                    showReading={showFurigana}
+                                  />
+                                );
+                              } else {
+                                return <span key={index}>{part.content}</span>;
+                              }
+                            })}
+                          </span>
+                        );
+                      })}
                     </p>
                   ))}
 
@@ -2061,7 +2313,7 @@ function NewsReaderContent() {
                 </div>
               )}
 
-              {isLoading && (
+              {loading && (
                 <div className={`fixed inset-0 backdrop-blur-sm z-50 ${
                   theme === "dark" 
                     ? "bg-black/10" 
@@ -2149,7 +2401,7 @@ function NewsReaderContent() {
 
               <button
                 onClick={handlePlay}
-                disabled={!newsContent || isLoading}
+                disabled={!newsContent || loading}
                 className={`p-2 rounded-full flex items-center justify-center ${
                   isVoiceLoading
                     ? "bg-purple-600 hover:enabled:bg-purple-500 active:enabled:bg-purple-400"

@@ -14,7 +14,7 @@ const formatDuration = (minutes) => {
 };
 
 // Helper function to format date
-const formatDate = (dateString) => {
+const formatDate = (dateString, type = 'finished') => {
   const date = new Date(dateString);
   const now = new Date();
   const diffTime = Math.abs(now - date);
@@ -25,12 +25,14 @@ const formatDate = (dateString) => {
     hour12: true 
   });
   
+  const suffix = type === 'saved' ? '- saved news' : '- finished reading';
+  
   if (diffDays === 0) {
-    return ['Today at ' + timeStr, '- saved news'];
+    return ['Today at ' + timeStr, suffix];
   } else if (diffDays === 1) {
-    return ['Yesterday at ' + timeStr, '- saved news'];
+    return ['Yesterday at ' + timeStr, suffix];
   } else if (diffDays < 7) {
-    return [`${diffDays} days ago at ${timeStr}`, '- saved news'];
+    return [`${diffDays} days ago at ${timeStr}`, suffix];
   } else {
     return [
       date.toLocaleDateString('en-US', { 
@@ -38,7 +40,7 @@ const formatDate = (dateString) => {
         day: 'numeric',
         year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
       }) + ' at ' + timeStr,
-      '- saved news'
+      suffix
     ];
   }
 };
@@ -49,13 +51,15 @@ export default function UserProfile() {
   const { user: currentUser, updateProfile } = useAuth();
   const [profile, setProfile] = useState(null);
   const [savedNews, setSavedNews] = useState([]);
+  const [finishedNews, setFinishedNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [theme, setTheme] = useState('light');
   const [stats, setStats] = useState({
     totalReadingTime: 0,
     totalArticlesRead: 0,
-    totalSavedArticles: 0
+    totalSavedArticles: 0,
+    totalFinishedArticles: 0
   });
 
   // Add new state for username editing
@@ -106,7 +110,7 @@ export default function UserProfile() {
 
         // Fetch user's saved news
         const { data: saved, error: savedError } = await supabase
-          .from('saved_news')
+          .from('saved_articles')
           .select('*')
           .eq('user_id', profiles.id)
           .order('created_at', { ascending: false });
@@ -117,6 +121,22 @@ export default function UserProfile() {
           console.error('Error fetching saved news:', savedError);
           return;
         }
+
+        // Fetch user's finished articles
+        const { data: finished, error: finishedArticlesError } = await supabase
+          .from('finished_articles')
+          .select('*')
+          .eq('user_id', profiles.id)
+          .order('finished_at', { ascending: false });
+
+        if (!isMounted) return;
+
+        if (finishedArticlesError) {
+          console.error('Error fetching finished articles:', finishedArticlesError);
+        }
+
+        setSavedNews(saved || []);
+        setFinishedNews(finished || []);
 
         // Fetch user's reading stats
         const { data: readingStats, error: statsError } = await supabase
@@ -131,11 +151,21 @@ export default function UserProfile() {
           console.error('Error fetching reading stats:', statsError);
         }
 
-        setSavedNews(saved || []);
+        // Fetch finished articles count
+        const { count: finishedCount, error: finishedError } = await supabase
+          .from('finished_articles')
+          .select('id', { count: 'exact' })
+          .eq('user_id', profiles.id);
+
+        if (finishedError) {
+          console.error('Error fetching finished articles:', finishedError);
+        }
+
         setStats({
           totalReadingTime: readingStats?.total_reading_time || 0,
           totalArticlesRead: readingStats?.total_articles_read || 0,
-          totalSavedArticles: saved?.length || 0
+          totalSavedArticles: saved?.length || 0,
+          totalFinishedArticles: finishedCount || 0
         });
       } catch (error) {
         if (!isMounted) return;
@@ -231,10 +261,31 @@ export default function UserProfile() {
     setIsEditingUsername(true);
   };
 
+  // Add helper function to format activity items
+  const getActivityItems = () => {
+    const items = [
+      // Add saved articles
+      ...(savedNews || []).map(article => ({
+        type: 'saved',
+        date: article.created_at,
+        data: article
+      })),
+      // Add finished articles
+      ...(finishedNews || []).map(article => ({
+        type: 'finished',
+        date: article.finished_at,
+        data: article
+      }))
+    ];
+
+    // Sort all items by date, most recent first
+    return items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[rgb(19,31,36)]"></div>
       </div>
     );
   }
@@ -243,7 +294,7 @@ export default function UserProfile() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+          <h1 className="text-2xl font-bold text-[rgb(19,31,36)] mb-4">Error</h1>
           <p className="text-gray-600">{error}</p>
         </div>
       </div>
@@ -306,16 +357,16 @@ export default function UserProfile() {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="container mx-auto p-4 pt-24 pb-32">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
+      <div className="container mx-auto p-4 pt-16 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
-          <div className={`mb-8 p-8 rounded-2xl shadow-lg ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          <div className={`mb-8 ${
+            theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'
           }`}>
             <div className="flex items-center gap-6">
               <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
-                theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-white text-gray-700'
               }`}>
                 {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
               </div>
@@ -323,7 +374,7 @@ export default function UserProfile() {
                 {isEditingUsername && currentUser?.id === profile?.id ? (
                   <div className="space-y-2">
                     <div className={`flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
                     }`}>
                       <input
                         type="text"
@@ -369,7 +420,7 @@ export default function UserProfile() {
                 ) : (
                   <div className="flex items-center gap-3">
                     <h1 className={`text-3xl font-bold ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
                     }`}>
                       {profile?.username || 'Anonymous User'}
                     </h1>
@@ -397,52 +448,65 @@ export default function UserProfile() {
             </div>
 
             {/* Stats Section */}
-            <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8 pt-8 border-t ${
+            <div className={`pt-8 ${
               theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
             }`}>
-              <div className={`p-4 rounded-xl ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+              <div className={`p-6 rounded-xl shadow-sm ${
+                theme === 'dark' ? 'bg-gray-800' : 'bg-white'
               }`}>
-                <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>
-                  {stats.totalArticlesRead}
-                </div>
-                <div className={`text-sm flex items-center gap-2 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  <FaBook className="w-4 h-4" />
-                  Articles Read
-                </div>
-              </div>
-              <div className={`p-4 rounded-xl ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-              }`}>
-                <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>
-                  {formatDuration(stats.totalReadingTime)}
-                </div>
-                <div className={`text-sm flex items-center gap-2 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  <FaClock className="w-4 h-4" />
-                  Total Reading Time
-                </div>
-              </div>
-              <div className={`p-4 rounded-xl ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-              }`}>
-                <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>
-                  {stats.totalSavedArticles}
-                </div>
-                <div className={`text-sm flex items-center gap-2 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  <FaHeart className="w-4 h-4" />
-                  Saved Articles
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div>
+                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
+                    }`}>
+                      {stats.totalArticlesRead}
+                    </div>
+                    <div className={`text-sm flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      <FaBook className="w-4 h-4" />
+                      Articles Read
+                    </div>
+                  </div>
+                  <div>
+                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
+                    }`}>
+                      {formatDuration(stats.totalReadingTime)}
+                    </div>
+                    <div className={`text-sm flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      <FaClock className="w-4 h-4" />
+                      Total Reading Time
+                    </div>
+                  </div>
+                  <div>
+                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
+                    }`}>
+                      {stats.totalSavedArticles}
+                    </div>
+                    <div className={`text-sm flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      <FaHeart className="w-4 h-4" />
+                      Saved Articles
+                    </div>
+                  </div>
+                  <div>
+                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
+                    }`}>
+                      {stats.totalFinishedArticles}
+                    </div>
+                    <div className={`text-sm flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      <FaCheck className="w-4 h-4" />
+                      Finished Articles
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -452,7 +516,7 @@ export default function UserProfile() {
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
           <h2 className={`text-2xl font-bold mb-6 ${
-            theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+            theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
           }`}>
             Activity
           </h2>
@@ -464,21 +528,27 @@ export default function UserProfile() {
             }`} />
 
             <div className="space-y-6">
-              {/* Saved news items */}
-              {savedNews.map((article) => (
-                <div key={article.id} className="relative flex gap-4">
+              {/* Activity items */}
+              {getActivityItems().map((item, index) => (
+                <div key={`${item.type}-${index}`} className="relative flex gap-4">
                   {/* Timeline dot and date */}
                   <div className="relative">
                     <div className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
                       theme === 'dark' ? 'border-gray-800' : 'border-white'
-                    } bg-red-500`} />
+                    } ${item.type === 'saved' ? 'bg-red-500' : 'bg-green-500'}`} />
                     <div className={`pl-4 text-sm whitespace-nowrap ${
                       theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                     }`}>
-                      {formatDate(article.created_at).map((text, i) => (
+                      {formatDate(item.date, item.type).map((text, i) => (
                         <div key={i} className={i === 1 ? 'text-xs opacity-75 flex items-center gap-1' : ''}>
                           {text}
-                          {i === 1 && <FaHeart className="w-3 h-3 text-red-500" />}
+                          {i === 1 && (
+                            item.type === 'saved' ? (
+                              <FaHeart className="w-3 h-3 text-red-500" />
+                            ) : (
+                              <FaCheck className="w-3 h-3 text-green-500" />
+                            )
+                          )}
                         </div>
                       ))}
                     </div>
@@ -486,16 +556,16 @@ export default function UserProfile() {
 
                   {/* Article content */}
                   <button
-                    onClick={() => router.push(`/read?source=${encodeURIComponent(article.url)}`)}
+                    onClick={() => router.push(`/read?source=${encodeURIComponent(item.data.url)}`)}
                     className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70`}
                   >
                     <div className="flex gap-4">
-                      {article.image && (
+                      {item.type === 'saved' && item.data.image && (
                         <div className="hidden sm:block w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden">
                           <img
-                            src={article.image}
+                            src={item.data.image}
                             alt=""
-                            className="w-full h-full object-cover"
+                            className="object-cover w-full h-full"
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
@@ -506,13 +576,13 @@ export default function UserProfile() {
                         <h3 className={`text-lg font-medium mb-2 text-left ${
                           theme === 'dark' 
                             ? 'text-gray-100' 
-                            : 'text-gray-900'
+                            : 'text-[rgb(19,31,36)]'
                         }`}>
                           {(() => {
                             try {
-                              const parsedTitle = typeof article.title === 'string' 
-                                ? JSON.parse(article.title)
-                                : article.title;
+                              const parsedTitle = typeof item.data.title === 'string' 
+                                ? JSON.parse(item.data.title)
+                                : item.data.title;
                               
                               return Array.isArray(parsedTitle)
                                 ? processForDisplay(parsedTitle).map((part, i) => {
@@ -530,23 +600,25 @@ export default function UserProfile() {
                                   })
                                 : parsedTitle || 'Untitled Article';
                             } catch (e) {
-                              return article.title || 'Untitled Article';
+                              return item.data.title || 'Untitled Article';
                             }
                           })()}
                         </h3>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                          <p className={`text-sm ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>{article.date}</p>
-                          {article.reading_time > 0 && (
-                            <div className={`flex items-center gap-2 text-sm ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}>
-                              <FaClock className="w-3.5 h-3.5" />
-                              <span>Read for {formatDuration(article.reading_time)}</span>
-                            </div>
-                          )}
-                        </div>
+                        {item.type === 'saved' && (
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                            <p className={`text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>{item.data.date}</p>
+                            {item.data.reading_time > 0 && (
+                              <div className={`flex items-center gap-2 text-sm ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                              }`}>
+                                <FaClock className="w-3.5 h-3.5" />
+                                <span>Read for {formatDuration(item.data.reading_time)}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </button>

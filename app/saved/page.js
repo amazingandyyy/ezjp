@@ -127,7 +127,7 @@ export default function SavedNews() {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('saved_news')
+        .from('saved_articles')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -157,10 +157,10 @@ export default function SavedNews() {
   if (authLoading || isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
-        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+        theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'
       }`}>
         <div className={`animate-spin rounded-full h-32 w-32 border-b-2 ${
-          theme === 'dark' ? 'border-gray-200' : 'border-gray-900'
+          theme === 'dark' ? 'border-gray-200' : 'border-[rgb(19,31,36)]'
         }`}></div>
       </div>
     );
@@ -200,7 +200,7 @@ export default function SavedNews() {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'}`}>
       {/* Back button - top left */}
       <button
         onClick={() => router.push('/')}
@@ -246,13 +246,13 @@ export default function SavedNews() {
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
               ${theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
                 {/* Theme controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
                     Theme
                     <LoadingIndicator loading={updatingPreferences.theme} theme={theme} />
                   </label>
@@ -320,7 +320,7 @@ export default function SavedNews() {
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
               ${theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
@@ -328,7 +328,7 @@ export default function SavedNews() {
                   <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                     Signed in as
                   </p>
-                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
+                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"}`}>
                     {profile?.username || user.email}
                   </p>
                   <button
@@ -373,7 +373,7 @@ export default function SavedNews() {
       <div className="container mx-auto p-4 pt-24">
         <div className="flex items-center gap-2 mb-8">
           <h1 className={`text-3xl font-bold ${
-            theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+            theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
           }`}>
             Saved News
           </h1>
@@ -414,7 +414,7 @@ export default function SavedNews() {
                 )}
                 <div className="p-4">
                   <h2 className={`text-xl font-semibold mb-2 ${
-                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                    theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
                   }`}>
                     {renderTitle(news.title)}
                   </h2>
