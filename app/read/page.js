@@ -51,6 +51,139 @@ const LoadingIndicator = ({ loading, theme }) => {
   );
 };
 
+// Add custom RepeatIcon component
+const RepeatIcon = ({ className, isActive }) => (
+  <div className="relative">
+    <svg 
+      role="img" 
+      viewBox="-1 -1 18 18" 
+      className={className}
+      stroke={isActive ? "rgb(168 85 247)" : "currentColor"}
+      fill={isActive ? "rgb(168 85 247)" : "currentColor"}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="0.1"
+    >
+      <path d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z"></path>
+    </svg>
+    {isActive && (
+      <>
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+          <div className="bg-purple-500 rounded w-2.5 h-2.5 flex items-center justify-center ring-[0.3px] ring-white">
+            <span className="text-[6px] font-bold text-white leading-none">1</span>
+          </div>
+        </div>
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500"></div>
+      </>
+    )}
+  </div>
+);
+
+// Add this helper function at the top level
+const formatJapaneseDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}時${String(date.getMinutes()).padStart(2, '0')}分`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Add SavedNewsList component before NewsReaderContent
+const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
+  const parseTitle = (title) => {
+    try {
+      if (typeof title === 'string' && title.startsWith('[')) {
+        const parsed = JSON.parse(title);
+        return parsed.map(part => part.type === 'ruby' ? part.kanji : part.content).join('');
+      }
+      return title;
+    } catch (e) {
+      return title;
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    try {
+      // Try to parse the date string
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        // If the date is invalid, try to parse it as a Japanese date string
+        const match = dateStr.match(/(\d+)年(\d+)月(\d+)日\s*(\d+)時(\d+)分/);
+        if (match) {
+          const [_, year, month, day, hour, minute] = match;
+          return `${year}年${month}月${day}日 ${hour}時${minute}分`;
+        }
+        return dateStr;
+      }
+      return formatJapaneseDate(date);
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  if (news.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-32 text-center">
+        <FaHeart className={`w-6 h-6 mb-2 ${
+          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+        }`} />
+        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
+          No saved articles yet
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {news.map((article, index) => (
+        <button
+          key={index}
+          onClick={() => onNewsClick(article.url)}
+          className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
+            ${theme === 'dark' 
+              ? article.url === sourceUrl
+                ? 'bg-gray-800'
+                : 'hover:bg-gray-800/70'
+              : article.url === sourceUrl
+                ? 'bg-gray-100'
+                : 'hover:bg-gray-50'
+            }`}
+        >
+          <div className="flex-shrink-0">
+            {article.image && (
+              <div className="w-20 h-20 relative rounded-md overflow-hidden">
+                <img
+                  src={article.image}
+                  alt=""
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className={`font-medium mb-1 line-clamp-2 ${
+              theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
+            }`}>
+              {parseTitle(article.title)}
+            </h3>
+            <p className={`text-sm ${
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              {formatDate(article.date)}
+            </p>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -120,6 +253,17 @@ function NewsReaderContent() {
   const [readingStartTime, setReadingStartTime] = useState(null);
   const [hasRecordedArticle, setHasRecordedArticle] = useState(false);
 
+  // Add these states near the other state declarations
+  const [sidebarView, setSidebarView] = useState('latest'); // 'latest' or 'saved'
+  const [savedNews, setSavedNews] = useState([]);
+
+  // Add these states near other state declarations
+  const [isFinished, setIsFinished] = useState(false);
+  const [finishLoading, setFinishLoading] = useState(false);
+
+  // Add this state near other state declarations
+  const [finishedAt, setFinishedAt] = useState(null);
+
   // Add function to check if news is saved
   const checkSaveStatus = async () => {
     if (!user || !url) return;
@@ -153,13 +297,18 @@ function NewsReaderContent() {
           .eq('url', url);
         setIsArchived(false);
       } else {
+        // Convert title to plain text if it's an array
+        const plainTitle = Array.isArray(newsTitle) 
+          ? newsTitle.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
+          : newsTitle;
+
         // Add to saved
         await supabase
           .from('saved_news')
           .insert([{
             user_id: user.id,
             url,
-            title: newsTitle,
+            title: plainTitle,
             date: newsDate,
             image: newsImages[0]?.src || null
           }]);
@@ -987,7 +1136,7 @@ function NewsReaderContent() {
 
   // Update the repeat countdown styles
   const getRepeatCountdownClasses = () => {
-    const baseClasses = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-medium z-50';
+    const baseClasses = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-medium z-50';
     switch (theme) {
       case 'dark':
         return `${baseClasses} bg-gray-800 text-gray-100`;
@@ -1046,6 +1195,90 @@ function NewsReaderContent() {
       return () => clearTimeout(timer);
     }
   }, [newsContent, hasRecordedArticle, user, readingStartTime]);
+
+  // Add this function near other data fetching functions
+  const fetchSavedNews = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('saved_news')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setSavedNews(data || []);
+    } catch (error) {
+      console.error('Error fetching saved news:', error);
+      setSavedNews([]);
+    }
+  };
+
+  // Add this effect to fetch saved news when needed
+  useEffect(() => {
+    if (user && sidebarView === 'saved') {
+      fetchSavedNews();
+    }
+  }, [user, sidebarView]);
+
+  // Add this function near other data fetching functions
+  const checkFinishStatus = async () => {
+    if (!user || !url) return;
+
+    try {
+      const { data } = await supabase
+        .from('finished_articles')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('url', url)
+        .single();
+      
+      setIsFinished(!!data);
+    } catch (error) {
+      console.error('Error checking finish status:', error);
+    }
+  };
+
+  // Add this function near other toggle functions
+  const toggleFinished = async () => {
+    if (!user || !url || finishLoading) return;
+
+    setFinishLoading(true);
+    try {
+      if (isFinished) {
+        // Remove from finished
+        await supabase
+          .from('finished_articles')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('url', url);
+        setIsFinished(false);
+      } else {
+        // Add to finished
+        await supabase
+          .from('finished_articles')
+          .insert([{
+            user_id: user.id,
+            url,
+            title: Array.isArray(newsTitle) 
+              ? newsTitle.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
+              : newsTitle,
+            finished_at: new Date().toISOString()
+          }]);
+        setIsFinished(true);
+      }
+    } catch (error) {
+      console.error('Error toggling finish status:', error);
+    } finally {
+      setFinishLoading(false);
+    }
+  };
+
+  // Add this effect near other initialization effects
+  useEffect(() => {
+    if (user && url) {
+      checkFinishStatus();
+    }
+  }, [user, url]);
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
@@ -1395,101 +1628,173 @@ function NewsReaderContent() {
           className={sidebarClasses}
         >
           <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Recent News</h2>
-              <button
-                onClick={() => setShowSidebar(false)}
-                className={`p-2 rounded-full hover:bg-opacity-80 
-                  ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {recentNews?.length > 0 ? (
-              <div className="space-y-4">
-                {recentNews.map((article, index) => (
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">News List</h2>
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className={`p-2 rounded-full hover:bg-opacity-80 
+                    ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {user && (
+                <div className={`flex gap-1 p-1 rounded-lg ${
+                  theme === 'dark' 
+                    ? 'bg-gray-800/50' 
+                    : 'bg-gray-100'
+                  }`}
+                >
                   <button
-                    key={index}
-                    onClick={() => {
-                      router.push(`/read?source=${encodeURIComponent(article.url)}`);
-                      setShowSidebar(false);
-                    }}
-                    className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
-                      ${theme === 'dark' 
-                        ? article.url === sourceUrl
-                          ? 'bg-gray-800'
-                          : 'hover:bg-gray-800/70'
-                        : article.url === sourceUrl
-                          ? 'bg-gray-100'
-                          : 'hover:bg-gray-50'
+                    onClick={() => setSidebarView('latest')}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
+                      ${sidebarView === 'latest'
+                        ? theme === 'dark'
+                          ? 'bg-gray-700 text-white shadow-sm'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                          ? 'text-gray-400 hover:text-gray-200'
+                          : 'text-gray-500 hover:text-gray-700'
                       }`}
                   >
-                    <div className="flex-shrink-0 relative">
-                      {article.image && (
-                        <div className="w-20 h-20 relative rounded-md overflow-hidden">
-                          <img
-                            src={article.image}
-                            alt=""
-                            className="object-cover w-full h-full"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
-                      {archivedUrls.has(article.url) && (
-                        <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-lg">
-                          <FaHeart className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`font-medium mb-1 line-clamp-2 ${
-                        theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
-                      }`}>
-                        {article.title}
-                      </h3>
-                      <p className={`text-sm ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>
-                        {article.date}
-                      </p>
-                    </div>
+                    <svg 
+                      className="w-3.5 h-3.5" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M13 10V3L4 14h7v7l9-11h-7z" 
+                      />
+                    </svg>
+                    Latest
                   </button>
-                ))}
-              </div>
-            ) : recentNewsError ? (
-              <div className="flex items-center justify-center h-32 text-red-500">
-                Failed to load news. Please try again.
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-32">
-                <svg className={`animate-spin h-6 w-6 mb-2 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-900'
-                }`} viewBox="0 0 24 24">
-                  <circle 
-                    className="opacity-25" 
-                    cx="12" 
-                    cy="12" 
-                    r="10" 
-                    stroke="currentColor" 
-                    strokeWidth="4" 
-                    fill="none" 
+                  <button
+                    onClick={() => setSidebarView('saved')}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
+                      ${sidebarView === 'saved'
+                        ? theme === 'dark'
+                          ? 'bg-gray-700 text-white shadow-sm'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                          ? 'text-gray-400 hover:text-gray-200'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                  >
+                    <FaHeart className="w-3.5 h-3.5" />
+                    Saved
+                  </button>
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                {sidebarView === 'latest' ? (
+                  recentNews?.length > 0 ? (
+                    recentNews.map((article, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          router.push(`/read?source=${encodeURIComponent(article.url)}`);
+                          setShowSidebar(false);
+                        }}
+                        className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
+                          ${theme === 'dark' 
+                            ? article.url === sourceUrl
+                              ? 'bg-gray-800'
+                              : 'hover:bg-gray-800/70'
+                            : article.url === sourceUrl
+                              ? 'bg-gray-100'
+                              : 'hover:bg-gray-50'
+                          }`}
+                      >
+                        <div className="flex-shrink-0 relative">
+                          {article.image && (
+                            <div className="w-20 h-20 relative rounded-md overflow-hidden">
+                              <img
+                                src={article.image}
+                                alt=""
+                                className="object-cover w-full h-full"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                          )}
+                          {archivedUrls.has(article.url) && (
+                            <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-lg">
+                              <FaHeart className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-medium mb-1 line-clamp-2 ${
+                            theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
+                          }`}>
+                            {Array.isArray(article.title) 
+                              ? article.title.map((part, i) => 
+                                  part.type === 'ruby' ? part.kanji : part.content
+                                ).join('')
+                              : article.title}
+                          </h3>
+                          <p className={`text-sm ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
+                            {Array.isArray(article.date)
+                              ? article.date.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
+                              : formatJapaneseDate(article.date)}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  ) : recentNewsError ? (
+                    <div className="flex items-center justify-center h-32 text-red-500">
+                      Failed to load news. Please try again.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-32">
+                      <svg className={`animate-spin h-6 w-6 mb-2 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-900'
+                      }`} viewBox="0 0 24 24">
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4" 
+                          fill="none" 
+                        />
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                        />
+                      </svg>
+                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
+                        Loading news...
+                      </span>
+                    </div>
+                  )
+                ) : (
+                  <SavedNewsList 
+                    news={savedNews}
+                    theme={theme}
+                    sourceUrl={sourceUrl}
+                    onNewsClick={(url) => {
+                      router.push(`/read?source=${encodeURIComponent(url)}`);
+                      setShowSidebar(false);
+                    }}
                   />
-                  <path 
-                    className="opacity-75" 
-                    fill="currentColor" 
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
-                  />
-                </svg>
-                <span className={`${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                }`}>Loading news...</span>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </aside>
 
@@ -1577,43 +1882,6 @@ function NewsReaderContent() {
                             : `${sentences.length}`}
                         </span>
                       </div>
-
-                      {/* Repeat toggle on the right */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleRepeatToggle}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                            isRepeatMode
-                              ? theme === "dark"
-                                ? "bg-purple-600"
-                                : "bg-purple-500"
-                              : theme === "dark"
-                              ? "bg-gray-700"
-                              : "bg-gray-300"
-                          }`}
-                          title={`${isRepeatMode ? 'Stop' : 'Start'} sentence repeat mode`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform relative ${
-                              isRepeatMode ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          >
-                            <FaRedo 
-                              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 
-                              ${isRepeatMode ? "text-purple-500" : "text-gray-400"}`} 
-                            />
-                          </span>
-                        </button>
-                        <span className={`text-xs whitespace-nowrap ${
-                          theme === "dark" ? "text-gray-300" : "text-gray-600"
-                        }`}>
-                          {isRepeatMode 
-                            ? repeatCountdown > 0 
-                              ? `${repeatCountdown}s` 
-                              : 'Repeating one sentence'
-                            : 'Repeat one sentence'}
-                        </span>
-                      </div>
                     </div>
                   )}
                 </div>
@@ -1669,6 +1937,60 @@ function NewsReaderContent() {
                       {renderSentence(sentence, index)}
                     </p>
                   ))}
+
+                  {/* Mark as Finished button at the bottom of the article */}
+                  {user && (
+                    <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
+                      <button
+                        onClick={toggleFinished}
+                        disabled={finishLoading}
+                        className={`
+                          px-4 py-2 rounded-lg flex items-center justify-center gap-2
+                          transition-all duration-150
+                          ${theme === "dark"
+                            ? isFinished
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                            : isFinished
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }
+                          ${finishLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                        `}
+                      >
+                        {finishLoading ? (
+                          <div className="w-5 h-5 relative">
+                            <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                              theme === "dark"
+                                ? "border-gray-300 border-r-transparent"
+                                : theme === "yellow"
+                                  ? "border-yellow-500 border-r-transparent"
+                                  : "border-gray-400 border-r-transparent"
+                            }`}></div>
+                          </div>
+                        ) : (
+                          <>
+                            <svg 
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={isFinished ? "2.5" : "2"}
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                d="M5 13l4 4L19 7" 
+                              />
+                            </svg>
+                            <span className="font-medium">
+                              {isFinished ? "Finished Reading" : "Mark as Finished"}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1696,57 +2018,63 @@ function NewsReaderContent() {
         </main>
       </div>
 
-      {/* Media controls - keep at bottom */}
+      {/* Media controls */}
       {sentences?.length > 0 && (
-        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 
-          px-6 py-4 rounded-full shadow-lg border z-40
+        <div className={`
+          fixed bottom-0 left-0 right-0 z-40
+          sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:w-[320px]
           ${theme === "dark"
-            ? "bg-gray-800 border-gray-700"
-            : "[color-scheme:light] bg-white border-gray-200"
-          }`}>
-          <div className="flex items-center justify-center gap-4">
+            ? "bg-gray-800 border-t sm:border border-gray-700"
+            : "[color-scheme:light] bg-white border-t sm:border border-gray-200"
+          }
+          px-4 sm:px-6 py-4 sm:rounded-full sm:shadow-lg
+          shadow-[0_-2px_15px_-3px_rgba(0,0,0,0.1)] sm:shadow-lg
+        `}>
+          <div className="flex items-center justify-center gap-3">
             {/* Archive button */}
             {user && (
-              <button
-                onClick={toggleSave}
-                disabled={archiveLoading}
-                className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
-                  ${theme === "dark"
-                    ? "hover:bg-gray-700/50"
-                    : "hover:bg-gray-100/50"
-                  }
-                  ${archiveLoading ? 'opacity-50 cursor-not-allowed' : ''}
-                `}
-                title={isArchived ? "Remove from Saved" : "Save Article"}
-              >
-                {archiveLoading ? (
-                  <div className="w-4 h-4 relative">
-                    <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+              <>
+                <button
+                  onClick={toggleSave}
+                  disabled={archiveLoading}
+                  className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+                    ${theme === "dark"
+                      ? "hover:bg-gray-700/50"
+                      : "hover:bg-gray-100/50"
+                    }
+                    ${archiveLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
+                  title={isArchived ? "Remove from Saved" : "Save Article"}
+                >
+                  {archiveLoading ? (
+                    <div className="w-4 h-4 relative">
+                      <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                        theme === "dark"
+                          ? "border-gray-300 border-r-transparent"
+                          : theme === "yellow"
+                            ? "border-yellow-500 border-r-transparent"
+                            : "border-gray-400 border-r-transparent"
+                      }`}></div>
+                    </div>
+                  ) : isArchived ? (
+                    <FaHeart className={`w-4 h-4 ${
                       theme === "dark"
-                        ? "border-gray-300 border-r-transparent"
+                        ? "text-red-400"
                         : theme === "yellow"
-                          ? "border-yellow-500 border-r-transparent"
-                          : "border-gray-400 border-r-transparent"
-                    }`}></div>
-                  </div>
-                ) : isArchived ? (
-                  <FaHeart className={`w-4 h-4 ${
-                    theme === "dark"
-                      ? "text-red-400"
-                      : theme === "yellow"
-                        ? "text-red-500"
-                        : "text-red-500"
-                  }`} />
-                ) : (
-                  <FaRegHeart className={`w-4 h-4 ${
-                    theme === "dark"
-                      ? "text-gray-300 hover:text-red-400"
-                      : theme === "yellow"
-                        ? "text-gray-600 hover:text-red-500"
-                        : "text-gray-600 hover:text-red-500"
-                  }`} />
-                )}
-              </button>
+                          ? "text-red-500"
+                          : "text-red-500"
+                    }`} />
+                  ) : (
+                    <FaRegHeart className={`w-4 h-4 ${
+                      theme === "dark"
+                        ? "text-gray-300 hover:text-purple-400"
+                        : theme === "yellow"
+                          ? "text-gray-600 hover:text-purple-500"
+                          : "text-gray-600 hover:text-purple-500"
+                    }`} />
+                  )}
+                </button>
+              </>
             )}
 
             {/* Play controls */}
@@ -1802,14 +2130,39 @@ function NewsReaderContent() {
                 <FaArrowRight className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Repeat toggle button */}
+            <button
+              onClick={handleRepeatToggle}
+              className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+                ${theme === "dark"
+                  ? "hover:bg-gray-700/50"
+                  : "hover:bg-gray-100/50"
+                }
+              `}
+              title={isRepeatMode 
+                ? "Currently repeating one sentence with 1 second pause between repeats" 
+                : "Click to repeat one sentence with 1 second pause between repeats"}
+            >
+              <RepeatIcon 
+                className={`w-4 h-4 ${
+                  isRepeatMode
+                    ? "text-purple-500"
+                    : theme === "dark"
+                      ? "text-gray-300 hover:text-purple-400"
+                      : "text-gray-600 hover:text-purple-500"
+                }`} 
+                isActive={isRepeatMode}
+              />
+            </button>
           </div>
         </div>
       )}
 
       {/* Repeat countdown */}
       {repeatCountdown > 0 && (
-        <div className={getRepeatCountdownClasses()}>
-          Repeating in {repeatCountdown}...
+        <div className={`${getRepeatCountdownClasses()} mb-20 sm:mb-0`}>
+          Repeat sentence in {repeatCountdown} s
         </div>
       )}
     </div>
