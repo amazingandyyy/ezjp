@@ -15,33 +15,9 @@ import {
   FaRedo
 } from 'react-icons/fa';
 
-const LoadingSpinner = () => (
-  <div className="fixed inset-0 bg-white bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-8 flex flex-col items-center space-y-4">
-      <svg className="animate-spin h-12 w-12 text-blue-500" viewBox="0 0 24 24">
-        <circle 
-          className="opacity-25" 
-          cx="12" 
-          cy="12" 
-          r="10" 
-          stroke="currentColor" 
-          strokeWidth="4" 
-          fill="none" 
-        />
-        <path 
-          className="opacity-75" 
-          fill="currentColor" 
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
-        />
-      </svg>
-      <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
-        Loading news content...
-      </p>
-    </div>
-  </div>
-);
+// Add this helper function at the top level
+const isBrowser = typeof window !== 'undefined';
 
-// Create a component for the main content
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,11 +55,90 @@ function NewsReaderContent() {
   const [newsTitle, setNewsTitle] = useState('');
   const [newsDate, setNewsDate] = useState('');
   const [newsImages, setNewsImages] = useState([]);
-  const [currentWord, setCurrentWord] = useState(-1);
-  const [showWordHighlight, setShowWordHighlight] = useState(true);
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [recentNews, setRecentNews] = useState([]);
+  const [recentNewsError, setRecentNewsError] = useState(false);
+  const sidebarRef = useRef(null);
 
   const settingsRef = useRef(null);
   const repeatModeRef = useRef(false);
+
+  // Add new state for image visibility
+  const [showImages, setShowImages] = useState(true);
+
+  // Add useMediaQuery hook
+  const useMediaQuery = (query) => {
+    const [matches, setMatches] = useState(false);
+
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const media = window.matchMedia(query);
+        setMatches(media.matches);
+
+        const listener = (e) => setMatches(e.matches);
+        media.addEventListener('change', listener);
+
+        return () => media.removeEventListener('change', listener);
+      }
+    }, [query]);
+
+    return matches;
+  };
+
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const isExtraLargeScreen = useMediaQuery('(min-width: 1300px)');
+
+  // Update the sidebar classes
+  const sidebarClasses = `
+    fixed top-0 h-screen transform transition-all duration-300 ease-in-out z-50
+    ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+    ${isLargeScreen ? 'lg:fixed lg:top-0' : ''}
+    ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} 
+    border-r ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}
+    overflow-y-auto
+    w-[400px]
+  `;
+
+  // Update the main content container classes
+  const mainContentClasses = `
+    transition-all duration-300 ease-in-out transform
+    ${showSidebar && isLargeScreen 
+      ? 'lg:translate-x-[200px]' 
+      : 'translate-x-0'
+    }
+    max-w-3xl mx-auto
+    p-4 pb-32
+  `;
+
+  // Update the main wrapper classes
+  const mainWrapperClasses = `
+    min-h-screen relative
+  `;
+
+  // Add overlay for mobile sidebar
+  const overlayClasses = `
+    fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300
+    ${!isLargeScreen && showSidebar ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+  `;
+
+  // Update click outside handler for sidebar
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !isLargeScreen) {
+        setShowSidebar(false);
+      }
+    }
+
+    if (showSidebar && !isLargeScreen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSidebar, isLargeScreen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -100,6 +155,50 @@ function NewsReaderContent() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSettings]);
+
+  useEffect(() => {
+    if (!isBrowser) return;
+
+    function loadVoices() {
+      const voices = speechSynthesis.getVoices();
+      const japaneseVoices = voices.filter(voice => voice.lang.includes('ja-JP'));
+      setAvailableVoices(japaneseVoices);
+      
+      // Try to find Microsoft Keita first
+      const keitaVoice = japaneseVoices.find(voice => 
+        voice.name.toLowerCase().includes('microsoft keita') || 
+        voice.name.toLowerCase().includes('microsoft けいた')
+      );
+      
+      // Set default voice (Keita if available, otherwise first Japanese voice)
+      if (!selectedVoice && japaneseVoices.length > 0) {
+        setSelectedVoice(keitaVoice || japaneseVoices[0]);
+      }
+    }
+
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setShowSidebar(false);
+      }
+    }
+
+    if (showSidebar) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSidebar]);
 
   const splitIntoSentences = (content) => {
     // Initialize variables for sentence building
@@ -128,6 +227,19 @@ function NewsReaderContent() {
   const fetchNews = async (targetUrl = url) => {
     setIsLoading(true);
     setAudioError('');
+    
+    // Reset voice-related states
+    if (isBrowser) {
+      speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    setIsPaused(false);
+    setAutoPlay(false);
+    setCurrentSentence(-1);
+    setRepeatCountdown(0);
+    setIsRepeatMode(false);
+    repeatModeRef.current = false;
+    
     // Clean up existing cache
     Object.values(audioCache).forEach(url => {
       URL.revokeObjectURL(url);
@@ -143,7 +255,6 @@ function NewsReaderContent() {
         console.log("response", response.data);
         setNewsContent(response.data.content);
         setSentences(splitIntoSentences(response.data.content));
-        setCurrentSentence(-1); // Reset to no selection
         setUrl(targetUrl);
         setNewsTitle(response.data.title);
         setNewsDate(response.data.date);
@@ -204,165 +315,124 @@ function NewsReaderContent() {
     }).join('');
   };
 
-  const playCurrentSentence = async (index = currentSentence) => {
-    setCurrentWord(-1); // Reset word highlight when starting new sentence
-    if (!sentences[index]) return;
-    
-    try {
-      // Stop any existing audio first
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-        setAudioElement(null); // Clear the old audio element
+  const getJapaneseVoice = () => {
+    if (!isBrowser) return Promise.resolve(null);
+
+    return new Promise((resolve) => {
+      if (selectedVoice) {
+        resolve(selectedVoice);
+        return;
       }
 
-      setIsPlaying(true);
-      setIsPaused(false);
+      const voices = speechSynthesis.getVoices();
+      const japaneseVoices = voices.filter(voice => voice.lang.includes('ja-JP'));
+      const keitaVoice = japaneseVoices.find(voice => 
+        voice.name.toLowerCase().includes('microsoft keita') || 
+        voice.name.toLowerCase().includes('microsoft けいた')
+      );
+      const defaultVoice = keitaVoice || japaneseVoices[0];
+      
+      if (defaultVoice) {
+        setSelectedVoice(defaultVoice);
+        resolve(defaultVoice);
+      } else {
+        speechSynthesis.onvoiceschanged = () => {
+          const voices = speechSynthesis.getVoices();
+          const japaneseVoices = voices.filter(voice => voice.lang.includes('ja-JP'));
+          const keitaVoice = japaneseVoices.find(voice => 
+            voice.name.toLowerCase().includes('microsoft keita') || 
+            voice.name.toLowerCase().includes('microsoft けいた')
+          );
+          const voice = keitaVoice || japaneseVoices[0];
+          setSelectedVoice(voice);
+          resolve(voice);
+        };
+      }
+    });
+  };
+
+  // Modify the playCurrentSentence function
+  const playCurrentSentence = async (index = currentSentence) => {
+    if (!isBrowser || !sentences[index]) return;
+    
+    try {
+      speechSynthesis.cancel();
       setAudioError('');
       
       const sentenceText = sentenceToText(sentences[index]);
-      const cacheKey = `${sentenceText}_${speed}`;
+      const japaneseVoice = await getJapaneseVoice();
       
-      let audio = new Audio(); // Always create a new audio element
-
-      // Check if we have a cached audio blob
-      if (audioCache[cacheKey]) {
-        audio.src = audioCache[cacheKey];
-      } else {
-        setIsVoiceLoading(true);
-        
-        try {
-          const response = await fetch(`/api/tts?text=${encodeURIComponent(sentenceText)}&speed=${parseFloat(speed)}`);
-          if (!response.ok) throw new Error('Failed to fetch audio');
-          
-          const audioBlob = await response.blob();
-          const audioUrl = URL.createObjectURL(audioBlob);
-          
-          setAudioCache(prev => ({
-            ...prev,
-            [cacheKey]: audioUrl
-          }));
-          
-          audio.src = audioUrl;
-        } catch (fetchError) {
-          throw new Error('Failed to generate audio');
-        }
+      if (!japaneseVoice) {
+        throw new Error('No Japanese voice found');
       }
 
-      // Set up event handlers
-      audio.dataset.sentence = index.toString();
+      const utterance = new SpeechSynthesisUtterance(sentenceText);
+      utterance.voice = japaneseVoice;
+      utterance.lang = 'ja-JP';
+      utterance.rate = parseFloat(speed);
+
+      // Set playing state just before speaking
+      setIsPlaying(true);
+      setIsPaused(false);
       
-      audio.onerror = () => {
-        setAudioError('Failed to play audio. Please make sure Voicevox is running.');
+      utterance.onend = () => {
         setIsPlaying(false);
         setIsPaused(false);
-        setAutoPlay(false);
-        setIsVoiceLoading(false);
-      };
-      
-      // Wait for audio to be loaded before setting up onended
-      await new Promise((resolve, reject) => {
-        audio.onloadeddata = () => {
-          setIsVoiceLoading(false);
-          resolve();
-        };
-        audio.onerror = reject;
-      });
-
-      // Add ontimeupdate handler for word timing
-      audio.ontimeupdate = () => {
-        if (!sentences[index]) return;
         
-        const words = processForDisplay(sentences[index]).length;
-        const duration = audio.duration;
-        const currentTime = audio.currentTime;
-        
-        // Estimate current word based on time
-        const wordIndex = Math.floor((currentTime / duration) * words);
-        if (wordIndex !== currentWord && wordIndex < words) {
-          setCurrentWord(wordIndex);
-        }
-      };
-
-      // Update onended to reset word highlight
-      audio.onended = () => {
-        console.log('Audio ended, repeat mode:', repeatModeRef.current);
-        
-        setCurrentWord(-1);
-        setIsPlaying(false);
-        setIsPaused(false);
-        setIsVoiceLoading(false);
-
-        // Clear any existing intervals first
-        if (window.repeatInterval) {
-          clearInterval(window.repeatInterval);
-          window.repeatInterval = null;
-        }
-
         if (repeatModeRef.current) {
-          console.log('Starting repeat countdown');
           setRepeatCountdown(1);
           window.repeatInterval = setInterval(() => {
             setRepeatCountdown(prev => {
               if (prev <= 0) {
                 clearInterval(window.repeatInterval);
-                window.repeatInterval = null;
                 if (repeatModeRef.current) {
-                  setIsPlaying(true);
-                  setTimeout(() => {
-                    playCurrentSentence(index);
-                  }, 100);
+                  playCurrentSentence(index);
                 }
                 return 0;
               }
               return prev - 1;
             });
           }, 1000);
-        } else {
-          if (index < sentences.length - 1) {
-            setCurrentSentence(prev => prev + 1);
-            setTimeout(() => {
-              setIsPlaying(true);
-              playCurrentSentence(index + 1);
-            }, 800);
-          }
+        } else if (index < sentences.length - 1) {
+          setCurrentSentence(prev => prev + 1);
+          setTimeout(() => {
+            playCurrentSentence(index + 1);
+          }, 800);
         }
       };
 
-      setAudioElement(audio);
-      await audio.play();
+      utterance.onpause = () => {
+        setIsPlaying(false);
+        setIsPaused(true);
+      };
+
+      utterance.onresume = () => {
+        setIsPlaying(true);
+        setIsPaused(false);
+      };
+
+      speechSynthesis.speak(utterance);
       
     } catch (error) {
       console.error('Error playing audio:', error);
-      setAudioError('Failed to play audio. Please make sure Voicevox is running.');
+      setAudioError('Failed to play audio. Please make sure your browser supports Japanese text-to-speech.');
       setIsPlaying(false);
       setIsPaused(false);
-      setAutoPlay(false);
-      setIsVoiceLoading(false);
     }
   };
 
   const pauseAudio = () => {
-    if (audioElement && !audioElement.paused) {
-      audioElement.pause();
-      setIsPlaying(false);
-      setIsPaused(true);
-    }
+    if (!isBrowser) return;
+    speechSynthesis.pause();
+    setIsPlaying(false);
+    setIsPaused(true);
   };
 
-  const resumeAudio = async () => {
-    if (audioElement && audioElement.paused) {
-      try {
-        setIsPlaying(true);
-        setIsPaused(false);
-        await audioElement.play();
-      } catch (error) {
-        console.error('Error resuming audio:', error);
-        setAudioError('Failed to resume audio');
-        setIsPlaying(false);
-        setIsPaused(false);
-      }
-    }
+  const resumeAudio = () => {
+    if (!isBrowser) return;
+    speechSynthesis.resume();
+    setIsPlaying(true);
+    setIsPaused(false);
   };
 
   const handlePlay = async () => {
@@ -383,28 +453,26 @@ function NewsReaderContent() {
   };
 
   const handleNext = async () => {
-    if (currentSentence < sentences.length - 1) {
-      const nextIndex = currentSentence + 1;
-      setCurrentSentence(nextIndex);
-      try {
-        setAutoPlay(true);
-        await playCurrentSentence(nextIndex);
-      } catch (error) {
-        console.error('Error playing next sentence:', error);
-      }
+    if (!sentences || currentSentence >= sentences.length - 1) return;
+    
+    const nextIndex = currentSentence + 1;
+    setCurrentSentence(nextIndex);
+    try {
+      await playCurrentSentence(nextIndex);
+    } catch (error) {
+      console.error('Error playing next sentence:', error);
     }
   };
 
   const handlePrevious = async () => {
-    if (currentSentence > 0) {
-      const prevIndex = currentSentence - 1;
-      setCurrentSentence(prevIndex);
-      try {
-        setAutoPlay(true);
-        await playCurrentSentence(prevIndex);
-      } catch (error) {
-        console.error('Error playing previous sentence:', error);
-      }
+    if (!sentences || currentSentence <= 0) return;
+    
+    const prevIndex = currentSentence - 1;
+    setCurrentSentence(prevIndex);
+    try {
+      await playCurrentSentence(prevIndex);
+    } catch (error) {
+      console.error('Error playing previous sentence:', error);
     }
   };
 
@@ -449,19 +517,19 @@ function NewsReaderContent() {
         };
       case 'yellow':
         return {
-          main: 'bg-yellow-50',
-          input: 'bg-white border-yellow-200',
-          button: '',
-          select: 'bg-white border-yellow-200',
-          controlBg: 'bg-gray-200'
+          main: '[color-scheme:light] bg-yellow-50 text-gray-900',
+          input: '[color-scheme:light] bg-white border-yellow-200 text-gray-900',
+          button: '[color-scheme:light]',
+          select: '[color-scheme:light] bg-white border-yellow-200 text-gray-900',
+          controlBg: '[color-scheme:light] bg-gray-200'
         };
-      default:
+      default: // light theme
         return {
-          main: 'bg-white',
-          input: 'bg-white border-gray-300',
-          button: '',
-          select: 'bg-white border-gray-300',
-          controlBg: 'bg-gray-200'
+          main: '[color-scheme:light] bg-white text-gray-900',
+          input: '[color-scheme:light] bg-white border-gray-300 text-gray-900',
+          button: '[color-scheme:light]',
+          select: '[color-scheme:light] bg-white border-gray-300 text-gray-900',
+          controlBg: '[color-scheme:light] bg-gray-200'
         };
     }
   };
@@ -545,7 +613,6 @@ function NewsReaderContent() {
     if (index === currentSentence) return;
     
     setCurrentSentence(index);
-    setCurrentWord(-1);
     if (audioElement) {
       audioElement.pause();
     }
@@ -573,17 +640,6 @@ function NewsReaderContent() {
     z-40
   `;
 
-  // Add a function to handle word highlighting
-  const getWordClassName = (sentenceIndex, wordIndex) => {
-    if (!showWordHighlight || sentenceIndex !== currentSentence) return '';
-    
-    return wordIndex === currentWord
-      ? theme === "dark"
-        ? "bg-gray-600 rounded px-1"
-        : "bg-emerald-100 rounded px-1"
-      : "";
-  };
-
   // Add a useEffect to handle repeat mode changes
   useEffect(() => {
     if (!isRepeatMode && audioElement) {
@@ -609,206 +665,612 @@ function NewsReaderContent() {
     }
   };
 
+  // Update the sentence rendering to use chunks
+  const renderSentence = (sentence, index) => {
+    return processForDisplay(sentence).map((part, i) => {
+      if (part.type === "ruby") {
+        return (
+          <span key={i}>
+            <RubyText
+              kanji={part.kanji}
+              reading={part.reading}
+              showReading={showFurigana}
+            />
+          </span>
+        );
+      } else {
+        return (
+          <span key={i}>
+            {part.content}
+          </span>
+        );
+      }
+    });
+  };
+
+  // Add this function to fetch recent news
+  const fetchRecentNews = async () => {
+    try {
+      const response = await axios.get('/api/fetch-news-list', {
+        params: { limit: 30 }
+      });
+      if (response.data.success && Array.isArray(response.data.newsList)) {
+        setRecentNews(response.data.newsList);
+      } else {
+        console.error('Invalid response format from fetch-news-list');
+        setRecentNews([]);
+      }
+    } catch (error) {
+      console.error('Error fetching recent news:', error);
+      setRecentNews([]);
+    }
+  };
+
+  // Add this useEffect to fetch recent news when sidebar opens
+  useEffect(() => {
+    if (showSidebar) {
+      setRecentNewsError(false);
+      fetchRecentNews();
+    }
+  }, [showSidebar]);
+
+  // Update effect to handle auto-showing sidebar
+  useEffect(() => {
+    if (isExtraLargeScreen) {
+      setShowSidebar(true); // Auto show on extra large screens (1300px+)
+    } else if (!isLargeScreen) {
+      setShowSidebar(false); // Auto hide on small screens (<1024px)
+    }
+    // Don't auto-change on regular large screens (1024px-1300px) to allow user control
+  }, [isLargeScreen, isExtraLargeScreen]);
+
+  // Update the floating nav position calculation
+  const floatingNavClasses = `
+    fixed top-4 h-12 z-50 rounded-full shadow-lg border px-4
+    transition-all duration-300 ease-in-out transform
+    ${showSidebar && isLargeScreen 
+      ? 'lg:translate-x-[200px] left-1/2 -translate-x-1/2' 
+      : 'left-1/2 -translate-x-1/2'
+    }
+    ${theme === "dark"
+      ? "bg-gray-800/95 border-gray-700 backdrop-blur-sm"
+      : "[color-scheme:light] bg-white/95 border-gray-200 backdrop-blur-sm"
+    }
+  `;
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
-      <div className="container mx-auto p-4 pb-32"> {/* Add padding bottom to prevent content from being hidden behind controls */}
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Easy Japanese News Reader</h1>
-        </div>
+      {/* Overlay */}
+      <div className={overlayClasses} onClick={() => !isLargeScreen && setShowSidebar(false)} />
 
-        {newsContent && (
-          <div
-            className='mt-4 p-0 rounded relative'
+      {/* Menu button - top left */}
+      <button
+        onClick={() => setShowSidebar(!showSidebar)}
+        className={`fixed top-4 left-4 p-3 rounded-lg shadow-lg border flex items-center justify-center 
+          transition-colors duration-150 z-50
+          ${theme === 'dark'
+            ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
+            : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
+          }`}
+        title={showSidebar ? "Hide News List" : "Show News List"}
+      >
+        <svg 
+          className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M4 6h16M4 12h16M4 18h16" 
+          />
+        </svg>
+      </button>
+
+      {/* Settings button - top right */}
+      <div className="fixed top-4 right-4 z-50" ref={settingsRef}>
+        <button
+          onClick={toggleSettings}
+          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
+            theme === "dark"
+              ? showSettings
+                ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+                : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
+              : showSettings
+                ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+          }`}
+          title="Settings"
+        >
+          <FaCog className={`w-5 h-5 ${
+            theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
+          }`} />
+        </button>
+
+        {/* Settings panel - opens below the button */}
+        {showSettings && (
+          <div 
+            className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
+            ${theme === "dark"
+              ? "bg-gray-800 border-gray-700 text-gray-100"
+              : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+            }`}
           >
-            {/* Title section with padding for controls */}
-            <div className="pt-24 sm:pt-4"> {/* Add top padding on mobile, normal padding on desktop */}
-              <div className="mb-6">
-                <h2 className={`text-2xl font-bold mb-2 ${
-                  theme === "dark" ? "text-gray-100" : "text-gray-900"
-                }`}>
-                  {Array.isArray(newsTitle)
-                    ? processForDisplay(newsTitle).map((part, i) =>
-                        part.type === "ruby" ? (
-                          <RubyText
-                            key={i}
-                            kanji={part.kanji}
-                            reading={part.reading}
-                            showReading={showFurigana}
-                          />
-                        ) : (
-                          <span key={i}>{part.content}</span>
-                        )
-                      )
-                    : newsTitle}
-                </h2>
-                <div
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {newsDate}
+            <div className="space-y-4">
+              {/* Font size controls */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Font Size</label>
+                <div className="flex gap-1">
+                  {[
+                    { size: "medium", class: "text-lg" },
+                    { size: "large", class: "text-xl" },
+                    { size: "x-large", class: "text-2xl" },
+                    { size: "xx-large", class: "text-3xl" }
+                  ].map(({ size, class: sizeClass }) => (
+                    <button
+                      key={size}
+                      onClick={() => handleFontSizeChange(size)}
+                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
+                        fontSize === size
+                          ? theme === "dark"
+                            ? "bg-gray-600 text-white"
+                            : "[color-scheme:light] bg-gray-700 text-white"
+                          : theme === "dark"
+                          ? "bg-gray-700 text-gray-300"
+                          : "[color-scheme:light] bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      A
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Progress indicator and repeat toggle - adjusted positioning */}
-              {sentences.length > 0 && (
-                <div className="absolute top-4 right-4 sm:top-4 flex flex-col gap-3">
-                  {/* Progress bar row */}
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="bg-gray-200 dark:bg-gray-700 rounded-full w-32 h-1.5 overflow-hidden">
-                      <div 
-                        className={`h-full transition-all duration-300 ${
-                          theme === "dark" 
-                            ? "bg-gray-400" 
-                            : "bg-gray-600"
-                        }`}
-                        style={{ 
-                          width: `${currentSentence >= 0 ? ((currentSentence + 1) / sentences.length) * 100 : 0}%` 
-                        }}
-                      />
-                    </div>
-                    <span className={`text-xs whitespace-nowrap ${
-                      theme === "dark" ? "text-gray-300" : "text-gray-600"
-                    }`}>
-                      {currentSentence >= 0
-                        ? `${currentSentence + 1}/${sentences.length}`
-                        : `${sentences.length}`}
-                    </span>
-                  </div>
+              {/* Speed control */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Speed</label>
+                <select
+                  value={speed}
+                  onChange={(e) => handleSpeedChange(e.target.value)}
+                  className={`w-full p-2 border rounded ${
+                    theme === "dark"
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
+                  }`}
+                >
+                  <option value="0.6">Very Slow (0.6x)</option>
+                  <option value="0.8">Slow (0.8x)</option>
+                  <option value="1.0">Normal (1.0x)</option>
+                  <option value="1.2">Faster (1.2x)</option>
+                </select>
+              </div>
 
-                  {/* Repeat toggle row */}
-                  <div className="flex items-center justify-end gap-2">
+              {/* Theme controls */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Theme</label>
+                <div className="flex gap-1">
+                  {[
+                    { id: "light", icon: <FaSun />, title: "Light" },
+                    { id: "dark", icon: <FaMoon />, title: "Dark" },
+                    { id: "yellow", icon: <FaBook />, title: "Yellow" },
+                  ].map((themeOption) => (
                     <button
-                      onClick={handleRepeatToggle}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                        isRepeatMode
+                      key={themeOption.id}
+                      onClick={() => handleThemeChange(themeOption.id)}
+                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center gap-2 ${
+                        theme === themeOption.id
                           ? theme === "dark"
-                            ? "bg-purple-600"
-                            : "bg-purple-500"
+                            ? "bg-gray-600 text-white"
+                            : "[color-scheme:light] bg-gray-700 text-white"
                           : theme === "dark"
-                          ? "bg-gray-700"
-                          : "bg-gray-300"
+                          ? "bg-gray-700 text-gray-300"
+                          : "[color-scheme:light] bg-gray-200 text-gray-600"
                       }`}
-                      title={`${isRepeatMode ? 'Stop' : 'Start'} sentence repeat mode`}
                     >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform relative ${
-                          isRepeatMode ? "translate-x-6" : "translate-x-1"
-                        }`}
-                      >
-                        <FaRedo 
-                          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 
-                          ${isRepeatMode ? "text-purple-500" : "text-gray-400"}`} 
-                        />
-                      </span>
+                      {themeOption.icon}
+                      <span className="text-sm">{themeOption.title}</span>
                     </button>
-                    <span className={`text-xs whitespace-nowrap ${
-                      theme === "dark" ? "text-gray-300" : "text-gray-600"
-                    }`}>
-                      {isRepeatMode 
-                        ? repeatCountdown > 0 
-                          ? `${repeatCountdown}s` 
-                          : 'Repeating'
-                        : 'Repeat'}
-                    </span>
-                  </div>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {newsImages.length > 0 && (
-                <div className={imageContainerClass}>
-                  <img
-                    src={newsImages[0].src}
-                    alt={newsImages[0].alt}
-                    className="w-full h-auto"
-                  />
-                  {newsImages[0].caption && (
-                    <p className="p-2 text-sm text-gray-600">
-                      {newsImages[0].caption}
-                    </p>
+              {/* Furigana control */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Furigana</label>
+                <button
+                  onClick={() => setShowFurigana(!showFurigana)}
+                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
+                    showFurigana
+                      ? theme === "dark"
+                        ? "bg-gray-600 text-white"
+                        : "[color-scheme:light] bg-gray-700 text-white"
+                      : theme === "dark"
+                      ? "bg-gray-700 text-gray-300"
+                      : "[color-scheme:light] bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {showFurigana ? "Hide Furigana" : "Show Furigana"}
+                </button>
+                <span className={`text-xs block text-center ${
+                  theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
+                }`}>
+                  (Hover to show when hidden)
+                </span>
+              </div>
+
+              {/* Voice selection control */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Voice</label>
+                <select
+                  value={selectedVoice?.voiceURI || ''}
+                  onChange={(e) => {
+                    const voice = availableVoices.find(v => v.voiceURI === e.target.value);
+                    setSelectedVoice(voice);
+                    speechSynthesis.cancel();
+                    setIsPlaying(false);
+                    setIsPaused(false);
+                  }}
+                  className={`w-full p-2 border rounded ${
+                    theme === "dark"
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "[color-scheme:light] bg-white border-gray-300 text-gray-900"
+                  }`}
+                >
+                  {availableVoices.map((voice) => (
+                    <option key={voice.voiceURI} value={voice.voiceURI}>
+                      {voice.name} ({voice.lang})
+                    </option>
+                  ))}
+                  {availableVoices.length === 0 && (
+                    <option value="" disabled>No Japanese voices available</option>
                   )}
-                </div>
-              )}
-
-              <div>
-                {sentences.map((sentence, index) => (
-                  <p
-                    key={index}
-                    onClick={() => handleSentenceClick(index)}
-                    className={`mb-2 px-2 py-1 rounded-md leading-relaxed cursor-pointer hover:bg-opacity-75 
-                      ${index === currentSentence
-                        ? theme === "dark"
-                          ? "bg-gray-700 p-4"
-                          : theme === "yellow"
-                            ? "bg-yellow-200 p-4"
-                            : "bg-emerald-50 p-4"
-                        : theme === "dark"
-                        ? "hover:bg-gray-800"
-                        : "hover:bg-gray-50"
-                      } 
-                      ${fontSize === "medium"
-                        ? "text-lg leading-loose"
-                        : fontSize === "large"
-                        ? "text-xl leading-loose"
-                        : fontSize === "x-large"
-                        ? "text-2xl leading-loose"
-                        : "text-3xl leading-loose"
-                      }
-                      ${isRepeatMode && index !== currentSentence 
-                        ? theme === "dark"
-                          ? "opacity-50"
-                          : "opacity-40"
-                        : ""
-                      }
-                      transition-opacity duration-200
-                    `}
-                  >
-                    {processForDisplay(sentence).map((part, i) =>
-                      part.type === "ruby" ? (
-                        <span
-                          key={i}
-                          className={`inline-block ${getWordClassName(index, i)}`}
-                        >
-                          <RubyText
-                            kanji={part.kanji}
-                            reading={part.reading}
-                            showReading={showFurigana}
-                          />
-                        </span>
-                      ) : (
-                        <span 
-                          key={i}
-                          className={getWordClassName(index, i)}
-                        >
-                          {part.content}
-                        </span>
-                      )
-                    )}
+                </select>
+                {availableVoices.length === 0 && (
+                  <p className={`text-xs text-red-500 ${theme === "dark" ? "" : "[color-scheme:light]"}`}>
+                    No Japanese voices found. Please install Japanese language support in your system.
                   </p>
-                ))}
+                )}
+              </div>
+
+              {/* Image control */}
+              <div className="space-y-2">
+                <label className={`text-sm font-medium ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>Images</label>
+                <button
+                  onClick={() => setShowImages(!showImages)}
+                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
+                    showImages
+                      ? theme === "dark"
+                        ? "bg-gray-600 text-white"
+                        : "[color-scheme:light] bg-gray-700 text-white"
+                      : theme === "dark"
+                      ? "bg-gray-700 text-gray-300"
+                      : "[color-scheme:light] bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {showImages ? "Hide Images" : "Show Images"}
+                </button>
+                <span className={`text-xs block text-center ${
+                  theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
+                }`}>
+                  (Toggle article images)
+                </span>
               </div>
             </div>
           </div>
         )}
-
-        {audioError && (
-          <div
-            className={`mt-4 p-4 border rounded ${
-              theme === "dark"
-                ? "bg-red-900 text-red-100 border-red-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {audioError}
-          </div>
-        )}
-
-        {isLoading && <LoadingSpinner />}
       </div>
 
-      {/* Add back the media controls */}
-      {newsContent && (
-        <div className={mediaControlsClass}>
+      <div className={mainWrapperClasses}>
+        {/* Sidebar */}
+        <aside 
+          ref={sidebarRef}
+          className={sidebarClasses}
+        >
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Recent News</h2>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className={`p-2 rounded-full hover:bg-opacity-80 
+                  ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {recentNews?.length > 0 ? (
+              <div className="space-y-4">
+                {recentNews.map((article, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      router.push(`/read?source=${encodeURIComponent(article.url)}`);
+                      setShowSidebar(false);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
+                      ${theme === 'dark' 
+                        ? article.url === sourceUrl
+                          ? 'bg-gray-800'
+                          : 'hover:bg-gray-800/70'
+                        : article.url === sourceUrl
+                          ? 'bg-gray-100'
+                          : 'hover:bg-gray-50'
+                      }`}
+                  >
+                    {article.image && (
+                      <div className="flex-shrink-0 w-20 h-20 relative rounded-md overflow-hidden">
+                        <img
+                          src={article.image}
+                          alt=""
+                          className="object-cover w-full h-full"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium mb-1 line-clamp-2 ${
+                        theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
+                      }`}>
+                        {article.title}
+                      </h3>
+                      <p className={`text-sm ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {article.date}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : recentNewsError ? (
+              <div className="flex items-center justify-center h-32 text-red-500">
+                Failed to load news. Please try again.
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-32">
+                <svg className={`animate-spin h-6 w-6 mb-2 ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-900'
+                }`} viewBox="0 0 24 24">
+                  <circle 
+                    className="opacity-25" 
+                    cx="12" 
+                    cy="12" 
+                    r="10" 
+                    stroke="currentColor" 
+                    strokeWidth="4" 
+                    fill="none" 
+                  />
+                  <path 
+                    className="opacity-75" 
+                    fill="currentColor" 
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                  />
+                </svg>
+                <span className={`${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`}>Loading news...</span>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main className={mainContentClasses}>
+          {newsContent && (
+            <div
+              className='mt-4 p-0 rounded relative'
+            >
+              {/* Title section with padding for controls */}
+              <div className="pt-4">
+                <div className="mb-6">
+                  <h2 className={`text-2xl font-bold mb-2 ${
+                    theme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }`}>
+                    {Array.isArray(newsTitle)
+                      ? processForDisplay(newsTitle).map((part, i) =>
+                          part.type === "ruby" ? (
+                            <RubyText
+                              key={i}
+                              kanji={part.kanji}
+                              reading={part.reading}
+                              showReading={showFurigana}
+                            />
+                          ) : (
+                            <span key={i}>{part.content}</span>
+                          )
+                        )
+                      : newsTitle}
+                  </h2>
+                  <div
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    {newsDate}
+                  </div>
+
+                  {/* News image */}
+                  {newsImages?.length > 0 && showImages && (
+                    <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-w-xl mx-auto">
+                      <img
+                        src={newsImages[0].src}
+                        alt={newsImages[0].alt || ''}
+                        className="w-full h-auto"
+                      />
+                      {newsImages[0].caption && (
+                        <p className={`p-3 text-sm ${
+                          theme === "dark" 
+                            ? "bg-gray-800 text-gray-300" 
+                            : "bg-gray-50 text-gray-600"
+                        }`}>
+                          {newsImages[0].caption}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Progress indicator and repeat toggle - moved below image */}
+                  {sentences?.length > 0 && (
+                    <div className="mt-4 flex justify-between items-center">
+                      {/* Progress bar on the left */}
+                      <div className="flex items-center gap-3">
+                        <div className={`rounded-full w-48 h-2 overflow-hidden ${
+                          theme === "dark" 
+                            ? "bg-gray-800" 
+                            : "bg-gray-100"
+                        }`}>
+                          <div 
+                            className={`h-full transition-all duration-300 ${
+                              theme === "dark" 
+                                ? "bg-green-500" 
+                                : "bg-green-600"
+                            }`}
+                            style={{ 
+                              width: `${currentSentence >= 0 ? ((currentSentence + 1) / sentences.length) * 100 : 0}%` 
+                            }}
+                          />
+                        </div>
+                        <span className={`text-sm font-medium whitespace-nowrap ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }`}>
+                          {currentSentence >= 0
+                            ? `${currentSentence + 1} / ${sentences.length}`
+                            : `${sentences.length}`}
+                        </span>
+                      </div>
+
+                      {/* Repeat toggle on the right */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleRepeatToggle}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                            isRepeatMode
+                              ? theme === "dark"
+                                ? "bg-purple-600"
+                                : "bg-purple-500"
+                              : theme === "dark"
+                              ? "bg-gray-700"
+                              : "bg-gray-300"
+                          }`}
+                          title={`${isRepeatMode ? 'Stop' : 'Start'} sentence repeat mode`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform relative ${
+                              isRepeatMode ? "translate-x-6" : "translate-x-1"
+                            }`}
+                          >
+                            <FaRedo 
+                              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 
+                              ${isRepeatMode ? "text-purple-500" : "text-gray-400"}`} 
+                            />
+                          </span>
+                        </button>
+                        <span className={`text-xs whitespace-nowrap ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }`}>
+                          {isRepeatMode 
+                            ? repeatCountdown > 0 
+                              ? `${repeatCountdown}s` 
+                              : 'Repeating one sentence'
+                            : 'Repeat one sentence'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {newsImages.length > 0 && (
+                  <div className={imageContainerClass}>
+                    <img
+                      src={newsImages[0].src}
+                      alt={newsImages[0].alt}
+                      className="w-full h-auto"
+                    />
+                    {newsImages[0].caption && (
+                      <p className="p-2 text-sm text-gray-600">
+                        {newsImages[0].caption}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  {sentences.map((sentence, index) => (
+                    <p
+                      key={index}
+                      onClick={() => handleSentenceClick(index)}
+                      className={`mb-2 px-2 py-1 rounded-md leading-relaxed cursor-pointer hover:bg-opacity-75 
+                        ${index === currentSentence
+                          ? theme === "dark"
+                            ? "bg-gray-700 p-4"
+                            : theme === "yellow"
+                              ? "bg-yellow-200 p-4"
+                              : "bg-emerald-50 p-4"
+                          : theme === "dark"
+                          ? "hover:bg-gray-800"
+                          : "hover:bg-gray-50"
+                        } 
+                        ${fontSize === "medium"
+                          ? "text-lg leading-loose"
+                          : fontSize === "large"
+                          ? "text-xl leading-loose"
+                          : fontSize === "x-large"
+                          ? "text-2xl leading-loose"
+                          : "text-3xl leading-loose"
+                        }
+                        ${isRepeatMode && index !== currentSentence 
+                          ? theme === "dark"
+                            ? "opacity-50"
+                            : "opacity-40"
+                          : ""
+                        }
+                        transition-opacity duration-200
+                      `}
+                    >
+                      {renderSentence(sentence, index)}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {audioError && (
+                <div
+                  className={`mt-4 p-4 border rounded ${
+                    theme === "dark"
+                      ? "bg-red-900 text-red-100 border-red-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {audioError}
+                </div>
+              )}
+
+              {isLoading && (
+                <div className={`fixed inset-0 backdrop-blur-sm z-50 ${
+                  theme === "dark" 
+                    ? "bg-black/10" 
+                    : "bg-white/70"
+                }`} />
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Media controls - keep at bottom */}
+      {sentences?.length > 0 && (
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 
+          px-6 py-4 rounded-full shadow-lg border z-40
+          ${theme === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "[color-scheme:light] bg-white border-gray-200"
+          }`}>
           <div className="flex items-center justify-center gap-4">
             <button
               onClick={handlePrevious}
@@ -833,7 +1295,6 @@ function NewsReaderContent() {
                 setIsPaused(false);
                 setAutoPlay(false);
                 setCurrentSentence(-1);
-                setCurrentWord(-1);
                 if (isRepeatMode) {
                   setIsRepeatMode(false);
                   setRepeatCountdown(0);
@@ -890,159 +1351,6 @@ function NewsReaderContent() {
           </div>
         </div>
       )}
-
-      {/* Add fixed settings button and drawer */}
-      <div className="fixed bottom-6 right-6 z-50" ref={settingsRef}>
-        {showSettings && (
-          <div 
-            className={`absolute bottom-16 right-0 mb-2 p-4 rounded-lg shadow-lg border w-72
-            ${theme === "dark"
-              ? "bg-gray-800 border-gray-700"
-              : "bg-white border-gray-200"
-            }`}
-          >
-            <div className="space-y-4">
-              {/* Font size controls */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Font Size</label>
-                <div className="flex gap-1">
-                  {[
-                    { size: "medium", class: "text-lg" },
-                    { size: "large", class: "text-xl" },
-                    { size: "x-large", class: "text-2xl" },
-                    { size: "xx-large", class: "text-3xl" }
-                  ].map(({ size, class: sizeClass }) => (
-                    <button
-                      key={size}
-                      onClick={() => handleFontSizeChange(size)}
-                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
-                        fontSize === size
-                          ? theme === "dark"
-                            ? "bg-gray-600 text-white"
-                            : "bg-gray-700 text-white"
-                          : theme === "dark"
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-200"
-                      }`}
-                    >
-                      A
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Speed control */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Speed</label>
-                <select
-                  value={speed}
-                  onChange={(e) => handleSpeedChange(e.target.value)}
-                  className={`w-full p-2 border rounded ${themeClasses.select}`}
-                >
-                  <option value="0.6">Super Slow (0.6x)</option>
-                  <option value="0.8">Slow (0.8x)</option>
-                  <option value="1.0">Normal (1.0x)</option>
-                  <option value="1.2">Fast (1.2x)</option>
-                </select>
-              </div>
-
-              {/* Theme controls */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Theme</label>
-                <div className="flex gap-1">
-                  {[
-                    { id: "light", icon: <FaSun />, title: "Light" },
-                    { id: "dark", icon: <FaMoon />, title: "Dark" },
-                    { id: "yellow", icon: <FaBook />, title: "Yellow" },
-                  ].map((themeOption) => (
-                    <button
-                      key={themeOption.id}
-                      onClick={() => handleThemeChange(themeOption.id)}
-                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center gap-2 ${
-                        theme === themeOption.id
-                          ? theme === "dark"
-                            ? "bg-gray-600 text-white"
-                            : "bg-gray-700 text-white"
-                          : theme === "dark"
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-200"
-                      }`}
-                    >
-                      {themeOption.icon}
-                      <span className="text-sm">{themeOption.title}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Furigana control */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Furigana</label>
-                <button
-                  onClick={() => setShowFurigana(!showFurigana)}
-                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                    showFurigana
-                      ? theme === "dark"
-                        ? "bg-gray-600 text-white"
-                        : "bg-gray-700 text-white"
-                      : theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  {showFurigana ? "Hide Furigana" : "Show Furigana"}
-                </button>
-                <span className="text-xs text-gray-500 block text-center">
-                  (Hover to show when hidden)
-                </span>
-              </div>
-
-              {/* Word highlight control */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Word Highlight</label>
-                <button
-                  onClick={() => setShowWordHighlight(!showWordHighlight)}
-                  className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                    showWordHighlight
-                      ? theme === "dark"
-                        ? "bg-gray-600 text-white"
-                        : "bg-gray-700 text-white"
-                      : theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  {showWordHighlight ? "Disable Word Highlight" : "Enable Word Highlight"}
-                </button>
-                <span className="text-xs text-gray-500 block text-center">
-                  (Highlight words while reading)
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Settings toggle button */}
-        <button
-          onClick={toggleSettings}
-          className={`p-3 rounded-full shadow-lg flex items-center justify-center transition-colors duration-150 ${
-            theme === "dark"
-              ? showSettings
-                ? "bg-gray-700"
-                : "bg-gray-800 hover:bg-gray-700"
-              : showSettings
-                ? "bg-gray-100"
-                : "bg-white hover:bg-gray-50"
-          } border ${
-            theme === "dark" ? "border-gray-700" : "border-gray-200"
-          }`}
-          title="Settings"
-        >
-          <FaCog className={`w-6 h-6 ${
-            theme === "dark" ? "text-gray-300" : "text-gray-600"
-          }`} />
-        </button>
-      </div>
     </div>
   );
 }
@@ -1050,7 +1358,9 @@ function NewsReaderContent() {
 // Create the main page component that wraps the content in Suspense
 export default function NewsReader() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={
+      <div className="fixed inset-0 backdrop-blur-sm bg-white/70 z-50" />
+    }>
       <NewsReaderContent />
     </Suspense>
   );
