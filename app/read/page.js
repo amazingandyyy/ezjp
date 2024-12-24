@@ -52,7 +52,7 @@ const LoadingIndicator = ({ loading, theme }) => {
 };
 
 // Add custom RepeatIcon component
-const RepeatIcon = ({ className, isActive }) => (
+const RepeatIcon = ({ className, isActive, theme }) => (
   <div className="relative">
     <svg 
       role="img" 
@@ -69,7 +69,7 @@ const RepeatIcon = ({ className, isActive }) => (
     {isActive && (
       <>
         <div className="absolute -top-1 left-1/2 -translate-x-1/2">
-          <div className="bg-purple-500 rounded w-2.5 h-2.5 flex items-center justify-center ring-[0.3px] ring-white">
+          <div className={`bg-purple-500 rounded w-2.5 h-2.5 flex items-center justify-center ring-[0.3px] ${theme === 'dark' ? 'ring-gray-700' : 'ring-white'}`}>
             <span className="text-[6px] font-bold text-white leading-none">1</span>
           </div>
         </div>
@@ -229,6 +229,7 @@ function NewsReaderContent() {
   const [recentNews, setRecentNews] = useState([]);
   const [recentNewsError, setRecentNewsError] = useState(false);
   const [archivedUrls, setArchivedUrls] = useState(new Set());
+  const [finishedUrls, setFinishedUrls] = useState(new Set());
   const sidebarRef = useRef(null);
 
   const settingsRef = useRef(null);
@@ -260,9 +261,6 @@ function NewsReaderContent() {
   // Add these states near other state declarations
   const [isFinished, setIsFinished] = useState(false);
   const [finishLoading, setFinishLoading] = useState(false);
-
-  // Add this state near other state declarations
-  const [finishedAt, setFinishedAt] = useState(null);
 
   // Add function to check if news is saved
   const checkSaveStatus = async () => {
@@ -1035,6 +1033,32 @@ function NewsReaderContent() {
     }
   };
 
+  // Add function to fetch finished URLs
+  const fetchFinishedUrls = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('finished_articles')
+        .select('url');
+      
+      if (error) throw error;
+      setFinishedUrls(new Set(data.map(item => item.url)));
+    } catch (error) {
+      console.error('Error fetching finished URLs:', error);
+    }
+  };
+
+  // Update the useEffect to fetch both archived and finished URLs
+  useEffect(() => {
+    if (user) {
+      fetchArchivedUrls();
+      fetchFinishedUrls();
+    } else {
+      setArchivedUrls(new Set());
+      setFinishedUrls(new Set());
+    }
+  }, [user]);
+
   // Add this useEffect to fetch archived URLs when user changes
   useEffect(() => {
     if (user) {
@@ -1246,15 +1270,23 @@ function NewsReaderContent() {
     try {
       if (isFinished) {
         // Remove from finished
-        await supabase
+        const { error } = await supabase
           .from('finished_articles')
           .delete()
           .eq('user_id', user.id)
           .eq('url', url);
+        
+        if (error) throw error;
         setIsFinished(false);
+        // Update finishedUrls
+        setFinishedUrls(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(url);
+          return newSet;
+        });
       } else {
         // Add to finished
-        await supabase
+        const { error } = await supabase
           .from('finished_articles')
           .insert([{
             user_id: user.id,
@@ -1264,7 +1296,11 @@ function NewsReaderContent() {
               : newsTitle,
             finished_at: new Date().toISOString()
           }]);
+        
+        if (error) throw error;
         setIsFinished(true);
+        // Update finishedUrls
+        setFinishedUrls(prev => new Set([...prev, url]));
       }
     } catch (error) {
       console.error('Error toggling finish status:', error);
@@ -1727,11 +1763,30 @@ function NewsReaderContent() {
                               />
                             </div>
                           )}
-                          {archivedUrls.has(article.url) && (
-                            <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1 shadow-lg">
-                              <FaHeart className="w-3 h-3 text-white" />
-                            </div>
-                          )}
+                          <div className="absolute -top-1 -right-1 flex gap-1">
+                            {archivedUrls.has(article.url) && (
+                              <div className="bg-red-500 rounded-full p-1 shadow-lg">
+                                <FaHeart className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                            {finishedUrls.has(article.url) && (
+                              <div className="bg-green-500 rounded-full p-1 shadow-lg">
+                                <svg 
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                >
+                                  <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M5 13l4 4L19 7" 
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className={`font-medium mb-1 line-clamp-2 ${
@@ -2153,6 +2208,7 @@ function NewsReaderContent() {
                       : "text-gray-600 hover:text-purple-500"
                 }`} 
                 isActive={isRepeatMode}
+                theme={theme}
               />
             </button>
           </div>
