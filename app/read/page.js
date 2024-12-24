@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { 
@@ -41,7 +41,8 @@ const LoadingSpinner = () => (
   </div>
 );
 
-export default function NewsReader() {
+// Create a component for the main content
+function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sourceUrl = searchParams.get('source');
@@ -1046,5 +1047,14 @@ export default function NewsReader() {
         </button>
       </div>
     </div>
+  );
+}
+
+// Create the main page component that wraps the content in Suspense
+export default function NewsReader() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <NewsReaderContent />
+    </Suspense>
   );
 }
