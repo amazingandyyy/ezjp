@@ -757,13 +757,13 @@ export default function NewsReader() {
                         ? "hover:bg-gray-800"
                         : "hover:bg-gray-50"
                       } 
-                      ${fontSize === "small"
-                        ? "text-base leading-loose"
-                        : fontSize === "medium"
+                      ${fontSize === "medium"
                         ? "text-lg leading-loose"
                         : fontSize === "large"
                         ? "text-xl leading-loose"
-                        : "text-2xl leading-loose"
+                        : fontSize === "x-large"
+                        ? "text-2xl leading-loose"
+                        : "text-3xl leading-loose"
                       }
                       ${isRepeatMode && index !== currentSentence 
                         ? theme === "dark"
@@ -826,9 +826,9 @@ export default function NewsReader() {
               disabled={currentSentence <= 0 || isVoiceLoading || !isPlaying && !isPaused && !autoPlay}
               className={`p-2 rounded-full flex items-center justify-center 
                 ${theme === "dark"
-                  ? "bg-gray-700 hover:bg-gray-600 active:bg-gray-500 disabled:bg-gray-800"
-                  : "bg-gray-500 hover:bg-gray-400 active:bg-gray-300 disabled:bg-gray-300"
-                } text-white w-10 h-10 transition-colors duration-150`}
+                  ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                  : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                } text-white w-10 h-10 transition-all duration-150`}
               title="Previous"
             >
               <FaArrowLeft className="w-4 h-4" />
@@ -853,9 +853,9 @@ export default function NewsReader() {
               disabled={!newsContent || isLoading || (!isPlaying && !isPaused && !autoPlay && currentSentence === -1)}
               className={`p-2 rounded-full flex items-center justify-center 
                 ${theme === "dark"
-                  ? "bg-red-600 hover:bg-red-500 active:bg-red-400"
-                  : "bg-red-500 hover:bg-red-400 active:bg-red-300"
-                } text-white disabled:bg-gray-600 disabled:text-gray-300 w-10 h-10 transition-colors duration-150`}
+                  ? "bg-red-600 hover:enabled:bg-red-500 active:enabled:bg-red-400 disabled:opacity-40"
+                  : "bg-red-500 hover:enabled:bg-red-400 active:enabled:bg-red-300 disabled:bg-gray-300"
+                } text-white w-10 h-10 transition-all duration-150`}
               title="Stop and Reset"
             >
               <FaStop className="w-4 h-4" />
@@ -866,11 +866,11 @@ export default function NewsReader() {
               disabled={!newsContent || isLoading}
               className={`p-2 rounded-full flex items-center justify-center ${
                 isVoiceLoading
-                  ? "bg-purple-600 hover:bg-purple-500 active:bg-purple-400"
+                  ? "bg-purple-600 hover:enabled:bg-purple-500 active:enabled:bg-purple-400"
                   : isPlaying
-                  ? "bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-400"
-                  : "bg-green-600 hover:bg-green-500 active:bg-green-400"
-              } text-white disabled:bg-gray-600 disabled:text-gray-300 w-12 h-12 transition-colors duration-150`}
+                  ? "bg-yellow-600 hover:enabled:bg-yellow-500 active:enabled:bg-yellow-400"
+                  : "bg-green-600 hover:enabled:bg-green-500 active:enabled:bg-green-400"
+              } text-white disabled:${theme === "dark" ? "opacity-40" : "bg-gray-600"} w-12 h-12 transition-all duration-150`}
               title={
                 isVoiceLoading
                   ? "Loading Voice"
@@ -891,9 +891,9 @@ export default function NewsReader() {
               disabled={currentSentence === sentences.length - 1 || isVoiceLoading}
               className={`p-2 rounded-full flex items-center justify-center 
                 ${theme === "dark"
-                  ? "bg-gray-700 hover:bg-gray-600 active:bg-gray-500 disabled:bg-gray-800"
-                  : "bg-gray-500 hover:bg-gray-400 active:bg-gray-300 disabled:bg-gray-300"
-                } text-white w-10 h-10 transition-colors duration-150`}
+                  ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                  : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                } text-white w-10 h-10 transition-all duration-150`}
               title="Next"
             >
               <FaArrowRight className="w-4 h-4" />
@@ -917,11 +917,16 @@ export default function NewsReader() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Font Size</label>
                 <div className="flex gap-1">
-                  {["small", "medium", "large", "x-large"].map((size) => (
+                  {[
+                    { size: "medium", class: "text-lg" },
+                    { size: "large", class: "text-xl" },
+                    { size: "x-large", class: "text-2xl" },
+                    { size: "xx-large", class: "text-3xl" }
+                  ].map(({ size, class: sizeClass }) => (
                     <button
                       key={size}
                       onClick={() => handleFontSizeChange(size)}
-                      className={`flex-1 px-3 py-1.5 rounded ${
+                      className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
                         fontSize === size
                           ? theme === "dark"
                             ? "bg-gray-600 text-white"
