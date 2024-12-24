@@ -174,7 +174,11 @@ export default function NewsList() {
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+    <div
+      className={`min-h-screen ${
+        theme === "dark" ? "bg-gray-900" : "bg-white"
+      }`}
+    >
       {/* Settings and Profile buttons - top right */}
       <div className="fixed top-4 right-4 z-50 flex gap-2">
         {/* Settings Button */}
@@ -190,29 +194,40 @@ export default function NewsList() {
                   ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                   : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                 : showSettings
-                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
             }`}
             title="Settings"
           >
-            <FaCog className={`w-5 h-5 ${
-              theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
-            }`} />
+            <FaCog
+              className={`w-5 h-5 ${
+                theme === "dark"
+                  ? "text-gray-300"
+                  : "[color-scheme:light] text-gray-600"
+              }`}
+            />
           </button>
 
           {/* Settings panel */}
           {showSettings && (
-            <div 
+            <div
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
-              ${theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+              ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100"
+                  : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
               }`}
             >
               <div className="space-y-4">
                 {/* Theme controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${theme === "dark" ? "" : "[color-scheme:light] text-gray-900"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-gray-900"
+                    }`}
+                  >
                     Theme
                     <LoadingIndicator loading={updatingPreferences.theme} />
                   </label>
@@ -233,7 +248,11 @@ export default function NewsList() {
                             : theme === "dark"
                             ? "bg-gray-700 text-gray-300"
                             : "[color-scheme:light] bg-gray-200 text-gray-600"
-                        } ${updatingPreferences.theme ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } ${
+                          updatingPreferences.theme
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
                       >
                         {themeOption.icon}
                         <span className="text-sm">{themeOption.title}</span>
@@ -263,35 +282,65 @@ export default function NewsList() {
                   ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                   : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                 : showProfile
-                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
             }`}
             title={user ? "Profile" : "Sign In"}
           >
-            <FaUserCircle className={`w-5 h-5 ${
-              theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
-            }`} />
+            <FaUserCircle
+              className={`w-5 h-5 ${
+                theme === "dark"
+                  ? "text-gray-300"
+                  : "[color-scheme:light] text-gray-600"
+              }`}
+            />
           </button>
 
           {/* Profile panel - only shown when user is logged in and panel is open */}
           {user && showProfile && (
-            <div 
+            <div
               className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
-              ${theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
+              ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100"
+                  : "[color-scheme:light] bg-white border-gray-200 text-gray-900"
               }`}
             >
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                  <p
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     Signed in as
                   </p>
-                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
-                    {user.email}
+                  <p
+                    className={`font-medium ${
+                      theme === "dark" ? "text-gray-100" : "text-gray-900"
+                    }`}
+                  >
+                    {profile?.username || user.email}
                   </p>
                   <button
-                    onClick={() => router.push('/saved')}
+                    onClick={() =>
+                      router.push(
+                        `/user/${encodeURIComponent(
+                          profile?.username || user.email
+                        )}`
+                      )
+                    }
+                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
+                      theme === "dark"
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaUserCircle className="w-4 h-4" />
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => router.push("/saved")}
                     className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
                       theme === "dark"
                         ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -299,7 +348,7 @@ export default function NewsList() {
                     }`}
                   >
                     <FaHeart className="w-4 h-4" />
-                    View Saved
+                    Saved News
                   </button>
                   <button
                     onClick={signOut}
@@ -318,11 +367,13 @@ export default function NewsList() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4">
-        <h1 className={`text-3xl font-bold mb-8 ${
-          theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-        }`}>
-          NHK Easy News
+      <div className="container mx-auto p-4 pt-16">
+        <h1
+          className={`text-3xl font-bold mb-8 ${
+            theme === "dark" ? "text-gray-100" : "text-gray-900"
+          }`}
+        >
+          Explore Easy JP News
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {newsList.map((news, index) => (
@@ -330,9 +381,9 @@ export default function NewsList() {
               key={index}
               onClick={() => handleNewsClick(news.url)}
               className={`border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group ${
-                theme === 'dark'
-                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                  : 'bg-white border-gray-200 hover:bg-gray-50'
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                  : "bg-white border-gray-200 hover:bg-gray-50"
               }`}
             >
               <div className="relative">
@@ -352,14 +403,18 @@ export default function NewsList() {
                 )}
               </div>
               <div className="p-4">
-                <h2 className={`text-xl font-semibold mb-2 ${
-                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>
+                <h2
+                  className={`text-xl font-semibold mb-2 ${
+                    theme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }`}
+                >
                   {news.title}
                 </h2>
-                <p className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
+                <p
+                  className={`text-sm ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   {news.date}
                 </p>
               </div>

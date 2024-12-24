@@ -121,10 +121,11 @@ export default function SavedNews() {
     if (user) {
       fetchSavedNews();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, router]);
 
   const fetchSavedNews = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('saved_news')
         .select('*')
@@ -200,6 +201,20 @@ export default function SavedNews() {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+      {/* Back button - top left */}
+      <button
+        onClick={() => router.push('/')}
+        className={`fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg border flex items-center justify-center 
+          transition-colors duration-150
+          ${theme === 'dark'
+            ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
+            : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
+          }`}
+        title="Back to News Explorer"
+      >
+        <FaBook className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
+      </button>
+
       {/* Settings and Profile buttons - top right */}
       <div className="fixed top-4 right-4 z-50 flex gap-2">
         {/* Settings Button */}
@@ -314,8 +329,19 @@ export default function SavedNews() {
                     Signed in as
                   </p>
                   <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
-                    {user.email}
+                    {profile?.username || user.email}
                   </p>
+                  <button
+                    onClick={() => router.push(`/user/${encodeURIComponent(profile?.username || user.email)}`)}
+                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
+                      theme === "dark"
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaUserCircle className="w-4 h-4" />
+                    My Profile
+                  </button>
                   <button
                     onClick={() => router.push('/')}
                     className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
@@ -325,7 +351,7 @@ export default function SavedNews() {
                     }`}
                   >
                     <FaBook className="w-4 h-4" />
-                    View News List
+                    News List
                   </button>
                   <button
                     onClick={signOut}
@@ -344,7 +370,7 @@ export default function SavedNews() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 pt-24">
         <div className="flex items-center gap-2 mb-8">
           <h1 className={`text-3xl font-bold ${
             theme === 'dark' ? 'text-gray-100' : 'text-gray-900'

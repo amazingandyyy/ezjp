@@ -117,6 +117,9 @@ function NewsReaderContent() {
   const [isArchived, setIsArchived] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
 
+  const [readingStartTime, setReadingStartTime] = useState(null);
+  const [hasRecordedArticle, setHasRecordedArticle] = useState(false);
+
   // Add function to check if news is saved
   const checkSaveStatus = async () => {
     if (!user || !url) return;
@@ -222,7 +225,7 @@ function NewsReaderContent() {
 
   // Update the main wrapper classes
   const mainWrapperClasses = `
-    min-h-screen relative
+    min-h-screen relative pt-4
   `;
 
   // Add overlay for mobile sidebar
@@ -995,36 +998,100 @@ function NewsReaderContent() {
     }
   };
 
+  // Add function to update reading stats
+  const updateReadingStats = async (readingTime) => {
+    if (!user || hasRecordedArticle) return;
+
+    try {
+      // First try to update existing stats
+      const { error } = await supabase.rpc('increment_reading_stats', {
+        p_user_id: user.id,
+        p_reading_time: readingTime
+      });
+
+      if (error) throw error;
+      setHasRecordedArticle(true);
+    } catch (error) {
+      console.error('Error updating reading stats:', error);
+    }
+  };
+
+  // Add effect to start tracking reading time when content loads
+  useEffect(() => {
+    if (newsContent && !readingStartTime) {
+      setReadingStartTime(Date.now());
+    }
+  }, [newsContent]);
+
+  // Add effect to update reading time when component unmounts or URL changes
+  useEffect(() => {
+    return () => {
+      if (readingStartTime && user) {
+        const readingTime = (Date.now() - readingStartTime) / (1000 * 60); // Convert to minutes
+        updateReadingStats(readingTime);
+      }
+    };
+  }, [readingStartTime, user, url]);
+
+  // Add effect to record article read after a certain time
+  useEffect(() => {
+    if (newsContent && !hasRecordedArticle && user) {
+      const timer = setTimeout(() => {
+        const readingTime = (Date.now() - readingStartTime) / (1000 * 60); // Convert to minutes
+        if (readingTime >= 0.5) { // Only record if user spent at least 30 seconds
+          updateReadingStats(readingTime);
+        }
+      }, 30000); // Check after 30 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [newsContent, hasRecordedArticle, user, readingStartTime]);
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       {/* Overlay */}
       <div className={overlayClasses} onClick={() => !isLargeScreen && setShowSidebar(false)} />
 
       {/* Menu button - top left */}
-      <button
-        onClick={() => setShowSidebar(!showSidebar)}
-        className={`fixed top-4 left-4 p-3 rounded-lg shadow-lg border flex items-center justify-center 
-          transition-colors duration-150 z-50
-          ${theme === 'dark'
-            ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
-            : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
-          }`}
-        title={showSidebar ? "Hide News List" : "Show News List"}
-      >
-        <svg 
-          className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+      <div className="fixed top-4 left-4 z-50 flex gap-2">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center 
+            transition-colors duration-150
+            ${theme === 'dark'
+              ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
+              : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
+            }`}
+          title={showSidebar ? "Hide News List" : "Show News List"}
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M4 6h16M4 12h16M4 18h16" 
-          />
-        </svg>
-      </button>
+          <svg 
+            className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M4 6h16M4 12h16M4 18h16" 
+            />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => router.push('/')}
+          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center 
+            transition-colors duration-150
+            ${theme === 'dark'
+              ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
+              : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
+            }`}
+          title="Back to News Explorer"
+        >
+          <FaBook className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
+        </button>
+      </div>
 
       {/* Settings and Profile buttons - top right */}
       <div className="fixed top-4 right-4 z-50 flex gap-2">
@@ -1280,8 +1347,19 @@ function NewsReaderContent() {
                     Signed in as
                   </p>
                   <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
-                    {user.email}
+                    {profile?.username || user.email}
                   </p>
+                  <button
+                    onClick={() => router.push(`/user/${encodeURIComponent(profile?.username || user.email)}`)}
+                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
+                      theme === "dark"
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaUserCircle className="w-4 h-4" />
+                    My Profile
+                  </button>
                   <button
                     onClick={() => router.push('/saved')}
                     className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
@@ -1291,7 +1369,7 @@ function NewsReaderContent() {
                     }`}
                   >
                     <FaHeart className="w-4 h-4" />
-                    View Saved
+                    Saved News
                   </button>
                   <button
                     onClick={signOut}
