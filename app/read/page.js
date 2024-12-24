@@ -51,6 +51,7 @@ function NewsReaderContent() {
 
   useEffect(() => {
     if (sourceUrl) {
+      fetchNews(sourceUrl);
       setUrl(sourceUrl);
     } else {
       router.push('/');
@@ -157,10 +158,6 @@ function NewsReaderContent() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchNews();
-  }, []); // Run once on mount
 
   const isValidUrl = (urlString) => {
     try {
