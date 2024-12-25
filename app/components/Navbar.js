@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaBook, FaUserCircle, FaHeart, FaDownload } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
+import Image from 'next/image';
 
 export default function Navbar({ 
   showSidebar, 
@@ -122,10 +123,12 @@ export default function Navbar({
           >
             <span className="font-extrabold flex items-center">
               EZ
-              <FaBook
-                className={`px-1 w-8 h-8 ${
-                  theme === "dark" ? "text-green-500" : "text-green-600"
-                }`}
+              <Image
+                src="/icons/ezjp-app.png"
+                alt="EZJP Logo"
+                width={32}
+                height={32}
+                className="mx-1"
               />
               JP
             </span>
