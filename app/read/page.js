@@ -354,7 +354,7 @@ function NewsReaderContent() {
   `;
 
   const mainWrapperClasses = `
-    min-h-screen relative pt-4
+    min-h-screen relative pt-6
   `;
 
   const overlayClasses = `
@@ -2081,7 +2081,7 @@ function NewsReaderContent() {
               className='mt-4 p-0 rounded relative'
             >
               {/* Title section with padding for controls */}
-              <div className="pt-4">
+              <div className="pt-6">
                 <div className="mb-6">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <h2 className={`text-2xl font-bold ${

@@ -1,11 +1,37 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { FaHeart } from 'react-icons/fa';
+import { FaHeart, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import Navbar from './components/Navbar';
+
+const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInDays >= 7) {
+      return `${Math.floor(diffInDays / 7)}週間前`;
+    } else if (diffInDays > 0) {
+      return `${diffInDays}日${diffInHours % 24}時間前`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours}時間${diffInMinutes % 60}分前`;
+    } else if (diffInMinutes > 0) {
+      return `${diffInMinutes}分前`;
+    } else {
+      return 'たった今';
+    }
+  } catch (e) {
+    return dateStr;
+  }
+};
 
 export default function NewsList() {
   const [newsList, setNewsList] = useState([]);
@@ -13,11 +39,29 @@ export default function NewsList() {
   const [error, setError] = useState("");
   const [archivedUrls, setArchivedUrls] = useState(new Set());
   const [finishedUrls, setFinishedUrls] = useState(new Set());
+  const [hideFinished, setHideFinished] = useState(false);
+  const [finishedStats, setFinishedStats] = useState({ recent: 0, total: 0 });
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
 
   // Get theme from profile if available, otherwise from localStorage
   const [theme, setTheme] = useState('light');
+
+  // Add intersection observer ref
+  const observerRef = useRef();
+  const loadMoreRef = useCallback(node => {
+    if (loadingMore) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        loadMoreNews();
+      }
+    });
+    if (node) observerRef.current.observe(node);
+  }, [loadingMore, hasMore]);
 
   useEffect(() => {
     if (profile) {
@@ -66,23 +110,78 @@ export default function NewsList() {
     }
   };
 
-  // Update the useEffect to fetch both archived and finished URLs
+  // Add function to fetch finished stats
+  const fetchFinishedStats = async () => {
+    if (!user) return;
+    try {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      // Get total count of articles from the news list that are within 7 days
+      const recentArticles = newsList.filter(article => {
+        try {
+          const articleDate = new Date(article.date);
+          return articleDate >= oneWeekAgo;
+        } catch (e) {
+          return false;
+        }
+      });
+
+      // Count finished articles from the recent articles list
+      const recentFinishedCount = recentArticles.filter(article => 
+        finishedUrls.has(article.url)
+      ).length;
+
+      setFinishedStats({
+        recent: recentFinishedCount,
+        total: recentArticles.length
+      });
+    } catch (error) {
+      console.error('Error fetching finished stats:', error);
+    }
+  };
+
+  // Update useEffect to include stats fetch
   useEffect(() => {
     if (!authLoading) {  // Only proceed if auth state is determined
       if (user) {
-        Promise.all([fetchArchivedUrls(), fetchFinishedUrls()]);
+        Promise.all([fetchArchivedUrls(), fetchFinishedUrls(), fetchFinishedStats()]);
       } else {
         setArchivedUrls(new Set());
         setFinishedUrls(new Set());
+        setFinishedStats({ recent: 0, total: 0 });
       }
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, newsList]); // Add newsList as dependency
 
-  const fetchNewsList = async () => {
+  // Add effect to update stats when finishedUrls changes
+  useEffect(() => {
+    if (user && newsList.length > 0) {
+      fetchFinishedStats();
+    }
+  }, [finishedUrls, newsList]);
+
+  // Modify fetchNewsList to support pagination
+  const fetchNewsList = async (pageNum = 1, append = false) => {
     try {
-      const response = await axios.get("/api/fetch-news-list");
+      const response = await axios.get("/api/fetch-news-list", {
+        params: { 
+          page: pageNum,
+          offset: (pageNum - 1) * (pageNum === 1 ? 50 : 12), // First page loads 50, subsequent pages load 12
+          limit: pageNum === 1 ? 50 : 12 // First page loads 50, subsequent pages load 12
+        }
+      });
       if (response.data.success) {
-        setNewsList(response.data.newsList);
+        const newNews = response.data.newsList;
+        setHasMore(response.data.hasMore);
+        setNewsList(prev => {
+          const updatedList = append ? [...prev, ...newNews] : newNews;
+          // Update stats after updating the list
+          if (user) {
+            setTimeout(() => fetchFinishedStats(), 0);
+          }
+          return updatedList;
+        });
         // Only refresh user data if auth is loaded and user exists
         if (!authLoading && user) {
           await Promise.all([fetchArchivedUrls(), fetchFinishedUrls()]);
@@ -95,20 +194,30 @@ export default function NewsList() {
       setError("Failed to load news list");
     } finally {
       setIsLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  // Add loadMoreNews function
+  const loadMoreNews = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchNewsList(nextPage, true);
+  }, [page, loadingMore, hasMore]);
 
   const handleNewsClick = (originalLink) => {
     router.push(`/read?source=${encodeURIComponent(originalLink)}`);
   };
 
   // Show loading state only when both auth and data are loading
-  if (authLoading || (isLoading && !newsList.length)) {
+  if (isLoading && !newsList.length) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${
         theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'
       }`}>
-        <div className={`animate-spin rounded-full h-32 w-32 border-b-2 ${
+        <div className={`animate-spin rounded-full h-16 w-16 border-b-2 ${
           theme === 'dark' ? 'border-gray-200' : 'border-[rgb(19,31,36)]'
         }`}></div>
       </div>
@@ -150,16 +259,49 @@ export default function NewsList() {
         hideNewsListButton={true}
       />
 
-      <div className="container mx-auto p-4 pt-16">
-        <h1
-          className={`text-3xl font-bold mb-8 text-center ${
-            theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
-          }`}
-        >
-          Explore Easy JP News
-        </h1>
+      <div className="container mx-auto p-4 pt-24">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <h1
+            className={`text-3xl font-bold text-center ${
+              theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
+            }`}
+          >
+            Find the latest news
+          </h1>
+          {user && (
+            <div className="flex items-center gap-4">
+              <div className={`text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}>
+                <span className="font-medium text-green-500">{finishedStats.recent}</span>
+                <span className="mx-1">/</span>
+                <span>{finishedStats.total}</span>
+                <span className="ml-1 text-xs opacity-75">finished in the past 7 days</span>
+              </div>
+              <button
+                onClick={() => setHideFinished(!hideFinished)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                  ${theme === "dark"
+                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  }`}
+              >
+                {hideFinished ? (
+                  <FaEye className="w-5 h-5 text-green-500" />
+                ) : (
+                  <FaEyeSlash className="w-5 h-5 text-gray-400" />
+                )}
+                <span className="text-sm font-medium">
+                  {hideFinished ? "Show all articles" : "Hide finished"}
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {newsList.map((news, index) => (
+          {newsList
+            .filter(news => !hideFinished || !finishedUrls.has(news.url))
+            .map((news, index) => (
             <div
               key={index}
               onClick={() => handleNewsClick(news.url)}
@@ -167,7 +309,7 @@ export default function NewsList() {
                 theme === "dark"
                   ? "bg-[rgb(19,31,36)] border-gray-700 hover:bg-[rgb(29,41,46)]"
                   : "bg-white border-gray-200 hover:bg-gray-50"
-              }`}
+              } ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
             >
               <div className="relative">
                 {news.image && (
@@ -186,7 +328,7 @@ export default function NewsList() {
                     </div>
                   )}
                   {finishedUrls.has(news.url) && (
-                    <div className="bg-green-500 rounded-full p-1.5 shadow-lg">
+                    <div className="bg-emerald-500 rounded-full p-1.5 shadow-lg">
                       <svg 
                         className="w-4 h-4 text-white"
                         fill="none"
@@ -217,12 +359,30 @@ export default function NewsList() {
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
                   }`}
                 >
-                  {news.date}
+                  {formatRelativeTime(news.date)}
                 </p>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Loading more indicator */}
+        {hasMore && (
+          <div
+            ref={loadMoreRef}
+            className="py-8 flex justify-center"
+          >
+            {loadingMore ? (
+              <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+                theme === 'dark' ? 'border-gray-400' : 'border-gray-800'
+              }`} />
+            ) : (
+              <div className={`h-8 w-8 ${
+                theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+              }`} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

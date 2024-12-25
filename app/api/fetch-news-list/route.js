@@ -3,9 +3,10 @@ import axios from 'axios';
 
 export async function GET(request) {
   try {
-    // Get the limit from search params
+    // Get pagination params from search params
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit')) || 30; // Default to 30 if not specified
+    const limit = parseInt(searchParams.get('limit')) || 12; // Default to 12 items per page
+    const offset = parseInt(searchParams.get('offset')) || 0;
 
     // Fetch from their news list API endpoint
     const response = await axios.get(
@@ -30,15 +31,17 @@ export async function GET(request) {
       });
     });
 
-    // Limit the number of articles
-    const limitedNewsList = transformedNewsList.slice(0, limit);
+    // Apply pagination
+    const paginatedNewsList = transformedNewsList.slice(offset, offset + limit);
 
-    console.log('Found news items:', limitedNewsList.length);
-    console.log('First item example:', limitedNewsList[0]);
+    console.log('Found news items:', paginatedNewsList.length);
+    console.log('Offset:', offset, 'Limit:', limit);
 
     return NextResponse.json({
       success: true,
-      newsList: limitedNewsList
+      newsList: paginatedNewsList,
+      hasMore: offset + limit < transformedNewsList.length,
+      total: transformedNewsList.length
     });
   } catch (error) {
     console.error('Error fetching news list:', error);

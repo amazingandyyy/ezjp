@@ -427,7 +427,7 @@ export default function UserProfile() {
     >
       {/* Add Navbar */}
       <Navbar theme={theme} hideNewsListButton={true} />
-      <div className="container mx-auto p-4 pt-16 pb-32">
+      <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
           <div
@@ -805,46 +805,43 @@ export default function UserProfile() {
                 <div className="relative">
                   <div
                     className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
-                      theme === "dark"
-                        ? "border-gray-800 bg-gray-600"
-                        : "border-white bg-gray-400"
+                      theme === 'dark'
+                        ? 'border-gray-800 bg-yellow-500'
+                        : 'border-white bg-yellow-500'
                     }`}
                   />
                   <div
                     className={`pl-4 text-sm whitespace-nowrap ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                     }`}
                   >
                     {(() => {
                       const date = new Date(profile?.created_at);
                       return [
-                        date.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year:
-                            date.getFullYear() !== new Date().getFullYear()
-                              ? "numeric"
-                              : undefined,
+                        date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
                         }) +
-                          " at " +
-                          date.toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
+                          ' at ' +
+                          date.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
                             hour12: true,
                           }),
-                        "- joined Easy JP News as Reader",
+                        '- joined EZJP as Reader',
                       ];
                     })().map((text, i) => (
                       <div
                         key={i}
-                        className={
-                          i === 1
-                            ? "text-xs opacity-75 flex items-center gap-1"
-                            : ""
-                        }
+                        className={i === 1 ? 'text-xs opacity-75 flex items-center gap-1.5' : ''}
                       >
                         {text}
-                        {i === 1 && <FaEgg className="w-3 h-3" />}
+                        {i === 1 && (
+                          <div className="p-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                            <FaEgg className="w-4 h-4 text-yellow-500" />
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
