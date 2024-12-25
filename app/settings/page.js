@@ -203,30 +203,32 @@ export default function Settings() {
       
       <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className={`pl-2 text-2xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-              Settings
+          <div className="flex items-center justify-between mb-6">
+            <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+              Account Settings
             </h1>
             {showSuccess && (
               <div className={`flex items-center gap-2 text-sm ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
                 <FaCheckCircle className="w-4 h-4" />
-                <span>Saved</span>
+                <span>Changes saved</span>
               </div>
             )}
           </div>
 
           {/* Settings Sections */}
-          <div className="space-y-6">
-            {/* Username Section */}
-            <div className={`p-6 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                Profile Information
-              </h2>
-              <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Profile Section */}
+            <div className={`overflow-hidden rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <h2 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                  Profile Information
+                </h2>
+              </div>
+              <div className="p-6 space-y-6">
                 {/* Username field */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    EZJP Username
+                    Username
                   </label>
                   {isEditingUsername ? (
                     <div className="flex items-center gap-2">
@@ -234,7 +236,7 @@ export default function Settings() {
                         type="text"
                         value={editedUsername}
                         onChange={(e) => setEditedUsername(e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-lg border ${
+                        className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
                           theme === 'dark'
                             ? 'bg-gray-700 border-gray-600 text-gray-100'
                             : 'bg-white border-gray-200 text-gray-900'
@@ -270,7 +272,10 @@ export default function Settings() {
                   ) : (
                     <div className="flex items-center justify-between">
                       <div className={`flex items-center gap-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <FaIdBadge className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                         <span>{username || 'No username set'}</span>
                       </div>
                       <button
@@ -293,7 +298,7 @@ export default function Settings() {
                 </div>
 
                 {/* Japanese Level field */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     Japanese Level
                   </label>
@@ -305,11 +310,11 @@ export default function Settings() {
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           japaneseLevel === level
                             ? theme === 'dark'
-                              ? 'bg-green-500/10 text-green-400 border-2 border-green-500'
-                              : 'bg-green-50 text-green-600 border-2 border-green-500'
+                              ? 'bg-green-500/10 text-green-400 border border-green-500'
+                              : 'bg-green-50 text-green-600 border border-green-500'
                             : theme === 'dark'
-                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-transparent'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-transparent'
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent'
                         }`}
                       >
                         {level}
@@ -319,7 +324,7 @@ export default function Settings() {
                 </div>
 
                 {/* Self Introduction field */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     Self Introduction
                   </label>
@@ -329,7 +334,7 @@ export default function Settings() {
                         value={editedIntro}
                         onChange={(e) => setEditedIntro(e.target.value)}
                         rows={4}
-                        className={`w-full px-3 py-2 rounded-lg border ${
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${
                           theme === 'dark'
                             ? 'bg-gray-700 border-gray-600 text-gray-100'
                             : 'bg-white border-gray-200 text-gray-900'
@@ -388,9 +393,9 @@ export default function Settings() {
                 </div>
 
                 {/* Duolingo Username field */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Duolingo Username
+                    Duolingo Profile
                   </label>
                   {isEditingDuolingo ? (
                     <div className="flex items-center gap-2">
@@ -398,7 +403,7 @@ export default function Settings() {
                         type="text"
                         value={editedDuolingoUsername}
                         onChange={(e) => setEditedDuolingoUsername(e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-lg border ${
+                        className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
                           theme === 'dark'
                             ? 'bg-gray-700 border-gray-600 text-gray-100'
                             : 'bg-white border-gray-200 text-gray-900'
@@ -441,7 +446,7 @@ export default function Settings() {
                           <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="#58CC02"/>
                           <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill="white"/>
                         </svg>
-                        <span>{duolingoUsername || 'No Duolingo username set'}</span>
+                        <span>{duolingoUsername || 'No Duolingo profile linked'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {duolingoUsername && (
@@ -455,7 +460,7 @@ export default function Settings() {
                                 : 'text-gray-600 hover:bg-gray-100'
                             }`}
                           >
-                            Try Profile URL
+                            View Profile
                           </a>
                         )}
                         <button
@@ -475,155 +480,162 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Theme Section */}
-            <div className={`p-6 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                Appearance
-              </h2>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => handleThemeChange('light')}
-                  className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
-                    theme === 'light'
-                      ? 'border-green-500 bg-green-50 text-green-700'
-                      : theme === 'dark'
-                      ? 'border-gray-700 hover:border-gray-600 text-gray-400'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <FaSun className="w-6 h-6" />
-                    <span className="text-sm font-medium">Light</span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleThemeChange('dark')}
-                  className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
-                    theme === 'dark'
-                      ? 'border-green-500 bg-green-500/10 text-green-400'
-                      : theme === 'dark'
-                      ? 'border-gray-700 hover:border-gray-600 text-gray-400'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <FaMoon className="w-6 h-6" />
-                    <span className="text-sm font-medium">Dark</span>
-                  </div>
-                </button>
+            {/* Appearance Section */}
+            <div className={`overflow-hidden rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <h2 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                  Appearance
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleThemeChange('light')}
+                    className={`flex-1 p-4 rounded-lg border transition-colors ${
+                      theme === 'light'
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : theme === 'dark'
+                        ? 'border-gray-700 hover:border-gray-600 text-gray-400'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <FaSun className="w-5 h-5" />
+                      <span className="text-sm font-medium">Light</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleThemeChange('dark')}
+                    className={`flex-1 p-4 rounded-lg border transition-colors ${
+                      theme === 'dark'
+                        ? 'border-green-500 bg-green-500/10 text-green-400'
+                        : theme === 'dark'
+                        ? 'border-gray-700 hover:border-gray-600 text-gray-400'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <FaMoon className="w-5 h-5" />
+                      <span className="text-sm font-medium">Dark</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Reset Reading History Section */}
-            <div className={`p-6 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                Reset Reading History
-              </h2>
-              <div className="space-y-4">
-                <div className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <p className="text-sm">This will remove all your finished articles history. This action cannot be undone.</p>
-                </div>
-                <button
-                  onClick={async () => {
-                    // First confirmation
-                    if (window.confirm('Warning: You are about to delete all your reading history.\n\nThis includes:\n- All articles marked as finished\n- Your reading progress tracking\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
-                      // Second confirmation with typing
-                      const confirmText = 'reset reading history';
-                      const userInput = window.prompt(`To confirm this irreversible action, please type "${confirmText}" below:`);
-                      
-                      if (userInput === confirmText) {
-                        try {
-                          const { error } = await supabase
-                            .from('finished_articles')
-                            .delete()
-                            .eq('user_id', user.id);
+            {/* Data Management Section */}
+            <div className={`overflow-hidden rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <h2 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                  Data Management
+                </h2>
+              </div>
+              <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700/10' : 'divide-gray-100/50'}`}>
+                {/* Reset Reading History */}
+                <div className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                        Reset Reading History
+                      </h3>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Remove all your finished articles history. This action cannot be undone.
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (window.confirm('Warning: You are about to delete all your reading history.\n\nThis includes:\n- All articles marked as finished\n- Your reading progress tracking\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
+                          const confirmText = 'reset reading history';
+                          const userInput = window.prompt(`To confirm this irreversible action, please type "${confirmText}" below:`);
                           
-                          if (error) throw error;
-                          
-                          // Show success message
-                          setShowSuccess(true);
-                          setTimeout(() => {
-                            setShowSuccess(false);
-                            window.location.reload();
-                          }, 1000);
-                        } catch (error) {
-                          console.error('Error resetting reading history:', error);
-                          setError('Failed to reset reading history');
-                          setTimeout(() => setError(''), 3000);
+                          if (userInput === confirmText) {
+                            try {
+                              const { error } = await supabase
+                                .from('finished_articles')
+                                .delete()
+                                .eq('user_id', user.id);
+                              
+                              if (error) throw error;
+                              
+                              setShowSuccess(true);
+                              setTimeout(() => {
+                                setShowSuccess(false);
+                                window.location.reload();
+                              }, 1000);
+                            } catch (error) {
+                              console.error('Error resetting reading history:', error);
+                              setError('Failed to reset reading history');
+                              setTimeout(() => setError(''), 3000);
+                            }
+                          } else if (userInput !== null) {
+                            setError('Text did not match. Reset cancelled.');
+                            setTimeout(() => setError(''), 3000);
+                          }
                         }
-                      } else if (userInput !== null) {
-                        setError('Text did not match. Reset cancelled.');
-                        setTimeout(() => setError(''), 3000);
-                      }
-                    }
-                  }}
-                  className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                      : 'bg-red-50 text-red-600 hover:bg-red-100'
-                  }`}
-                >
-                  Reset Reading History
-                </button>
-                {error && (
-                  <p className={`text-sm ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                      }}
+                      className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                          : 'bg-red-50 text-red-600 hover:bg-red-100'
+                      }`}
+                    >
+                      Reset Reading History
+                    </button>
+                  </div>
+                </div>
                     {error}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Reset Saved Articles Section */}
-            <div className={`p-6 rounded-xl shadow-sm mt-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                Reset Saved Articles
-              </h2>
-              <div className="space-y-4">
-                <div className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <p className="text-sm">This will remove all your saved articles. This action cannot be undone.</p>
-                </div>
-                <button
-                  onClick={async () => {
-                    // First confirmation
-                    if (window.confirm('Warning: You are about to delete all your saved articles.\n\nThis includes:\n- All articles you have saved for later\n- Your bookmarked articles\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
-                      // Second confirmation with typing
-                      const confirmText = 'reset saved articles';
-                      const userInput = window.prompt(`To confirm this irreversible action, please type "${confirmText}" below:`);
-                      
-                      if (userInput === confirmText) {
-                        try {
-                          const { error } = await supabase
-                            .from('saved_articles')
-                            .delete()
-                            .eq('user_id', user.id);
+                {/* Reset Saved Articles */}
+                <div className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                        Reset Saved Articles
+                      </h3>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Remove all your saved articles. This action cannot be undone.
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (window.confirm('Warning: You are about to delete all your saved articles.\n\nThis includes:\n- All articles you have saved for later\n- Your bookmarked articles\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
+                          const confirmText = 'reset saved articles';
+                          const userInput = window.prompt(`To confirm this irreversible action, please type "${confirmText}" below:`);
                           
-                          if (error) throw error;
-                          
-                          // Show success message
-                          setShowSuccess(true);
-                          setTimeout(() => {
-                            setShowSuccess(false);
-                            window.location.reload();
-                          }, 1000);
-                        } catch (error) {
-                          console.error('Error resetting saved articles:', error);
-                          setError('Failed to reset saved articles');
-                          setTimeout(() => setError(''), 3000);
+                          if (userInput === confirmText) {
+                            try {
+                              const { error } = await supabase
+                                .from('saved_articles')
+                                .delete()
+                                .eq('user_id', user.id);
+                              
+                              if (error) throw error;
+                              
+                              setShowSuccess(true);
+                              setTimeout(() => {
+                                setShowSuccess(false);
+                                window.location.reload();
+                              }, 1000);
+                            } catch (error) {
+                              console.error('Error resetting saved articles:', error);
+                              setError('Failed to reset saved articles');
+                              setTimeout(() => setError(''), 3000);
+                            }
+                          } else if (userInput !== null) {
+                            setError('Text did not match. Reset cancelled.');
+                            setTimeout(() => setError(''), 3000);
+                          }
                         }
-                      } else if (userInput !== null) {
-                        setError('Text did not match. Reset cancelled.');
-                        setTimeout(() => setError(''), 3000);
-                      }
-                    }
-                  }}
-                  className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                      : 'bg-red-50 text-red-600 hover:bg-red-100'
-                  }`}
-                >
-                  Reset Saved Articles
-                </button>
+                      }}
+                      className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                          : 'bg-red-50 text-red-600 hover:bg-red-100'
+                      }`}
+                    >
+                      Reset Saved Articles
+                    </button>
+                  </div>
+                </div>
                 {error && (
                   <p className={`text-sm ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                     {error}
