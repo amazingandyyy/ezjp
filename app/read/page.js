@@ -12,16 +12,15 @@ import {
   FaSun,
   FaMoon,
   FaBook,
-  FaRedo,
-  FaUserCircle,
-  FaGoogle,
-  FaSpinner,
   FaHeart,
   FaRegHeart,
   FaExternalLinkAlt
 } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
+
+// Add import for Navbar
+import Navbar from '../components/Navbar';
 
 // Add this helper function at the top level
 const isBrowser = typeof window !== 'undefined';
@@ -1652,60 +1651,19 @@ function NewsReaderContent() {
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
-      {/* Overlay */}
-      <div className={overlayClasses} onClick={() => !isLargeScreen && setShowSidebar(false)} />
+      {/* Add Navbar */}
+      <Navbar 
+        showSidebar={showSidebar}
+        onSidebarToggle={setShowSidebar}
+        theme={preferenceState.theme}
+      />
 
-      {/* Menu button - top left */}
-      <div className="fixed top-4 left-4 z-50 flex gap-2">
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center 
-            transition-colors duration-150
-            ${preferenceState.theme === 'dark'
-              ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
-              : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
-            }`}
-          title={showSidebar ? "Hide News List" : "Show News List"}
-        >
-          <svg 
-            className={`w-5 h-5 ${preferenceState.theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M4 6h16M4 12h16M4 18h16" 
-            />
-          </svg>
-        </button>
-
-        <button
-          onClick={() => router.push('/')}
-          className={`p-3 rounded-lg shadow-lg border flex items-center justify-center 
-            transition-colors duration-150
-            ${preferenceState.theme === 'dark'
-              ? 'bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm'
-              : '[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm'
-            }`}
-          title="Back to News Explorer"
-        >
-          <FaBook className={`w-5 h-5 ${preferenceState.theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-        </button>
-      </div>
-
-      {/* Settings and Profile buttons - top right */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
-        {/* Settings Button */}
+      {/* Settings button and dropdown - bottom right */}
+      <div className="fixed bottom-4 right-4 z-50">
         <div ref={settingsRef}>
           <button
-            onClick={() => {
-              setShowSettings(!showSettings);
-              setShowProfile(false);
-            }}
-            className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
+            onClick={() => setShowSettings(!showSettings)}
+            className={`group relative p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
               preferenceState.theme === "dark"
                 ? showSettings
                   ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
@@ -1714,17 +1672,25 @@ function NewsReaderContent() {
                   ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
                   : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
             }`}
-            title="Settings"
+            title="Article Reader Preference"
           >
             <FaCog className={`w-5 h-5 ${
               preferenceState.theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
             }`} />
+            {/* Tooltip */}
+            <div className={`absolute bottom-full right-0 mb-2 px-2 py-1 text-sm rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${
+              preferenceState.theme === "dark"
+                ? "bg-gray-800 text-gray-100"
+                : "bg-white text-gray-600"
+            }`}>
+              Article Reader Preference
+            </div>
           </button>
 
           {/* Settings panel */}
           {showSettings && (
             <div 
-              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
+              className={`absolute bottom-full right-0 mb-2 p-4 rounded-lg shadow-lg border w-72
               ${preferenceState.theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-100"
                 : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
@@ -1771,7 +1737,6 @@ function NewsReaderContent() {
                     <LoadingIndicator loading={updatingPreferences.preferred_speed} theme={preferenceState.theme} />
                   </label>
                   <select
-                    key={preferenceState.preferred_speed}
                     value={preferenceState.preferred_speed}
                     onChange={(e) => handleSpeedChange(e.target.value)}
                     disabled={updatingPreferences.preferred_speed}
@@ -1908,89 +1873,10 @@ function NewsReaderContent() {
             </div>
           )}
         </div>
-
-        {/* Profile Button */}
-        <div ref={profileRef}>
-          <button
-            onClick={() => {
-              if (!user) {
-                signInWithGoogle();
-              } else {
-                setShowProfile(!showProfile);
-                setShowSettings(false);
-              }
-            }}
-            className={`p-3 rounded-lg shadow-lg border flex items-center justify-center transition-colors duration-150 ${
-              preferenceState.theme === "dark"
-                ? showProfile
-                  ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
-                  : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
-                : showProfile
-                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-            }`}
-            title={user ? "Profile" : "Sign In"}
-          >
-            <FaUserCircle className={`w-5 h-5 ${
-              preferenceState.theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
-            }`} />
-          </button>
-
-          {/* Profile panel - only shown when user is logged in and panel is open */}
-          {user && showProfile && (
-            <div 
-              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
-              ${preferenceState.theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
-              }`}
-            >
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <p className={`text-sm ${preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                    Signed in as
-                  </p>
-                  <p className={`font-medium ${preferenceState.theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"}`}>
-                    {profile?.username || user.email}
-                  </p>
-                  <button
-                    onClick={() => router.push(`/user/${encodeURIComponent(profile?.username || user.email)}`)}
-                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
-                      preferenceState.theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                    }`}
-                  >
-                    <FaUserCircle className="w-4 h-4" />
-                    My Profile
-                  </button>
-                  <button
-                    onClick={() => router.push('/saved')}
-                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
-                      preferenceState.theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                    }`}
-                  >
-                    <FaHeart className="w-4 h-4" />
-                    Saved News
-                  </button>
-                  <button
-                    onClick={signOut}
-                    className={`w-full px-3 py-1.5 rounded text-sm ${
-                      preferenceState.theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                    }`}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
+
+      {/* Overlay */}
+      <div className={overlayClasses} onClick={() => !isLargeScreen && setShowSidebar(false)} />
 
       <div className={mainWrapperClasses}>
         {/* Sidebar */}
