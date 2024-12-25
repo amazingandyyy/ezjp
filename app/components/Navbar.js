@@ -121,51 +121,73 @@ export default function Navbar({
           {/* Profile panel - only shown when user is logged in and panel is open */}
           {user && showProfile && (
             <div
-              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-lg border w-72
+              className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-xl border w-72
               ${theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
+                ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-sm"
+                : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-sm"
               }`}
             >
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                    Signed in as
-                  </p>
-                  <p className={`font-medium ${theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"}`}>
-                    {profile?.username || user.email}
-                  </p>
-                  <button
-                    onClick={() => router.push(`/user/${encodeURIComponent(profile?.username || user.email)}`)}
-                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
-                      theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              <div className="space-y-6">
+                {/* User info section */}
+                <div className="flex items-center gap-3 pb-4 border-b border-gray-200/10">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
+                    ${theme === "dark" 
+                      ? "bg-gray-700 text-gray-300" 
+                      : "bg-gray-100 text-gray-700"
                     }`}
                   >
+                    {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-medium truncate ${theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"}`}>
+                      {profile?.username || user.email}
+                    </p>
+                    <p className={`text-sm truncate ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+                      {profile?.username ? user.email : 'No username set'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Navigation section */}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => router.push(`/user/${encodeURIComponent(profile?.username || user.email)}`)}
+                    className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${theme === "dark"
+                        ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                        : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
+                  >
                     <FaUserCircle className="w-4 h-4" />
-                    My Profile
+                    <span>My Profile</span>
                   </button>
                   <button
                     onClick={() => router.push('/saved')}
-                    className={`w-full px-3 py-1.5 rounded text-sm flex items-center justify-center gap-2 ${
-                      theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${theme === "dark"
+                        ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                        : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
                   >
                     <FaHeart className="w-4 h-4" />
-                    Saved News
+                    <span>Saved News</span>
                   </button>
+                </div>
+
+                {/* Sign out section */}
+                <div className="pt-4 border-t border-gray-200/10">
                   <button
                     onClick={signOut}
-                    className={`w-full px-3 py-1.5 rounded text-sm ${
-                      theme === "dark"
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${theme === "dark"
+                        ? "hover:bg-red-500/10 text-red-400 hover:text-red-300"
+                        : "hover:bg-red-50 text-red-600 hover:text-red-700"
+                      }`}
                   >
-                    Sign Out
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               </div>

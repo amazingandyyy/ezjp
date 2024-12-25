@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FaHeart, FaBook, FaClock, FaEdit, FaCheck, FaTimes, FaUser, FaEgg } from 'react-icons/fa';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/AuthContext';
+import Navbar from '../../components/Navbar';
 
 // Import RubyText component and utility functions from read/page.js
 const RubyText = ({ part, preferenceState }) => {
@@ -419,34 +420,51 @@ export default function UserProfile() {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
+    <div
+      className={`min-h-screen ${
+        theme === "dark" ? "bg-[rgb(19,31,36)]" : "bg-gray-50"
+      }`}
+    >
+      {/* Add Navbar */}
+      <Navbar theme={theme} hideNewsListButton={true} />
       <div className="container mx-auto p-4 pt-16 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
-          <div className={`mb-8 ${
-            theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'
-          }`}>
+          <div
+            className={`mb-8 ${
+              theme === "dark" ? "bg-[rgb(19,31,36)]" : "bg-gray-50"
+            }`}
+          >
             <div className="flex items-center gap-6">
-              <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
-                theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-white text-gray-700'
-              }`}>
-                {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
+              <div
+                className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-gray-300"
+                    : "bg-white text-gray-700"
+                }`}
+              >
+                {profile?.username?.[0]?.toUpperCase() ||
+                  profile?.email?.[0]?.toUpperCase()}
               </div>
               <div className="flex-1">
                 {isEditingUsername && currentUser?.id === profile?.id ? (
                   <div className="space-y-2">
-                    <div className={`flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       <input
                         type="text"
                         value={newUsername}
                         onChange={(e) => setNewUsername(e.target.value)}
                         placeholder="Enter username"
                         className={`text-3xl font-bold px-2 py-0.5 rounded focus:outline-none ${
-                          theme === 'dark' 
-                            ? 'bg-gray-700/50 placeholder-gray-600 focus:bg-gray-700' 
-                            : 'bg-gray-100/50 placeholder-gray-400 focus:bg-gray-100'
+                          theme === "dark"
+                            ? "bg-gray-700/50 placeholder-gray-600 focus:bg-gray-700"
+                            : "bg-gray-100/50 placeholder-gray-400 focus:bg-gray-100"
                         }`}
                         disabled={isSaving}
                       />
@@ -454,9 +472,9 @@ export default function UserProfile() {
                         onClick={handleSaveUsername}
                         disabled={isSaving}
                         className={`p-1.5 rounded-lg transition-colors ${
-                          theme === 'dark'
-                            ? 'hover:bg-gray-700 text-green-400 hover:text-green-300'
-                            : 'hover:bg-gray-100 text-green-600 hover:text-green-700'
+                          theme === "dark"
+                            ? "hover:bg-gray-700 text-green-400 hover:text-green-300"
+                            : "hover:bg-gray-100 text-green-600 hover:text-green-700"
                         } disabled:opacity-50`}
                         title="Save username"
                       >
@@ -466,9 +484,9 @@ export default function UserProfile() {
                         onClick={() => setIsEditingUsername(false)}
                         disabled={isSaving}
                         className={`p-1.5 rounded-lg transition-colors ${
-                          theme === 'dark'
-                            ? 'hover:bg-gray-700 text-red-400 hover:text-red-300'
-                            : 'hover:bg-gray-100 text-red-600 hover:text-red-700'
+                          theme === "dark"
+                            ? "hover:bg-gray-700 text-red-400 hover:text-red-300"
+                            : "hover:bg-gray-100 text-red-600 hover:text-red-700"
                         } disabled:opacity-50`}
                         title="Cancel"
                       >
@@ -481,18 +499,22 @@ export default function UserProfile() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <h1 className={`text-3xl font-bold ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
-                      {profile?.username || 'Anonymous User'}
+                    <h1
+                      className={`text-3xl font-bold ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
+                      {profile?.username || "Anonymous User"}
                     </h1>
                     {currentUser?.id === profile?.id && (
                       <button
                         onClick={startEditingUsername}
                         className={`p-2 rounded-lg transition-colors ${
-                          theme === 'dark'
-                            ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                          theme === "dark"
+                            ? "text-gray-400 hover:text-gray-300 hover:bg-gray-700"
+                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                         }`}
                         title="Edit username"
                       >
@@ -501,70 +523,100 @@ export default function UserProfile() {
                     )}
                   </div>
                 )}
-                <p className={`mt-1 text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
+                <p
+                  className={`mt-1 text-sm ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Joined {new Date(profile?.created_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
 
             {/* Stats Section */}
-            <div className={`pt-8 ${
-              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-            }`}>
-              <div className={`p-6 rounded-xl shadow-sm ${
-                theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-              }`}>
+            <div
+              className={`pt-8 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-200"
+              }`}
+            >
+              <div
+                className={`p-6 rounded-xl shadow-sm ${
+                  theme === "dark" ? "bg-gray-800" : "bg-white"
+                }`}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div>
-                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
+                    <div
+                      className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       {stats.totalArticlesRead}
                     </div>
-                    <div className={`text-sm flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`text-sm flex items-center gap-2 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       <FaBook className="w-4 h-4" />
                       Articles Read
                     </div>
                   </div>
                   <div>
-                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
+                    <div
+                      className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       {formatDuration(stats.totalReadingTime)}
                     </div>
-                    <div className={`text-sm flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`text-sm flex items-center gap-2 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       <FaClock className="w-4 h-4" />
                       Total Reading Time
                     </div>
                   </div>
                   <div>
-                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
+                    <div
+                      className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       {stats.totalSavedArticles}
                     </div>
-                    <div className={`text-sm flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`text-sm flex items-center gap-2 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       <FaHeart className="w-4 h-4" />
                       Saved Articles
                     </div>
                   </div>
                   <div>
-                    <div className={`text-2xl sm:text-3xl font-bold mb-1 ${
-                      theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                    }`}>
+                    <div
+                      className={`text-2xl sm:text-3xl font-bold mb-1 ${
+                        theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       {stats.totalFinishedArticles}
                     </div>
-                    <div className={`text-sm flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`text-sm flex items-center gap-2 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       <FaCheck className="w-4 h-4" />
                       Finished Articles
                     </div>
@@ -577,40 +629,59 @@ export default function UserProfile() {
 
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-2xl font-bold mb-6 ${
-            theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-          }`}>
+          <h2
+            className={`text-2xl font-bold mb-6 ${
+              theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
+            }`}
+          >
             Activity
           </h2>
 
           <div className="relative">
             {/* Timeline line */}
-            <div className={`absolute left-0 top-0 bottom-0 w-px ${
-              theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-            }`} />
+            <div
+              className={`absolute left-0 top-0 bottom-0 w-px ${
+                theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            />
 
             <div className="space-y-6">
               {/* Activity items */}
               {getActivityItems().map((item, index) => (
-                <div key={`${item.type}-${index}`} className="relative flex gap-4">
+                <div
+                  key={`${item.type}-${index}`}
+                  className="relative flex gap-4"
+                >
                   {/* Timeline dot and date */}
                   <div className="relative">
-                    <div className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
-                      theme === 'dark' ? 'border-gray-800' : 'border-white'
-                    } ${item.type === 'saved' ? 'bg-red-500' : 'bg-green-500'}`} />
-                    <div className={`pl-4 text-sm whitespace-nowrap ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
+                    <div
+                      className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
+                        theme === "dark" ? "border-gray-800" : "border-white"
+                      } ${
+                        item.type === "saved" ? "bg-red-500" : "bg-green-500"
+                      }`}
+                    />
+                    <div
+                      className={`pl-4 text-sm whitespace-nowrap ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       {formatDate(item.date, item.type).map((text, i) => (
-                        <div key={i} className={i === 1 ? 'text-xs opacity-75 flex items-center gap-1' : ''}>
+                        <div
+                          key={i}
+                          className={
+                            i === 1
+                              ? "text-xs opacity-75 flex items-center gap-1"
+                              : ""
+                          }
+                        >
                           {text}
-                          {i === 1 && (
-                            item.type === 'saved' ? (
+                          {i === 1 &&
+                            (item.type === "saved" ? (
                               <FaHeart className="w-3 h-3 text-red-500" />
                             ) : (
                               <FaCheck className="w-3 h-3 text-green-500" />
-                            )
-                          )}
+                            ))}
                         </div>
                       ))}
                     </div>
@@ -618,7 +689,11 @@ export default function UserProfile() {
 
                   {/* Article content */}
                   <button
-                    onClick={() => router.push(`/read?source=${encodeURIComponent(item.data.url)}`)}
+                    onClick={() =>
+                      router.push(
+                        `/read?source=${encodeURIComponent(item.data.url)}`
+                      )
+                    }
                     className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70`}
                   >
                     <div className="flex gap-4">
@@ -629,7 +704,7 @@ export default function UserProfile() {
                             alt=""
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.target.parentElement.style.display = 'none';
+                              e.target.parentElement.style.display = "none";
                             }}
                           />
                         ) : (
@@ -639,64 +714,85 @@ export default function UserProfile() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className={`text-lg font-medium mb-2 text-left ${
-                          theme === 'dark' 
-                            ? 'text-gray-100' 
-                            : 'text-[rgb(19,31,36)]'
-                        }`}>
+                        <h3
+                          className={`text-lg font-medium mb-2 text-left ${
+                            theme === "dark"
+                              ? "text-gray-100"
+                              : "text-[rgb(19,31,36)]"
+                          }`}
+                        >
                           {(() => {
                             try {
-                              let title = item.data.article?.title || item.data.title;
-                              
+                              let title =
+                                item.data.article?.title || item.data.title;
+
                               // If title is a string that looks like JSON, try to parse it
-                              if (typeof title === 'string' && (title.startsWith('[') || title.startsWith('{'))) {
+                              if (
+                                typeof title === "string" &&
+                                (title.startsWith("[") || title.startsWith("{"))
+                              ) {
                                 try {
                                   title = JSON.parse(title);
                                 } catch (e) {
-                                  return title || 'Untitled Article';
+                                  return title || "Untitled Article";
                                 }
                               }
-                              
+
                               // Process title using processContent if it's an array
                               if (Array.isArray(title)) {
                                 return processContent(title).map((part, i) => {
-                                  if (part.type === 'ruby') {
+                                  if (part.type === "ruby") {
                                     return (
                                       <RubyText
                                         key={i}
                                         part={part}
-                                        preferenceState={{ show_furigana: true }}
+                                        preferenceState={{
+                                          show_furigana: true,
+                                        }}
                                       />
                                     );
                                   }
                                   return <span key={i}>{part.content}</span>;
                                 });
                               }
-                              
-                              return title || 'Untitled Article';
+
+                              return title || "Untitled Article";
                             } catch (e) {
-                              console.error('Error rendering title:', e);
-                              return 'Untitled Article';
+                              console.error("Error rendering title:", e);
+                              return "Untitled Article";
                             }
                           })()}
                         </h3>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                          <p className={`text-sm ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            {item.data.article?.publish_date 
-                              ? formatJapaneseDate(item.data.article.publish_date)
-                              : 'No date'
-                            }
+                          <p
+                            className={`text-sm ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {item.data.article?.publish_date
+                              ? formatJapaneseDate(
+                                  item.data.article.publish_date
+                                )
+                              : "No date"}
                           </p>
-                          {item.type === 'saved' && item.data.reading_time > 0 && (
-                            <div className={`flex items-center gap-2 text-sm ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}>
-                              <FaClock className="w-3.5 h-3.5" />
-                              <span>Read for {formatDuration(item.data.reading_time)}</span>
-                            </div>
-                          )}
+                          {item.type === "saved" &&
+                            item.data.reading_time > 0 && (
+                              <div
+                                className={`flex items-center gap-2 text-sm ${
+                                  theme === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                <FaClock className="w-3.5 h-3.5" />
+                                <span>
+                                  Read for{" "}
+                                  {formatDuration(item.data.reading_time)}
+                                </span>
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
@@ -707,28 +803,46 @@ export default function UserProfile() {
               {/* Joined timeline item */}
               <div className="relative flex gap-4">
                 <div className="relative">
-                  <div className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
-                    theme === 'dark' ? 'border-gray-800 bg-gray-600' : 'border-white bg-gray-400'
-                  }`} />
-                  <div className={`pl-4 text-sm whitespace-nowrap ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
+                  <div
+                    className={`absolute left-0 top-6 w-3 h-3 -ml-1.5 rounded-full border-2 ${
+                      theme === "dark"
+                        ? "border-gray-800 bg-gray-600"
+                        : "border-white bg-gray-400"
+                    }`}
+                  />
+                  <div
+                    className={`pl-4 text-sm whitespace-nowrap ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
                     {(() => {
                       const date = new Date(profile?.created_at);
                       return [
-                        date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                        }) + ' at ' + date.toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        }),
-                        '- joined Easy JP News as Reader'
+                        date.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year:
+                            date.getFullYear() !== new Date().getFullYear()
+                              ? "numeric"
+                              : undefined,
+                        }) +
+                          " at " +
+                          date.toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          }),
+                        "- joined Easy JP News as Reader",
                       ];
                     })().map((text, i) => (
-                      <div key={i} className={i === 1 ? 'text-xs opacity-75 flex items-center gap-1' : ''}>
+                      <div
+                        key={i}
+                        className={
+                          i === 1
+                            ? "text-xs opacity-75 flex items-center gap-1"
+                            : ""
+                        }
+                      >
                         {text}
                         {i === 1 && <FaEgg className="w-3 h-3" />}
                       </div>
@@ -739,14 +853,20 @@ export default function UserProfile() {
               </div>
 
               {savedNews.length === 0 && (
-                <div className={`text-center py-12 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  <FaHeart className={`w-12 h-12 mx-auto mb-4 ${
-                    theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
-                  }`} />
+                <div
+                  className={`text-center py-12 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  <FaHeart
+                    className={`w-12 h-12 mx-auto mb-4 ${
+                      theme === "dark" ? "text-gray-600" : "text-gray-400"
+                    }`}
+                  />
                   <p>No saved articles yet</p>
-                  <p className="text-sm mt-2">Articles you save will appear here</p>
+                  <p className="text-sm mt-2">
+                    Articles you save will appear here
+                  </p>
                 </div>
               )}
             </div>
