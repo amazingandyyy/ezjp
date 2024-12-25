@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { FaHeart, FaBook, FaClock, FaEdit, FaCheck, FaTimes, FaUser, FaEgg, FaFire } from 'react-icons/fa';
+import { FaHeart, FaBook, FaClock, FaEdit, FaCheck, FaTimes, FaUser, FaEgg, FaFire, FaShare, FaTwitter, FaWhatsapp, FaLinkedin, FaLink } from 'react-icons/fa';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/AuthContext';
 import Navbar from '../../components/Navbar';
@@ -95,13 +95,15 @@ const formatJapaneseDate = (dateStr) => {
 export default function UserProfile() {
   const params = useParams();
   const router = useRouter();
-  const { user: currentUser, updateProfile } = useAuth();
+  const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [savedNews, setSavedNews] = useState([]);
   const [finishedNews, setFinishedNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [theme, setTheme] = useState('light');
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef(null);
   const [stats, setStats] = useState({
     totalReadingTime: 0,
     totalArticlesRead: 0,
@@ -111,13 +113,7 @@ export default function UserProfile() {
     currentStreak: 0
   });
 
-  // Add new state for username editing
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [newUsername, setNewUsername] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Add getActivityItems function to handle the new table structure
+  // Add getActivityItems function to handle the timeline items
   const getActivityItems = () => {
     const items = [
       // Add saved articles
@@ -257,22 +253,22 @@ export default function UserProfile() {
         if (!isMounted) return;
 
         if (profileError) {
-          setError(profileError.message);
-          return;
-        }
-        if (!profiles) {
-          setError('User not found');
-          return;
+          console.error('Error fetching profile:', profileError);
+          // Don't set error, just use default profile
         }
 
-        setProfile(profiles);
-        setTheme(profiles.theme || 'light');
+        // If no profile found, create a default one
+        const defaultProfile = {
+          id: identifier,
+          username: identifier.includes('@') ? identifier.split('@')[0] : identifier,
+          email: identifier.includes('@') ? identifier : null,
+          created_at: new Date().toISOString(),
+          theme: 'light'
+        };
 
-        // If viewing by email and user has a username, redirect to username URL
-        if (identifier.includes('@') && profiles.username) {
-          router.replace(`/user/${profiles.username}`);
-          return;
-        }
+        const profileData = profiles || defaultProfile;
+        setProfile(profileData);
+        setTheme(profileData.theme || 'light');
 
         // Fetch user's saved news with article data
         const { data: saved, error: savedError } = await supabase
@@ -287,14 +283,14 @@ export default function UserProfile() {
               images
             )
           `)
-          .eq('user_id', profiles.id)
+          .eq('user_id', profileData.id)
           .order('created_at', { ascending: false });
 
         if (!isMounted) return;
 
         if (savedError) {
           console.error('Error fetching saved news:', savedError);
-          return;
+          // Don't return on error, continue with empty array
         }
 
         // Fetch user's finished articles with article data
@@ -310,13 +306,14 @@ export default function UserProfile() {
               images
             )
           `)
-          .eq('user_id', profiles.id)
+          .eq('user_id', profileData.id)
           .order('finished_at', { ascending: false });
 
         if (!isMounted) return;
 
         if (finishedArticlesError) {
           console.error('Error fetching finished articles:', finishedArticlesError);
+          // Don't return on error, continue with empty array
         }
 
         setSavedNews(saved || []);
@@ -326,23 +323,25 @@ export default function UserProfile() {
         const { data: readingStats, error: statsError } = await supabase
           .from('reading_stats')
           .select('total_reading_time, total_articles_read')
-          .eq('user_id', profiles.id)
+          .eq('user_id', profileData.id)
           .maybeSingle();
 
         if (!isMounted) return;
 
         if (statsError && statsError.code !== 'PGRST116') {
           console.error('Error fetching reading stats:', statsError);
+          // Don't return on error, continue with default stats
         }
 
         // Fetch finished articles count
         const { count: finishedCount, error: finishedError } = await supabase
           .from('finished_articles')
           .select('id', { count: 'exact' })
-          .eq('user_id', profiles.id);
+          .eq('user_id', profileData.id);
 
         if (finishedError) {
           console.error('Error fetching finished articles:', finishedError);
+          // Don't return on error, continue with zero count
         }
 
         setStats({
@@ -355,8 +354,8 @@ export default function UserProfile() {
         });
       } catch (error) {
         if (!isMounted) return;
-        console.error('Error fetching user profile:', error);
-        setError(error.message);
+        console.error('Error in profile loading:', error);
+        // Don't set error state, use default values instead
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -369,82 +368,52 @@ export default function UserProfile() {
     return () => {
       isMounted = false;
     };
-  }, [params.email, router]);
+  }, [params.email]);
 
-  // Add function to validate username
-  const validateUsername = (username) => {
-    if (!username) return 'Username is required';
-    if (username.length < 3) return 'Username must be at least 3 characters';
-    if (username.length > 20) return 'Username must be less than 20 characters';
-    if (!/^[a-zA-Z0-9_-]+$/.test(username)) return 'Username can only contain letters, numbers, underscores, and hyphens';
-    return '';
+  // Add click outside handler for share menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+        setShowShareMenu(false);
+      }
+    }
+
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showShareMenu]);
+
+  // Add share functions
+  const getShareUrl = () => {
+    return `${window.location.origin}/user/${profile?.username || profile?.email}`;
   };
 
-  // Add function to check username availability
-  const checkUsernameAvailability = async (username) => {
+  const copyToClipboard = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', username)
-        .neq('id', profile.id)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        // No data found means username is available
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error checking username availability:', error);
-      return false;
+      const url = getShareUrl();
+      const text = `Checkout my reading progress on #EZJP\n${url}`;
+      await navigator.clipboard.writeText(text);
+      setShowShareMenu(false);
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
-  // Add function to handle username save
-  const handleSaveUsername = async () => {
-    try {
-      setUsernameError('');
-      setIsSaving(true);
-
-      // Validate username
-      const validationError = validateUsername(newUsername);
-      if (validationError) {
-        setUsernameError(validationError);
-        return;
-      }
-
-      // Check availability
-      const isAvailable = await checkUsernameAvailability(newUsername);
-      if (!isAvailable) {
-        setUsernameError('Username is already taken');
-        return;
-      }
-
-      // Update profile
-      await updateProfile({
-        username: newUsername
-      });
-
-      // Update local state
-      setProfile(prev => ({ ...prev, username: newUsername }));
-      setIsEditingUsername(false);
-
-      // Redirect to new username URL
-      router.replace(`/user/${newUsername}`);
-    } catch (error) {
-      console.error('Error saving username:', error);
-      setUsernameError('Failed to save username');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Add function to start editing username
-  const startEditingUsername = () => {
-    setNewUsername(profile.username || '');
-    setUsernameError('');
-    setIsEditingUsername(true);
+  const shareToTwitter = () => {
+    const url = getShareUrl();
+    const isOwnProfile = currentUser?.id === profile?.id;
+    const text = isOwnProfile
+      ? `Check out my Japanese reading progress on EZJP! Currently on a ${stats.currentStreak}-day streak and have read ${stats.totalFinishedArticles} articles.\n\n${url}\n\n#EZJP #Japanese #LearnJapanese`
+      : `Check out ${profile?.username || 'this reader'}'s Japanese reading progress on EZJP! They've finished ${stats.totalFinishedArticles} articles with a ${stats.longestStreak}-day best streak.\n\n${url}\n\n#EZJP #Japanese #LearnJapanese`;
+    
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+      '_blank'
+    );
+    setShowShareMenu(false);
   };
 
   if (isLoading) {
@@ -513,214 +482,138 @@ export default function UserProfile() {
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        theme === "dark" ? "bg-[rgb(19,31,36)]" : "bg-gray-50"
-      }`}
-    >
-      {/* Add Navbar */}
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
       <Navbar theme={theme} hideNewsListButton={true} />
+      
       <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
-          <div
-            className={`mb-8 ${
-              theme === "dark" ? "bg-[rgb(19,31,36)]" : "bg-gray-50"
-            }`}
-          >
+          <div className={`mb-8 ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="flex flex-col items-center sm:items-start">
-                <div
-                  className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
-                    theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "bg-white text-gray-700"
-                  }`}
-                >
-                  {profile?.username?.[0]?.toUpperCase() ||
-                    profile?.email?.[0]?.toUpperCase()}
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
+                  theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-white text-gray-700'
+                }`}>
+                  {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
                 </div>
               </div>
               <div className="flex-1 text-center sm:text-left">
-                {isEditingUsername && currentUser?.id === profile?.id ? (
-                  <div className="space-y-2">
-                    <div
-                      className={`flex items-center gap-2 ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
-                      <input
-                        type="text"
-                        value={newUsername}
-                        onChange={(e) => setNewUsername(e.target.value)}
-                        placeholder="Enter username"
-                        className={`text-3xl font-bold px-2 py-0.5 rounded focus:outline-none ${
-                          theme === "dark"
-                            ? "bg-gray-700/50 placeholder-gray-600 focus:bg-gray-700"
-                            : "bg-gray-100/50 placeholder-gray-400 focus:bg-gray-100"
-                        }`}
-                        disabled={isSaving}
-                      />
+                <div className="flex items-center gap-3">
+                  <h1 className={`text-3xl font-bold ${
+                    theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
+                  }`}>
+                    {profile?.username || 'Anonymous User'}
+                  </h1>
+                  <div className="flex items-center gap-2">
+                    <div className="relative" ref={shareMenuRef}>
                       <button
-                        onClick={handleSaveUsername}
-                        disabled={isSaving}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          theme === "dark"
-                            ? "hover:bg-gray-700 text-green-400 hover:text-green-300"
-                            : "hover:bg-gray-100 text-green-600 hover:text-green-700"
-                        } disabled:opacity-50`}
-                        title="Save username"
-                      >
-                        <FaCheck className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setIsEditingUsername(false)}
-                        disabled={isSaving}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          theme === "dark"
-                            ? "hover:bg-gray-700 text-red-400 hover:text-red-300"
-                            : "hover:bg-gray-100 text-red-600 hover:text-red-700"
-                        } disabled:opacity-50`}
-                        title="Cancel"
-                      >
-                        <FaTimes className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {usernameError && (
-                      <p className="text-sm text-red-500">{usernameError}</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <h1
-                      className={`text-3xl font-bold ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
-                      {profile?.username || "Anonymous User"}
-                    </h1>
-                    {currentUser?.id === profile?.id && (
-                      <button
-                        onClick={startEditingUsername}
+                        onClick={() => setShowShareMenu(!showShareMenu)}
                         className={`p-2 rounded-lg transition-colors ${
-                          theme === "dark"
-                            ? "text-gray-400 hover:text-gray-300 hover:bg-gray-700"
-                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                          theme === 'dark'
+                            ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                         }`}
-                        title="Edit username"
+                        title="Share profile"
                       >
-                        <FaEdit className="w-4 h-4" />
+                        <FaShare className="w-4 h-4" />
                       </button>
-                    )}
+                      {showShareMenu && (
+                        <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-10 ${
+                          theme === 'dark'
+                            ? 'bg-gray-800 border border-gray-700'
+                            : 'bg-white border border-gray-200'
+                        }`}>
+                          <button
+                            onClick={copyToClipboard}
+                            className={`w-full px-4 py-2 text-sm flex items-center gap-3 transition-colors ${
+                              theme === 'dark'
+                                ? 'text-gray-300 hover:bg-gray-700'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            <FaLink className="w-4 h-4" />
+                            Copy Link
+                          </button>
+                          <button
+                            onClick={shareToTwitter}
+                            className={`w-full px-4 py-2 text-sm flex items-center gap-3 transition-colors ${
+                              theme === 'dark'
+                                ? 'text-gray-300 hover:bg-gray-700'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              fill="currentColor"
+                            >
+                              <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
+                            </svg>
+                            Share on X
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-                <p
-                  className={`mt-1 text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
+                </div>
+                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   Joined {new Date(profile?.created_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
 
             {/* Stats Section */}
-            <div
-              className={`pt-6 sm:pt-8 ${
-                theme === "dark" ? "border-gray-700" : "border-gray-200"
-              }`}
-            >
-              <div
-                className={`p-4 sm:p-6 rounded-xl shadow-sm ${
-                  theme === "dark" ? "bg-gray-800" : "bg-white"
-                }`}
-              >
+            <div className={`pt-6 sm:pt-8 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className={`p-4 sm:p-6 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
                   <div>
-                    <div
-                      className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                      {stats.longestStreak} days
+                    </div>
+                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <FaFire className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
+                      Best Streak
+                    </div>
+                    <div className={`mt-2 text-xs flex items-center gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <div className={`px-2 py-0.5 rounded ${
+                        stats.currentStreak > 0
+                          ? theme === 'dark'
+                            ? 'bg-orange-500/20 text-orange-300'
+                            : 'bg-orange-100 text-orange-700'
+                          : theme === 'dark'
+                          ? 'bg-gray-700 text-gray-400'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {stats.currentStreak} days current
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {stats.totalFinishedArticles}
                     </div>
-                    <div
-                      className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <FaCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                       Finished Read
                     </div>
                   </div>
                   <div>
-                    <div
-                      className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {formatDuration(stats.totalReadingTime)}
                     </div>
-                    <div
-                      className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <FaClock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
                       Total Reading Time
                     </div>
                   </div>
                   <div>
-                    <div
-                      className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {stats.totalSavedArticles}
                     </div>
-                    <div
-                      className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <FaHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
                       Saved Articles
-                    </div>
-                  </div>
-                  <div>
-                    <div
-                      className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${
-                        theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
-                      {stats.longestStreak}
-                    </div>
-                    <div
-                      className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      <FaFire className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
-                      Best Streak
-                    </div>
-                    <div
-                      className={`mt-1 text-xs ${
-                        theme === "dark" ? "text-gray-500" : "text-gray-400"
-                      }`}
-                    >
-                      Current: {stats.currentStreak}
                     </div>
                   </div>
                 </div>
@@ -731,52 +624,30 @@ export default function UserProfile() {
 
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
-          <h2
-            className={`text-2xl font-bold mb-6 ${
-              theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
-            }`}
-          >
+          <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
             Activity
           </h2>
 
           <div className="relative">
             {/* Timeline line */}
-            <div
-              className={`absolute left-0 top-0 bottom-0 w-px ${
-                theme === "dark" ? "bg-gray-700" : "bg-gray-200"
-              }`}
-            />
+            <div className={`absolute left-0 top-0 bottom-0 w-px ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
 
             <div className="space-y-6">
               {/* Activity items */}
               {getActivityItems().map((item, index) => (
-                <div
-                  key={`${item.type}-${index}`}
-                  className="relative flex gap-4"
-                >
+                <div key={`${item.type}-${index}`} className="relative flex gap-4">
                   {/* Timeline dot and date */}
                   <div className="relative">
-                    <div
-                      className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${
-                        theme === "dark" ? "border-gray-800" : "border-white"
-                      } ${
-                        item.type === "saved" ? "bg-red-500" : "bg-green-500"
-                      }`}
-                    />
-                    <div
-                      className={`pl-4 text-sm whitespace-nowrap ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
+                    <div className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800' : 'border-white'} ${
+                      item.type === "saved" ? "bg-red-500" : "bg-green-500"
+                    }`} />
+                    <div className={`pl-4 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       {formatDate(item.date, item.type).map((text, i) => (
-                        <div
-                          key={i}
-                          className={
-                            i === 1
-                              ? "text-sm font-medium flex items-center gap-1.5"
-                              : "text-xs opacity-75"
-                          }
-                        >
+                        <div key={i} className={
+                          i === 1
+                            ? "text-sm font-medium flex items-center gap-1.5"
+                            : "text-xs opacity-75"
+                        }>
                           {text}
                           {i === 1 &&
                             (item.type === "saved" ? (
@@ -790,26 +661,18 @@ export default function UserProfile() {
                   </div>
 
                   {/* Article content */}
-                  <button
-                    onClick={() =>
-                      router.push(
-                        `/read?source=${encodeURIComponent(item.data.url)}`
-                      )
-                    }
-                    className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70 text-left`}
-                  >
+                  <button onClick={() =>
+                    router.push(
+                      `/read?source=${encodeURIComponent(item.data.url)}`
+                    )
+                  } className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70 text-left`}>
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="block w-full sm:w-32 h-32 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                           {item.data.article?.images?.[0] ? (
-                            <img
-                              src={item.data.article.images[0]}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.parentElement.style.display = "none";
-                              }}
-                            />
+                            <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
+                              e.target.parentElement.style.display = "none";
+                            }} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100">
                               <FaBook className="w-8 h-8 text-gray-400" />
@@ -817,13 +680,7 @@ export default function UserProfile() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3
-                            className={`font-medium mb-2 break-words line-clamp-2 ${
-                              theme === "dark"
-                                ? "text-gray-100"
-                                : "text-[rgb(19,31,36)]"
-                            }`}
-                          >
+                          <h3 className={`font-medium mb-2 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                             {(() => {
                               try {
                                 let title =
@@ -866,13 +723,7 @@ export default function UserProfile() {
                             })()}
                           </h3>
                           <div className="flex flex-wrap gap-2 text-sm">
-                            <p
-                              className={`${
-                                theme === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
+                            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                               {item.data.article?.publish_date
                                 ? formatJapaneseDate(
                                     item.data.article.publish_date
@@ -881,13 +732,7 @@ export default function UserProfile() {
                             </p>
                             {item.type === "saved" &&
                               item.data.reading_time > 0 && (
-                                <div
-                                  className={`flex items-center gap-2 ${
-                                    theme === "dark"
-                                      ? "text-gray-400"
-                                      : "text-gray-500"
-                                  }`}
-                                >
+                                <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                   <FaClock className="w-3.5 h-3.5 flex-shrink-0" />
                                   <span className="whitespace-nowrap">
                                     Read for{" "}
@@ -906,18 +751,8 @@ export default function UserProfile() {
               {/* Joined timeline item */}
               <div className="relative flex gap-4">
                 <div className="relative">
-                  <div
-                    className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${
-                      theme === 'dark'
-                        ? 'border-gray-800 bg-yellow-500'
-                        : 'border-white bg-yellow-500'
-                    }`}
-                  />
-                  <div
-                    className={`pl-4 text-sm whitespace-nowrap ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}
-                  >
+                  <div className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800 bg-yellow-500' : 'border-white bg-yellow-500'}`} />
+                  <div className={`pl-4 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {(() => {
                       const date = new Date(profile?.created_at);
                       return [
@@ -935,10 +770,7 @@ export default function UserProfile() {
                         'joined EZJP as Reader',
                       ];
                     })().map((text, i) => (
-                      <div
-                        key={i}
-                        className={i === 1 ? 'text-sm font-medium flex items-center gap-1.5' : 'text-xs opacity-75'}
-                      >
+                      <div key={i} className={i === 1 ? 'text-sm font-medium flex items-center gap-1.5' : 'text-xs opacity-75'}>
                         {text}
                         {i === 1 && (
                           <FaEgg className="w-3.5 h-3.5 text-yellow-500" />
@@ -951,16 +783,8 @@ export default function UserProfile() {
               </div>
 
               {savedNews.length === 0 && (
-                <div
-                  className={`text-center py-12 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  <FaHeart
-                    className={`w-12 h-12 mx-auto mb-4 ${
-                      theme === "dark" ? "text-gray-600" : "text-gray-400"
-                    }`}
-                  />
+                <div className={`text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <FaHeart className={`w-12 h-12 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
                   <p>No saved articles yet</p>
                   <p className="text-sm mt-2">
                     Articles you save will appear here

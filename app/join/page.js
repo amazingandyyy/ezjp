@@ -22,7 +22,10 @@ export default function JoinPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           {/* Logo and Hero Section */}
           <div className="text-center mb-16">
-            <div className="flex justify-center items-center mb-6">
+            <div 
+              onClick={() => router.push('/')}
+              className="flex justify-center items-center mb-6 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
+            >
               <span className="text-4xl font-extrabold flex items-center">
                 EZ
                 <FaBook className="px-2 w-12 h-12 text-green-600 dark:text-green-500" />
@@ -63,7 +66,7 @@ export default function JoinPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Level Up with News
+                    Level Up with EZJP News
                   </h3>
                   <p className="mt-2 text-gray-500 dark:text-gray-400">
                     Connect with Japanese culture through real news. Expose yourself to authentic
@@ -89,7 +92,7 @@ export default function JoinPage() {
           {/* Benefits Section */}
           <div className="mb-16">
             <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
-              With an Account, You Can
+              Why having an account
             </h2>
             <div className="grid grid-cols-1 gap-6">
               {/* Benefits cards... */}
