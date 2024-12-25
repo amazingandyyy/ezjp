@@ -5,6 +5,41 @@ import { FaHeart, FaBook, FaClock, FaEdit, FaCheck, FaTimes, FaUser, FaEgg } fro
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/AuthContext';
 
+// Import RubyText component and utility functions from read/page.js
+const RubyText = ({ part, preferenceState }) => {
+  if (!part || part.type !== 'ruby' || !part.kanji || !part.reading) {
+    return null;
+  }
+  return (
+    <ruby className="group">
+      {part.kanji}
+      <rt className={`${preferenceState?.show_furigana ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+        {part.reading}
+      </rt>
+    </ruby>
+  );
+};
+
+// Import processContent utility from read/page.js
+const processContent = (content) => {
+  if (!Array.isArray(content)) return [];
+  return content.map((part, index) => {
+    if (part?.type === 'ruby') {
+      return {
+        type: 'ruby',
+        kanji: part.kanji,
+        reading: part.reading
+      };
+    } else if (part?.type === 'text') {
+      return {
+        type: 'text',
+        content: part.content
+      };
+    }
+    return null;
+  }).filter(Boolean);
+};
+
 // Helper function to format time duration
 const formatDuration = (minutes) => {
   if (minutes < 60) return `${Math.round(minutes)} minutes`;
@@ -45,6 +80,17 @@ const formatDate = (dateString, type = 'finished') => {
   }
 };
 
+// Import formatJapaneseDate from read/page.js
+const formatJapaneseDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}時${String(date.getMinutes()).padStart(2, '0')}分`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 export default function UserProfile() {
   const params = useParams();
   const router = useRouter();
@@ -67,6 +113,34 @@ export default function UserProfile() {
   const [newUsername, setNewUsername] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Add getActivityItems function to handle the new table structure
+  const getActivityItems = () => {
+    const items = [
+      // Add saved articles
+      ...(savedNews || []).map(item => ({
+        type: 'saved',
+        date: item.created_at,
+        data: {
+          url: item.article?.url || '',
+          article: item.article,
+          reading_time: item.reading_time
+        }
+      })),
+      // Add finished articles
+      ...(finishedNews || []).map(item => ({
+        type: 'finished',
+        date: item.finished_at,
+        data: {
+          url: item.article?.url || '',
+          article: item.article
+        }
+      }))
+    ];
+
+    // Sort all items by date, most recent first
+    return items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -108,10 +182,19 @@ export default function UserProfile() {
           return;
         }
 
-        // Fetch user's saved news
+        // Fetch user's saved news with article data
         const { data: saved, error: savedError } = await supabase
           .from('saved_articles')
-          .select('*')
+          .select(`
+            *,
+            article:articles (
+              id,
+              url,
+              title,
+              publish_date,
+              images
+            )
+          `)
           .eq('user_id', profiles.id)
           .order('created_at', { ascending: false });
 
@@ -122,10 +205,19 @@ export default function UserProfile() {
           return;
         }
 
-        // Fetch user's finished articles
+        // Fetch user's finished articles with article data
         const { data: finished, error: finishedArticlesError } = await supabase
           .from('finished_articles')
-          .select('*')
+          .select(`
+            *,
+            article:articles (
+              id,
+              url,
+              title,
+              publish_date,
+              images
+            )
+          `)
           .eq('user_id', profiles.id)
           .order('finished_at', { ascending: false });
 
@@ -261,27 +353,6 @@ export default function UserProfile() {
     setIsEditingUsername(true);
   };
 
-  // Add helper function to format activity items
-  const getActivityItems = () => {
-    const items = [
-      // Add saved articles
-      ...(savedNews || []).map(article => ({
-        type: 'saved',
-        date: article.created_at,
-        data: article
-      })),
-      // Add finished articles
-      ...(finishedNews || []).map(article => ({
-        type: 'finished',
-        date: article.finished_at,
-        data: article
-      }))
-    ];
-
-    // Sort all items by date, most recent first
-    return items.sort((a, b) => new Date(b.date) - new Date(a.date));
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -300,15 +371,6 @@ export default function UserProfile() {
       </div>
     );
   }
-
-  const RubyText = ({ kanji, reading, showReading = true }) => (
-    <ruby className="group">
-      {kanji}
-      <rt className={`${showReading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-        {reading}
-      </rt>
-    </ruby>
-  );
 
   // Add processForDisplay function
   const processForDisplay = (sentence) => {
@@ -344,8 +406,8 @@ export default function UserProfile() {
           return (
             <RubyText
               key={i}
-              kanji={part.kanji}
-              reading={part.reading}
+              part={part}
+              preferenceState={{ show_furigana: true }}
             />
           );
         } else {
@@ -560,18 +622,22 @@ export default function UserProfile() {
                     className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70`}
                   >
                     <div className="flex gap-4">
-                      {item.type === 'saved' && item.data.image && (
-                        <div className="hidden sm:block w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <div className="hidden sm:block w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                        {item.data.article?.images?.[0] ? (
                           <img
-                            src={item.data.image}
+                            src={item.data.article.images[0]}
                             alt=""
-                            className="object-cover w-full h-full"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.target.style.display = 'none';
+                              e.target.parentElement.style.display = 'none';
                             }}
                           />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                            <FaBook className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className={`text-lg font-medium mb-2 text-left ${
                           theme === 'dark' 
@@ -580,45 +646,58 @@ export default function UserProfile() {
                         }`}>
                           {(() => {
                             try {
-                              const parsedTitle = typeof item.data.title === 'string' 
-                                ? JSON.parse(item.data.title)
-                                : item.data.title;
+                              let title = item.data.article?.title || item.data.title;
                               
-                              return Array.isArray(parsedTitle)
-                                ? processForDisplay(parsedTitle).map((part, i) => {
-                                    if (part.type === "ruby") {
-                                      return (
-                                        <RubyText
-                                          key={i}
-                                          kanji={part.kanji}
-                                          reading={part.reading}
-                                          showReading={true}
-                                        />
-                                      );
-                                    }
-                                    return <span key={i}>{part.content}</span>;
-                                  })
-                                : parsedTitle || 'Untitled Article';
+                              // If title is a string that looks like JSON, try to parse it
+                              if (typeof title === 'string' && (title.startsWith('[') || title.startsWith('{'))) {
+                                try {
+                                  title = JSON.parse(title);
+                                } catch (e) {
+                                  return title || 'Untitled Article';
+                                }
+                              }
+                              
+                              // Process title using processContent if it's an array
+                              if (Array.isArray(title)) {
+                                return processContent(title).map((part, i) => {
+                                  if (part.type === 'ruby') {
+                                    return (
+                                      <RubyText
+                                        key={i}
+                                        part={part}
+                                        preferenceState={{ show_furigana: true }}
+                                      />
+                                    );
+                                  }
+                                  return <span key={i}>{part.content}</span>;
+                                });
+                              }
+                              
+                              return title || 'Untitled Article';
                             } catch (e) {
-                              return item.data.title || 'Untitled Article';
+                              console.error('Error rendering title:', e);
+                              return 'Untitled Article';
                             }
                           })()}
                         </h3>
-                        {item.type === 'saved' && (
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                            <p className={`text-sm ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                            }`}>{item.data.date}</p>
-                            {item.data.reading_time > 0 && (
-                              <div className={`flex items-center gap-2 text-sm ${
-                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                              }`}>
-                                <FaClock className="w-3.5 h-3.5" />
-                                <span>Read for {formatDuration(item.data.reading_time)}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                          <p className={`text-sm ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
+                            {item.data.article?.publish_date 
+                              ? formatJapaneseDate(item.data.article.publish_date)
+                              : 'No date'
+                            }
+                          </p>
+                          {item.type === 'saved' && item.data.reading_time > 0 && (
+                            <div className={`flex items-center gap-2 text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                              <FaClock className="w-3.5 h-3.5" />
+                              <span>Read for {formatDuration(item.data.reading_time)}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </button>

@@ -1411,14 +1411,50 @@ function NewsReaderContent() {
           .eq('url', url);
         setIsFinished(false);
       } else {
-        // Add to finished articles
-        await supabase
-          .from('finished_articles')
-          .insert([{
-            user_id: user.id,
-            url,
-            finished_at: new Date().toISOString()
-          }]);
+        // First get or create the article record
+        const { data: article, error: articleError } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('url', url)
+          .single();
+
+        if (articleError && articleError.code === 'PGRST116') {
+          // Article doesn't exist, create it
+          const { data: newArticle, error: createError } = await supabase
+            .from('articles')
+            .insert([{
+              url,
+              title: newsTitle,
+              publish_date: newsDate,
+              images: newsImages
+            }])
+            .select()
+            .single();
+
+          if (createError) throw createError;
+
+          // Add to finished articles with new article reference
+          await supabase
+            .from('finished_articles')
+            .insert([{
+              user_id: user.id,
+              url,
+              article_id: newArticle.id,
+              finished_at: new Date().toISOString()
+            }]);
+        } else if (articleError) {
+          throw articleError;
+        } else {
+          // Article exists, use its ID
+          await supabase
+            .from('finished_articles')
+            .insert([{
+              user_id: user.id,
+              url,
+              article_id: article.id,
+              finished_at: new Date().toISOString()
+            }]);
+        }
         setIsFinished(true);
       }
 
