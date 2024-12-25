@@ -155,9 +155,9 @@ export default function Download() {
           <div className={`text-center mb-16 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
             <div className="mb-8">
               <img
-                src="/images/logo.png"
+                src="/icons/ezjp-app.png"
                 alt="EZJP App"
-                className="w-32 h-32 mx-auto mb-6 bg-white rounded-[32px]"
+                className="w-24 h-24 mx-auto mb-6"
               />
               <h1 className="text-4xl font-bold mb-4">
                 Download EZJP

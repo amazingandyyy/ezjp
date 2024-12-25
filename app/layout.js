@@ -15,15 +15,15 @@ export const metadata = {
   authors: [{ name: 'EZJP' }],
   icons: {
     icon: [
-      { url: '/images/icon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/images/logo.png', sizes: '512x512', type: 'image/png' }
+      { url: '/icons/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/ezjp-app.png', sizes: '512x512', type: 'image/png' }
     ],
-    shortcut: '/images/icon.png',
+    shortcut: '/icons/favicon.png',
     apple: [
-      { url: '/images/logo.png', sizes: '512x512', type: 'image/png' }
+      { url: '/icons/ezjp-app.png', sizes: '512x512', type: 'image/png' }
     ],
     other: [
-      { rel: 'mask-icon', url: '/images/logo.png' }
+      { rel: 'mask-icon', url: '/icons/ezjp-app.png' }
     ]
   },
   manifest: '/manifest.json',
@@ -40,7 +40,7 @@ export const metadata = {
         alt: 'EZJP - Learn Japanese Through News',
       },
       {
-        url: '/images/logo.png',
+        url: '/icons/ezjp-app.png',
         width: 512,
         height: 512,
         alt: 'EZJP Logo',
@@ -53,7 +53,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'EZJP - Learn Japanese Through News',
     description: 'Improve your Japanese reading skills with AI-powered news articles. Practice with real Japanese content, get instant translations, and track your progress.',
-    images: ['/og-image.png', '/images/logo.png'],
+    images: ['/og-image.png', '/icons/ezjp-app.png'],
     creator: '@ezjpnews',
   },
   robots: {

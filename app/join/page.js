@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaGoogle, FaBook, FaNewspaper, FaLanguage, FaStar, FaBookmark, FaUserCircle, FaFire, FaUsers } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
+import Image from 'next/image';
 
 export default function JoinPage() {
   const router = useRouter();
@@ -26,18 +27,58 @@ export default function JoinPage() {
               onClick={() => router.push("/")}
               className="flex justify-center items-center mb-6 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
             >
-              <span className="text-4xl font-extrabold flex items-center">
-                EZ
-                <FaBook className="px-2 w-12 h-12 text-green-600 dark:text-green-500" />
-                JP
-              </span>
+              <div className="flex items-center gap-4">
+                <Image
+                  src="/icons/duolingo-app.svg"
+                  alt="Duolingo Logo"
+                  width={48}
+                  height={48}
+                />
+                <span className="text-3xl font-bold text-gray-600 dark:text-gray-400">+</span>
+                <span className="text-4xl font-extrabold flex items-center">
+                  EZ
+                  <Image
+                    src="/icons/ezjp-app.png"
+                    alt="EZJP Logo"
+                    width={48}
+                    height={48}
+                    className="mx-2"
+                  />
+                  JP
+                </span>
+              </div>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
-              The Best Way to Learn Japanese
+              Perfect Learning Combination
             </h1>
-            <p className="mt-3 text-xl text-gray-500 dark:text-gray-300">
-              Combine Duolingo with real Japanese news for the perfect learning
-              experience
+            <div className="mt-6 flex justify-center gap-8 items-center">
+              <div className="text-center">
+                <Image
+                  src="/icons/duolingo-app.svg"
+                  alt="Duolingo App"
+                  width={64}
+                  height={64}
+                  className="mx-auto mb-3"
+                />
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Duolingo</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Master the Basics</p>
+              </div>
+              <div className="text-2xl font-bold text-gray-400">+</div>
+              <div className="text-center">
+                <Image
+                  src="/icons/ezjp-app.png"
+                  alt="EZJP App"
+                  width={64}
+                  height={64}
+                  className="mx-auto mb-3"
+                />
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">EZJP News</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Real Japanese Content</p>
+              </div>
+            </div>
+            <p className="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Start with Duolingo to build your foundation, then enhance your learning with real Japanese news. 
+              This powerful combination helps you master both textbook and practical Japanese.
             </p>
           </div>
 
