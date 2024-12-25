@@ -1,2 +1,4 @@
-id,email,full_name,avatar_url,reading_level,preferred_voice,preferred_speed,show_furigana,font_size,theme,created_at,updated_at,username
-0e770af9-f03c-467f-9cfa-2ade6cfd5f0c,amazingandyyy@gmail.com,,,beginner,,0.8,false,x-large,dark,2024-12-25 00:06:34.084736+00,2024-12-25 00:07:59.137+00,
+id,email,full_name,avatar_url,reading_level,preferred_voice,preferred_speed,show_furigana,font_size,theme,created_at,updated_at,username,self_introduction,japanese_level,duolingo_username
+fc33da46-032b-426f-ad9b-dc53f80bfbc8,amazingandyyy@gmail.com,,,beginner,Microsoft Keita Online (Natural) - Japanese (Japan),0.8,true,x-large,dark,2024-12-25 00:54:58.700036+00,2024-12-25 18:21:23.837+00,amazingandyyy,"This is andy, just started Duolingo this year and hope to improve more. 2
+
+I think Japanese is very interesting and learning a new language is super fun.",N5,amazingandyyy

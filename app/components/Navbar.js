@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaBook, FaUserCircle, FaHeart } from 'react-icons/fa';
+import { FaBook, FaUserCircle, FaHeart, FaDownload } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 
 export default function Navbar({ 
@@ -13,6 +13,40 @@ export default function Navbar({
   const { user, profile, signInWithGoogle, signOut } = useAuth();
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  // Handle PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Handle install click
+  const handleInstallClick = async () => {
+    if (installPrompt) {
+      // Show the install prompt
+      installPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await installPrompt.userChoice;
+      // Clear the saved prompt since it can't be used again
+      setInstallPrompt(null);
+      // Optionally track the outcome
+      console.log(`User ${outcome} the installation`);
+    } else {
+      // Fallback for browsers that don't support install prompt
+      window.location.href = '/manifest.json';
+    }
+  };
 
   // Add click outside handler
   useEffect(() => {
@@ -221,6 +255,18 @@ export default function Navbar({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       <span>Settings</span>
+                    </button>
+                    <button
+                      onClick={() => router.push('/download')}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                        ${
+                          theme === "dark"
+                            ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                            : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                        }`}
+                    >
+                      <FaDownload className="w-4 h-4" />
+                      <span>Download App</span>
                     </button>
                   </div>
 
