@@ -239,7 +239,16 @@ export default function UserProfile() {
       try {
         setIsLoading(true);
         const identifier = decodeURIComponent(params.email);
-        let profileQuery = supabase.from('profiles').select('*');
+        let profileQuery = supabase.from('profiles').select(`
+          id,
+          username,
+          email,
+          created_at,
+          theme,
+          self_introduction,
+          japanese_level,
+          duolingo_username
+        `);
 
         // Check if the identifier is an email or username
         if (identifier.includes('@')) {
@@ -560,6 +569,55 @@ export default function UserProfile() {
                 <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   Joined {new Date(profile?.created_at).toLocaleDateString()}
                 </p>
+
+                {/* Japanese Level */}
+                {profile?.japanese_level && (
+                  <div className={`mt-3 inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                    theme === 'dark'
+                      ? 'bg-green-500/10 text-green-400'
+                      : 'bg-green-50 text-green-600'
+                  }`}>
+                    <span className="font-medium">JLPT {profile.japanese_level}</span>
+                  </div>
+                )}
+
+                {/* Duolingo Username */}
+                {profile?.duolingo_username && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <a
+                      href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
+                          : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z" fill="currentColor"/>
+                        <path d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                        <path d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                        <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="currentColor"/>
+                        <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                      </svg>
+                      <span className="font-medium">Duolingo Profile</span>
+                    </a>
+                  </div>
+                )}
+
+                {/* Self Introduction */}
+                {profile?.self_introduction && (
+                  <div className={`mt-4 p-4 rounded-lg ${
+                    theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-50'
+                  }`}>
+                    <p className={`text-sm whitespace-pre-wrap ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
+                      {profile.self_introduction}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
