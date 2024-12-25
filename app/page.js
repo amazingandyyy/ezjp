@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
 import { FaHeart, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../lib/AuthContext';
@@ -46,9 +46,27 @@ export default function NewsList() {
   const [loadingMore, setLoadingMore] = useState(false);
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
+  const pathname = usePathname();
 
   // Get theme from profile if available, otherwise from localStorage
   const [theme, setTheme] = useState('light');
+
+  // Load theme from localStorage or profile
+  useEffect(() => {
+    const updateTheme = () => {
+      if (profile) {
+        setTheme(profile.theme);
+      } else if (typeof window !== 'undefined') {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme && savedTheme !== 'yellow') {
+          setTheme(savedTheme);
+        }
+      }
+    };
+
+    // Update theme whenever we navigate back to this page
+    updateTheme();
+  }, [profile, pathname]); // Add pathname as dependency to update theme on navigation
 
   // Add intersection observer ref
   const observerRef = useRef();
@@ -62,19 +80,6 @@ export default function NewsList() {
     });
     if (node) observerRef.current.observe(node);
   }, [loadingMore, hasMore]);
-
-  useEffect(() => {
-    if (profile) {
-      // If user has a profile, use their saved theme
-      setTheme(profile.theme);
-    } else if (typeof window !== 'undefined') {
-      // Otherwise, use localStorage
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme && savedTheme !== 'yellow') {
-        setTheme(savedTheme);
-      }
-    }
-  }, [profile]);
 
   useEffect(() => {
     fetchNewsList();
@@ -161,14 +166,25 @@ export default function NewsList() {
     }
   }, [finishedUrls, newsList]);
 
+  // Add loadMoreNews function
+  const loadMoreNews = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchNewsList(nextPage, true);
+  }, [page, loadingMore, hasMore]);
+
   // Modify fetchNewsList to support pagination
   const fetchNewsList = async (pageNum = 1, append = false) => {
     try {
+      const pageSize = pageNum === 1 ? 50 : 12;
+      const offset = pageNum === 1 ? 0 : 50 + ((pageNum - 2) * 12);
+      
       const response = await axios.get("/api/fetch-news-list", {
         params: { 
-          page: pageNum,
-          offset: (pageNum - 1) * (pageNum === 1 ? 50 : 12), // First page loads 50, subsequent pages load 12
-          limit: pageNum === 1 ? 50 : 12 // First page loads 50, subsequent pages load 12
+          offset,
+          limit: pageSize
         }
       });
       if (response.data.success) {
@@ -197,15 +213,6 @@ export default function NewsList() {
       setLoadingMore(false);
     }
   };
-
-  // Add loadMoreNews function
-  const loadMoreNews = useCallback(() => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchNewsList(nextPage, true);
-  }, [page, loadingMore, hasMore]);
 
   const handleNewsClick = (originalLink) => {
     router.push(`/read?source=${encodeURIComponent(originalLink)}`);
@@ -298,22 +305,18 @@ export default function NewsList() {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {newsList
             .filter(news => !hideFinished || !finishedUrls.has(news.url))
             .map((news, index) => (
             <div
               key={index}
               onClick={() => handleNewsClick(news.url)}
-              className={`border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group ${
-                theme === "dark"
-                  ? "bg-[rgb(19,31,36)] border-gray-700 hover:bg-[rgb(29,41,46)]"
-                  : "bg-white border-gray-200 hover:bg-gray-50"
-              } ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
+              className={`transition-all cursor-pointer group ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
             >
               <div className="relative">
                 {news.image && (
-                  <div className="aspect-video relative overflow-hidden">
+                  <div className="aspect-video relative overflow-hidden rounded-lg">
                     <img
                       src={news.image}
                       alt={news.title}
@@ -346,7 +349,7 @@ export default function NewsList() {
                   )}
                 </div>
               </div>
-              <div className="p-4">
+              <div className="pt-3">
                 <h2
                   className={`text-xl font-semibold mb-2 ${
                     theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"

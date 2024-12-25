@@ -76,7 +76,7 @@ export default function Navbar({
 
           {/* Logo */}
           <div
-            onClick={() => router.push("/")}
+            onClick={() => window.location.href = '/'}
             className={`cursor-pointer flex items-center justify-center 
               letter-spacing-wide text-2xl hover:opacity-80 active:scale-95 transition-all
               ${
@@ -146,16 +146,16 @@ export default function Navbar({
             {/* Profile panel - only shown when user is logged in and panel is open */}
             {user && showProfile && (
               <div
-                className={`absolute top-full right-0 mt-2 p-4 rounded-lg shadow-xl border w-72
+                className={`absolute top-full right-4 mt-2 p-3 rounded-lg shadow-xl border w-72
                 ${
                   theme === "dark"
                     ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-sm"
                     : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-sm"
                 }`}
               >
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {/* User info section */}
-                  <div className="flex items-center gap-3 pb-4 border-b border-gray-200/10">
+                  <div className="flex items-center gap-3 pb-3 border-b border-gray-200/10">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${
@@ -188,7 +188,7 @@ export default function Navbar({
                   </div>
 
                   {/* Navigation section */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <button
                       onClick={() =>
                         router.push(
@@ -197,7 +197,7 @@ export default function Navbar({
                           )}`
                         )
                       }
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      className={`w-full px-3 py-2 rounded-lg text-sm flex items-center gap-3 transition-colors
                         ${
                           theme === "dark"
                             ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
@@ -210,10 +210,10 @@ export default function Navbar({
                   </div>
 
                   {/* Sign out section */}
-                  <div className="pt-4 border-t border-gray-200/10">
+                  <div className="pt-3 border-t border-gray-200/10">
                     <button
                       onClick={signOut}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      className={`w-full px-3 py-2 rounded-lg text-sm flex items-center gap-3 transition-colors
                         ${
                           theme === "dark"
                             ? "hover:bg-red-500/10 text-red-400 hover:text-red-300"

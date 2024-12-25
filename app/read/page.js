@@ -193,13 +193,14 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
           key={index}
           onClick={() => onNewsClick(article.url)}
           className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
-            ${theme === 'dark' 
-              ? article.url === sourceUrl
-                ? 'bg-gray-800'
-                : 'hover:bg-gray-800/70'
-              : article.url === sourceUrl
-                ? 'bg-gray-100'
-                : 'hover:bg-gray-50'
+            ${
+              theme === "dark"
+                ? article.url === sourceUrl
+                  ? "bg-gray-800"
+                  : "hover:bg-gray-800/70"
+                : article.url === sourceUrl
+                ? "bg-gray-100"
+                : "hover:bg-gray-50"
             }`}
         >
           <div className="flex-shrink-0">
@@ -210,21 +211,25 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
                   alt=""
                   className="object-cover w-full h-full"
                   onError={(e) => {
-                    e.target.style.display = 'none';
+                    e.target.style.display = "none";
                   }}
                 />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className={`font-medium mb-1 line-clamp-2 ${
-              theme === 'dark' ? 'text-gray-200' : 'text-[rgb(19,31,36)]'
-            }`}>
+            <h3
+              className={`font-medium mb-1 line-clamp-2 ${
+                theme === "dark" ? "text-gray-200" : "text-[rgb(19,31,36)]"
+              }`}
+            >
               {parseTitle(article.article?.title)}
             </h3>
-            <p className={`text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}>
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               {formatDate(article.article?.publish_date)}
             </p>
           </div>
@@ -1652,7 +1657,7 @@ function NewsReaderContent() {
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       {/* Add Navbar */}
-      <Navbar 
+      <Navbar
         showSidebar={showSidebar}
         onSidebarToggle={setShowSidebar}
         theme={preferenceState.theme}
@@ -1669,46 +1674,62 @@ function NewsReaderContent() {
                   ? "bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                   : "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700 backdrop-blur-sm"
                 : showSettings
-                  ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
-                  : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                ? "[color-scheme:light] bg-gray-50/95 border-gray-200 backdrop-blur-sm"
+                : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200 backdrop-blur-sm"
             }`}
             title="Article Reader Preference"
           >
-            <FaCog className={`w-5 h-5 ${
-              preferenceState.theme === "dark" ? "text-gray-300" : "[color-scheme:light] text-gray-600"
-            }`} />
+            <FaCog
+              className={`w-5 h-5 ${
+                preferenceState.theme === "dark"
+                  ? "text-gray-300"
+                  : "[color-scheme:light] text-gray-600"
+              }`}
+            />
             {/* Tooltip */}
-            <div className={`absolute bottom-full right-0 mb-2 px-2 py-1 text-sm rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${
-              preferenceState.theme === "dark"
-                ? "bg-gray-800 text-gray-100"
-                : "bg-white text-gray-600"
-            }`}>
+            <div
+              className={`absolute bottom-full right-0 mb-2 px-2 py-1 text-sm rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${
+                preferenceState.theme === "dark"
+                  ? "bg-gray-800 text-gray-100"
+                  : "bg-white text-gray-600"
+              }`}
+            >
               Article Reader Preference
             </div>
           </button>
 
           {/* Settings panel */}
           {showSettings && (
-            <div 
+            <div
               className={`absolute bottom-full right-0 mb-2 p-4 rounded-lg shadow-lg border w-72
-              ${preferenceState.theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-100"
-                : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
+              ${
+                preferenceState.theme === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100"
+                  : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
               }`}
             >
               <div className="space-y-4">
                 {/* Font size controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
                     Font Size
-                    <LoadingIndicator loading={updatingPreferences.font_size} theme={preferenceState.theme} />
+                    <LoadingIndicator
+                      loading={updatingPreferences.font_size}
+                      theme={preferenceState.theme}
+                    />
                   </label>
                   <div className="flex gap-1">
                     {[
                       { size: "medium", class: "text-lg" },
                       { size: "large", class: "text-xl" },
                       { size: "x-large", class: "text-2xl" },
-                      { size: "xx-large", class: "text-3xl" }
+                      { size: "xx-large", class: "text-3xl" },
                     ].map(({ size, class: sizeClass }) => (
                       <button
                         key={size}
@@ -1722,7 +1743,11 @@ function NewsReaderContent() {
                             : preferenceState.theme === "dark"
                             ? "bg-gray-700 text-gray-300"
                             : "[color-scheme:light] bg-gray-200 text-gray-600"
-                        } ${updatingPreferences.font_size ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } ${
+                          updatingPreferences.font_size
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
                       >
                         A
                       </button>
@@ -1732,9 +1757,18 @@ function NewsReaderContent() {
 
                 {/* Speed control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
                     Speed
-                    <LoadingIndicator loading={updatingPreferences.preferred_speed} theme={preferenceState.theme} />
+                    <LoadingIndicator
+                      loading={updatingPreferences.preferred_speed}
+                      theme={preferenceState.theme}
+                    />
                   </label>
                   <select
                     value={preferenceState.preferred_speed}
@@ -1744,7 +1778,11 @@ function NewsReaderContent() {
                       preferenceState.theme === "dark"
                         ? "bg-gray-800 border-gray-700 text-gray-100"
                         : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
-                    } ${updatingPreferences.preferred_speed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${
+                      updatingPreferences.preferred_speed
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     <option value={0.6}>Very Slow (0.6x)</option>
                     <option value={0.8}>Slow (0.8x)</option>
@@ -1755,9 +1793,18 @@ function NewsReaderContent() {
 
                 {/* Theme controls */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
                     Theme
-                    <LoadingIndicator loading={updatingPreferences.theme} theme={preferenceState.theme} />
+                    <LoadingIndicator
+                      loading={updatingPreferences.theme}
+                      theme={preferenceState.theme}
+                    />
                   </label>
                   <div className="flex gap-1">
                     {[
@@ -1777,7 +1824,11 @@ function NewsReaderContent() {
                             : preferenceState.theme === "dark"
                             ? "bg-gray-700 text-gray-300"
                             : "[color-scheme:light] bg-gray-200 text-gray-600"
-                        } ${updatingPreferences.theme ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } ${
+                          updatingPreferences.theme
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
                       >
                         {themeOption.icon}
                         <span className="text-sm">{themeOption.title}</span>
@@ -1788,9 +1839,18 @@ function NewsReaderContent() {
 
                 {/* Furigana control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
                     Furigana
-                    <LoadingIndicator loading={updatingPreferences.show_furigana} theme={preferenceState.theme} />
+                    <LoadingIndicator
+                      loading={updatingPreferences.show_furigana}
+                      theme={preferenceState.theme}
+                    />
                   </label>
                   <button
                     onClick={toggleFurigana}
@@ -1803,32 +1863,55 @@ function NewsReaderContent() {
                         : preferenceState.theme === "dark"
                         ? "bg-gray-700 text-gray-300"
                         : "[color-scheme:light] bg-gray-200 text-gray-600"
-                    } ${updatingPreferences.show_furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${
+                      updatingPreferences.show_furigana
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
-                    {preferenceState.show_furigana ? "Hide Furigana" : "Show Furigana"}
+                    {preferenceState.show_furigana
+                      ? "Hide Furigana"
+                      : "Show Furigana"}
                   </button>
-                  <span className={`text-xs block text-center ${
-                    preferenceState.theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
-                  }`}>
+                  <span
+                    className={`text-xs block text-center ${
+                      preferenceState.theme === "dark"
+                        ? "text-gray-500"
+                        : "[color-scheme:light] text-gray-500"
+                    }`}
+                  >
                     (Hover to show when hidden)
                   </span>
                 </div>
 
                 {/* Voice selection control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium flex items-center ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>
+                  <label
+                    className={`text-sm font-medium flex items-center ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
                     Voice
-                    <LoadingIndicator loading={updatingPreferences.preferred_voice} theme={preferenceState.theme} />
+                    <LoadingIndicator
+                      loading={updatingPreferences.preferred_voice}
+                      theme={preferenceState.theme}
+                    />
                   </label>
                   <select
-                    value={preferenceState.preferred_voice || ''}
+                    value={preferenceState.preferred_voice || ""}
                     onChange={(e) => handleVoiceChange(e.target.value)}
                     disabled={updatingPreferences.preferred_voice}
                     className={`w-full p-2 border rounded ${
                       preferenceState.theme === "dark"
                         ? "bg-gray-800 border-gray-700 text-gray-100"
                         : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
-                    } ${updatingPreferences.preferred_voice ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${
+                      updatingPreferences.preferred_voice
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     {availableVoices.map((voice) => (
                       <option key={voice.voiceURI} value={voice.voiceURI}>
@@ -1836,19 +1919,36 @@ function NewsReaderContent() {
                       </option>
                     ))}
                     {availableVoices.length === 0 && (
-                      <option value="" disabled>No Japanese voices available</option>
+                      <option value="" disabled>
+                        No Japanese voices available
+                      </option>
                     )}
                   </select>
                   {availableVoices.length === 0 && (
-                    <p className={`text-xs text-red-500 ${preferenceState.theme === "dark" ? "" : "[color-scheme:light]"}`}>
-                      No Japanese voices found. Please install Japanese language support in your system.
+                    <p
+                      className={`text-xs text-red-500 ${
+                        preferenceState.theme === "dark"
+                          ? ""
+                          : "[color-scheme:light]"
+                      }`}
+                    >
+                      No Japanese voices found. Please install Japanese language
+                      support in your system.
                     </p>
                   )}
                 </div>
 
                 {/* Image control */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium ${preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"}`}>Images</label>
+                  <label
+                    className={`text-sm font-medium ${
+                      preferenceState.theme === "dark"
+                        ? ""
+                        : "[color-scheme:light] text-[rgb(19,31,36)]"
+                    }`}
+                  >
+                    Images
+                  </label>
                   <button
                     onClick={() => setShowImages(!showImages)}
                     className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
@@ -1859,13 +1959,21 @@ function NewsReaderContent() {
                         : preferenceState.theme === "dark"
                         ? "bg-gray-700 text-gray-300"
                         : "[color-scheme:light] bg-gray-200 text-gray-600"
-                    } ${updatingPreferences.show_furigana ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${
+                      updatingPreferences.show_furigana
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     {showImages ? "Hide Images" : "Show Images"}
                   </button>
-                  <span className={`text-xs block text-center ${
-                    preferenceState.theme === "dark" ? "text-gray-500" : "[color-scheme:light] text-gray-500"
-                  }`}>
+                  <span
+                    className={`text-xs block text-center ${
+                      preferenceState.theme === "dark"
+                        ? "text-gray-500"
+                        : "[color-scheme:light] text-gray-500"
+                    }`}
+                  >
                     (Toggle article images)
                   </span>
                 </div>
@@ -1876,14 +1984,14 @@ function NewsReaderContent() {
       </div>
 
       {/* Overlay */}
-      <div className={overlayClasses} onClick={() => !isLargeScreen && setShowSidebar(false)} />
+      <div
+        className={overlayClasses}
+        onClick={() => !isLargeScreen && setShowSidebar(false)}
+      />
 
       <div className={mainWrapperClasses}>
         {/* Sidebar */}
-        <aside 
-          ref={sidebarRef}
-          className={sidebarClasses}
-        >
+        <aside ref={sidebarRef} className={sidebarClasses}>
           <div className="p-4">
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center">
@@ -1891,58 +1999,75 @@ function NewsReaderContent() {
                 <button
                   onClick={() => setShowSidebar(false)}
                   className={`p-2 rounded-full hover:bg-opacity-80 
-                    ${preferenceState.theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                    ${
+                      preferenceState.theme === "dark"
+                        ? "hover:bg-gray-800"
+                        : "hover:bg-gray-100"
+                    }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               {user && (
-                <div className={`flex gap-1 p-1 rounded-lg ${
-                  preferenceState.theme === 'dark' 
-                    ? 'bg-gray-800/50' 
-                    : 'bg-gray-100'
+                <div
+                  className={`flex gap-1 p-1 rounded-lg ${
+                    preferenceState.theme === "dark"
+                      ? "bg-gray-800/50"
+                      : "bg-gray-100"
                   }`}
                 >
                   <button
-                    onClick={() => setSidebarView('latest')}
+                    onClick={() => setSidebarView("latest")}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
-                      ${sidebarView === 'latest'
-                        ? preferenceState.theme === 'dark'
-                          ? 'bg-gray-700 text-white shadow-sm'
-                          : 'bg-white text-[rgb(19,31,36)] shadow-sm'
-                        : preferenceState.theme === 'dark'
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-500 hover:text-gray-700'
+                      ${
+                        sidebarView === "latest"
+                          ? preferenceState.theme === "dark"
+                            ? "bg-gray-700 text-white shadow-sm"
+                            : "bg-white text-[rgb(19,31,36)] shadow-sm"
+                          : preferenceState.theme === "dark"
+                          ? "text-gray-400 hover:text-gray-200"
+                          : "text-gray-500 hover:text-gray-700"
                       }`}
                   >
-                    <svg 
-                      className="w-3.5 h-3.5" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M13 10V3L4 14h7v7l9-11h-7z" 
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
                       />
                     </svg>
                     Latest
                   </button>
                   <button
-                    onClick={() => setSidebarView('saved')}
+                    onClick={() => setSidebarView("saved")}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
-                      ${sidebarView === 'saved'
-                        ? preferenceState.theme === 'dark'
-                          ? 'bg-gray-700 text-white shadow-sm'
-                          : 'bg-white text-[rgb(19,31,36)] shadow-sm'
-                        : preferenceState.theme === 'dark'
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-500 hover:text-gray-700'
+                      ${
+                        sidebarView === "saved"
+                          ? preferenceState.theme === "dark"
+                            ? "bg-gray-700 text-white shadow-sm"
+                            : "bg-white text-[rgb(19,31,36)] shadow-sm"
+                          : preferenceState.theme === "dark"
+                          ? "text-gray-400 hover:text-gray-200"
+                          : "text-gray-500 hover:text-gray-700"
                       }`}
                   >
                     <FaHeart className="w-3.5 h-3.5" />
@@ -1950,25 +2075,33 @@ function NewsReaderContent() {
                   </button>
                 </div>
               )}
-              
+
               <div className="space-y-4">
-                {sidebarView === 'latest' ? (
+                {sidebarView === "latest" ? (
                   recentNews?.length > 0 ? (
                     recentNews.map((article, index) => (
                       <button
                         key={index}
                         onClick={() => {
-                          router.push(`/read?source=${encodeURIComponent(article.url)}`);
+                          router.push(
+                            `/read?source=${encodeURIComponent(article.url)}`
+                          );
                           setShowSidebar(false);
                         }}
                         className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
-                          ${preferenceState.theme === 'dark' 
-                            ? article.url === sourceUrl
-                              ? 'bg-gray-800'
-                              : 'hover:bg-gray-800/70'
-                            : article.url === sourceUrl
-                              ? 'bg-gray-100'
-                              : 'hover:bg-gray-50'
+                        ${
+                          finishedUrls.has(article.url)
+                            ? "opacity-40 hover:opacity-100"
+                            : ""
+                        }
+                          ${
+                            preferenceState.theme === "dark"
+                              ? article.url === sourceUrl
+                                ? "bg-gray-800"
+                                : "hover:bg-gray-800/70"
+                              : article.url === sourceUrl
+                              ? "bg-gray-100"
+                              : "hover:bg-gray-50"
                           }`}
                       >
                         <div className="flex-shrink-0 relative">
@@ -1979,7 +2112,7 @@ function NewsReaderContent() {
                                 alt=""
                                 className="object-cover w-full h-full"
                                 onError={(e) => {
-                                  e.target.style.display = 'none';
+                                  e.target.style.display = "none";
                                 }}
                               />
                             </div>
@@ -1992,17 +2125,17 @@ function NewsReaderContent() {
                             )}
                             {finishedUrls.has(article.url) && (
                               <div className="bg-green-500 rounded-full p-1 shadow-lg">
-                                <svg 
+                                <svg
                                   className="w-3 h-3 text-white"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
                                   strokeWidth="2.5"
                                 >
-                                  <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    d="M5 13l4 4L19 7" 
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
                                   />
                                 </svg>
                               </div>
@@ -2010,20 +2143,38 @@ function NewsReaderContent() {
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-medium mb-1 line-clamp-2 ${
-                            preferenceState.theme === 'dark' ? 'text-gray-200' : 'text-[rgb(19,31,36)]'
-                          }`}>
-                            {Array.isArray(article.title) 
-                              ? article.title.map((part, i) => 
-                                  part.type === 'ruby' ? part.kanji : part.content
-                                ).join('')
+                          <h3
+                            className={`font-medium mb-1 line-clamp-2 ${
+                              preferenceState.theme === "dark"
+                                ? "text-gray-200"
+                                : "text-[rgb(19,31,36)]"
+                            }`}
+                          >
+                            {Array.isArray(article.title)
+                              ? article.title
+                                  .map((part, i) =>
+                                    part.type === "ruby"
+                                      ? part.kanji
+                                      : part.content
+                                  )
+                                  .join("")
                               : article.title}
                           </h3>
-                          <p className={`text-sm ${
-                            preferenceState.theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
+                          <p
+                            className={`text-sm ${
+                              preferenceState.theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }`}
+                          >
                             {Array.isArray(article.date)
-                              ? article.date.map(part => part.type === 'ruby' ? part.kanji : part.content).join('')
+                              ? article.date
+                                  .map((part) =>
+                                    part.type === "ruby"
+                                      ? part.kanji
+                                      : part.content
+                                  )
+                                  .join("")
                               : formatJapaneseDate(article.date)}
                           </p>
                         </div>
@@ -2035,31 +2186,42 @@ function NewsReaderContent() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-32">
-                      <svg className={`animate-spin h-6 w-6 mb-2 ${
-                        preferenceState.theme === 'dark' ? 'text-gray-400' : 'text-[rgb(19,31,36)]'
-                      }`} viewBox="0 0 24 24">
-                        <circle 
-                          className="opacity-25" 
-                          cx="12" 
-                          cy="12" 
-                          r="10" 
-                          stroke="currentColor" 
-                          strokeWidth="4" 
-                          fill="none" 
+                      <svg
+                        className={`animate-spin h-6 w-6 mb-2 ${
+                          preferenceState.theme === "dark"
+                            ? "text-gray-400"
+                            : "text-[rgb(19,31,36)]"
+                        }`}
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
                         />
-                        <path 
-                          className="opacity-75" 
-                          fill="currentColor" 
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         />
                       </svg>
-                      <span className={preferenceState.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
+                      <span
+                        className={
+                          preferenceState.theme === "dark"
+                            ? "text-gray-400"
+                            : "text-gray-500"
+                        }
+                      >
                         Loading news...
                       </span>
                     </div>
                   )
                 ) : (
-                  <SavedNewsList 
+                  <SavedNewsList
                     news={savedNews}
                     theme={preferenceState.theme}
                     sourceUrl={sourceUrl}
@@ -2077,16 +2239,18 @@ function NewsReaderContent() {
         {/* Main content */}
         <main className={mainContentClasses}>
           {newsContent && (
-            <div
-              className='mt-4 p-0 rounded relative'
-            >
+            <div className="mt-4 p-0 rounded relative">
               {/* Title section with padding for controls */}
               <div className="pt-6">
                 <div className="mb-6">
                   <div className="flex items-start justify-between gap-4 mb-2">
-                    <h2 className={`text-2xl font-bold ${
-                      preferenceState.theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
-                    }`}>
+                    <h2
+                      className={`text-2xl font-bold ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-100"
+                          : "text-[rgb(19,31,36)]"
+                      }`}
+                    >
                       {renderTitle(newsTitle)}
                     </h2>
                     <a
@@ -2094,19 +2258,26 @@ function NewsReaderContent() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
-                        ${preferenceState.theme === "dark"
-                          ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        ${
+                          preferenceState.theme === "dark"
+                            ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
-                      title={url ? new URL(url).hostname : 'Open original article'}
+                      title={
+                        url ? new URL(url).hostname : "Open original article"
+                      }
                     >
                       <FaExternalLinkAlt className="w-4 h-4" />
-                      <span className="text-sm font-medium hidden sm:inline">Original</span>
+                      <span className="text-sm font-medium hidden sm:inline">
+                        Original
+                      </span>
                     </a>
                   </div>
                   <div
                     className={`text-sm ${
-                      preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      preferenceState.theme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
                     }`}
                   >
                     {formatJapaneseDate(newsDate)}
@@ -2128,25 +2299,36 @@ function NewsReaderContent() {
                     <div className="mt-4 flex justify-between items-center">
                       {/* Progress bar on the left */}
                       <div className="flex items-center gap-3">
-                        <div className={`rounded-full w-48 h-2 overflow-hidden ${
-                          preferenceState.theme === "dark" 
-                            ? "bg-gray-800" 
-                            : "bg-gray-100"
-                        }`}>
-                          <div 
+                        <div
+                          className={`rounded-full w-48 h-2 overflow-hidden ${
+                            preferenceState.theme === "dark"
+                              ? "bg-gray-800"
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          <div
                             className={`h-full transition-all duration-300 ${
-                              preferenceState.theme === "dark" 
-                                ? "bg-green-500" 
+                              preferenceState.theme === "dark"
+                                ? "bg-green-500"
                                 : "bg-green-600"
                             }`}
-                            style={{ 
-                              width: `${currentSentence >= 0 ? ((currentSentence + 1) / sentences.length) * 100 : 0}%` 
+                            style={{
+                              width: `${
+                                currentSentence >= 0
+                                  ? ((currentSentence + 1) / sentences.length) *
+                                    100
+                                  : 0
+                              }%`,
                             }}
                           />
                         </div>
-                        <span className={`text-sm font-medium whitespace-nowrap ${
-                          preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-600"
-                        }`}>
+                        <span
+                          className={`text-sm font-medium whitespace-nowrap ${
+                            preferenceState.theme === "dark"
+                              ? "text-gray-300"
+                              : "text-gray-600"
+                          }`}
+                        >
                           {currentSentence >= 0
                             ? `${currentSentence + 1} / ${sentences.length}`
                             : `${sentences.length}`}
@@ -2160,7 +2342,7 @@ function NewsReaderContent() {
                   <div className={imageContainerClass}>
                     <img
                       src={newsImages[0]}
-                      alt={newsImages[0].alt || ''}
+                      alt={newsImages[0].alt || ""}
                       className="w-full h-auto"
                     />
                     {newsImages[0].caption && (
@@ -2176,20 +2358,21 @@ function NewsReaderContent() {
                     <p
                       key={pIndex}
                       className={`mb-6 px-2 py-1 rounded-md leading-relaxed
-                        ${preferenceState.font_size === "medium"
-                          ? "text-lg leading-loose"
-                          : preferenceState.font_size === "large"
-                          ? "text-xl leading-loose"
-                          : preferenceState.font_size === "x-large"
-                          ? "text-2xl leading-loose"
-                          : "text-3xl leading-loose"
+                        ${
+                          preferenceState.font_size === "medium"
+                            ? "text-lg leading-loose"
+                            : preferenceState.font_size === "large"
+                            ? "text-xl leading-loose"
+                            : preferenceState.font_size === "x-large"
+                            ? "text-2xl leading-loose"
+                            : "text-3xl leading-loose"
                         }
                       `}
                     >
                       {sentences.map((sentence, sIndex) => {
                         // Find if this sentence belongs to this paragraph
-                        const sentenceBelongsToParagraph = sentence.some(part => 
-                          paragraph.content.includes(part)
+                        const sentenceBelongsToParagraph = sentence.some(
+                          (part) => paragraph.content.includes(part)
                         );
 
                         if (!sentenceBelongsToParagraph) return null;
@@ -2199,21 +2382,23 @@ function NewsReaderContent() {
                             key={sIndex}
                             onClick={() => handleSentenceClick(sIndex)}
                             className={`inline cursor-pointer rounded px-1
-                              ${sIndex === currentSentence
-                                ? preferenceState.theme === "dark"
-                                  ? "bg-gray-700"
-                                  : preferenceState.theme === "yellow"
+                              ${
+                                sIndex === currentSentence
+                                  ? preferenceState.theme === "dark"
+                                    ? "bg-gray-700"
+                                    : preferenceState.theme === "yellow"
                                     ? "bg-yellow-200"
                                     : "bg-emerald-50"
-                                : preferenceState.theme === "dark"
+                                  : preferenceState.theme === "dark"
                                   ? "hover:bg-gray-700/50"
                                   : "hover:bg-gray-100"
                               }
-                              ${isRepeatMode && sIndex !== currentSentence 
-                                ? preferenceState.theme === "dark"
-                                  ? "opacity-50"
-                                  : "opacity-40"
-                                : ""
+                              ${
+                                isRepeatMode && sIndex !== currentSentence
+                                  ? preferenceState.theme === "dark"
+                                    ? "opacity-50"
+                                    : "opacity-40"
+                                  : ""
                               }
                               transition-all duration-200
                             `}
@@ -2246,44 +2431,51 @@ function NewsReaderContent() {
                         className={`
                           px-4 py-2 rounded-lg flex items-center justify-center gap-2
                           transition-all duration-150
-                          ${preferenceState.theme === "dark"
-                            ? isFinished
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                            : isFinished
+                          ${
+                            preferenceState.theme === "dark"
+                              ? isFinished
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                              : isFinished
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                           }
-                          ${finishLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                          ${
+                            finishLoading ? "opacity-50 cursor-not-allowed" : ""
+                          }
                         `}
                       >
                         {finishLoading ? (
                           <div className="w-5 h-5 relative">
-                            <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                              preferenceState.theme === "dark"
-                                ? "border-gray-300 border-r-transparent"
-                                : preferenceState.theme === "yellow"
+                            <div
+                              className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                preferenceState.theme === "dark"
+                                  ? "border-gray-300 border-r-transparent"
+                                  : preferenceState.theme === "yellow"
                                   ? "border-yellow-500 border-r-transparent"
                                   : "border-gray-400 border-r-transparent"
-                            }`}></div>
+                              }`}
+                            ></div>
                           </div>
                         ) : (
                           <>
-                            <svg 
+                            <svg
                               className="w-5 h-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
                               strokeWidth={isFinished ? "2.5" : "2"}
                             >
-                              <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                d="M5 13l4 4L19 7" 
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
                               />
                             </svg>
                             <span className="font-medium">
-                              {isFinished ? "Finished Reading" : "Mark as Finished"}
+                              {isFinished
+                                ? "Finished Reading"
+                                : "Mark as Finished"}
                             </span>
                           </>
                         )}
@@ -2306,11 +2498,13 @@ function NewsReaderContent() {
               )}
 
               {loading && (
-                <div className={`fixed inset-0 backdrop-blur-sm z-50 ${
-                  preferenceState.theme === "dark" 
-                    ? "bg-black/10" 
-                    : "bg-white/70"
-                }`} />
+                <div
+                  className={`fixed inset-0 backdrop-blur-sm z-50 ${
+                    preferenceState.theme === "dark"
+                      ? "bg-black/10"
+                      : "bg-white/70"
+                  }`}
+                />
               )}
             </div>
           )}
@@ -2319,16 +2513,19 @@ function NewsReaderContent() {
 
       {/* Media controls */}
       {sentences?.length > 0 && (
-        <div className={`
+        <div
+          className={`
           fixed bottom-0 left-0 right-0 z-40
           sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:w-[320px]
-          ${preferenceState.theme === "dark"
-            ? "bg-gray-800 border-t sm:border border-gray-700"
-            : "[color-scheme:light] bg-white border-t sm:border border-gray-200"
+          ${
+            preferenceState.theme === "dark"
+              ? "bg-gray-800 border-t sm:border border-gray-700"
+              : "[color-scheme:light] bg-white border-t sm:border border-gray-200"
           }
           px-4 sm:px-6 py-4 sm:rounded-full sm:shadow-lg
           shadow-[0_-2px_15px_-3px_rgba(0,0,0,0.1)] sm:shadow-lg
-        `}>
+        `}
+        >
           <div className="flex items-center justify-center gap-3">
             {/* Archive button */}
             {user && (
@@ -2337,40 +2534,47 @@ function NewsReaderContent() {
                   onClick={toggleSave}
                   disabled={archiveLoading}
                   className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
-                    ${preferenceState.theme === "dark"
-                      ? "hover:bg-gray-700/50"
-                      : "hover:bg-gray-100/50"
+                    ${
+                      preferenceState.theme === "dark"
+                        ? "hover:bg-gray-700/50"
+                        : "hover:bg-gray-100/50"
                     }
-                    ${archiveLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${archiveLoading ? "opacity-50 cursor-not-allowed" : ""}
                   `}
                   title={isArchived ? "Remove from Saved" : "Save Article"}
                 >
                   {archiveLoading ? (
                     <div className="w-4 h-4 relative">
-                      <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                        preferenceState.theme === "dark"
-                          ? "border-gray-300 border-r-transparent"
-                          : preferenceState.theme === "yellow"
+                      <div
+                        className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                          preferenceState.theme === "dark"
+                            ? "border-gray-300 border-r-transparent"
+                            : preferenceState.theme === "yellow"
                             ? "border-yellow-500 border-r-transparent"
                             : "border-gray-400 border-r-transparent"
-                      }`}></div>
+                        }`}
+                      ></div>
                     </div>
                   ) : isArchived ? (
-                    <FaHeart className={`w-4 h-4 ${
-                      preferenceState.theme === "dark"
-                        ? "text-red-400"
-                        : preferenceState.theme === "yellow"
+                    <FaHeart
+                      className={`w-4 h-4 ${
+                        preferenceState.theme === "dark"
+                          ? "text-red-400"
+                          : preferenceState.theme === "yellow"
                           ? "text-red-500"
                           : "text-red-500"
-                    }`} />
+                      }`}
+                    />
                   ) : (
-                    <FaRegHeart className={`w-4 h-4 ${
-                      preferenceState.theme === "dark"
-                        ? "text-gray-300 hover:text-purple-400"
-                        : preferenceState.theme === "yellow"
+                    <FaRegHeart
+                      className={`w-4 h-4 ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-300 hover:text-purple-400"
+                          : preferenceState.theme === "yellow"
                           ? "text-gray-600 hover:text-purple-500"
                           : "text-gray-600 hover:text-purple-500"
-                    }`} />
+                      }`}
+                    />
                   )}
                 </button>
               </>
@@ -2382,9 +2586,10 @@ function NewsReaderContent() {
                 onClick={handlePrevious}
                 disabled={currentSentence === 0 || isVoiceLoading}
                 className={`p-2 rounded-full flex items-center justify-center 
-                  ${preferenceState.theme === "dark"
-                    ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
-                    : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                  ${
+                    preferenceState.theme === "dark"
+                      ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                      : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
                   } text-white w-10 h-10 transition-all duration-150`}
                 title="Previous"
               >
@@ -2400,7 +2605,11 @@ function NewsReaderContent() {
                     : isPlaying
                     ? "bg-yellow-600 hover:enabled:bg-yellow-500 active:enabled:bg-yellow-400"
                     : "bg-green-600 hover:enabled:bg-green-500 active:enabled:bg-green-400"
-                } text-white disabled:${preferenceState.theme === "dark" ? "opacity-40" : "bg-gray-600"} w-12 h-12 transition-all duration-150`}
+                } text-white disabled:${
+                  preferenceState.theme === "dark"
+                    ? "opacity-40"
+                    : "bg-gray-600"
+                } w-12 h-12 transition-all duration-150`}
                 title={
                   isVoiceLoading
                     ? "Loading Voice"
@@ -2418,11 +2627,14 @@ function NewsReaderContent() {
 
               <button
                 onClick={handleNext}
-                disabled={currentSentence === sentences.length - 1 || isVoiceLoading}
+                disabled={
+                  currentSentence === sentences.length - 1 || isVoiceLoading
+                }
                 className={`p-2 rounded-full flex items-center justify-center 
-                  ${preferenceState.theme === "dark"
-                    ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
-                    : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
+                  ${
+                    preferenceState.theme === "dark"
+                      ? "bg-gray-700 hover:enabled:bg-gray-600 active:enabled:bg-gray-500 disabled:opacity-40"
+                      : "bg-gray-500 hover:enabled:bg-gray-400 active:enabled:bg-gray-300 disabled:bg-gray-300"
                   } text-white w-10 h-10 transition-all duration-150`}
                 title="Next"
               >
@@ -2434,23 +2646,26 @@ function NewsReaderContent() {
             <button
               onClick={handleRepeatToggle}
               className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
-                ${preferenceState.theme === "dark"
-                  ? "hover:bg-gray-700/50"
-                  : "hover:bg-gray-100/50"
+                ${
+                  preferenceState.theme === "dark"
+                    ? "hover:bg-gray-700/50"
+                    : "hover:bg-gray-100/50"
                 }
               `}
-              title={isRepeatMode 
-                ? "Currently repeating one sentence with 1 second pause between repeats" 
-                : "Click to repeat one sentence with 1 second pause between repeats"}
+              title={
+                isRepeatMode
+                  ? "Currently repeating one sentence with 1 second pause between repeats"
+                  : "Click to repeat one sentence with 1 second pause between repeats"
+              }
             >
-              <RepeatIcon 
+              <RepeatIcon
                 className={`w-4 h-4 ${
                   isRepeatMode
                     ? "text-purple-500"
                     : preferenceState.theme === "dark"
-                      ? "text-gray-300 hover:text-purple-400"
-                      : "text-gray-600 hover:text-purple-500"
-                }`} 
+                    ? "text-gray-300 hover:text-purple-400"
+                    : "text-gray-600 hover:text-purple-500"
+                }`}
                 isActive={isRepeatMode}
                 theme={preferenceState.theme}
               />
