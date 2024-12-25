@@ -22,8 +22,8 @@ export default function JoinPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           {/* Logo and Hero Section */}
           <div className="text-center mb-16">
-            <div 
-              onClick={() => router.push('/')}
+            <div
+              onClick={() => router.push("/")}
               className="flex justify-center items-center mb-6 cursor-pointer hover:opacity-80 active:scale-95 transition-all"
             >
               <span className="text-4xl font-extrabold flex items-center">
@@ -36,7 +36,8 @@ export default function JoinPage() {
               The Best Way to Learn Japanese
             </h1>
             <p className="mt-3 text-xl text-gray-500 dark:text-gray-300">
-              Combine Duolingo with real Japanese news for the perfect learning experience
+              Combine Duolingo with real Japanese news for the perfect learning
+              experience
             </p>
           </div>
 
@@ -52,8 +53,9 @@ export default function JoinPage() {
                     Start with Duolingo
                   </h3>
                   <p className="mt-2 text-gray-500 dark:text-gray-400">
-                    Use Duolingo to build your foundation in Japanese. Learn essential grammar,
-                    vocabulary, and basic reading skills through structured lessons.
+                    Use Duolingo to build your foundation in Japanese. Learn
+                    essential grammar, vocabulary, and basic reading skills
+                    through structured lessons.
                   </p>
                 </div>
               </div>
@@ -69,8 +71,9 @@ export default function JoinPage() {
                     Level Up with EZJP News
                   </h3>
                   <p className="mt-2 text-gray-500 dark:text-gray-400">
-                    Connect with Japanese culture through real news. Expose yourself to authentic
-                    language and stay updated with Japan's latest stories.
+                    Connect with Japanese culture through real news. Expose
+                    yourself to authentic language and stay updated with
+                    Japan&apos;s latest stories.
                   </p>
                 </div>
               </div>
@@ -83,9 +86,10 @@ export default function JoinPage() {
               Perfect Learning Combination
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              While Duolingo teaches you the basics, reading news helps you understand real Japanese
-              context and culture. This combination is the key to true language mastery and have FUN!
-              Learning Japanese shouldn't feel like a chore.
+              While Duolingo teaches you the basics, reading news helps you
+              understand real Japanese context and culture. This combination is
+              the key to true language mastery and have FUN! Learning Japanese
+              shouldn&apos;t feel like a chore.
             </p>
           </div>
 
@@ -98,32 +102,50 @@ export default function JoinPage() {
               {/* Benefits cards... */}
               {[
                 {
-                  icon: <FaBookmark className="h-6 w-6 text-green-600 dark:text-green-500" />,
+                  icon: (
+                    <FaBookmark className="h-6 w-6 text-green-600 dark:text-green-500" />
+                  ),
                   title: "Saved Articles",
-                  description: "Save interesting articles to read later and track your reading progress"
+                  description:
+                    "Save interesting articles to read later and track your reading progress",
                 },
                 {
-                  icon: <FaUserCircle className="h-6 w-6 text-green-600 dark:text-green-500" />,
+                  icon: (
+                    <FaUserCircle className="h-6 w-6 text-green-600 dark:text-green-500" />
+                  ),
                   title: "Reader Profile",
-                  description: "Create your profile and track your reading journey and achievements"
+                  description:
+                    "Create your profile and track your reading journey and achievements",
                 },
                 {
-                  icon: <FaUsers className="h-6 w-6 text-green-600 dark:text-green-500" />,
+                  icon: (
+                    <FaUsers className="h-6 w-6 text-green-600 dark:text-green-500" />
+                  ),
                   title: "Learn Together",
-                  description: "Connect with fellow Japanese learners, share progress, and motivate each other"
+                  description:
+                    "Connect with fellow Japanese learners, share progress, and motivate each other",
                 },
                 {
-                  icon: <FaFire className="h-6 w-6 text-green-600 dark:text-green-500" />,
+                  icon: (
+                    <FaFire className="h-6 w-6 text-green-600 dark:text-green-500" />
+                  ),
                   title: "Daily Streaks",
-                  description: "Build a reading habit with daily streaks and compete with friends"
+                  description:
+                    "Build a reading habit with daily streaks and compete with friends",
                 },
                 {
-                  icon: <FaStar className="h-6 w-6 text-green-600 dark:text-green-500" />,
+                  icon: (
+                    <FaStar className="h-6 w-6 text-green-600 dark:text-green-500" />
+                  ),
                   title: "Achievements",
-                  description: "Unlock achievements and share your milestones with the community"
-                }
+                  description:
+                    "Unlock achievements and share your milestones with the community",
+                },
               ].map((benefit, index) => (
-                <div key={index} className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div
+                  key={index}
+                  className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+                >
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
                       {benefit.icon}
@@ -149,7 +171,7 @@ export default function JoinPage() {
         <div className="w-full max-w-sm space-y-6 lg:space-y-8">
           <div className="text-center">
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-              Join Now - It's Free
+              Join Now - It&apos;s Free
             </h2>
             <div className="mt-2 space-y-2">
               <p className="text-gray-600 dark:text-gray-300">
