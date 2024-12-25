@@ -12,25 +12,26 @@ export async function GET() {
     (
       <div
         style={{
-          background: 'linear-gradient(to bottom right, #1a1a1a, #2d3748)',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          borderRadius: '50%',
-          padding: '6px',
-          boxShadow: '0 0 4px rgba(34, 197, 94, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+          background: "white",
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          borderRadius: "50%",
+          padding: "6px",
+          boxShadow:
+            "0 0 4px rgba(34, 197, 94, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
         }}
       >
         <svg
           viewBox="0 0 448 512"
           style={{
-            width: '100%',
-            height: '100%',
-            color: '#22c55e',
-            filter: 'drop-shadow(0 0 2px rgba(34, 197, 94, 0.3))',
+            width: "100%",
+            height: "100%",
+            color: "#22c55e",
+            filter: "drop-shadow(0 0 2px rgba(34, 197, 94, 0.3))",
           }}
           fill="currentColor"
         >

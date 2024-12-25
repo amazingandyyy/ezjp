@@ -230,43 +230,79 @@ export default function Settings() {
   }
 
   return (
-    <div className={`min-h-screen ${profileData.currentTheme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
+    <div
+      className={`min-h-screen ${
+        profileData.currentTheme === "dark"
+          ? "bg-[rgb(19,31,36)]"
+          : "bg-gray-50"
+      }`}
+    >
       {!isProfileLoaded && (
         <div className="fixed inset-0 bg-black/5 backdrop-blur-sm z-50" />
       )}
       {showSuccess && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50">
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg text-sm ${
-            profileData.currentTheme === 'dark' 
-              ? 'bg-gray-800 text-green-400 border border-gray-700'
-              : 'bg-white text-green-600 border border-gray-200'
-          }`}>
+          <div
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg text-sm ${
+              profileData.currentTheme === "dark"
+                ? "bg-gray-800 text-green-400 border border-gray-700"
+                : "bg-white text-green-600 border border-gray-200"
+            }`}
+          >
             <FaCheckCircle className="w-4 h-4" />
             <span>Changes saved</span>
           </div>
         </div>
       )}
-      <Navbar theme={profileData.currentTheme} />
-      
+      <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
+
       <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-2xl mx-auto">
-          <h1 className={`text-xl font-semibold mb-6 ${profileData.currentTheme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+          <h1
+            className={`text-xl font-semibold mb-6 ${
+              profileData.currentTheme === "dark"
+                ? "text-gray-100"
+                : "text-[rgb(19,31,36)]"
+            }`}
+          >
             Account Settings
           </h1>
 
           {/* Settings Sections */}
           <div className="space-y-4">
             {/* Profile Section */}
-            <div className={`overflow-hidden rounded-xl shadow-sm ${profileData.currentTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`px-6 py-4 border-b ${profileData.currentTheme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                <h2 className={`text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+            <div
+              className={`overflow-hidden rounded-xl shadow-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div
+                className={`px-6 py-4 border-b ${
+                  profileData.currentTheme === "dark"
+                    ? "border-gray-700"
+                    : "border-gray-100"
+                }`}
+              >
+                <h2
+                  className={`text-sm font-medium ${
+                    profileData.currentTheme === "dark"
+                      ? "text-gray-300"
+                      : "text-gray-900"
+                  }`}
+                >
                   Profile Information
                 </h2>
               </div>
               <div className="p-6 space-y-6">
                 {/* Username field */}
                 <div className="space-y-2">
-                  <label className={`block text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label
+                    className={`block text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-300"
+                        : "text-gray-700"
+                    }`}
+                  >
                     Username
                   </label>
                   {editState.username ? (
@@ -274,34 +310,47 @@ export default function Settings() {
                       <input
                         type="text"
                         value={profileData.editedUsername}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, editedUsername: e.target.value }))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            editedUsername: e.target.value,
+                          }))
+                        }
                         className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
-                          profileData.currentTheme === 'dark'
-                            ? 'bg-gray-700 border-gray-600 text-gray-100'
-                            : 'bg-white border-gray-200 text-gray-900'
+                          profileData.currentTheme === "dark"
+                            ? "bg-gray-700 border-gray-600 text-gray-100"
+                            : "bg-white border-gray-200 text-gray-900"
                         } focus:outline-none focus:ring-2 focus:ring-green-500`}
                         placeholder="Enter username"
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleUpdate('username', profileData.editedUsername)}
+                          onClick={() =>
+                            handleUpdate("username", profileData.editedUsername)
+                          }
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                            profileData.currentTheme === "dark"
+                              ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                              : "bg-green-50 text-green-600 hover:bg-green-100"
                           }`}
                         >
                           Save
                         </button>
                         <button
                           onClick={() => {
-                            setEditState(prev => ({ ...prev, username: false }));
-                            setProfileData(prev => ({ ...prev, editedUsername: prev.username }));
+                            setEditState((prev) => ({
+                              ...prev,
+                              username: false,
+                            }));
+                            setProfileData((prev) => ({
+                              ...prev,
+                              editedUsername: prev.username,
+                            }));
                           }}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
                           Cancel
@@ -310,19 +359,44 @@ export default function Settings() {
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <div className={`flex items-center gap-3 ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <div
+                        className={`flex items-center gap-3 ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-300"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
-                        <span>{profileData.username || 'No username set'}</span>
+                        <span>{profileData.username || "No username set"}</span>
                       </div>
                       <button
-                        onClick={() => setEditState(prev => ({ ...prev, username: true }))}
+                        onClick={() =>
+                          setEditState((prev) => ({ ...prev, username: true }))
+                        }
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          profileData.currentTheme === 'dark'
-                            ? 'text-gray-300 hover:bg-gray-700'
-                            : 'text-gray-600 hover:bg-gray-100'
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-300 hover:bg-gray-700"
+                            : "text-gray-600 hover:bg-gray-100"
                         }`}
                       >
                         Edit
@@ -330,7 +404,13 @@ export default function Settings() {
                     </div>
                   )}
                   {error && (
-                    <p className={`text-sm ${profileData.currentTheme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                    <p
+                      className={`text-sm ${
+                        profileData.currentTheme === "dark"
+                          ? "text-red-400"
+                          : "text-red-600"
+                      }`}
+                    >
                       {error}
                     </p>
                   )}
@@ -338,40 +418,98 @@ export default function Settings() {
 
                 {/* Japanese Level field */}
                 <div className="space-y-2">
-                  <label className={`block text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Japanese Level
+                  <label
+                    className={`block text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-300"
+                        : "text-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      Japanese Level
+                      <a
+                        href="https://www.jlpt.jp/e/about/levelsummary.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-xs transition-colors ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-400 hover:text-gray-300"
+                            : "text-gray-500 hover:text-gray-600"
+                        }`}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 16v-4m0-4h.01M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
+                    </div>
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
-                      { level: 'N5', description: 'Basic understanding of everyday Japanese. Can read basic phrases and understand simple conversations.' },
-                      { level: 'N4', description: 'Basic understanding of Japanese used in everyday situations. Can read simple passages and follow slow conversations.' },
-                      { level: 'N3', description: 'Understanding of Japanese used in everyday situations to some degree. Can read newspapers with basic vocabulary.' },
-                      { level: 'N2', description: 'Ability to understand Japanese used in everyday situations and in a variety of circumstances. Can read newspapers and follow TV news.' },
-                      { level: 'N1', description: 'Ability to understand Japanese used in a variety of circumstances. Can read newspapers and magazines fluently.' },
-                      { level: 'Native', description: 'Native or near-native proficiency in Japanese.' }
-                    ].map(({ level, description }) => (
-                      <div key={level} className="group relative">
+                      {
+                        level: "N5",
+                        displayLevel: "N5 or below",
+                        description:
+                          "Being very new to Japanese. Can understand and use familiar everyday expressions and very basic phrases.",
+                      },
+                      {
+                        level: "N4",
+                        displayLevel: "N4",
+                        description:
+                          "Basic understanding of Japanese used in everyday situations. Can read simple passages and follow slow conversations.",
+                      },
+                      {
+                        level: "N3",
+                        displayLevel: "N3",
+                        description:
+                          "Understanding of Japanese used in everyday situations to some degree. Can read newspapers with basic vocabulary.",
+                      },
+                      {
+                        level: "N2",
+                        displayLevel: "N2",
+                        description:
+                          "Ability to understand Japanese used in everyday situations and in a variety of circumstances. Can read newspapers and follow TV news.",
+                      },
+                      {
+                        level: "N1",
+                        displayLevel: "N1",
+                        description:
+                          "Ability to understand Japanese used in a variety of circumstances. Can read newspapers and magazines fluently.",
+                      },
+                      {
+                        level: "Native",
+                        displayLevel: "Native",
+                        description:
+                          "Native or near-native proficiency in Japanese.",
+                      },
+                    ].map(({ level, displayLevel, description }) => (
+                      <div key={level}>
                         <button
-                          onClick={() => handleUpdate('japanese_level', level)}
-                          className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          onClick={() => handleUpdate("japanese_level", level)}
+                          className={`w-full p-3 rounded-lg text-left transition-colors ${
                             profileData.japanese_level === level
-                              ? profileData.currentTheme === 'dark'
-                                ? 'bg-green-500/10 text-green-400 border border-green-500'
-                                : 'bg-green-50 text-green-600 border border-green-500'
-                              : profileData.currentTheme === 'dark'
-                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent'
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-green-500/10 text-green-400 border border-green-500"
+                                : "bg-green-50 text-green-600 border border-green-500"
+                              : profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
                           }`}
                         >
-                          {level}
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium">{displayLevel}</div>
+                            <div className={`text-xs ${
+                              profileData.japanese_level === level
+                                ? profileData.currentTheme === "dark"
+                                  ? "text-green-400/80"
+                                  : "text-green-600/80"
+                                : profileData.currentTheme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}>
+                              {description}
+                            </div>
+                          </div>
                         </button>
-                        <div className={`absolute bottom-full left-0 mb-2 w-64 p-2 rounded-lg text-xs transform scale-0 group-hover:scale-100 transition-transform origin-bottom z-10 ${
-                          profileData.currentTheme === 'dark'
-                            ? 'bg-gray-800 text-gray-300 border border-gray-700'
-                            : 'bg-white text-gray-600 border border-gray-200 shadow-lg'
-                        }`}>
-                          {description}
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -379,42 +517,61 @@ export default function Settings() {
 
                 {/* Self Introduction field */}
                 <div className="space-y-2">
-                  <label className={`block text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label
+                    className={`block text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-300"
+                        : "text-gray-700"
+                    }`}
+                  >
                     Self Introduction
                   </label>
                   {editState.intro ? (
                     <div className="space-y-3">
                       <textarea
                         value={profileData.edited_self_introduction}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, edited_self_introduction: e.target.value }))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            edited_self_introduction: e.target.value,
+                          }))
+                        }
                         rows={4}
                         className={`w-full px-3 py-2 rounded-lg border text-sm ${
-                          profileData.currentTheme === 'dark'
-                            ? 'bg-gray-700 border-gray-600 text-gray-100'
-                            : 'bg-white border-gray-200 text-gray-900'
+                          profileData.currentTheme === "dark"
+                            ? "bg-gray-700 border-gray-600 text-gray-100"
+                            : "bg-white border-gray-200 text-gray-900"
                         } focus:outline-none focus:ring-2 focus:ring-green-500`}
                         placeholder="Write a brief introduction about yourself..."
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleUpdate('self_introduction', profileData.edited_self_introduction)}
+                          onClick={() =>
+                            handleUpdate(
+                              "self_introduction",
+                              profileData.edited_self_introduction
+                            )
+                          }
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                            profileData.currentTheme === "dark"
+                              ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                              : "bg-green-50 text-green-600 hover:bg-green-100"
                           }`}
                         >
                           Save
                         </button>
                         <button
                           onClick={() => {
-                            setEditState(prev => ({ ...prev, intro: false }));
-                            setProfileData(prev => ({ ...prev, edited_self_introduction: prev.self_introduction }));
+                            setEditState((prev) => ({ ...prev, intro: false }));
+                            setProfileData((prev) => ({
+                              ...prev,
+                              edited_self_introduction: prev.self_introduction,
+                            }));
                           }}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
                           Cancel
@@ -424,21 +581,32 @@ export default function Settings() {
                   ) : (
                     <div className="flex flex-col">
                       <div className="flex items-start justify-between gap-4">
-                        <div className={`flex-1 p-4 rounded-lg ${
-                          profileData.currentTheme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'
-                        }`}>
-                          <p className={`text-sm whitespace-pre-wrap ${
-                            profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                          }`}>
-                            {profileData.self_introduction || 'No introduction set'}
+                        <div
+                          className={`flex-1 p-4 rounded-lg ${
+                            profileData.currentTheme === "dark"
+                              ? "bg-gray-700/50"
+                              : "bg-gray-50"
+                          }`}
+                        >
+                          <p
+                            className={`text-sm whitespace-pre-wrap ${
+                              profileData.currentTheme === "dark"
+                                ? "text-gray-300"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {profileData.self_introduction ||
+                              "No introduction set"}
                           </p>
                         </div>
                         <button
-                          onClick={() => setEditState(prev => ({ ...prev, intro: true }))}
+                          onClick={() =>
+                            setEditState((prev) => ({ ...prev, intro: true }))
+                          }
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'text-gray-300 hover:bg-gray-700'
-                              : 'text-gray-600 hover:bg-gray-100'
+                            profileData.currentTheme === "dark"
+                              ? "text-gray-300 hover:bg-gray-700"
+                              : "text-gray-600 hover:bg-gray-100"
                           }`}
                         >
                           Edit
@@ -450,7 +618,13 @@ export default function Settings() {
 
                 {/* Duolingo Username field */}
                 <div className="space-y-2">
-                  <label className={`block text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label
+                    className={`block text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-300"
+                        : "text-gray-700"
+                    }`}
+                  >
                     Duolingo Profile
                   </label>
                   {editState.duolingo ? (
@@ -458,34 +632,50 @@ export default function Settings() {
                       <input
                         type="text"
                         value={profileData.edited_duolingo_username}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, edited_duolingo_username: e.target.value }))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            edited_duolingo_username: e.target.value,
+                          }))
+                        }
                         className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
-                          profileData.currentTheme === 'dark'
-                            ? 'bg-gray-700 border-gray-600 text-gray-100'
-                            : 'bg-white border-gray-200 text-gray-900'
+                          profileData.currentTheme === "dark"
+                            ? "bg-gray-700 border-gray-600 text-gray-100"
+                            : "bg-white border-gray-200 text-gray-900"
                         } focus:outline-none focus:ring-2 focus:ring-green-500`}
                         placeholder="Enter Duolingo username"
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleUpdate('duolingo_username', profileData.edited_duolingo_username)}
+                          onClick={() =>
+                            handleUpdate(
+                              "duolingo_username",
+                              profileData.edited_duolingo_username
+                            )
+                          }
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                            profileData.currentTheme === "dark"
+                              ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                              : "bg-green-50 text-green-600 hover:bg-green-100"
                           }`}
                         >
                           Save
                         </button>
                         <button
                           onClick={() => {
-                            setEditState(prev => ({ ...prev, duolingo: false }));
-                            setProfileData(prev => ({ ...prev, edited_duolingo_username: prev.duolingo_username }));
+                            setEditState((prev) => ({
+                              ...prev,
+                              duolingo: false,
+                            }));
+                            setProfileData((prev) => ({
+                              ...prev,
+                              edited_duolingo_username: prev.duolingo_username,
+                            }));
                           }}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
                           Cancel
@@ -494,37 +684,73 @@ export default function Settings() {
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <div className={`flex items-center gap-3 ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z" fill="#58CC02"/>
-                          <path d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z" fill="white"/>
-                          <path d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z" fill="white"/>
-                          <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="#58CC02"/>
-                          <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill="white"/>
+                      <div
+                        className={`flex items-center gap-3 ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-300"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z"
+                            fill="#58CC02"
+                          />
+                          <path
+                            d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z"
+                            fill="white"
+                          />
+                          <path
+                            d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z"
+                            fill="white"
+                          />
+                          <path
+                            d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z"
+                            fill="#58CC02"
+                          />
+                          <path
+                            d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z"
+                            fill="white"
+                          />
                         </svg>
-                        <span>{profileData.duolingo_username || 'No Duolingo profile linked'}</span>
+                        <span>
+                          {profileData.duolingo_username ||
+                            "No Duolingo profile linked"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         {profileData.duolingo_username && (
                           <a
-                            href={`https://www.duolingo.com/profile/${encodeURIComponent(profileData.duolingo_username)}`}
+                            href={`https://www.duolingo.com/profile/${encodeURIComponent(
+                              profileData.duolingo_username
+                            )}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              profileData.currentTheme === 'dark'
-                                ? 'text-gray-300 hover:bg-gray-700'
-                                : 'text-gray-600 hover:bg-gray-100'
+                              profileData.currentTheme === "dark"
+                                ? "text-gray-300 hover:bg-gray-700"
+                                : "text-gray-600 hover:bg-gray-100"
                             }`}
                           >
                             View Profile
                           </a>
                         )}
                         <button
-                          onClick={() => setEditState(prev => ({ ...prev, duolingo: true }))}
+                          onClick={() =>
+                            setEditState((prev) => ({
+                              ...prev,
+                              duolingo: true,
+                            }))
+                          }
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === 'dark'
-                              ? 'text-gray-300 hover:bg-gray-700'
-                              : 'text-gray-600 hover:bg-gray-100'
+                            profileData.currentTheme === "dark"
+                              ? "text-gray-300 hover:bg-gray-700"
+                              : "text-gray-600 hover:bg-gray-100"
                           }`}
                         >
                           Edit
@@ -537,22 +763,38 @@ export default function Settings() {
             </div>
 
             {/* Appearance Section */}
-            <div className={`overflow-hidden rounded-xl shadow-sm ${profileData.currentTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`px-6 py-4 border-b ${profileData.currentTheme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                <h2 className={`text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+            <div
+              className={`overflow-hidden rounded-xl shadow-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div
+                className={`px-6 py-4 border-b ${
+                  profileData.currentTheme === "dark"
+                    ? "border-gray-700"
+                    : "border-gray-100"
+                }`}
+              >
+                <h2
+                  className={`text-sm font-medium ${
+                    profileData.currentTheme === "dark"
+                      ? "text-gray-300"
+                      : "text-gray-900"
+                  }`}
+                >
                   Appearance
                 </h2>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-3 gap-3">
                   <button
-                    onClick={() => handleUpdate('theme', 'light')}
+                    onClick={() => handleUpdate("theme", "light")}
                     className={`p-4 rounded-lg border transition-colors ${
-                      profileData.theme === 'light'
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : profileData.currentTheme === 'dark'
-                        ? 'border-gray-700 hover:border-gray-600 text-gray-400'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      profileData.theme === "light"
+                        ? "border-green-500 bg-green-50 text-green-700"
+                        : profileData.currentTheme === "dark"
+                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -561,13 +803,13 @@ export default function Settings() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleUpdate('theme', 'dark')}
+                    onClick={() => handleUpdate("theme", "dark")}
                     className={`p-4 rounded-lg border transition-colors ${
-                      profileData.theme === 'dark'
-                        ? 'border-green-500 bg-green-500/10 text-green-400'
-                        : profileData.currentTheme === 'dark'
-                        ? 'border-gray-700 hover:border-gray-600 text-gray-400'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      profileData.theme === "dark"
+                        ? "border-green-500 bg-green-500/10 text-green-400"
+                        : profileData.currentTheme === "dark"
+                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -576,21 +818,38 @@ export default function Settings() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleUpdate('theme', 'system')}
+                    onClick={() => handleUpdate("theme", "system")}
                     className={`p-4 rounded-lg border transition-colors ${
-                      profileData.theme === 'system'
-                        ? profileData.currentTheme === 'dark'
-                          ? 'border-green-500 bg-green-500/10 text-green-400'
-                          : 'border-green-500 bg-green-50 text-green-700'
-                        : profileData.currentTheme === 'dark'
-                        ? 'border-gray-700 hover:border-gray-600 text-gray-400'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      profileData.theme === "system"
+                        ? profileData.currentTheme === "dark"
+                          ? "border-green-500 bg-green-500/10 text-green-400"
+                          : "border-green-500 bg-green-50 text-green-700"
+                        : profileData.currentTheme === "dark"
+                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 16a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <svg
+                        className="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M12 16a4 4 0 100-8 4 4 0 000 8z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                       <span className="text-sm font-medium">System</span>
                     </div>
@@ -600,30 +859,65 @@ export default function Settings() {
             </div>
 
             {/* Data Management Section */}
-            <div className={`overflow-hidden rounded-xl shadow-sm ${profileData.currentTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`px-6 py-4 border-b ${profileData.currentTheme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                <h2 className={`text-sm font-medium ${profileData.currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+            <div
+              className={`overflow-hidden rounded-xl shadow-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div
+                className={`px-6 py-4 border-b ${
+                  profileData.currentTheme === "dark"
+                    ? "border-gray-700"
+                    : "border-gray-100"
+                }`}
+              >
+                <h2
+                  className={`text-sm font-medium ${
+                    profileData.currentTheme === "dark"
+                      ? "text-gray-300"
+                      : "text-gray-900"
+                  }`}
+                >
                   Data Management
                 </h2>
               </div>
-              <div className={`divide-y ${profileData.currentTheme === 'dark' ? 'divide-gray-700/50' : 'divide-gray-100'}`}>
+              <div
+                className={`divide-y ${
+                  profileData.currentTheme === "dark"
+                    ? "divide-gray-700/50"
+                    : "divide-gray-100"
+                }`}
+              >
                 {/* Reset Reading History */}
                 <div className="p-6">
                   <div className="space-y-4">
                     <div>
-                      <h3 className={`text-sm font-medium mb-1 ${profileData.currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                      <h3
+                        className={`text-sm font-medium mb-1 ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-200"
+                            : "text-gray-800"
+                        }`}
+                      >
                         Reset Reading History
                       </h3>
-                      <p className={`text-sm ${profileData.currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Remove all your finished articles history and reset reading stats. This action cannot be undone.
+                      <p
+                        className={`text-sm ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-400"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        Remove all your finished articles history and reset
+                        reading stats. This action cannot be undone.
                       </p>
                     </div>
                     <button
                       onClick={handleResetReadingHistory}
                       className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        profileData.currentTheme === 'dark'
-                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                          : 'bg-red-50 text-red-600 hover:bg-red-100'
+                        profileData.currentTheme === "dark"
+                          ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          : "bg-red-50 text-red-600 hover:bg-red-100"
                       }`}
                     >
                       Reset Reading History
@@ -635,19 +929,32 @@ export default function Settings() {
                 <div className="p-6">
                   <div className="space-y-4">
                     <div>
-                      <h3 className={`text-sm font-medium mb-1 ${profileData.currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                      <h3
+                        className={`text-sm font-medium mb-1 ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-200"
+                            : "text-gray-800"
+                        }`}
+                      >
                         Reset Saved Articles
                       </h3>
-                      <p className={`text-sm ${profileData.currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Remove all your saved articles. This action cannot be undone.
+                      <p
+                        className={`text-sm ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-400"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        Remove all your saved articles. This action cannot be
+                        undone.
                       </p>
                     </div>
                     <button
                       onClick={handleResetSavedArticles}
                       className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        profileData.currentTheme === 'dark'
-                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                          : 'bg-red-50 text-red-600 hover:bg-red-100'
+                        profileData.currentTheme === "dark"
+                          ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          : "bg-red-50 text-red-600 hover:bg-red-100"
                       }`}
                     >
                       Reset Saved Articles
@@ -657,7 +964,13 @@ export default function Settings() {
 
                 {error && (
                   <div className="px-6 py-4">
-                    <p className={`text-sm ${profileData.currentTheme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                    <p
+                      className={`text-sm ${
+                        profileData.currentTheme === "dark"
+                          ? "text-red-400"
+                          : "text-red-600"
+                      }`}
+                    >
                       {error}
                     </p>
                   </div>
@@ -670,9 +983,9 @@ export default function Settings() {
               <button
                 onClick={signOut}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  profileData.currentTheme === 'dark'
-                    ? 'text-red-400 hover:bg-gray-800'
-                    : 'text-red-600 hover:bg-gray-100'
+                  profileData.currentTheme === "dark"
+                    ? "text-red-400 hover:bg-gray-800"
+                    : "text-red-600 hover:bg-gray-100"
                 }`}
               >
                 Sign Out
