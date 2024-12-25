@@ -43,10 +43,15 @@ const processContent = (content) => {
 
 // Helper function to format time duration
 const formatDuration = (minutes) => {
-  if (minutes < 60) return `${Math.round(minutes)} minutes`;
+  if (minutes < 60) return `${Math.round(minutes)}m`;
   const hours = Math.floor(minutes / 60);
-  const remainingMinutes = Math.round(minutes % 60);
-  return `${hours} hour${hours > 1 ? 's' : ''}${remainingMinutes > 0 ? ` ${remainingMinutes} min` : ''}`;
+  if (hours < 24) {
+    const remainingMinutes = Math.round(minutes % 60);
+    return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}m` : ''}`;
+  }
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  return `${days}d${remainingHours > 0 ? ` ${remainingHours}h` : ''}`;
 };
 
 // Helper function to format date
@@ -279,6 +284,9 @@ export default function UserProfile() {
         setProfile(profileData);
         setTheme(profileData.theme || 'light');
 
+        // Log profile data for debugging
+        console.log('Profile Data:', profileData);
+
         // Fetch user's saved news with article data
         const { data: saved, error: savedError } = await supabase
           .from('saved_articles')
@@ -299,7 +307,6 @@ export default function UserProfile() {
 
         if (savedError) {
           console.error('Error fetching saved news:', savedError);
-          // Don't return on error, continue with empty array
         }
 
         // Fetch user's finished articles with article data
@@ -322,7 +329,6 @@ export default function UserProfile() {
 
         if (finishedArticlesError) {
           console.error('Error fetching finished articles:', finishedArticlesError);
-          // Don't return on error, continue with empty array
         }
 
         setSavedNews(saved || []);
@@ -339,7 +345,6 @@ export default function UserProfile() {
 
         if (statsError && statsError.code !== 'PGRST116') {
           console.error('Error fetching reading stats:', statsError);
-          // Don't return on error, continue with default stats
         }
 
         // Fetch finished articles count
@@ -350,7 +355,6 @@ export default function UserProfile() {
 
         if (finishedError) {
           console.error('Error fetching finished articles:', finishedError);
-          // Don't return on error, continue with zero count
         }
 
         setStats({
@@ -360,6 +364,28 @@ export default function UserProfile() {
           totalFinishedArticles: finishedCount || 0,
           longestStreak: calculateLongestStreak(finished || []),
           currentStreak: calculateStreaks(finished || []).current
+        });
+
+        // Log all profile data after everything is fetched
+        console.log('Profile Data:', {
+          profile: profileData,
+          readingStats: readingStats || {},
+          stats: {
+            totalReadingTime: readingStats?.total_reading_time || 0,
+            totalArticlesRead: readingStats?.total_articles_read || 0,
+            totalSavedArticles: saved?.length || 0,
+            totalFinishedArticles: finishedCount || 0,
+            longestStreak: calculateLongestStreak(finished || []),
+            currentStreak: calculateStreaks(finished || []).current
+          },
+          savedArticles: {
+            count: saved?.length || 0,
+            items: saved || []
+          },
+          finishedArticles: {
+            count: finished?.length || 0,
+            items: finished || []
+          }
         });
       } catch (error) {
         if (!isMounted) return;
@@ -497,98 +523,62 @@ export default function UserProfile() {
       <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
-          <div className={`mb-8 ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className={`mb-12 ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
               <div className="flex flex-col items-center sm:items-start">
-                <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold ${
-                  theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-white text-gray-700'
+                <div className={`w-28 h-28 rounded-2xl flex items-center justify-center text-4xl font-bold shadow-lg transform transition-all duration-300 hover:scale-105 ${
+                  theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-700'
                 }`}>
                   {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
                 </div>
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <div className="flex items-center gap-3">
-                  <h1 className={`text-3xl font-bold ${
+                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4">
+                  <h1 className={`text-4xl font-bold tracking-tight ${
                     theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
                   }`}>
                     {profile?.username || 'Anonymous User'}
                   </h1>
-                  <div className="flex items-center gap-2">
-                    <div className="relative" ref={shareMenuRef}>
-                      <button
-                        onClick={() => setShowShareMenu(!showShareMenu)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          theme === 'dark'
-                            ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                        }`}
-                        title="Share profile"
-                      >
-                        <FaShare className="w-4 h-4" />
-                      </button>
-                      {showShareMenu && (
-                        <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-10 ${
-                          theme === 'dark'
-                            ? 'bg-gray-800 border border-gray-700'
-                            : 'bg-white border border-gray-200'
-                        }`}>
-                          <button
-                            onClick={copyToClipboard}
-                            className={`w-full px-4 py-2 text-sm flex items-center gap-3 transition-colors ${
-                              theme === 'dark'
-                                ? 'text-gray-300 hover:bg-gray-700'
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            <FaLink className="w-4 h-4" />
-                            Copy Link
-                          </button>
-                          <button
-                            onClick={shareToTwitter}
-                            className={`w-full px-4 py-2 text-sm flex items-center gap-3 transition-colors ${
-                              theme === 'dark'
-                                ? 'text-gray-300 hover:bg-gray-700'
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            <svg
-                              className="w-3.5 h-3.5"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                              fill="currentColor"
-                            >
-                              <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
-                            </svg>
-                            Share on X
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
-                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   Joined {new Date(profile?.created_at).toLocaleDateString()}
                 </p>
 
-                {/* Japanese Level */}
-                {profile?.japanese_level && (
-                  <div className={`mt-3 inline-flex items-center px-3 py-1 rounded-full text-sm ${
-                    theme === 'dark'
-                      ? 'bg-green-500/10 text-green-400'
-                      : 'bg-green-50 text-green-600'
-                  }`}>
-                    <span className="font-medium">JLPT {profile.japanese_level}</span>
+                {/* Self Introduction */}
+                {profile?.self_introduction && (
+                  <div className={`mt-4 p-5 rounded-xl ${
+                    theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'
+                  } ${theme === 'dark' ? 'shadow-none' : 'shadow-sm'}`}>
+                    <div className="flex gap-3">
+                      <div className={`text-4xl font-serif ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                      <p className={`text-sm leading-relaxed whitespace-pre-wrap italic ${
+                        theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
+                        {profile.self_introduction.toUpperCase()}
+                      </p>
+                      <div className={`text-4xl font-serif self-end ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                    </div>
                   </div>
                 )}
 
-                {/* Duolingo Username */}
-                {profile?.duolingo_username && (
-                  <div className="mt-3 flex items-center gap-2">
+                {/* Japanese Level, Duolingo Username, and Share button side by side */}
+                <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  {profile?.japanese_level && (
+                    <div className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium tracking-wide ${
+                      theme === 'dark'
+                        ? 'bg-green-500/10 text-green-400'
+                        : 'bg-green-50 text-green-600'
+                    }`}>
+                      <span>JLPT {profile.japanese_level}</span>
+                    </div>
+                  )}
+
+                  {profile?.duolingo_username && (
                     <a
                       href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm transition-colors ${
+                      className={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-sm font-medium tracking-wide transition-all duration-200 ${
                         theme === 'dark'
                           ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
                           : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
@@ -601,40 +591,79 @@ export default function UserProfile() {
                         <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="currentColor"/>
                         <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
                       </svg>
-                      <span className="font-medium">Duolingo Profile</span>
+                      <span>Duolingo Profile</span>
                     </a>
-                  </div>
-                )}
+                  )}
 
-                {/* Self Introduction */}
-                {profile?.self_introduction && (
-                  <div className={`mt-4 p-4 rounded-lg ${
-                    theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-50'
-                  }`}>
-                    <p className={`text-sm whitespace-pre-wrap ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                    }`}>
-                      {profile.self_introduction}
-                    </p>
+                  {/* Share button moved here */}
+                  <div className="relative" ref={shareMenuRef}>
+                    <button
+                      onClick={() => setShowShareMenu(!showShareMenu)}
+                      className={`p-2.5 rounded-xl transition-all duration-200 ${
+                        theme === 'dark'
+                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      }`}
+                      title="Share profile"
+                    >
+                      <FaShare className="w-4 h-4" />
+                    </button>
+                    {showShareMenu && (
+                      <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1.5 z-10 backdrop-blur-sm ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/95 border border-gray-700'
+                          : 'bg-white/95 border border-gray-200'
+                      }`}>
+                        <button
+                          onClick={copyToClipboard}
+                          className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
+                            theme === 'dark'
+                              ? 'text-gray-300 hover:bg-gray-700/50'
+                              : 'text-gray-700 hover:bg-gray-50/50'
+                          }`}
+                        >
+                          <FaLink className="w-4 h-4" />
+                          Copy Link
+                        </button>
+                        <button
+                          onClick={shareToTwitter}
+                          className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
+                            theme === 'dark'
+                              ? 'text-gray-300 hover:bg-gray-700/50'
+                              : 'text-gray-700 hover:bg-gray-50/50'
+                          }`}
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            fill="currentColor"
+                          >
+                            <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
+                          </svg>
+                          Share on X
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
             {/* Stats Section */}
-            <div className={`pt-6 sm:pt-8 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className={`p-4 sm:p-6 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
+            <div className={`pt-8 sm:pt-10 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className={`p-6 sm:p-8 rounded-2xl shadow-lg transition-all duration-300 ${theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-800' : 'bg-white hover:shadow-xl'}`}>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
                   <div>
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                    <div className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {stats.longestStreak} days
                     </div>
-                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaFire className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
+                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <FaFire className="w-4 h-4 text-orange-500" />
                       Best Streak
                     </div>
-                    <div className={`mt-2 text-xs flex items-center gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      <div className={`px-2 py-0.5 rounded ${
+                    <div className={`mt-3 text-xs flex items-center gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <div className={`px-2.5 py-1 rounded-full ${
                         stats.currentStreak > 0
                           ? theme === 'dark'
                             ? 'bg-orange-500/20 text-orange-300'
@@ -648,29 +677,29 @@ export default function UserProfile() {
                     </div>
                   </div>
                   <div>
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                    <div className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {stats.totalFinishedArticles}
                     </div>
-                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
+                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <FaCheck className="w-4 h-4 text-green-500" />
                       Finished Read
                     </div>
                   </div>
                   <div>
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                    <div className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {formatDuration(stats.totalReadingTime)}
                     </div>
-                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaClock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
+                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <FaClock className="w-4 h-4 text-blue-500" />
                       Total Reading Time
                     </div>
                   </div>
                   <div>
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                    <div className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                       {stats.totalSavedArticles}
                     </div>
-                    <div className={`text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
+                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <FaHeart className="w-4 h-4 text-red-500" />
                       Saved Articles
                     </div>
                   </div>
@@ -682,28 +711,62 @@ export default function UserProfile() {
 
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-            Activity
+          <h2 className={`text-2xl font-bold mb-8 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+            Journey
           </h2>
 
           <div className="relative">
             {/* Timeline line */}
-            <div className={`absolute left-0 top-0 bottom-0 w-px ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
+            <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
 
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Joined timeline item - Moved to top */}
+              <div className="relative flex gap-6">
+                <div className="relative">
+                  <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800 bg-yellow-500' : 'border-white bg-yellow-500'}`} />
+                  <div className={`pl-6 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {(() => {
+                      const date = new Date(profile?.created_at);
+                      return [
+                        date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                        }) +
+                          ' at ' +
+                          date.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          }),
+                        'joined EZJP as Reader',
+                      ];
+                    })().map((text, i) => (
+                      <div key={i} className={i === 1 ? 'text-sm font-medium flex items-center gap-2' : 'text-xs opacity-75'}>
+                        {text}
+                        {i === 1 && (
+                          <FaEgg className="w-3.5 h-3.5 text-yellow-500" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex-1 ml-4" />
+              </div>
+
               {/* Activity items */}
               {getActivityItems().map((item, index) => (
-                <div key={`${item.type}-${index}`} className="relative flex gap-4">
+                <div key={`${item.type}-${index}`} className="relative flex gap-6">
                   {/* Timeline dot and date */}
                   <div className="relative">
-                    <div className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800' : 'border-white'} ${
+                    <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800' : 'border-white'} ${
                       item.type === "saved" ? "bg-red-500" : "bg-green-500"
                     }`} />
-                    <div className={`pl-4 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <div className={`pl-6 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       {formatDate(item.date, item.type).map((text, i) => (
                         <div key={i} className={
                           i === 1
-                            ? "text-sm font-medium flex items-center gap-1.5"
+                            ? "text-sm font-medium flex items-center gap-2"
                             : "text-xs opacity-75"
                         }>
                           {text}
@@ -723,28 +786,31 @@ export default function UserProfile() {
                     router.push(
                       `/read?source=${encodeURIComponent(item.data.url)}`
                     )
-                  } className={`flex-1 ml-4 p-4 rounded-lg transition-opacity duration-200 hover:opacity-70 text-left`}>
+                  } className={`flex-1 ml-4 p-5 rounded-xl transition-all duration-300 hover:opacity-90 text-left ${
+                    theme === 'dark' 
+                      ? 'bg-gray-800/50 hover:bg-gray-800/70' 
+                      : 'bg-white hover:shadow-lg'
+                  }`}>
                     <div className="flex flex-col gap-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="block w-full sm:w-32 h-32 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      <div className="flex flex-col sm:flex-row gap-6">
+                        <div className="block w-full sm:w-36 h-36 sm:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
                           {item.data.article?.images?.[0] ? (
                             <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
                               e.target.parentElement.style.display = "none";
                             }} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                              <FaBook className="w-8 h-8 text-gray-400" />
+                              <FaBook className="w-10 h-10 text-gray-400" />
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-medium mb-2 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                          <h3 className={`text-lg font-medium mb-3 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                             {(() => {
                               try {
                                 let title =
                                   item.data.article?.title || item.data.title;
 
-                                // If title is a string that looks like JSON, try to parse it
                                 if (
                                   typeof title === "string" &&
                                   (title.startsWith("[") || title.startsWith("{"))
@@ -756,7 +822,6 @@ export default function UserProfile() {
                                   }
                                 }
 
-                                // Process title using processContent if it's an array
                                 if (Array.isArray(title)) {
                                   return processContent(title).map((part, i) => {
                                     if (part.type === "ruby") {
@@ -780,7 +845,7 @@ export default function UserProfile() {
                               }
                             })()}
                           </h3>
-                          <div className="flex flex-wrap gap-2 text-sm">
+                          <div className="flex flex-wrap gap-4 text-sm">
                             <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                               {item.data.article?.publish_date
                                 ? formatJapaneseDate(
@@ -806,46 +871,12 @@ export default function UserProfile() {
                 </div>
               ))}
 
-              {/* Joined timeline item */}
-              <div className="relative flex gap-4">
-                <div className="relative">
-                  <div className={`absolute left-0 top-1 w-3 h-3 -ml-1.5 rounded-full border-2 ${theme === 'dark' ? 'border-gray-800 bg-yellow-500' : 'border-white bg-yellow-500'}`} />
-                  <div className={`pl-4 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {(() => {
-                      const date = new Date(profile?.created_at);
-                      return [
-                        date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-                        }) +
-                          ' at ' +
-                          date.toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          }),
-                        'joined EZJP as Reader',
-                      ];
-                    })().map((text, i) => (
-                      <div key={i} className={i === 1 ? 'text-sm font-medium flex items-center gap-1.5' : 'text-xs opacity-75'}>
-                        {text}
-                        {i === 1 && (
-                          <FaEgg className="w-3.5 h-3.5 text-yellow-500" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex-1 ml-4" />
-              </div>
-
               {savedNews.length === 0 && (
-                <div className={`text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <FaHeart className={`w-12 h-12 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
-                  <p>No saved articles yet</p>
-                  <p className="text-sm mt-2">
-                    Articles you save will appear here
+                <div className={`text-center py-16 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <FaBook className={`w-16 h-16 mx-auto mb-6 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <p className="text-lg font-medium">No reading activity yet</p>
+                  <p className="text-sm mt-2 text-gray-500">
+                    This reader's journey will be shown here
                   </p>
                 </div>
               )}
