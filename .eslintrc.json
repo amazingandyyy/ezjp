@@ -2,7 +2,8 @@
   "extends": "next/core-web-vitals",
   "rules": {
     "react-hooks/exhaustive-deps": "off",
-    "@next/next/no-img-element": "off"
+    "@next/next/no-img-element": "off",
+    "react/no-unescaped-entities": "off"
   },
   "ignorePatterns": ["lib/database.types.ts"]
 } 
