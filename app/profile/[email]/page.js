@@ -121,6 +121,12 @@ export default function UserProfile() {
   // Add getActivityItems function to handle the timeline items
   const getActivityItems = () => {
     const items = [
+      // Add joined event
+      {
+        type: 'joined',
+        date: profile?.created_at,
+        data: {}
+      },
       // Add saved articles
       ...(savedNews || []).map(item => ({
         type: 'saved',
@@ -724,154 +730,150 @@ export default function UserProfile() {
             <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-200/70'}`} />
 
             <div className="space-y-8">
-              {/* Joined timeline item - Moved to top */}
-              <div className="relative flex gap-6">
-                <div className="relative">
-                  <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 shadow-lg ${theme === 'dark' ? 'border-gray-800 bg-yellow-500' : 'border-white bg-yellow-500'}`} />
-                  <div className={`pl-6 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {(() => {
-                      const date = new Date(profile?.created_at);
-                      return [
-                        date.toLocaleDateString('en-US', {
-                          month: 'long',
-                          day: 'numeric',
-                          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-                        }) +
-                          ' at ' +
-                          date.toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          }),
-                        'joined EZJP as Reader',
-                      ];
-                    })().map((text, i) => (
-                      <div key={i} className={i === 1 ? 'text-sm font-medium flex items-center gap-2' : 'text-xs opacity-75'}>
-                        {text}
-                        {i === 1 && (
-                          <FaEgg className="w-3.5 h-3.5 text-yellow-500" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex-1 ml-4" />
-              </div>
-
               {/* Activity items */}
               {getActivityItems().map((item, index) => (
                 <div key={`${item.type}-${index}`} className="relative flex gap-6">
                   {/* Timeline dot and date */}
                   <div className="relative">
                     <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 shadow-lg ${theme === 'dark' ? 'border-gray-800' : 'border-white'} ${
-                      item.type === "saved" ? "bg-red-500" : "bg-green-500"
+                      item.type === "saved" ? "bg-red-500" : item.type === "finished" ? "bg-green-500" : "bg-yellow-500"
                     }`} />
                     <div className={`pl-6 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {formatDate(item.date, item.type).map((text, i) => (
-                        <div key={i} className={
-                          i === 1
-                            ? "text-sm font-medium flex items-center gap-2"
-                            : "text-xs opacity-75"
-                        }>
-                          {text}
-                          {i === 1 &&
-                            (item.type === "saved" ? (
-                              <FaHeart className="w-3.5 h-3.5 text-red-500" />
-                            ) : (
-                              <FaCheck className="w-3.5 h-3.5 text-green-500" />
-                            ))}
-                        </div>
-                      ))}
+                      {item.type === 'joined' ? (
+                        (() => {
+                          const date = new Date(item.date);
+                          return [
+                            date.toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                            }) +
+                              ' at ' +
+                              date.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                              }),
+                            'joined EZJP as Reader',
+                          ].map((text, i) => (
+                            <div key={i} className={i === 1 ? 'text-sm font-medium flex items-center gap-2' : 'text-xs opacity-75'}>
+                              {text}
+                              {i === 1 && (
+                                <FaEgg className="w-3.5 h-3.5 text-yellow-500" />
+                              )}
+                            </div>
+                          ));
+                        })()
+                      ) : (
+                        formatDate(item.date, item.type).map((text, i) => (
+                          <div key={i} className={
+                            i === 1
+                              ? "text-sm font-medium flex items-center gap-2"
+                              : "text-xs opacity-75"
+                          }>
+                            {text}
+                            {i === 1 &&
+                              (item.type === "saved" ? (
+                                <FaHeart className="w-3.5 h-3.5 text-red-500" />
+                              ) : (
+                                <FaCheck className="w-3.5 h-3.5 text-green-500" />
+                              ))}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
 
                   {/* Article content */}
-                  <button onClick={() =>
-                    router.push(
-                      `/read?source=${encodeURIComponent(item.data.url)}`
-                    )
-                  } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:opacity-90 text-left ${
-                    theme === 'dark' 
-                      ? 'bg-gray-800/30 hover:bg-gray-800/50' 
-                      : 'bg-white/90 hover:shadow-xl'
-                  }`}>
-                    <div className="flex flex-col gap-4">
-                      <div className="flex flex-col sm:flex-row gap-6">
-                        <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50">
-                          {item.data.article?.images?.[0] ? (
-                            <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
-                              e.target.parentElement.style.display = "none";
-                            }} />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100/50">
-                              <FaBook className="w-12 h-12 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className={`text-lg font-medium mb-3 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                            {(() => {
-                              try {
-                                let title =
-                                  item.data.article?.title || item.data.title;
+                  {item.type !== 'joined' && (
+                    <button onClick={() =>
+                      router.push(
+                        `/read?source=${encodeURIComponent(item.data.url)}`
+                      )
+                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:opacity-90 text-left ${
+                      theme === 'dark' 
+                        ? 'bg-gray-800/30 hover:bg-gray-800/50' 
+                        : 'bg-white/90 hover:shadow-xl'
+                    }`}>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row gap-6">
+                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50">
+                            {item.data.article?.images?.[0] ? (
+                              <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
+                                e.target.parentElement.style.display = "none";
+                              }} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100/50">
+                                <FaBook className="w-12 h-12 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`text-lg font-medium mb-3 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                              {(() => {
+                                try {
+                                  let title =
+                                    item.data.article?.title || item.data.title;
 
-                                if (
-                                  typeof title === "string" &&
-                                  (title.startsWith("[") || title.startsWith("{"))
-                                ) {
-                                  try {
-                                    title = JSON.parse(title);
-                                  } catch (e) {
-                                    return title || "Untitled Article";
-                                  }
-                                }
-
-                                if (Array.isArray(title)) {
-                                  return processContent(title).map((part, i) => {
-                                    if (part.type === "ruby") {
-                                      return (
-                                        <RubyText
-                                          key={i}
-                                          part={part}
-                                          preferenceState={{
-                                            show_furigana: true,
-                                          }}
-                                        />
-                                      );
+                                  if (
+                                    typeof title === "string" &&
+                                    (title.startsWith("[") || title.startsWith("{"))
+                                  ) {
+                                    try {
+                                      title = JSON.parse(title);
+                                    } catch (e) {
+                                      return title || "Untitled Article";
                                     }
-                                    return <span key={i}>{part.content}</span>;
-                                  });
-                                }
+                                  }
 
-                                return title || "Untitled Article";
-                              } catch (e) {
-                                return "Untitled Article";
-                              }
-                            })()}
-                          </h3>
-                          <div className="flex flex-wrap gap-4 text-sm">
-                            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {item.data.article?.publish_date
-                                ? formatJapaneseDate(
-                                    item.data.article.publish_date
-                                  )
-                                : "No date"}
-                            </p>
-                            {item.type === "saved" &&
-                              item.data.reading_time > 0 && (
-                                <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                  <FaClock className="w-3.5 h-3.5 flex-shrink-0" />
-                                  <span className="whitespace-nowrap">
-                                    Read for{" "}
-                                    {formatDuration(item.data.reading_time)}
-                                  </span>
-                                </div>
-                              )}
+                                  if (Array.isArray(title)) {
+                                    return processContent(title).map((part, i) => {
+                                      if (part.type === "ruby") {
+                                        return (
+                                          <RubyText
+                                            key={i}
+                                            part={part}
+                                            preferenceState={{
+                                              show_furigana: true,
+                                            }}
+                                          />
+                                        );
+                                      }
+                                      return <span key={i}>{part.content}</span>;
+                                    });
+                                  }
+
+                                  return title || "Untitled Article";
+                                } catch (e) {
+                                  return "Untitled Article";
+                                }
+                              })()}
+                            </h3>
+                            <div className="flex flex-wrap gap-4 text-sm">
+                              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {item.data.article?.publish_date
+                                  ? formatJapaneseDate(
+                                      item.data.article.publish_date
+                                    )
+                                  : "No date"}
+                              </p>
+                              {item.type === "saved" &&
+                                item.data.reading_time > 0 && (
+                                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <FaClock className="w-3.5 h-3.5 flex-shrink-0" />
+                                    <span className="whitespace-nowrap">
+                                      Read for{" "}
+                                      {formatDuration(item.data.reading_time)}
+                                    </span>
+                                  </div>
+                                )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                  )}
+                  {item.type === 'joined' && <div className="flex-1 ml-4" />}
                 </div>
               ))}
 
