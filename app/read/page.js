@@ -494,6 +494,110 @@ const getHostname = (url) => {
   }
 };
 
+// Add ProfileDropdown component near the top with other components
+const ProfileDropdown = ({ show, onClose, theme, user, profile, onSignOut }) => {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60]">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+        onClick={onClose}
+      />
+      
+      {/* Content */}
+      <div className={`
+        absolute right-0 top-0 h-full w-full sm:w-[400px]
+        ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'}
+        shadow-xl overflow-y-auto
+        transition-all duration-300 ease-out
+      `}>
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Profile
+            </h2>
+            <button 
+              onClick={onClose}
+              className={`p-2 rounded-full hover:bg-opacity-80 
+                ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt={profile.full_name || user.email}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-medium
+                  ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-600'}`}>
+                  {(profile?.full_name || user.email || '?')[0].toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div>
+              {profile?.full_name && (
+                <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {profile.full_name}
+                </div>
+              )}
+              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                {user.email}
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className={`grid grid-cols-2 gap-4 p-4 rounded-xl
+            ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-50'}`}
+          >
+            <div className="space-y-1">
+              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                Articles Read
+              </div>
+              <div className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {profile?.articles_read || 0}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                Reading Time
+              </div>
+              <div className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {Math.round(profile?.total_reading_time || 0)}m
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <button
+              onClick={onSignOut}
+              className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                ${theme === 'dark' 
+                  ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -2011,7 +2115,17 @@ function NewsReaderContent() {
         showSidebar={showSidebar}
         onSidebarToggle={setShowSidebar}
         theme={preferenceState.theme}
-      />
+      >
+        {/* Add ProfileDropdown */}
+        <ProfileDropdown
+          show={showProfile}
+          onClose={() => setShowProfile(false)}
+          theme={preferenceState.theme}
+          user={user}
+          profile={profile}
+          onSignOut={signOut}
+        />
+      </Navbar>
 
       {/* Settings button and dropdown - bottom right */}
       <div className="fixed bottom-4 right-4 z-50">

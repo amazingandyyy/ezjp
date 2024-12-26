@@ -56,7 +56,21 @@ export default function Download() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showOpenAppHint, setShowOpenAppHint] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
   const theme = profile?.theme || 'system';
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isMobileDevice = /iphone|ipad|ipod|android/.test(userAgent);
+      setIsMobile(isMobileDevice);
+    };
+
+    checkIfMobile();
+  }, []);
 
   // Check if app is installed
   useEffect(() => {
@@ -67,6 +81,17 @@ export default function Download() {
         document.referrer.includes('android-app://'); // Android TWA
       
       setIsStandalone(isRunningStandalone);
+
+      // If we're in a regular browser tab, try to detect installed PWA
+      if (!isRunningStandalone) {
+        // Chrome & Edge on Android
+        if ('getInstalledRelatedApps' in navigator) {
+          navigator.getInstalledRelatedApps().then(apps => {
+            const isPWAInstalled = apps.some(app => app.platform === 'webapp');
+            setIsAppInstalled(isPWAInstalled);
+          }).catch(console.error);
+        }
+      }
     };
 
     // Initial check
@@ -93,7 +118,7 @@ export default function Download() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
-    // If no install prompt after a short delay, we're probably installed
+    // If no install prompt after a short delay, show content anyway
     const timeout = setTimeout(() => {
       setIsLoading(false);
       setShowContent(true);
@@ -106,7 +131,22 @@ export default function Download() {
   }, []);
 
   const handleInstall = async () => {
-    if (installPrompt) {
+    if (isMobile) {
+      // For mobile devices, trigger the browser's share button
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Install EZJP News',
+            text: 'Install EZJP News for easy access to Japanese news articles',
+            url: window.location.href
+          });
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('Error sharing:', error);
+          }
+        }
+      }
+    } else if (installPrompt) {
       installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
       setInstallPrompt(null);
@@ -115,16 +155,7 @@ export default function Download() {
   };
 
   const handleOpenApp = () => {
-    // For Edge/Chrome PWA
-    if (window.chrome && window.chrome.app) {
-      window.location.replace('/');
-    } else if (window.navigator.standalone) {
-      // For iOS PWA
-      window.location.replace('/');
-    } else {
-      // General fallback
-      window.location.href = '/';
-    }
+    setShowOpenAppHint(true);
   };
 
   const features = [
@@ -149,25 +180,29 @@ export default function Download() {
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
       <Navbar theme={theme} hideNewsListButton />
       
-      <div className="container mx-auto px-4 pt-24 pb-32">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 pt-32 pb-32">
+        <div className="max-w-4xl mx-auto space-y-24">
           {/* Hero Section */}
-          <div className={`text-center mb-16 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+          <div className={`text-center ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
             <div className="mb-8">
-              <img
-                src="/icons/ezjp-app.png"
-                alt="EZJP App"
-                className="w-24 h-24 mx-auto mb-6"
-              />
+              <div className={`w-24 h-24 mx-auto mb-6 rounded-2xl shadow-lg overflow-hidden ${
+                theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+              }`}>
+                <img
+                  src="/icons/ezjp-app.png"
+                  alt="EZJP App"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <h1 className="text-4xl font-bold mb-4">
-                Download EZJP
+                Download EZJP News
               </h1>
-              <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Learn Japanese through news articles, anytime, anywhere
+              <p className={`text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                Access Japanese news articles anytime, anywhere. Install our app for a seamless reading experience.
               </p>
             </div>
 
-            <div className="h-[88px] mb-16">
+            <div>
               {/* Loading State */}
               {!showContent ? (
                 <div className="flex flex-col items-center gap-3">
@@ -180,13 +215,13 @@ export default function Download() {
                 <div className={`flex flex-col sm:flex-row gap-4 justify-center transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
                   <button
                     onClick={handleInstall}
-                    disabled={!installPrompt || isLoading}
+                    disabled={(!installPrompt && !isMobile) || isLoading}
                     className={`px-8 py-4 rounded-lg text-lg font-medium transition-all duration-300 min-w-[200px] ${
                       isLoading
                         ? theme === 'dark'
                           ? 'bg-gray-800 text-gray-400'
                           : 'bg-gray-100 text-gray-500'
-                        : installPrompt
+                        : (installPrompt || isMobile)
                         ? 'bg-green-600 hover:bg-green-500 text-white'
                         : theme === 'dark'
                         ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
@@ -199,10 +234,10 @@ export default function Download() {
                           <LoadingSpinner />
                           <span>Checking...</span>
                         </>
-                      ) : installPrompt ? (
+                      ) : (installPrompt || isMobile) ? (
                         <>
-                          <FaDownload className="w-5 h-5" />
-                          <span>Install App</span>
+                          {isMobile ? <IosShareIcon /> : <FaDownload className="w-5 h-5" />}
+                          <span>{isMobile ? 'Add to Home Screen' : 'Install App'}</span>
                         </>
                       ) : (
                         <>
@@ -213,7 +248,7 @@ export default function Download() {
                     </div>
                   </button>
 
-                  {(!installPrompt && !isLoading) && (
+                  {(!installPrompt && !isLoading && !isStandalone) && (
                     <button
                       onClick={handleOpenApp}
                       className={`px-8 py-4 rounded-lg text-lg font-medium transition-all duration-300 min-w-[200px]
@@ -224,7 +259,7 @@ export default function Download() {
                     >
                       <div className="flex items-center gap-2 justify-center">
                         <FaExternalLinkAlt className="w-5 h-5" />
-                        <span>Open App</span>
+                        <span>How to Open App</span>
                       </div>
                     </button>
                   )}
@@ -233,212 +268,583 @@ export default function Download() {
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className={`p-6 rounded-xl ${
-                  theme === 'dark'
-                    ? 'bg-gray-800/50 hover:bg-gray-800'
-                    : 'bg-white hover:bg-gray-50'
-                } transition-colors shadow-sm`}
-              >
-                <feature.icon
-                  className={`w-8 h-8 mb-4 ${
+          {/* Features Section */}
+          <section>
+            <div className="text-center mb-12">
+              <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                Why Install EZJP News?
+              </h2>
+              <p className={`text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                Enhance your Japanese learning experience with our app
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {features.map((feature) => (
+                <div
+                  key={feature.title}
+                  className={`p-6 rounded-xl border backdrop-blur-sm ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/30 border-gray-700 hover:bg-gray-800/50'
+                      : 'bg-white/50 border-gray-200 hover:bg-white'
+                  } transition-colors shadow-sm hover:shadow-md`}
+                >
+                  <feature.icon
+                    className={`w-10 h-10 mb-4 ${
+                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                    }`}
+                  />
+                  <h3 className={`text-lg font-medium mb-2 ${
+                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                  }`}>
+                    {feature.title}
+                  </h3>
+                  <p className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Installation Guide Section */}
+          <section>
+            <div className={`rounded-2xl border backdrop-blur-sm ${
+              theme === 'dark' ? 'bg-gray-800/30 border-gray-700' : 'bg-white/50 border-gray-200'
+            } shadow-sm overflow-hidden`}>
+              <div className="text-center p-8 border-b border-gray-200/5 dark:border-gray-800">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 ${
+                  theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'
+                } ring-1 ring-gray-900/5 shadow-md`}>
+                  <FaDownload className={`w-8 h-8 ${
                     theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                  }`}
-                />
-                <h3 className={`text-lg font-medium mb-2 ${
+                  }`} />
+                </div>
+                <h2 className={`text-2xl font-bold mb-2 ${
                   theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
                 }`}>
-                  {feature.title}
-                </h3>
-                <p className={`text-sm ${
+                  Installation Guide
+                </h2>
+                <p className={`text-sm max-w-md mx-auto ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>
-                  {feature.description}
+                  Follow the instructions below based on your device and browser
                 </p>
               </div>
-            ))}
-          </div>
 
-          {/* Installation Instructions */}
-          <div className={`mt-16 p-8 rounded-xl ${
-            theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'
-          } shadow-sm`}>
-            <div className="text-center mb-12">
-              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+              <div className={`p-8 space-y-12 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
               }`}>
-                <FaDownload className={`w-7 h-7 ${
-                  theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                }`} />
-              </div>
-              <h2 className={`text-2xl font-bold ${
-                theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                Installation Guide
-              </h2>
-            </div>
+                {/* Desktop Instructions */}
+                <div>
+                  <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
+                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                  }`}>
+                    <div className={`p-2 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
+                      <FaDesktop className="w-5 h-5" />
+                    </div>
+                    <span>Desktop Installation</span>
+                  </h3>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Chrome */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaChrome className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">Google Chrome</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Click the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Or click the menu <FaEllipsisV className="inline w-3.5 h-3.5 mx-1" /> and select "Install EZJP News"</span>
+                        </li>
+                      </ol>
+                    </div>
 
-            <div className={`space-y-8 ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-            }`}>
-              {/* Desktop Instructions */}
-              <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-                }`}>
-                  <FaDesktop className="w-5 h-5" />
-                  Desktop Installation
-                </h3>
-                
-                <div className="space-y-6">
-                  {/* Chrome */}
-                  <div className="flex items-start gap-3">
-                    <FaChrome className={`w-6 h-6 mt-1 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`} />
-                    <div>
-                      <p className="font-medium mb-2">Chrome</p>
-                      <ol className="list-decimal list-inside space-y-1 ml-4">
-                        <li>Click the install button <FaDownload className="inline w-3 h-3" /> in the address bar, or</li>
-                        <li>Click the menu icon <FaEllipsisV className="inline w-3 h-3" /> and select "Install EZJP"</li>
+                    {/* Edge */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaEdge className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">Microsoft Edge</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Click the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Or click the menu <MenuDotsIcon className="inline mx-1" /> and select "Apps" → "Install EZJP News"</span>
+                        </li>
                       </ol>
                     </div>
                   </div>
+                </div>
 
-                  {/* Edge */}
-                  <div className="flex items-start gap-3">
-                    <FaEdge className={`w-6 h-6 mt-1 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`} />
-                    <div>
-                      <p className="font-medium mb-2">Microsoft Edge</p>
-                      <ol className="list-decimal list-inside space-y-1 ml-4">
-                        <li>Click the install button <FaDownload className="inline w-3 h-3" /> in the address bar, or</li>
-                        <li>Click the menu icon <MenuDotsIcon /> and select "Apps" → "Install EZJP News"</li>
+                {/* Mobile Instructions */}
+                <div>
+                  <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
+                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                  }`}>
+                    <div className={`p-2 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
+                      <FaMobile className="w-5 h-5" />
+                    </div>
+                    <span>Mobile Installation</span>
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* iOS */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaApple className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">iOS Safari</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Tap the Share button <IosShareIcon className="inline" /></span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Scroll down and tap "Add to Home Screen"</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>3</span>
+                          <span>Tap "Add" to install</span>
+                        </li>
+                      </ol>
+                    </div>
+
+                    {/* Android */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaAndroid className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">Android Chrome</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Tap the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Or tap the menu <FaEllipsisV className="inline w-3.5 h-3.5 mx-1" /> and select "Install app"</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`text-sm text-center mt-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <p className="max-w-lg mx-auto">
+                    <span className="font-medium">Tip:</span> If you see the "Install App" button at the top of this page, you can click it for a simpler installation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Uninstallation Guide Section */}
+          <section>
+            <div className={`rounded-2xl border backdrop-blur-sm ${
+              theme === 'dark' ? 'bg-gray-800/30 border-gray-700' : 'bg-white/50 border-gray-200'
+            } shadow-sm overflow-hidden`}>
+              <div className="text-center p-8 border-b border-gray-200/5 dark:border-gray-800">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 ${
+                  theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'
+                } ring-1 ring-gray-900/5 shadow-md`}>
+                  <svg 
+                    className={`w-8 h-8 ${
+                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                    }`}
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={1.5} 
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                    />
+                  </svg>
+                </div>
+                <h2 className={`text-2xl font-bold mb-2 ${
+                  theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                }`}>
+                  Uninstallation Guide
+                </h2>
+                <p className={`text-sm max-w-md mx-auto ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Follow these steps if you need to remove the app from your device
+                </p>
+              </div>
+
+              <div className={`p-8 space-y-12 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                {/* Desktop Uninstall */}
+                <div>
+                  <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
+                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                  }`}>
+                    <div className={`p-2 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
+                      <FaDesktop className="w-5 h-5" />
+                    </div>
+                    <span>Desktop Uninstallation</span>
+                  </h3>
+
+                  <div className={`p-5 rounded-xl border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                      : 'bg-gray-50 border-gray-200 hover:bg-white'
+                  } transition-colors duration-300`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`p-2 rounded-lg ${
+                        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                      }`}>
+                        <FaChrome className={`w-6 h-6 ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`} />
+                      </div>
+                      <p className="font-medium text-lg">Chrome & Edge</p>
+                    </div>
+                    <ol className="space-y-3 ml-4 list-none">
+                      <li className="flex items-start gap-3">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          theme === 'dark' 
+                            ? 'bg-gray-800 text-gray-300' 
+                            : 'bg-white text-gray-700'
+                        }`}>1</span>
+                        <span>Click the menu icon <MenuDotsIcon className="inline mx-1" /> in the app window</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          theme === 'dark' 
+                            ? 'bg-gray-800 text-gray-300' 
+                            : 'bg-white text-gray-700'
+                        }`}>2</span>
+                        <span>Select "Uninstall EZJP News"</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          theme === 'dark' 
+                            ? 'bg-gray-800 text-gray-300' 
+                            : 'bg-white text-gray-700'
+                        }`}>3</span>
+                        <span>Click "Remove" to confirm</span>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+
+                {/* Mobile Uninstall */}
+                <div>
+                  <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
+                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                  }`}>
+                    <div className={`p-2 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
+                      <FaMobile className="w-5 h-5" />
+                    </div>
+                    <span>Mobile Uninstallation</span>
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* iOS */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaApple className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">iOS</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Press and hold the EZJP News icon</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Tap "Remove App"</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>3</span>
+                          <span>Tap "Delete App" to confirm</span>
+                        </li>
+                      </ol>
+                    </div>
+
+                    {/* Android */}
+                    <div className={`p-5 rounded-xl border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900/30 border-gray-700 hover:bg-gray-900/50' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-white'
+                    } transition-colors duration-300`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                          <FaAndroid className={`w-6 h-6 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-lg">Android</p>
+                      </div>
+                      <ol className="space-y-3 ml-4 list-none">
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>1</span>
+                          <span>Press and hold the EZJP News icon</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>2</span>
+                          <span>Drag to "Uninstall" or tap "Uninstall"</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-white text-gray-700'
+                          }`}>3</span>
+                          <span>Tap "OK" to confirm</span>
+                        </li>
                       </ol>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Mobile Instructions */}
-              <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-                }`}>
-                  <FaMobile className="w-5 h-5" />
-                  Mobile Installation
-                </h3>
-
-                <div className="space-y-6">
-                  {/* iOS */}
-                  <div className="flex items-start gap-3">
-                    <FaApple className={`w-6 h-6 mt-1 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`} />
-                    <div>
-                      <p className="font-medium mb-2">iOS Safari</p>
-                      <ol className="list-decimal list-inside space-y-1 ml-4">
-                        <li>Tap the Share button <IosShareIcon /></li>
-                        <li>Scroll down and tap "Add to Home Screen"</li>
-                        <li>Tap "Add" to install</li>
-                      </ol>
-                    </div>
-                  </div>
-
-                  {/* Android */}
-                  <div className="flex items-start gap-3">
-                    <FaAndroid className={`w-6 h-6 mt-1 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`} />
-                    <div>
-                      <p className="font-medium mb-2">Android Chrome</p>
-                      <ol className="list-decimal list-inside space-y-1 ml-4">
-                        <li>Tap the install button <FaDownload className="inline w-3 h-3" /> in the address bar, or</li>
-                        <li>Tap the menu icon <FaEllipsisV className="inline w-3 h-3" /> and select "Install app"</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                <p>Note: If you see the "Install App" button at the top of this page, you can click it for a simpler installation.</p>
-              </div>
             </div>
-          </div>
+          </section>
+        </div>
+      </div>
 
-          {/* Uninstallation Instructions */}
-          <div className={`mt-8 p-8 rounded-xl ${
-            theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'
-          } shadow-sm`}>
-            <div className="text-center mb-12">
-              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-              }`}>
-                <svg 
-                  className={`w-7 h-7 ${
+      {/* Add hint message */}
+      {showOpenAppHint && (
+        <div className={`fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm z-50`}>
+          <div className={`relative max-w-md w-full p-8 rounded-2xl shadow-2xl ${
+            theme === 'dark' 
+              ? 'bg-gray-800/95 text-gray-200 border border-gray-700' 
+              : 'bg-white/95 text-gray-800'
+          }`}>
+            {/* Close button */}
+            <button 
+              onClick={() => setShowOpenAppHint(false)}
+              className={`absolute top-4 right-4 p-1.5 rounded-full transition-colors ${
+                theme === 'dark'
+                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`}
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                }`}>
+                  <FaExternalLinkAlt className={`w-5 h-5 ${
                     theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                  }`}
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                  />
-                </svg>
-              </div>
-              <h2 className={`text-2xl font-bold ${
-                theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                Uninstallation Guide
-              </h2>
-            </div>
-
-            <div className={`space-y-6 ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-            }`}>
-              {/* Desktop Uninstall */}
-              <div className="flex items-start gap-3">
-                <FaDesktop className={`w-6 h-6 mt-1 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`} />
-                <div>
-                  <p className="font-medium mb-2">Desktop (Chrome/Edge)</p>
-                  <ol className="list-decimal list-inside space-y-1 ml-4">
-                    <li>Click the menu icon <MenuDotsIcon /> in the app window</li>
-                    <li>Select "Uninstall EZJP News"</li>
-                    <li>Click "Remove" to confirm</li>
-                  </ol>
+                  }`} />
                 </div>
+                <h3 className="text-2xl font-bold mb-2">Open EZJP News</h3>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Follow these steps to open your installed app
+                </p>
               </div>
 
-              {/* Mobile Uninstall */}
-              <div className="flex items-start gap-3">
-                <FaMobile className={`w-6 h-6 mt-1 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`} />
-                <div>
-                  <p className="font-medium mb-2">Mobile</p>
-                  <ol className="list-decimal list-inside space-y-1 ml-4">
-                    <li>Press and hold the EZJP app icon</li>
-                    <li>Select "Remove App" or "Uninstall"</li>
-                    <li>Confirm the uninstallation</li>
-                  </ol>
+              <div className="space-y-4">
+                {isMobile ? (
+                  <div className={`p-5 rounded-xl border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-900/50 border-gray-700' 
+                      : 'bg-gray-50 border-gray-100'
+                  }`}>
+                    <p className="font-medium text-lg mb-4 flex items-center gap-2">
+                      <span className="text-xl">📱</span>
+                      <span>On Your Device</span>
+                    </p>
+                    <ol className="space-y-3 ml-6 list-decimal marker:text-green-500">
+                      <li className="pl-2">Exit your current browser</li>
+                      <li className="pl-2">Go to your device's home screen</li>
+                      <li className="pl-2">Find and tap the EZJP News icon</li>
+                    </ol>
+                  </div>
+                ) : /edg/i.test(navigator.userAgent) ? (
+                  <div className={`p-5 rounded-xl border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-900/50 border-gray-700' 
+                      : 'bg-gray-50 border-gray-100'
+                  }`}>
+                    <p className="font-medium text-lg mb-4 flex items-center gap-2">
+                      <FaEdge className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+                      <span>In Microsoft Edge</span>
+                    </p>
+                    <ol className="space-y-3 ml-6 list-decimal marker:text-green-500">
+                      <li className="pl-2">Look for the <span className="font-medium px-1 py-0.5 rounded bg-gray-800">⋯</span> menu in the top-right corner</li>
+                      <li className="pl-2">Click <span className="font-medium">Apps</span> from the dropdown menu</li>
+                      <li className="pl-2">Select <span className="font-medium">EZJP News</span> from your installed apps</li>
+                    </ol>
+                  </div>
+                ) : /chrome/i.test(navigator.userAgent) ? (
+                  <div className={`p-5 rounded-xl border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-900/50 border-gray-700' 
+                      : 'bg-gray-50 border-gray-100'
+                  }`}>
+                    <p className="font-medium text-lg mb-4 flex items-center gap-2">
+                      <FaChrome className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+                      <span>In Google Chrome</span>
+                    </p>
+                    <ol className="space-y-3 ml-6 list-decimal marker:text-green-500">
+                      <li className="pl-2">Find the <span className="font-medium px-1 py-0.5 rounded bg-gray-800">⋮</span> menu in the top-right corner</li>
+                      <li className="pl-2">Look for <span className="font-medium">EZJP News</span> in the menu</li>
+                      <li className="pl-2">Click <span className="font-medium">Open in EZJP News</span></li>
+                    </ol>
+                  </div>
+                ) : (
+                  <div className={`p-5 rounded-xl border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-900/50 border-gray-700' 
+                      : 'bg-gray-50 border-gray-100'
+                  }`}>
+                    <p className="font-medium text-lg mb-4 flex items-center gap-2">
+                      <span className="text-xl">🌐</span>
+                      <span>In Your Browser</span>
+                    </p>
+                    <p className="ml-6">Look for EZJP News in your browser's apps menu or shortcuts</p>
+                  </div>
+                )}
+
+                <div className={`text-sm text-center pt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <p>After following these steps, the app will open in a separate window</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 } 

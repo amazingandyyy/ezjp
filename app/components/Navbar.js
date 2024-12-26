@@ -277,7 +277,7 @@ export default function Navbar({
             <p className={`text-xs ${
               theme === "dark" ? "text-gray-500" : "text-gray-500"
             }`}>
-              Current Streak
+              Streak
             </p>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function Navbar({
             <p className={`text-xs ${
               theme === "dark" ? "text-gray-500" : "text-gray-500"
             }`}>
-              Articles Finished
+              Read
             </p>
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function Navbar({
 
         {/* Right side - Profile button */}
         <div>
-          <div ref={profileRef} className="relative">
+          <div ref={profileRef} className="relative static sm:relative">
             <button
               onClick={() => {
                 if (!user) {
@@ -479,12 +479,14 @@ export default function Navbar({
             {/* Profile panel - only shown when user is logged in and panel is open */}
             {user && showProfile && (
               <div
-                className={`absolute top-full right-0 mt-1 rounded-2xl shadow-lg border w-[380px] overflow-hidden
-                ${
-                  theme === "dark"
-                    ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-md"
-                    : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-md"
-                }`}
+                className={`fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full mt-1 
+                  rounded-2xl shadow-lg border overflow-hidden
+                  sm:w-[380px]
+                  ${
+                    theme === "dark"
+                      ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-md"
+                      : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-md"
+                  }`}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Profile Section */}
@@ -568,7 +570,7 @@ export default function Navbar({
                             <p className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-500"
                             }`}>
-                              Current Streak
+                              Streak
                             </p>
                           </div>
                         </div>
@@ -607,7 +609,7 @@ export default function Navbar({
                             <p className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-500"
                             }`}>
-                              Articles Finished
+                              Read
                             </p>
                           </div>
                         </div>
