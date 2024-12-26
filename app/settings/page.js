@@ -399,19 +399,19 @@ export default function Settings() {
                       <img
                         src={profile.avatar_url}
                         alt="Profile"
-                        className="w-16 sm:w-20 h-16 sm:h-20 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
+                        className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl object-cover border-2 border-gray-200/10 dark:border-gray-700/50 transition-all duration-200"
                       />
                     ) : (
-                      <div className={`w-16 sm:w-20 h-16 sm:h-20 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
+                      <div className={`w-16 sm:w-20 h-16 sm:h-20 rounded-2xl flex items-center justify-center border-2 border-gray-200/10 dark:border-gray-700/50 transition-all duration-200
                         ${profileData.currentTheme === "dark"
-                          ? "bg-gray-800 text-gray-200"
+                          ? "bg-gray-700 text-gray-300"
                           : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         <FaUser className="w-6 sm:w-8 h-6 sm:h-8" />
                       </div>
                     )}
-                    <div className={`absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ${
+                    <div className={`absolute inset-0 flex items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ${
                       profileData.currentTheme === "dark"
                         ? "bg-black/50"
                         : "bg-black/30"
@@ -465,21 +465,11 @@ export default function Settings() {
                           <span className={`${
                             profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"
                           } truncate`}>{user?.email}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 ${
-                            profileData.currentTheme === "dark" 
-                              ? "bg-blue-500/10 text-blue-400" 
-                              : "bg-blue-50 text-blue-600"
-                          }`}>
-                            <svg className="w-3 h-3 relative top-[0.5px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0-4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0-4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0 12a7 7 0 100-14 7 7 0 000 14z" fill="currentColor"/>
-                            </svg>
-                            <span className="relative top-px">2FA Enabled</span>
-                          </span>
                         </div>
                         <p className={`text-xs ${
                           profileData.currentTheme === "dark" ? "text-gray-500" : "text-gray-500"
                         }`}>
-                          Your account is protected by Google's advanced security features
+                          Your account is secured with Google Sign In
                         </p>
                       </div>
                     </div>
@@ -498,15 +488,7 @@ export default function Settings() {
                     >
                       Username
                     </label>
-                    {!profileData.username && (
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${
-                        profileData.currentTheme === "dark"
-                          ? "bg-yellow-500/10 text-yellow-400"
-                          : "bg-yellow-50 text-yellow-600"
-                      }`}>
-                        Missing
-                      </span>
-                    )}
+                    
                   </div>
                   {editState.username ? (
                     <div className="flex items-center gap-2">
@@ -590,7 +572,22 @@ export default function Settings() {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <span>{profileData.username || "No username set"}</span>
+                        {profileData.username ? (
+                          <span>{profileData.username}</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className={`${
+                              profileData.currentTheme === "dark"
+                                ? "text-red-400"
+                                : "text-red-600"
+                            }`}>No username set</span>
+                            <span className={`text-sm px-2 py-0.5 rounded-md ${
+                              profileData.currentTheme === "dark"
+                                ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                : "bg-red-50 text-red-600 border border-red-200"
+                            }`}>Required</span>
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() =>

@@ -313,37 +313,37 @@ export default function NewsList() {
         hideNewsListButton={true}
       />
 
-      <div className="container mx-auto p-4 pt-24">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+      <div className="container mx-auto px-6 py-8 pt-24 max-w-[1600px]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
           <h1
-            className={`text-3xl font-bold text-center ${
+            className={`text-4xl font-bold tracking-tight ${
               theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
             }`}
           >
-            Find the latest news
+            Latest News
           </h1>
           {user && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               <div className={`text-sm ${
                 theme === "dark" ? "text-gray-400" : "text-gray-600"
               }`}>
                 <span className="font-medium text-green-500">{finishedStats.recent}</span>
-                <span className="mx-1">/</span>
+                <span className="mx-1.5">/</span>
                 <span>{finishedStats.total}</span>
-                <span className="ml-1 text-xs opacity-75">finished in the past 7 days</span>
+                <span className="ml-2 text-xs opacity-75">finished this week</span>
               </div>
               <button
                 onClick={() => setHideFinished(!hideFinished)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full transition-all duration-300
                   ${theme === "dark"
-                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                    ? "bg-gray-800/80 hover:bg-gray-700 text-gray-300"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                   }`}
               >
                 {hideFinished ? (
-                  <FaEye className="w-5 h-5 text-green-500" />
+                  <FaEye className="w-4 h-4 text-green-500" />
                 ) : (
-                  <FaEyeSlash className="w-5 h-5 text-gray-400" />
+                  <FaEyeSlash className="w-4 h-4 text-gray-400" />
                 )}
                 <span className="text-sm font-medium">
                   {hideFinished ? "Show all articles" : "Hide finished"}
@@ -355,8 +355,8 @@ export default function NewsList() {
 
         {/* Today's News Section */}
         {newsList.some(news => isToday(news.date)) && (
-          <div className="mb-12">
-            <h2 className={`text-xl font-semibold mb-6 flex items-center gap-2 ${
+          <div className="mb-16">
+            <h2 className={`text-xl font-semibold mb-8 flex items-center gap-3 ${
               theme === "dark" ? "text-gray-200" : "text-gray-800"
             }`}>
               <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -364,7 +364,7 @@ export default function NewsList() {
               </svg>
               <span>Today's News</span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {newsList
                 .filter(news => isToday(news.date))
                 .filter(news => !hideFinished || !finishedUrls.has(news.url))
@@ -384,12 +384,12 @@ export default function NewsList() {
 
         {/* Previous News Section */}
         <div>
-          <h2 className={`text-xl font-semibold mb-6 ${
+          <h2 className={`text-xl font-semibold mb-8 ${
             theme === "dark" ? "text-gray-200" : "text-gray-800"
           }`}>
             Previous News
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {newsList
               .filter(news => !isToday(news.date))
               .filter(news => !hideFinished || !finishedUrls.has(news.url))
@@ -410,7 +410,7 @@ export default function NewsList() {
         {hasMore && (
           <div
             ref={loadMoreRef}
-            className="py-8 flex justify-center"
+            className="py-12 flex justify-center"
           >
             {loadingMore ? (
               <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
@@ -432,31 +432,33 @@ export default function NewsList() {
 const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
   <div
     onClick={onClick}
-    className={`transition-all cursor-pointer group ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
+    className={`transition-all duration-300 cursor-pointer group hover:translate-y-[-4px] ${
+      finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''
+    }`}
   >
     <div className="relative">
       {news.image && (
-        <div className="aspect-video relative overflow-hidden rounded-lg">
+        <div className="aspect-video relative overflow-hidden rounded-xl shadow-sm">
           <img
             src={news.image}
             alt={news.title}
-            className="object-cover w-full h-full transition-all duration-700 blur-sm group-hover:scale-110"
+            className="object-cover w-full h-full transition-all duration-700 blur-sm group-hover:scale-105"
             onLoad={(e) => {
               e.target.classList.remove('blur-sm');
             }}
           />
         </div>
       )}
-      <div className="absolute top-2 right-2 flex gap-1">
+      <div className="absolute top-3 right-3 flex gap-2">
         {archivedUrls.has(news.url) && (
-          <div className="bg-red-500 rounded-full p-1.5 shadow-lg">
-            <FaHeart className="w-4 h-4 text-white" />
+          <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg transition-transform duration-300 hover:scale-110">
+            <FaHeart className="w-3.5 h-3.5 text-white" />
           </div>
         )}
         {finishedUrls.has(news.url) && (
-          <div className="bg-emerald-500 rounded-full p-1.5 shadow-lg">
+          <div className="bg-emerald-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg transition-transform duration-300 hover:scale-110">
             <svg 
-              className="w-4 h-4 text-white"
+              className="w-3.5 h-3.5 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -472,9 +474,9 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
         )}
       </div>
     </div>
-    <div className="pt-3">
+    <div className="pt-4">
       <h2
-        className={`text-xl font-semibold mb-2 ${
+        className={`text-lg font-semibold leading-snug mb-2.5 line-clamp-2 ${
           theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
         }`}
       >

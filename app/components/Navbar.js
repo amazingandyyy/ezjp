@@ -6,6 +6,8 @@ import {
   FaHeart,
   FaBookOpen,
   FaUser,
+  FaFire,
+  FaCheck,
 } from "react-icons/fa";
 import { useAuth } from '../../lib/AuthContext';
 import Image from 'next/image';
@@ -245,21 +247,12 @@ export default function Navbar({
     <div className="px-4 py-3">
       <div className="grid grid-cols-2 gap-8">
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-9 flex items-center justify-center rounded-md ${
+          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
             theme === "dark"
-              ? "bg-orange-500/10 text-orange-400"
-              : "bg-orange-50 text-orange-600"
+              ? "bg-orange-500/20 text-orange-400"
+              : "bg-orange-100 text-orange-600"
           }`}>
-            <svg 
-              stroke="currentColor" 
-              fill="currentColor" 
-              strokeWidth="0" 
-              viewBox="0 0 384 512" 
-              className="w-4 h-4 flex-shrink-0" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M216 23.86c0-23.8-30.65-32.77-44.15-13.04C48 191.85 224 200 224 288c0 35.63-29.11 64.46-64.85 63.99-35.17-.45-63.15-29.77-63.15-64.94v-85.51c0-21.7-26.47-32.23-41.43-16.5C27.8 213.16 0 261.33 0 320c0 105.87 86.13 192 192 192s192-86.13 192-192c0-170.29-168-193-168-296.14z"></path>
-            </svg>
+            <FaFire className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-baseline gap-1.5">
@@ -275,26 +268,19 @@ export default function Navbar({
               </p>
             </div>
             <p className={`text-xs ${
-              theme === "dark" ? "text-gray-500" : "text-gray-500"
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
             }`}>
               Streak
             </p>
           </div>
         </div>
         <div className="flex items-start gap-3">
-          <div className={`w-12 h-9 flex items-center justify-center rounded-md ${
+          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
             theme === "dark"
-              ? "bg-green-500/10 text-green-400"
-              : "bg-green-50 text-green-600"
+              ? "bg-green-500/20 text-green-400"
+              : "bg-green-100 text-green-600"
           }`}>
-            <svg 
-              className="w-5 h-5 flex-shrink-0" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <FaCheck className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-baseline gap-1.5">
@@ -312,7 +298,7 @@ export default function Navbar({
               )}
             </div>
             <p className={`text-xs ${
-              theme === "dark" ? "text-gray-500" : "text-gray-500"
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
             }`}>
               Read
             </p>
@@ -343,11 +329,11 @@ export default function Navbar({
     <nav className="fixed top-0 left-0 right-0 z-50 h-16">
       <div
         className={`w-full h-full flex items-center justify-between px-6
-        border-b-2 transition-all
+        border-b-2 backdrop-blur-md transition-all
         ${
           theme === "dark"
-            ? "bg-gray-800 border-gray-600/50"
-            : "[color-scheme:light] bg-white border-gray-200"
+            ? "bg-gray-800/80 border-gray-600/50"
+            : "[color-scheme:light] bg-white/80 border-gray-200/50"
         }`}
       >
         {/* Left side - Menu button and Logo */}
@@ -355,7 +341,7 @@ export default function Navbar({
           {!hideNewsListButton && (
             <button
               onClick={() => onSidebarToggle(!showSidebar)}
-              className={`p-3 rounded-lg shadow-lg border flex items-center justify-center 
+              className={`p-3 rounded-xl shadow-lg border flex items-center justify-center 
                 transition-colors duration-150
                 ${
                   theme === "dark"
@@ -434,30 +420,30 @@ export default function Navbar({
               title={user ? "" : "Join Now"}
             >
               {user ? (
-                <div className="flex items-center gap-2 py-2 rounded-lg transition-colors">
+                <div className="flex items-center gap-2 py-2 rounded-xl transition-colors">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
                       alt="Profile"
-                      className={`w-8 h-8 rounded-full object-cover border-2 transition-transform hover:scale-105 ${
+                      className={`w-8 h-8 rounded-xl object-cover transition-all duration-200 hover:scale-105 ${
                         showProfile 
                           ? theme === "dark"
-                            ? "border-green-400"
-                            : "border-green-400"
+                            ? "shadow-lg shadow-gray-900/50"
+                            : "shadow-lg shadow-gray-400/50"
                           : theme === "dark"
-                            ? "border-gray-700"
-                            : "border-gray-200"
+                            ? "border-2 border-gray-700"
+                            : "border-2 border-gray-200"
                       }`}
                     />
                   ) : (
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-transform hover:scale-105
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105
                       ${showProfile 
                         ? theme === "dark"
-                          ? "border-green-400"
-                          : "border-green-400"
+                          ? "shadow-lg shadow-gray-900/50"
+                          : "shadow-lg shadow-gray-400/50"
                         : theme === "dark"
-                          ? "border-gray-700"
-                          : "border-gray-200"
+                          ? "border-2 border-gray-700"
+                          : "border-2 border-gray-200"
                       }
                       ${theme === "dark"
                         ? "bg-gray-800 text-gray-200"
@@ -480,12 +466,12 @@ export default function Navbar({
             {user && showProfile && (
               <div
                 className={`fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full mt-1 
-                  rounded-2xl shadow-lg border overflow-hidden
-                  sm:w-[380px]
+                  rounded-2xl shadow-lg border-2 overflow-hidden
+                  sm:w-[320px]
                   ${
                     theme === "dark"
-                      ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-md"
-                      : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-md"
+                      ? "bg-gray-800 border-gray-700 backdrop-blur-md"
+                      : "[color-scheme:light] bg-white border-gray-200 backdrop-blur-md"
                   }`}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -504,11 +490,11 @@ export default function Navbar({
                         <img
                           src={profile.avatar_url}
                           alt="Profile"
-                          className="w-11 h-11 rounded-full object-cover border border-gray-200/10 dark:border-gray-700/50"
+                          className="w-11 h-11 rounded-xl object-cover border-2 border-gray-200/10 dark:border-gray-700/50"
                         />
                       ) : (
                         <div
-                          className={`w-11 h-11 rounded-full flex items-center justify-center border border-gray-200/10 dark:border-gray-700/50
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center border-2 border-gray-200/10 dark:border-gray-700/50
                           ${
                             theme === "dark"
                               ? "bg-gray-700 text-gray-300"
@@ -547,12 +533,10 @@ export default function Navbar({
                         <div className="flex items-start gap-3">
                           <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
                             theme === "dark"
-                              ? "bg-orange-500/10 text-orange-400"
-                              : "bg-orange-50 text-orange-600"
+                              ? "bg-orange-500/20 text-orange-400"
+                              : "bg-orange-100 text-orange-600"
                           }`}>
-                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <FaFire className="w-5 h-5" />
                           </div>
                           <div>
                             <div className="flex items-baseline gap-1.5">
@@ -579,17 +563,10 @@ export default function Navbar({
                         <div className="flex items-start gap-3">
                           <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
                             theme === "dark"
-                              ? "bg-green-500/10 text-green-400"
-                              : "bg-green-50 text-green-600"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-green-100 text-green-600"
                           }`}>
-                            <svg 
-                              className="w-5 h-5 flex-shrink-0" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <FaCheck className="w-5 h-5" />
                           </div>
                           <div>
                             <div className="flex items-baseline gap-1.5">

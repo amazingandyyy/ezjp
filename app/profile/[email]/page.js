@@ -538,20 +538,18 @@ export default function UserProfile() {
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10">
                 <div className="flex flex-col items-center sm:items-start">
                   {profile?.avatar_url ? (
-                    <div className="group relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
+                    <div className="relative">
                       <img
                         src={profile.avatar_url}
                         alt={profile?.username || 'Profile'}
-                        className={`relative w-32 h-32 rounded-3xl object-cover shadow-xl transform transition-all duration-500 group-hover:scale-[1.02] ${
+                        className={`w-32 h-32 rounded-[32px] object-cover shadow-lg transition-all duration-300 hover:scale-[1.01] ${
                           theme === 'dark' ? 'ring-1 ring-white/10' : 'ring-1 ring-black/5'
                         }`}
                       />
                     </div>
                   ) : (
-                    <div className="group relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
-                      <div className={`relative w-32 h-32 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl transform transition-all duration-500 group-hover:scale-[1.02] ${
+                    <div className="relative">
+                      <div className={`w-32 h-32 rounded-[32px] flex items-center justify-center text-5xl font-bold shadow-lg transition-all duration-300 hover:scale-[1.01] ${
                         theme === 'dark' ? 'bg-gray-800/80 text-gray-200' : 'bg-white text-gray-700'
                       }`}>
                         {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
@@ -579,27 +577,27 @@ export default function UserProfile() {
 
                   {/* Self Introduction */}
                   {profile?.self_introduction && (
-                    <div className={`mt-6 p-6 rounded-2xl backdrop-blur-sm transition-all duration-500 hover:scale-[1.01] ${
+                    <div className={`mt-8 transition-all duration-500 ${
                       theme === 'dark' 
-                        ? 'bg-gray-800/30 hover:bg-gray-800/40 border border-gray-700/50' 
-                        : 'bg-white/90 hover:bg-white border border-gray-200/50'
-                    } ${theme === 'dark' ? 'shadow-none' : 'shadow-lg'}`}>
-                      <div className="flex gap-3">
-                        <div className={`text-5xl font-serif ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                        ? 'text-gray-400'
+                        : 'text-gray-600'
+                    }`}>
+                      <div className="flex gap-2">
+                        <div className={`text-4xl font-serif ${theme === 'dark' ? 'text-gray-600/50' : 'text-gray-300/70'}`}>"</div>
                         <p className={`text-sm leading-relaxed whitespace-pre-wrap italic tracking-wide ${
                           theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                         }`}>
                           {profile.self_introduction.toUpperCase()}
                         </p>
-                        <div className={`text-5xl font-serif self-end ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                        <div className={`text-4xl font-serif self-end ${theme === 'dark' ? 'text-gray-600/50' : 'text-gray-300/70'}`}>"</div>
                       </div>
                     </div>
                   )}
 
                   {/* Japanese Level, Duolingo Username, and Share button */}
-                  <div className="mt-6 flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                  <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3">
                     {profile?.japanese_level && (
-                      <div className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
+                      <div className={`inline-flex h-10 items-center px-5 rounded-xl text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
                         theme === 'dark'
                           ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20'
                           : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-200/50'
@@ -613,7 +611,7 @@ export default function UserProfile() {
                         href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
+                        className={`inline-flex h-10 items-center gap-2.5 px-5 rounded-xl text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
                           theme === 'dark'
                             ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
                             : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
@@ -634,7 +632,7 @@ export default function UserProfile() {
                     <div className="relative" ref={shareMenuRef}>
                       <button
                         onClick={() => setShowShareMenu(!showShareMenu)}
-                        className={`p-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${
+                        className={`h-10 px-5 rounded-xl backdrop-blur-sm transition-all duration-300 inline-flex items-center ${
                           theme === 'dark'
                             ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border border-gray-700/50'
                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/70 border border-gray-200/50'
@@ -697,7 +695,7 @@ export default function UserProfile() {
                   
                   <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
                     <div>
-                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                      <div className={`text-3xl sm:text-3xl lg:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
                         theme === 'dark' 
                           ? 'from-gray-100 to-gray-300'
                           : 'from-gray-700 to-gray-900'
@@ -723,7 +721,7 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div>
-                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                      <div className={`text-3xl sm:text-3xl lg:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
                         theme === 'dark' 
                           ? 'from-gray-100 to-gray-300'
                           : 'from-gray-700 to-gray-900'
@@ -736,7 +734,7 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div>
-                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                      <div className={`text-3xl sm:text-3xl lg:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
                         theme === 'dark' 
                           ? 'from-gray-100 to-gray-300'
                           : 'from-gray-700 to-gray-900'
@@ -749,7 +747,7 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div>
-                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                      <div className={`text-3xl sm:text-3xl lg:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
                         theme === 'dark' 
                           ? 'from-gray-100 to-gray-300'
                           : 'from-gray-700 to-gray-900'
@@ -853,17 +851,14 @@ export default function UserProfile() {
                       router.push(
                         `/read?source=${encodeURIComponent(item.data.url)}`
                       )
-                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-all duration-500 group hover:scale-[1.01] text-left ${
+                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-colors duration-300 ${
                       theme === 'dark' 
                         ? 'bg-gray-800/30 hover:bg-gray-800/40 border border-gray-700/50' 
-                        : 'bg-white/90 hover:shadow-xl border border-gray-200/50'
+                        : 'bg-white/90 hover:bg-white/95 border border-gray-200/50'
                     }`}>
-                      {/* Background gradient effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      
-                      <div className="relative flex flex-col gap-4">
+                      <div className="flex flex-col gap-4">
                         <div className="flex flex-col sm:flex-row gap-6">
-                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50 transition-transform duration-500 group-hover:scale-[1.02]">
+                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50">
                             {item.data.article?.images?.[0] ? (
                               <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
                                 e.target.parentElement.style.display = "none";
