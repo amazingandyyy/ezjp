@@ -320,7 +320,10 @@ export default function NewsList() {
                     <img
                       src={news.image}
                       alt={news.title}
-                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover w-full h-full transition-all duration-700 blur-sm group-hover:scale-110"
+                      onLoad={(e) => {
+                        e.target.classList.remove('blur-sm');
+                      }}
                     />
                   </div>
                 )}

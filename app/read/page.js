@@ -31,14 +31,12 @@ const LoadingIndicator = ({ loading, theme }) => {
   
   const spinnerColors = {
     dark: 'border-gray-300 border-r-transparent',
-    light: 'border-gray-400 border-r-transparent',
-    yellow: 'border-yellow-500 border-r-transparent'
+    light: 'border-gray-400 border-r-transparent'
   };
 
   const textColors = {
     dark: 'text-gray-500',
-    light: 'text-gray-500',
-    yellow: 'text-yellow-700'
+    light: 'text-gray-500'
   };
   
   return (
@@ -269,13 +267,10 @@ function NewsReaderContent() {
     preferred_voice: null,
     reading_level: 'beginner'
   });
-  const [showFurigana, setShowFurigana] = useState(true);
-  const [speed, setSpeed] = useState('1.0');
   const [updatingPreferences, setUpdatingPreferences] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarView, setSidebarView] = useState('latest');
-  const [showImages, setShowImages] = useState(true);
   const [recentNews, setRecentNews] = useState([]);
   const [savedNews, setSavedNews] = useState([]);
   const [recentNewsError, setRecentNewsError] = useState(false);
@@ -293,8 +288,6 @@ function NewsReaderContent() {
   const [isPaused, setIsPaused] = useState(false);
   const [isVoiceLoading, setIsVoiceLoading] = useState(false);
   const [audioError, setAudioError] = useState('');
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [isRepeatMode, setIsRepeatMode] = useState(false);
   const [repeatCountdown, setRepeatCountdown] = useState(0);
   const repeatModeRef = useRef(false);
   const [audioCache, setAudioCache] = useState({});
@@ -305,10 +298,10 @@ function NewsReaderContent() {
   const [newsContent, setNewsContent] = useState([]);
   const [newsDate, setNewsDate] = useState(null);
   const [newsImages, setNewsImages] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [currentSentence, setCurrentSentence] = useState(-1);
   const [sentences, setSentences] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Refs
   const sidebarRef = useRef(null);
@@ -934,14 +927,6 @@ function NewsReaderContent() {
           select: 'bg-gray-800 border-gray-700 text-gray-100',
           controlBg: 'bg-gray-200 dark:bg-gray-700'
         };
-      case 'yellow':
-        return {
-          main: '[color-scheme:light] bg-yellow-50 text-[rgb(19,31,36)]',
-          input: '[color-scheme:light] bg-white border-yellow-200 text-[rgb(19,31,36)]',
-          button: '[color-scheme:light]',
-          select: '[color-scheme:light] bg-white border-yellow-200 text-[rgb(19,31,36)]',
-          controlBg: '[color-scheme:light] bg-gray-200'
-        };
       default: // light theme
         return {
           main: '[color-scheme:light] bg-white text-[rgb(19,31,36)]',
@@ -956,10 +941,10 @@ function NewsReaderContent() {
   const themeClasses = getThemeClasses();
 
   useEffect(() => {
-    if (!isPlaying && autoPlay && currentSentence < sentences.length) {
+    if (!isPlaying && preferenceState.auto_play && currentSentence < sentences.length) {
       playCurrentSentence();
     }
-  }, [currentSentence, autoPlay]);
+  }, [currentSentence, preferenceState.auto_play]);
 
   useEffect(() => {
     return () => {
@@ -1026,21 +1011,19 @@ function NewsReaderContent() {
 
   // Add a useEffect to handle repeat mode changes
   useEffect(() => {
-    if (!isRepeatMode && audioElement) {
+    if (!preferenceState.repeat_mode && audioElement) {
       // If repeat mode is turned off during playback
       setRepeatCountdown(0);
     }
-  }, [isRepeatMode]);
+  }, [preferenceState.repeat_mode]);
 
   // Update the repeat toggle button handler
   const handleRepeatToggle = () => {
-    const newRepeatMode = !isRepeatMode;
-    console.log('Toggling repeat mode to:', newRepeatMode);
-    setIsRepeatMode(newRepeatMode);
+    const newRepeatMode = !preferenceState.repeat_mode;
+    setPreferenceState(prev => ({ ...prev, repeat_mode: newRepeatMode }));
     repeatModeRef.current = newRepeatMode;
     
     if (!newRepeatMode) {
-      console.log('Turning off repeat mode');
       setRepeatCountdown(0);
       if (window.repeatInterval) {
         clearInterval(window.repeatInterval);
@@ -1227,14 +1210,9 @@ function NewsReaderContent() {
   // Update the repeat countdown styles
   const getRepeatCountdownClasses = () => {
     const baseClasses = 'fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-medium z-50';
-    switch (preferenceState.theme) {
-      case 'dark':
-        return `${baseClasses} bg-gray-800 text-gray-100`;
-      case 'yellow':
-        return `${baseClasses} bg-yellow-100 text-yellow-800 border-2 border-yellow-400`;
-      default: // light
-        return `${baseClasses} bg-white text-[rgb(19,31,36)] shadow-md`;
-    }
+    return preferenceState.theme === 'dark'
+      ? `${baseClasses} bg-gray-800 text-gray-100`
+      : `${baseClasses} bg-white text-[rgb(19,31,36)] shadow-md`;
   };
 
   // Add function to update reading stats
@@ -1701,18 +1679,19 @@ function NewsReaderContent() {
           {/* Settings panel */}
           {showSettings && (
             <div
-              className={`absolute bottom-full right-0 mb-2 p-4 rounded-lg shadow-lg border w-72
+              className={`absolute bottom-full right-0 mb-2 p-4 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] border backdrop-blur-sm
+              w-[calc(100vw-2rem)] sm:w-[400px] md:w-[320px]
               ${
                 preferenceState.theme === "dark"
-                  ? "bg-gray-800 border-gray-700 text-gray-100"
-                  : "[color-scheme:light] bg-white border-gray-200 text-[rgb(19,31,36)]"
+                  ? "bg-gray-800/95 border-gray-700"
+                  : "[color-scheme:light] bg-white/95 border-gray-200"
               }`}
             >
-              <div className="space-y-4">
+              <div className="space-y-6 sm:space-y-4">
                 {/* Font size controls */}
-                <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-2">
                   <label
-                    className={`text-sm font-medium flex items-center ${
+                    className={`text-base sm:text-sm font-medium flex items-center ${
                       preferenceState.theme === "dark"
                         ? ""
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
@@ -1735,14 +1714,14 @@ function NewsReaderContent() {
                         key={size}
                         onClick={() => handleFontSizeChange(size)}
                         disabled={updatingPreferences.font_size}
-                        className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center ${sizeClass} ${
+                        className={`flex-1 px-3 py-2.5 sm:py-1.5 rounded flex items-center justify-center ${sizeClass} transition-all duration-200 border ${
                           preferenceState.font_size === size
                             ? preferenceState.theme === "dark"
-                              ? "bg-gray-600 text-white"
-                              : "[color-scheme:light] bg-gray-700 text-white"
+                              ? "bg-green-500/10 text-green-400 border-green-500/50"
+                              : "[color-scheme:light] bg-green-50 text-green-700 border-green-500/50"
                             : preferenceState.theme === "dark"
-                            ? "bg-gray-700 text-gray-300"
-                            : "[color-scheme:light] bg-gray-200 text-gray-600"
+                            ? "bg-gray-700 text-gray-300 border-transparent hover:border-gray-600"
+                            : "[color-scheme:light] bg-gray-200 text-gray-600 border-transparent hover:border-gray-300"
                         } ${
                           updatingPreferences.font_size
                             ? "opacity-50 cursor-not-allowed"
@@ -1756,9 +1735,9 @@ function NewsReaderContent() {
                 </div>
 
                 {/* Speed control */}
-                <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-2">
                   <label
-                    className={`text-sm font-medium flex items-center ${
+                    className={`text-base sm:text-sm font-medium flex items-center ${
                       preferenceState.theme === "dark"
                         ? ""
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
@@ -1774,10 +1753,10 @@ function NewsReaderContent() {
                     value={preferenceState.preferred_speed}
                     onChange={(e) => handleSpeedChange(e.target.value)}
                     disabled={updatingPreferences.preferred_speed}
-                    className={`w-full p-2 border rounded ${
+                    className={`w-full p-3 sm:p-2 text-base sm:text-sm rounded transition-all duration-200 border ${
                       preferenceState.theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-gray-100"
-                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
+                        ? "bg-gray-800 border-gray-700 text-gray-100 focus:border-green-500/50"
+                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)] focus:border-green-500/50"
                     } ${
                       updatingPreferences.preferred_speed
                         ? "opacity-50 cursor-not-allowed"
@@ -1792,9 +1771,9 @@ function NewsReaderContent() {
                 </div>
 
                 {/* Theme controls */}
-                <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-2">
                   <label
-                    className={`text-sm font-medium flex items-center ${
+                    className={`text-base sm:text-sm font-medium flex items-center ${
                       preferenceState.theme === "dark"
                         ? ""
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
@@ -1810,20 +1789,19 @@ function NewsReaderContent() {
                     {[
                       { id: "light", icon: <FaSun />, title: "Light" },
                       { id: "dark", icon: <FaMoon />, title: "Dark" },
-                      { id: "yellow", icon: <FaBook />, title: "Yellow" },
                     ].map((themeOption) => (
                       <button
                         key={themeOption.id}
                         onClick={() => handleThemeChange(themeOption.id)}
                         disabled={updatingPreferences.theme}
-                        className={`flex-1 px-3 py-1.5 rounded flex items-center justify-center gap-2 ${
+                        className={`flex-1 px-3 py-2.5 sm:py-1.5 rounded flex items-center justify-center gap-2 transition-all duration-200 border ${
                           preferenceState.theme === themeOption.id
                             ? preferenceState.theme === "dark"
-                              ? "bg-gray-600 text-white"
-                              : "[color-scheme:light] bg-gray-700 text-white"
+                              ? "bg-green-500/10 text-green-400 border-green-500/50"
+                              : "[color-scheme:light] bg-green-50 text-green-700 border-green-500/50"
                             : preferenceState.theme === "dark"
-                            ? "bg-gray-700 text-gray-300"
-                            : "[color-scheme:light] bg-gray-200 text-gray-600"
+                            ? "bg-gray-700 text-gray-300 border-transparent hover:border-gray-600"
+                            : "[color-scheme:light] bg-gray-200 text-gray-600 border-transparent hover:border-gray-300"
                         } ${
                           updatingPreferences.theme
                             ? "opacity-50 cursor-not-allowed"
@@ -1831,16 +1809,18 @@ function NewsReaderContent() {
                         }`}
                       >
                         {themeOption.icon}
-                        <span className="text-sm">{themeOption.title}</span>
+                        <span className="text-base sm:text-sm">
+                          {themeOption.title}
+                        </span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Furigana control */}
-                <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-2">
                   <label
-                    className={`text-sm font-medium flex items-center ${
+                    className={`text-base sm:text-sm font-medium flex items-center ${
                       preferenceState.theme === "dark"
                         ? ""
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
@@ -1855,39 +1835,55 @@ function NewsReaderContent() {
                   <button
                     onClick={toggleFurigana}
                     disabled={updatingPreferences.show_furigana}
-                    className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                      preferenceState.show_furigana
-                        ? preferenceState.theme === "dark"
-                          ? "bg-gray-600 text-white"
-                          : "[color-scheme:light] bg-gray-700 text-white"
-                        : preferenceState.theme === "dark"
-                        ? "bg-gray-700 text-gray-300"
-                        : "[color-scheme:light] bg-gray-200 text-gray-600"
+                    className={`w-full flex items-center justify-between px-4 py-3 sm:px-3 sm:py-2 rounded transition-all duration-200 border ${
+                      preferenceState.theme === "dark"
+                        ? "bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-600"
+                        : "[color-scheme:light] bg-white border-gray-300 text-gray-600 hover:border-gray-400"
                     } ${
                       updatingPreferences.show_furigana
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                   >
-                    {preferenceState.show_furigana
-                      ? "Hide Furigana"
-                      : "Show Furigana"}
+                    <div className="flex items-center gap-3">
+                      <span className="text-base sm:text-sm">
+                        {preferenceState.show_furigana ? "Visible" : "Hidden"}
+                      </span>
+                      <ruby className="text-base sm:text-sm">
+                        日本語
+                        {preferenceState.show_furigana && (
+                          <rt className="transition-opacity duration-200">
+                            にほんご
+                          </rt>
+                        )}
+                      </ruby>
+                    </div>
+                    <div
+                      className={`relative inline-flex h-7 sm:h-6 w-12 sm:w-11 items-center rounded-full transition-colors duration-200 ease-in-out border ${
+                        preferenceState.show_furigana
+                          ? preferenceState.theme === "dark"
+                            ? "bg-green-500/20 border-green-500/30"
+                            : "bg-green-50 border-green-500/30"
+                          : preferenceState.theme === "dark"
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-gray-200 border-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-5 sm:h-4 w-5 sm:w-4 transform rounded-full transition-transform duration-200 ease-in-out border ${
+                          preferenceState.show_furigana
+                            ? "translate-x-6 bg-green-600 border-green-500"
+                            : "translate-x-1 bg-white border-gray-300"
+                        } shadow-sm`}
+                      />
+                    </div>
                   </button>
-                  <span
-                    className={`text-xs block text-center ${
-                      preferenceState.theme === "dark"
-                        ? "text-gray-500"
-                        : "[color-scheme:light] text-gray-500"
-                    }`}
-                  >
-                    (Hover to show when hidden)
-                  </span>
                 </div>
 
                 {/* Voice selection control */}
-                <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-2">
                   <label
-                    className={`text-sm font-medium flex items-center ${
+                    className={`text-base sm:text-sm font-medium flex items-center ${
                       preferenceState.theme === "dark"
                         ? ""
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
@@ -1903,10 +1899,10 @@ function NewsReaderContent() {
                     value={preferenceState.preferred_voice || ""}
                     onChange={(e) => handleVoiceChange(e.target.value)}
                     disabled={updatingPreferences.preferred_voice}
-                    className={`w-full p-2 border rounded ${
+                    className={`w-full p-3 sm:p-2 text-base sm:text-sm rounded transition-all duration-200 border ${
                       preferenceState.theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-gray-100"
-                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)]"
+                        ? "bg-gray-800 border-gray-700 text-gray-100 focus:border-green-500/50"
+                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)] focus:border-green-500/50"
                     } ${
                       updatingPreferences.preferred_voice
                         ? "opacity-50 cursor-not-allowed"
@@ -1924,58 +1920,6 @@ function NewsReaderContent() {
                       </option>
                     )}
                   </select>
-                  {availableVoices.length === 0 && (
-                    <p
-                      className={`text-xs text-red-500 ${
-                        preferenceState.theme === "dark"
-                          ? ""
-                          : "[color-scheme:light]"
-                      }`}
-                    >
-                      No Japanese voices found. Please install Japanese language
-                      support in your system.
-                    </p>
-                  )}
-                </div>
-
-                {/* Image control */}
-                <div className="space-y-2">
-                  <label
-                    className={`text-sm font-medium ${
-                      preferenceState.theme === "dark"
-                        ? ""
-                        : "[color-scheme:light] text-[rgb(19,31,36)]"
-                    }`}
-                  >
-                    Images
-                  </label>
-                  <button
-                    onClick={() => setShowImages(!showImages)}
-                    className={`w-full px-3 py-1.5 rounded flex items-center justify-center ${
-                      showImages
-                        ? preferenceState.theme === "dark"
-                          ? "bg-gray-600 text-white"
-                          : "[color-scheme:light] bg-gray-700 text-white"
-                        : preferenceState.theme === "dark"
-                        ? "bg-gray-700 text-gray-300"
-                        : "[color-scheme:light] bg-gray-200 text-gray-600"
-                    } ${
-                      updatingPreferences.show_furigana
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                  >
-                    {showImages ? "Hide Images" : "Show Images"}
-                  </button>
-                  <span
-                    className={`text-xs block text-center ${
-                      preferenceState.theme === "dark"
-                        ? "text-gray-500"
-                        : "[color-scheme:light] text-gray-500"
-                    }`}
-                  >
-                    (Toggle article images)
-                  </span>
                 </div>
               </div>
             </div>
@@ -2238,126 +2182,143 @@ function NewsReaderContent() {
 
         {/* Main content */}
         <main className={mainContentClasses}>
-          {newsContent && (
-            <div className="mt-4 p-0 rounded relative">
-              {/* Title section with padding for controls */}
-              <div className="pt-6">
-                <div className="mb-6">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <h2
-                      className={`text-2xl font-bold ${
-                        preferenceState.theme === "dark"
-                          ? "text-gray-100"
-                          : "text-[rgb(19,31,36)]"
-                      }`}
-                    >
-                      {renderTitle(newsTitle)}
-                    </h2>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
+          {loading ? (
+            <div className="mt-16 animate-[pulse_1s_cubic-bezier(0.4,0,0.6,1)_infinite] space-y-8">
+              {/* Title placeholder */}
+              <div className="space-y-2">
+                <div className="h-8 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-4/5"></div>
+                <div className="h-4 bg-gray-100/80 dark:bg-gray-800/40 rounded w-32"></div>
+              </div>
+
+              {/* Image placeholder */}
+              <div className="m-0 aspect-video bg-gray-100/80 dark:bg-gray-800/40 rounded-lg max-w-xl mx-auto"></div>
+
+              {/* Progress bar placeholder */}
+              <div className="mt-6 flex items-center gap-3">
+                <div className="h-3 bg-gray-100/80 dark:bg-gray-800/40 rounded-full w-48"></div>
+                <div className="h-4 bg-gray-100/80 dark:bg-gray-800/40 rounded w-16"></div>
+              </div>
+
+              {/* Content paragraphs placeholder - reduced to 2 paragraphs */}
+              <div className="mt-8 space-y-6">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <div className="h-6 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-full"></div>
+                    <div className="h-6 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-11/12"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            newsContent && (
+              <div className="mt-4 p-0 rounded relative">
+                {/* Title section with padding for controls */}
+                <div className="pt-6">
+                  <div className="mb-6">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <h2
+                        className={`text-2xl font-bold ${
+                          preferenceState.theme === "dark"
+                            ? "text-gray-100"
+                            : "text-[rgb(19,31,36)]"
+                        }`}
+                      >
+                        {renderTitle(newsTitle)}
+                      </h2>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
                         ${
                           preferenceState.theme === "dark"
                             ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
                             : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
-                      title={
-                        url ? new URL(url).hostname : "Open original article"
-                      }
-                    >
-                      <FaExternalLinkAlt className="w-4 h-4" />
-                      <span className="text-sm font-medium hidden sm:inline">
-                        Original
-                      </span>
-                    </a>
-                  </div>
-                  <div
-                    className={`text-sm ${
-                      preferenceState.theme === "dark"
-                        ? "text-gray-400"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {formatJapaneseDate(newsDate)}
-                  </div>
-
-                  {/* News image */}
-                  {newsImages?.length > 0 && showImages && (
-                    <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-w-xl mx-auto">
-                      <img
-                        src={newsImages[0]}
-                        alt=""
-                        className="w-full h-auto"
-                      />
-                    </div>
-                  )}
-
-                  {/* Progress indicator and repeat toggle - moved below image */}
-                  {sentences?.length > 0 && (
-                    <div className="mt-4 flex justify-between items-center">
-                      {/* Progress bar on the left */}
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`rounded-full w-48 h-2 overflow-hidden ${
-                            preferenceState.theme === "dark"
-                              ? "bg-gray-800"
-                              : "bg-gray-100"
-                          }`}
-                        >
-                          <div
-                            className={`h-full transition-all duration-300 ${
-                              preferenceState.theme === "dark"
-                                ? "bg-green-500"
-                                : "bg-green-600"
-                            }`}
-                            style={{
-                              width: `${
-                                currentSentence >= 0
-                                  ? ((currentSentence + 1) / sentences.length) *
-                                    100
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className={`text-sm font-medium whitespace-nowrap ${
-                            preferenceState.theme === "dark"
-                              ? "text-gray-300"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {currentSentence >= 0
-                            ? `${currentSentence + 1} / ${sentences.length}`
-                            : `${sentences.length}`}
+                        title={
+                          url ? new URL(url).hostname : "Open original article"
+                        }
+                      >
+                        <FaExternalLinkAlt className="w-4 h-4" />
+                        <span className="text-sm font-medium hidden sm:inline">
+                          Original
                         </span>
-                      </div>
+                      </a>
                     </div>
-                  )}
-                </div>
+                    <div
+                      className={`text-sm ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-400"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {formatJapaneseDate(newsDate)}
+                    </div>
 
-                {newsImages.length > 0 && (
-                  <div className={imageContainerClass}>
-                    <img
-                      src={newsImages[0]}
-                      alt={newsImages[0].alt || ""}
-                      className="w-full h-auto"
-                    />
-                    {newsImages[0].caption && (
-                      <p className="p-2 text-sm text-gray-600">
-                        {newsImages[0].caption}
-                      </p>
+                    {/* News image - always show if available */}
+                    {newsImages?.length > 0 && (
+                      <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-w-xl mx-auto">
+                        <img
+                          src={newsImages[0]}
+                          alt=""
+                          className="w-full h-auto transition-all duration-700 blur-sm hover:blur-none"
+                          onLoad={(e) => {
+                            e.target.classList.remove('blur-sm');
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Progress indicator and repeat toggle */}
+                    {sentences?.length > 0 && (
+                      <div className="mt-4 flex justify-between items-center">
+                        {/* Progress bar on the left */}
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`rounded-full w-48 h-3 overflow-hidden ${
+                              preferenceState.theme === "dark"
+                                ? "bg-gray-800"
+                                : "bg-gray-100"
+                            }`}
+                          >
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                preferenceState.theme === "dark"
+                                  ? "bg-green-500/30"
+                                  : "bg-green-600"
+                              }`}
+                              style={{
+                                width: `${
+                                  currentSentence >= 0
+                                    ? ((currentSentence + 1) /
+                                        sentences.length) *
+                                      100
+                                    : 0
+                                }%`,
+                              }}
+                            />
+                          </div>
+                          <span
+                            className={`text-sm font-medium whitespace-nowrap ${
+                              preferenceState.theme === "dark"
+                                ? "text-gray-300"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {currentSentence >= 0
+                              ? `${currentSentence + 1} / ${sentences.length}`
+                              : `${sentences.length}`}
+                          </span>
+                        </div>
+                      </div>
                     )}
                   </div>
-                )}
 
-                <div>
-                  {newsContent.map((paragraph, pIndex) => (
-                    <p
-                      key={pIndex}
-                      className={`mb-6 px-2 py-1 rounded-md leading-relaxed
+                  <div>
+                    {newsContent.map((paragraph, pIndex) => (
+                      <p
+                        key={pIndex}
+                        className={`mb-6 px-2 py-1 rounded-md leading-relaxed
                         ${
                           preferenceState.font_size === "medium"
                             ? "text-lg leading-loose"
@@ -2368,33 +2329,32 @@ function NewsReaderContent() {
                             : "text-3xl leading-loose"
                         }
                       `}
-                    >
-                      {sentences.map((sentence, sIndex) => {
-                        // Find if this sentence belongs to this paragraph
-                        const sentenceBelongsToParagraph = sentence.some(
-                          (part) => paragraph.content.includes(part)
-                        );
+                      >
+                        {sentences.map((sentence, sIndex) => {
+                          // Find if this sentence belongs to this paragraph
+                          const sentenceBelongsToParagraph = sentence.some(
+                            (part) => paragraph.content.includes(part)
+                          );
 
-                        if (!sentenceBelongsToParagraph) return null;
+                          if (!sentenceBelongsToParagraph) return null;
 
-                        return (
-                          <span
-                            key={sIndex}
-                            onClick={() => handleSentenceClick(sIndex)}
-                            className={`inline cursor-pointer rounded px-1
+                          return (
+                            <span
+                              key={sIndex}
+                              onClick={() => handleSentenceClick(sIndex)}
+                              className={`inline cursor-pointer rounded px-1
                               ${
                                 sIndex === currentSentence
                                   ? preferenceState.theme === "dark"
                                     ? "bg-gray-700"
-                                    : preferenceState.theme === "yellow"
-                                    ? "bg-yellow-200"
                                     : "bg-emerald-50"
                                   : preferenceState.theme === "dark"
                                   ? "hover:bg-gray-700/50"
                                   : "hover:bg-gray-100"
                               }
                               ${
-                                isRepeatMode && sIndex !== currentSentence
+                                preferenceState.repeat_mode &&
+                                sIndex !== currentSentence
                                   ? preferenceState.theme === "dark"
                                     ? "opacity-50"
                                     : "opacity-40"
@@ -2402,33 +2362,35 @@ function NewsReaderContent() {
                               }
                               transition-all duration-200
                             `}
-                          >
-                            {sentence.map((part, index) => {
-                              if (part.type === "ruby") {
-                                return (
-                                  <RubyText
-                                    key={index}
-                                    part={part}
-                                    preferenceState={preferenceState}
-                                  />
-                                );
-                              } else {
-                                return <span key={index}>{part.content}</span>;
-                              }
-                            })}
-                          </span>
-                        );
-                      })}
-                    </p>
-                  ))}
+                            >
+                              {sentence.map((part, index) => {
+                                if (part.type === "ruby") {
+                                  return (
+                                    <RubyText
+                                      key={index}
+                                      part={part}
+                                      preferenceState={preferenceState}
+                                    />
+                                  );
+                                } else {
+                                  return (
+                                    <span key={index}>{part.content}</span>
+                                  );
+                                }
+                              })}
+                            </span>
+                          );
+                        })}
+                      </p>
+                    ))}
 
-                  {/* Mark as Finished button at the bottom of the article */}
-                  {user && (
-                    <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
-                      <button
-                        onClick={toggleFinished}
-                        disabled={finishLoading}
-                        className={`
+                    {/* Mark as Finished button at the bottom of the article */}
+                    {user && (
+                      <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
+                        <button
+                          onClick={toggleFinished}
+                          disabled={finishLoading}
+                          className={`
                           px-4 py-2 rounded-lg flex items-center justify-center gap-2
                           transition-all duration-150
                           ${
@@ -2444,69 +2406,68 @@ function NewsReaderContent() {
                             finishLoading ? "opacity-50 cursor-not-allowed" : ""
                           }
                         `}
-                      >
-                        {finishLoading ? (
-                          <div className="w-5 h-5 relative">
-                            <div
-                              className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                                preferenceState.theme === "dark"
-                                  ? "border-gray-300 border-r-transparent"
-                                  : preferenceState.theme === "yellow"
-                                  ? "border-yellow-500 border-r-transparent"
-                                  : "border-gray-400 border-r-transparent"
-                              }`}
-                            ></div>
-                          </div>
-                        ) : (
-                          <>
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={isFinished ? "2.5" : "2"}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                            <span className="font-medium">
-                              {isFinished
-                                ? "Finished Reading"
-                                : "Mark as Finished"}
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
+                        >
+                          {finishLoading ? (
+                            <div className="w-5 h-5 relative">
+                              <div
+                                className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                  preferenceState.theme === "dark"
+                                    ? "border-gray-300 border-r-transparent"
+                                    : "border-gray-400 border-r-transparent"
+                                }`}
+                              ></div>
+                            </div>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={isFinished ? "2.5" : "2"}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              <span className="font-medium">
+                                {isFinished
+                                  ? "Finished Reading"
+                                  : "Mark as Finished"}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {audioError && (
+                  <div
+                    className={`mt-4 p-4 border rounded ${
+                      preferenceState.theme === "dark"
+                        ? "bg-red-900 text-red-100 border-red-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {audioError}
+                  </div>
+                )}
+
+                {loading && (
+                  <div
+                    className={`fixed inset-0 backdrop-blur-sm z-50 ${
+                      preferenceState.theme === "dark"
+                        ? "bg-black/10"
+                        : "bg-white/70"
+                    }`}
+                  />
+                )}
               </div>
-
-              {audioError && (
-                <div
-                  className={`mt-4 p-4 border rounded ${
-                    preferenceState.theme === "dark"
-                      ? "bg-red-900 text-red-100 border-red-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {audioError}
-                </div>
-              )}
-
-              {loading && (
-                <div
-                  className={`fixed inset-0 backdrop-blur-sm z-50 ${
-                    preferenceState.theme === "dark"
-                      ? "bg-black/10"
-                      : "bg-white/70"
-                  }`}
-                />
-              )}
-            </div>
+            )
           )}
         </main>
       </div>
@@ -2527,57 +2488,72 @@ function NewsReaderContent() {
         `}
         >
           <div className="flex items-center justify-center gap-3">
+            {/* Original link button */}
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+                ${
+                  preferenceState.theme === "dark"
+                    ? "hover:bg-gray-700/50"
+                    : "hover:bg-gray-100/50"
+                }
+              `}
+              title={url ? new URL(url).hostname : "Open original article"}
+            >
+              <FaExternalLinkAlt
+                className={`w-4 h-4 ${
+                  preferenceState.theme === "dark"
+                    ? "text-gray-300 hover:text-gray-100"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              />
+            </a>
+
             {/* Archive button */}
             {user && (
-              <>
-                <button
-                  onClick={toggleSave}
-                  disabled={archiveLoading}
-                  className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
-                    ${
+              <button
+                onClick={toggleSave}
+                disabled={archiveLoading}
+                className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+                  ${
+                    preferenceState.theme === "dark"
+                      ? "hover:bg-gray-700/50"
+                      : "hover:bg-gray-100/50"
+                  }
+                  ${archiveLoading ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title={isArchived ? "Remove from Saved" : "Save Article"}
+              >
+                {archiveLoading ? (
+                  <div className="w-4 h-4 relative">
+                    <div
+                      className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                        preferenceState.theme === "dark"
+                          ? "border-gray-300 border-r-transparent"
+                          : "border-gray-400 border-r-transparent"
+                      }`}
+                    ></div>
+                  </div>
+                ) : isArchived ? (
+                  <FaHeart
+                    className={`w-4 h-4 ${
                       preferenceState.theme === "dark"
-                        ? "hover:bg-gray-700/50"
-                        : "hover:bg-gray-100/50"
-                    }
-                    ${archiveLoading ? "opacity-50 cursor-not-allowed" : ""}
-                  `}
-                  title={isArchived ? "Remove from Saved" : "Save Article"}
-                >
-                  {archiveLoading ? (
-                    <div className="w-4 h-4 relative">
-                      <div
-                        className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                          preferenceState.theme === "dark"
-                            ? "border-gray-300 border-r-transparent"
-                            : preferenceState.theme === "yellow"
-                            ? "border-yellow-500 border-r-transparent"
-                            : "border-gray-400 border-r-transparent"
-                        }`}
-                      ></div>
-                    </div>
-                  ) : isArchived ? (
-                    <FaHeart
-                      className={`w-4 h-4 ${
-                        preferenceState.theme === "dark"
-                          ? "text-red-400"
-                          : preferenceState.theme === "yellow"
-                          ? "text-red-500"
-                          : "text-red-500"
-                      }`}
-                    />
-                  ) : (
-                    <FaRegHeart
-                      className={`w-4 h-4 ${
-                        preferenceState.theme === "dark"
-                          ? "text-gray-300 hover:text-purple-400"
-                          : preferenceState.theme === "yellow"
-                          ? "text-gray-600 hover:text-purple-500"
-                          : "text-gray-600 hover:text-purple-500"
-                      }`}
-                    />
-                  )}
-                </button>
-              </>
+                        ? "text-red-400"
+                        : "text-red-500"
+                    }`}
+                  />
+                ) : (
+                  <FaRegHeart
+                    className={`w-4 h-4 ${
+                      preferenceState.theme === "dark"
+                        ? "text-gray-300 hover:text-purple-400"
+                        : "text-gray-600 hover:text-purple-500"
+                    }`}
+                  />
+                )}
+              </button>
             )}
 
             {/* Play controls */}
@@ -2653,20 +2629,20 @@ function NewsReaderContent() {
                 }
               `}
               title={
-                isRepeatMode
+                preferenceState.repeat_mode
                   ? "Currently repeating one sentence with 1 second pause between repeats"
                   : "Click to repeat one sentence with 1 second pause between repeats"
               }
             >
               <RepeatIcon
                 className={`w-4 h-4 ${
-                  isRepeatMode
+                  preferenceState.repeat_mode
                     ? "text-purple-500"
                     : preferenceState.theme === "dark"
                     ? "text-gray-300 hover:text-purple-400"
                     : "text-gray-600 hover:text-purple-500"
                 }`}
-                isActive={isRepeatMode}
+                isActive={preferenceState.repeat_mode}
                 theme={preferenceState.theme}
               />
             </button>

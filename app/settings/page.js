@@ -19,8 +19,7 @@ export default function Settings() {
     duolingo: false
   });
   const [profileData, setProfileData] = useState({
-    theme: 'system',
-    currentTheme: getSystemTheme(),
+    theme: 'light',
     username: '',
     editedUsername: '',
     self_introduction: '',
@@ -29,16 +28,6 @@ export default function Settings() {
     duolingo_username: '',
     edited_duolingo_username: ''
   });
-
-  // Set initial theme from system preference
-  useEffect(() => {
-    const systemTheme = getSystemTheme();
-    setProfileData(prev => ({ 
-      ...prev, 
-      theme: prev.theme || 'system',
-      currentTheme: getCurrentTheme(prev.theme || 'system')
-    }));
-  }, []);
 
   // Watch for system theme changes
   useEffect(() => {
@@ -49,7 +38,7 @@ export default function Settings() {
       if (profileData.theme === 'system') {
         setProfileData(prev => ({ 
           ...prev, 
-          currentTheme: getSystemTheme()
+          currentTheme: mediaQuery.matches ? 'dark' : 'light'
         }));
       }
     };
@@ -58,27 +47,64 @@ export default function Settings() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [profileData.theme]);
 
-  // Load user settings from profile
+  // Add effect to reload profile when page becomes visible
   useEffect(() => {
-    if (!profile) {
-      setIsProfileLoaded(false);
-      return;
-    }
-    
-    const theme = profile.theme || 'system';
-    setProfileData({
-      theme: theme,
-      currentTheme: getCurrentTheme(theme),
-      username: profile.username || '',
-      editedUsername: profile.username || '',
-      self_introduction: profile.self_introduction || '',
-      edited_self_introduction: profile.self_introduction || '',
-      japanese_level: profile.japanese_level || '',
-      duolingo_username: profile.duolingo_username || '',
-      edited_duolingo_username: profile.duolingo_username || ''
-    });
-    setIsProfileLoaded(true);
-  }, [profile]);
+    if (typeof document === 'undefined' || !user) return;
+
+    const reloadProfile = async () => {
+      try {
+        // Directly fetch the latest profile from database
+        const { data: latestProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileError) throw profileError;
+
+        const theme = latestProfile.theme || 'light';
+        const currentTheme = theme === 'system' 
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : theme;
+
+        setProfileData({
+          theme: theme,
+          currentTheme: currentTheme,
+          username: latestProfile.username || '',
+          editedUsername: latestProfile.username || '',
+          self_introduction: latestProfile.self_introduction || '',
+          edited_self_introduction: latestProfile.self_introduction || '',
+          japanese_level: latestProfile.japanese_level || '',
+          duolingo_username: latestProfile.duolingo_username || '',
+          edited_duolingo_username: latestProfile.duolingo_username || ''
+        });
+        setIsProfileLoaded(true);
+      } catch (error) {
+        console.error('Error reloading profile:', error);
+      }
+    };
+
+    // Initial load
+    reloadProfile();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        reloadProfile();
+      }
+    };
+
+    const handleFocus = () => {
+      reloadProfile();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user]);
 
   // Generic update handler
   const handleUpdate = async (field, value, editField = null) => {
@@ -86,7 +112,11 @@ export default function Settings() {
       let updateData = {};
       switch (field) {
         case 'theme':
-          updateData = { theme: value };
+          const newTheme = value;
+          const newCurrentTheme = value === 'system' 
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : value;
+          updateData = { theme: newTheme };
           break;
         case 'username':
           if (!value.trim()) {
@@ -108,11 +138,21 @@ export default function Settings() {
 
       const updatedProfile = await updateProfile(updateData);
       if (updatedProfile) {
-        setProfileData(prev => ({
-          ...prev,
-          ...updateData,
-          [editField || field]: value
-        }));
+        if (field === 'theme') {
+          setProfileData(prev => ({
+            ...prev,
+            theme: value,
+            currentTheme: value === 'system' 
+              ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+              : value
+          }));
+        } else {
+          setProfileData(prev => ({
+            ...prev,
+            ...updateData,
+            [editField || field]: value
+          }));
+        }
         
         // Always exit edit mode after successful save
         const editStateKey = {
