@@ -30,7 +30,10 @@ export default function Navbar({
     totalSavedArticles: 0,
     totalFinishedArticles: 0,
     longestStreak: 0,
-    currentStreak: 0
+    currentStreak: 0,
+    todayFinishedArticles: 0,
+    dailyArticleGoal: 3,
+    dailyReadingTimeGoal: 15
   });
   const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
 
@@ -158,7 +161,8 @@ export default function Navbar({
           readingStatsResponse,
           finishedArticlesResponse,
           finishedCountResponse,
-          todayFinishedResponse
+          todayFinishedResponse,
+          profileResponse
         ] = await Promise.all([
           // Fetch user's reading stats
           supabase
@@ -185,13 +189,21 @@ export default function Navbar({
             .from('finished_articles')
             .select('id', { count: 'exact' })
             .eq('user_id', user.id)
-            .gte('finished_at', todayStr)
+            .gte('finished_at', todayStr),
+
+          // Fetch user's profile for daily goals
+          supabase
+            .from('profiles')
+            .select('daily_article_goal, daily_reading_time_goal')
+            .eq('id', user.id)
+            .single()
         ]);
 
         const readingStats = readingStatsResponse.data;
         const finished = finishedArticlesResponse.data;
         const finishedCount = finishedCountResponse.count;
         const todayFinishedCount = todayFinishedResponse.count;
+        const profileData = profileResponse.data;
 
         // Calculate streaks
         const streaks = calculateStreaks(finished || []);
@@ -202,7 +214,9 @@ export default function Navbar({
           totalFinishedArticles: finishedCount || 0,
           todayFinishedArticles: todayFinishedCount || 0,
           currentStreak: streaks.current,
-          longestStreak: streaks.longest
+          longestStreak: streaks.longest,
+          dailyArticleGoal: profileData?.daily_article_goal || 3,
+          dailyReadingTimeGoal: profileData?.daily_reading_time_goal || 15
         };
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -213,34 +227,47 @@ export default function Navbar({
     return fetchStats();
   }, [user, calculateStreaks, refreshTimestamp]);
 
-  // Update useEffect to handle both initial load and refresh
+  // Add function to refresh stats
+  const refreshStats = useCallback(() => {
+    if (!user) {
+      return;
+    }
+    setRefreshTimestamp(Date.now());
+  }, [user]); // Only depend on user
+
+  // Add effect to refresh stats periodically when profile is open
   useEffect(() => {
-    if (showProfile && calculatedStats) {
+    // Initial refresh
+    refreshStats();
+
+    // Set up periodic refresh
+    const intervalId = setInterval(refreshStats, 30000); // Refresh every 30 seconds
+
+    // Listen for goal updates
+    const handleGoalsUpdate = () => {
+      console.log('Goals updated, refreshing stats...');
+      refreshStats();
+    };
+
+    window.addEventListener('goalsUpdated', handleGoalsUpdate);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('goalsUpdated', handleGoalsUpdate);
+    };
+  }, [refreshStats]);
+
+  // Update stats when calculatedStats changes
+  useEffect(() => {
+    if (calculatedStats) {
       calculatedStats.then(newStats => {
         if (newStats) {
+          console.log('Setting new stats:', newStats);
           setStats(newStats);
         }
       });
     }
-  }, [showProfile, calculatedStats]);
-
-  // Add function to refresh stats
-  const refreshStats = useCallback(() => {
-    setRefreshTimestamp(Date.now());
-  }, []);
-
-  // Add effect to refresh stats periodically when profile is open
-  useEffect(() => {
-    if (showProfile) {
-      // Initial refresh
-      refreshStats();
-
-      // Set up periodic refresh
-      const intervalId = setInterval(refreshStats, 30000); // Refresh every 30 seconds
-
-      return () => clearInterval(intervalId);
-    }
-  }, [showProfile, refreshStats]);
+  }, [calculatedStats]);
 
   // Memoize the stats display
   const StatsDisplay = useMemo(() => (
@@ -684,6 +711,162 @@ export default function Navbar({
                       </div>
                     </div>
                   )}
+
+                  {/* Daily Reading Goals Progress */}
+                  <div 
+                    onClick={() => {
+                      setShowProfile(false);
+                      router.push('/settings');
+                    }}
+                    className={`p-3 cursor-pointer transition-colors ${!profile?.username ? 'border-t border-gray-200/10' : ''} 
+                      ${theme === "dark"
+                        ? "hover:bg-gray-700/30"
+                        : "hover:bg-gray-100/70"
+                      }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
+                        theme === "dark"
+                          ? "bg-gray-700/80 text-gray-300"
+                          : "bg-gray-100 text-gray-600"
+                        }`}>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" 
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-medium ${
+                            theme === "dark" ? "text-gray-100" : "text-gray-900"
+                          }`}>
+                            Daily Reading Goals
+                          </p>
+                        </div>
+
+                        {/* Articles Progress */}
+                        <div className="mt-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-xs ${
+                              theme === "dark" ? "text-gray-400" : "text-gray-600"
+                            }`}>
+                              Articles
+                            </span>
+                            <span className={`text-xs font-medium ${
+                              stats.todayFinishedArticles > stats.dailyArticleGoal
+                                ? theme === "dark" ? "text-purple-400" : "text-purple-600"
+                                : theme === "dark" ? "text-gray-300" : "text-gray-700"
+                            }`}>
+                              {stats.todayFinishedArticles}/{stats.dailyArticleGoal}
+                              {stats.todayFinishedArticles > stats.dailyArticleGoal && (
+                                <span className="ml-1">
+                                  (+{stats.todayFinishedArticles - stats.dailyArticleGoal})
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="relative w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className={`absolute top-0 left-0 h-full transition-all duration-300 rounded-full ${
+                                stats.todayFinishedArticles > stats.dailyArticleGoal
+                                  ? theme === "dark" 
+                                    ? "bg-gradient-to-r from-green-500 via-blue-500 to-purple-500" 
+                                    : "bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"
+                                  : "bg-green-500"
+                              }`}
+                              style={{ 
+                                width: stats.todayFinishedArticles > stats.dailyArticleGoal 
+                                  ? "100%" 
+                                  : `${(stats.todayFinishedArticles / stats.dailyArticleGoal) * 100}%`,
+                                opacity: theme === "dark" ? 0.8 : 0.9,
+                                animation: stats.todayFinishedArticles > stats.dailyArticleGoal 
+                                  ? "gradientShift 3s linear infinite" 
+                                  : "none"
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Reading Time Progress */}
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-xs ${
+                              theme === "dark" ? "text-gray-400" : "text-gray-600"
+                            }`}>
+                              Reading Time
+                            </span>
+                            <span className={`text-xs font-medium ${
+                              Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal
+                                ? theme === "dark" ? "text-purple-400" : "text-purple-600"
+                                : theme === "dark" ? "text-gray-300" : "text-gray-700"
+                            }`}>
+                              {Math.round(stats.totalReadingTime)}/{stats.dailyReadingTimeGoal} min
+                              {Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal && (
+                                <span className="ml-1">
+                                  (+{Math.round(stats.totalReadingTime - stats.dailyReadingTimeGoal)})
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="relative w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className={`absolute top-0 left-0 h-full transition-all duration-300 rounded-full ${
+                                Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal
+                                  ? theme === "dark" 
+                                    ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" 
+                                    : "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+                                  : "bg-blue-500"
+                              }`}
+                              style={{ 
+                                width: Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal 
+                                  ? "100%" 
+                                  : `${(Math.round(stats.totalReadingTime) / stats.dailyReadingTimeGoal) * 100}%`,
+                                opacity: theme === "dark" ? 0.8 : 0.9,
+                                animation: Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal 
+                                  ? "gradientShift 3s linear infinite" 
+                                  : "none"
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <style jsx>{`
+                          @keyframes gradientShift {
+                            0% {
+                              background-position: 0% 50%;
+                            }
+                            50% {
+                              background-position: 100% 50%;
+                            }
+                            100% {
+                              background-position: 0% 50%;
+                            }
+                          }
+                        `}</style>
+
+                        {/* Status Message */}
+                        <p className={`text-xs mt-3 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }`}>
+                          {stats.todayFinishedArticles >= stats.dailyArticleGoal && Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal
+                            ? "Daily goals completed! 🎉"
+                            : stats.todayFinishedArticles >= stats.dailyArticleGoal
+                            ? `Almost there! ${Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))} more minutes of reading`
+                            : Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal
+                            ? `Keep going! ${stats.dailyArticleGoal - stats.todayFinishedArticles} more articles to go`
+                            : `Today's target: ${stats.dailyArticleGoal - stats.todayFinishedArticles} articles and ${Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))} minutes`}
+                        </p>
+                      </div>
+                      <div className={`flex items-center self-center ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
                   {stats.todayFinishedArticles === 0 && (
                     <div 
                       onClick={() => {
@@ -702,29 +885,27 @@ export default function Navbar({
                             ? "bg-gray-700/80 text-gray-300"
                             : "bg-gray-100 text-gray-600"
                         }`}>
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
+                          <FaFire className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className={`text-sm font-medium ${
                               theme === "dark" ? "text-gray-100" : "text-gray-900"
                             }`}>
-                              Read today's article
+                              {stats.currentStreak > 0 ? "Extend your streak" : "Start your streak"}
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
-                                ? "bg-gray-700 text-gray-300"
-                                : "bg-gray-100 text-gray-600"
+                                ? "bg-orange-500/20 text-orange-400"
+                                : "bg-orange-100 text-orange-600"
                             }`}>
-                              Daily Goal
+                              {stats.currentStreak > 0 ? `${stats.currentStreak} days` : 'Day 1'}
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
                             theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}>
-                            Keep your learning streak going
+                            Read at least one article to keep your streak going
                           </p>
                         </div>
                         <div className={`flex items-center self-center ${

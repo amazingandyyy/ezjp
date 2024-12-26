@@ -26,7 +26,9 @@ export default function Settings() {
     edited_self_introduction: '',
     japanese_level: '',
     duolingo_username: '',
-    edited_duolingo_username: ''
+    edited_duolingo_username: '',
+    daily_article_goal: 3,
+    daily_reading_time_goal: 15
   });
 
   // Handle avatar change
@@ -134,7 +136,9 @@ export default function Settings() {
           edited_self_introduction: latestProfile.self_introduction || '',
           japanese_level: latestProfile.japanese_level || '',
           duolingo_username: latestProfile.duolingo_username || '',
-          edited_duolingo_username: latestProfile.duolingo_username || ''
+          edited_duolingo_username: latestProfile.duolingo_username || '',
+          daily_article_goal: latestProfile.daily_article_goal || 3,
+          daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15
         });
         setIsProfileLoaded(true);
       } catch (error) {
@@ -192,43 +196,63 @@ export default function Settings() {
         case 'duolingo_username':
           updateData = { duolingo_username: value.trim() };
           break;
+        case 'daily_article_goal':
+          updateData = { daily_article_goal: value };
+          break;
+        case 'daily_reading_time_goal':
+          updateData = { daily_reading_time_goal: value };
+          break;
       }
 
-      const updatedProfile = await updateProfile(updateData);
-      if (updatedProfile) {
-        if (field === 'theme') {
-          setProfileData(prev => ({
-            ...prev,
-            theme: value,
-            currentTheme: value === 'system' 
-              ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-              : value
-          }));
-        } else {
-          setProfileData(prev => ({
-            ...prev,
-            ...updateData,
-            [editField || field]: value
-          }));
-        }
-        
-        // Always exit edit mode after successful save
-        const editStateKey = {
-          username: 'username',
-          self_introduction: 'intro',
-          duolingo_username: 'duolingo'
-        }[field];
-        
-        if (editStateKey) {
-          setEditState(prev => ({
-            ...prev,
-            [editStateKey]: false
-          }));
-        }
+      // Update database directly using supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id);
 
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 2000);
+      if (error) throw error;
+
+      // Update local state
+      if (field === 'theme') {
+        setProfileData(prev => ({
+          ...prev,
+          theme: value,
+          currentTheme: value === 'system' 
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : value
+        }));
+        window.location.reload();
+      } else {
+        setProfileData(prev => ({
+          ...prev,
+          ...updateData,
+          [editField || field]: value
+        }));
       }
+      
+      // Always exit edit mode after successful save
+      const editStateKey = {
+        username: 'username',
+        self_introduction: 'intro',
+        duolingo_username: 'duolingo'
+      }[field];
+      
+      if (editStateKey) {
+        setEditState(prev => ({
+          ...prev,
+          [editStateKey]: false
+        }));
+      }
+
+      // Trigger a custom event when goals are updated
+      if (field === 'daily_article_goal' || field === 'daily_reading_time_goal') {
+        window.dispatchEvent(new CustomEvent('goalsUpdated', { 
+          detail: { field, value } 
+        }));
+      }
+
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error(`Error updating ${field}:`, error);
       setError(`Failed to update ${field.replace('_', ' ')}`);
@@ -1017,6 +1041,148 @@ export default function Settings() {
                       <span className="text-sm font-medium">Dark</span>
                     </div>
                   </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Reader's Goals Section */}
+            <div
+              className={`overflow-hidden rounded-xl shadow-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div
+                className={`px-6 py-4 border-b ${
+                  profileData.currentTheme === "dark"
+                    ? "border-gray-700"
+                    : "border-gray-100"
+                }`}
+              >
+                <h2
+                  className={`text-sm font-medium ${
+                    profileData.currentTheme === "dark"
+                      ? "text-gray-300"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Reader's Goals
+                </h2>
+              </div>
+              <div className="p-6 space-y-8">
+                {/* Daily Articles Goal */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label
+                      className={`block text-sm font-medium ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Daily Articles Goal
+                    </label>
+                    <div className={`text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-green-400"
+                        : "text-green-600"
+                    }`}>
+                      {profileData.daily_article_goal} articles
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 3, 5, 10].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            setProfileData(prev => ({
+                              ...prev,
+                              daily_article_goal: value
+                            }));
+                            handleUpdate('daily_article_goal', value);
+                          }}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            profileData.daily_article_goal === value
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
+                                : "bg-green-50 text-green-600 ring-1 ring-green-500"
+                              : profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p
+                    className={`text-xs ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    Set a target for how many articles you want to read each day
+                  </p>
+                </div>
+
+                {/* Daily Reading Time Goal */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label
+                      className={`block text-sm font-medium ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Daily Reading Time Goal
+                    </label>
+                    <div className={`text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-green-400"
+                        : "text-green-600"
+                    }`}>
+                      {profileData.daily_reading_time_goal} minutes
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[3, 5, 15, 30].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            setProfileData(prev => ({
+                              ...prev,
+                              daily_reading_time_goal: value
+                            }));
+                            handleUpdate('daily_reading_time_goal', value);
+                          }}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            profileData.daily_reading_time_goal === value
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
+                                : "bg-green-50 text-green-600 ring-1 ring-green-500"
+                              : profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p
+                    className={`text-xs ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    Set a target for how much time you want to spend reading each day
+                  </p>
                 </div>
               </div>
             </div>
