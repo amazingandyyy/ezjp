@@ -864,7 +864,7 @@ function NewsReaderContent() {
       setNewsContent([]);
       setNewsDate(null);
       setNewsImages([]);
-      setCurrentSentence(0);
+      setCurrentSentence(-1);
       setSentences([]);
       setError(null);
       
@@ -876,7 +876,7 @@ function NewsReaderContent() {
     } else {
       router.push('/');
     }
-  }, [sourceUrl]);  // Remove router from dependencies to prevent double fetches
+  }, [sourceUrl]);
 
   // Fetch news content
   const fetchNews = async (url) => {
@@ -905,10 +905,9 @@ function NewsReaderContent() {
       setNewsContent(data.content);
       setNewsDate(data.published_date || data.date);
       setNewsImages(data.images || []);
-      setCurrentSentence(0);
+      setCurrentSentence(-1);  // Set to -1 instead of 0
       setSentences(splitIntoSentences(data.content));
-      setLoading(false);  // Add this line to set loading to false after successful fetch
-      
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching news:', error);
       setError('This article had an issue loading. Please try another one.');
@@ -2808,7 +2807,7 @@ function NewsReaderContent() {
                           >
                             {currentSentence >= 0
                               ? `${currentSentence + 1} / ${sentences.length}`
-                              : `${sentences.length}`}
+                              : `0 / ${sentences.length}`}
                           </span>
                         </div>
                       </div>
@@ -2843,7 +2842,7 @@ function NewsReaderContent() {
                               onClick={() => handleSentenceClick(sIndex)}
                               className={`inline cursor-pointer p-0.5 rounded
                                 ${
-                                  sIndex === currentSentence
+                                  currentSentence >= 0 && sIndex === currentSentence
                                     ? preferenceState.theme === "dark"
                                       ? "bg-emerald-900/80 shadow-sm"
                                       : "bg-emerald-100 ring-0 shadow-sm"
@@ -2853,7 +2852,8 @@ function NewsReaderContent() {
                                 }
                                 ${
                                   repeatMode === REPEAT_MODES.ONE &&
-                                  sIndex !== currentSentence
+                                  sIndex !== currentSentence &&
+                                  currentSentence >= 0
                                     ? "opacity-30"
                                     : ""
                                 }
