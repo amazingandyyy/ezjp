@@ -229,7 +229,7 @@ export default function Navbar({
                     <button
                       onClick={() =>
                         router.push(
-                          `/user/${encodeURIComponent(
+                          `/profile/${encodeURIComponent(
                             profile?.username || user.email
                           )}`
                         )
