@@ -14,6 +14,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.47.10",
     "axios": "^1.7.9",
+    "canvas-confetti": "^1.9.3",
     "cheerio": "^1.0.0",
     "next": "15.1.2",
     "react": "^19.0.0",

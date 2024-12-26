@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
+import confetti from 'canvas-confetti';
 import { 
   FaPlay, 
   FaPause, 
@@ -247,6 +248,234 @@ const DEFAULT_PREFERENCES = {
   reading_level: 'beginner'
 };
 
+// Add after the LoadingIndicator component
+const MotivationalMessage = ({ show, theme }) => {
+  const messages = [
+    // Achievement messages
+    { ja: '🎉 よくできました！', en: 'Well done!' },
+    { ja: '⭐️ 素晴らしい！', en: 'Excellent!' },
+    { ja: '💪 頑張りましたね！', en: 'Great effort!' },
+    { ja: '🌟 継続は力なり', en: 'Consistency is power' },
+    { ja: '🚀 一歩一歩前進', en: 'Step by step' },
+    { ja: '🌱 日々の努力が実を結ぶ', en: 'Daily efforts bear fruit' },
+    // Encouraging messages
+    { ja: '✨ すごい進歩です！', en: 'Amazing progress!' },
+    { ja: '🎯 目標達成！', en: 'Goal achieved!' },
+    { ja: '🌈 その調子！', en: "That's the spirit!" },
+    { ja: '💫 輝かしい成果！', en: 'Brilliant result!' },
+    // Learning journey messages
+    { ja: '📚 知識は力なり', en: 'Knowledge is power' },
+    { ja: '🎓 学びは冒険だ', en: 'Learning is an adventure' },
+    { ja: '🌅 新しい朝が来た', en: 'A new dawn awaits' },
+    { ja: '🔥 情熱を持ち続けて', en: 'Keep the passion alive' },
+    // Milestone messages
+    { ja: '🏆 また一つ達成！', en: 'Another milestone reached!' },
+    { ja: '⚡️ 止まらない成長', en: 'Unstoppable growth' },
+    { ja: '🎨 上手くなってきた', en: "You're getting better!" },
+    { ja: '🌊 波に乗ってる！', en: "You're on a roll!" },
+    // Wisdom messages
+    { ja: '🍀 努力は裏切らない', en: 'Hard work pays off' },
+    { ja: '🌸 千里の道も一歩から', en: 'Every journey begins with a step' },
+    { ja: '🎋 夢は叶うもの', en: 'Dreams do come true' },
+    { ja: '🎭 日本語の世界へようこそ', en: 'Welcome to the world of Japanese' },
+    // Fun messages
+    { ja: '🌈 やったね！', en: 'You did it!' },
+    { ja: '🎪 素晴らしいショー！', en: 'What a performance!' },
+    { ja: '🎮 レベルアップ！', en: 'Level up!' },
+    { ja: '🎵 リズムに乗ってる', en: "You're in the groove!" }
+  ];
+
+  const [message] = useState(() => messages[Math.floor(Math.random() * messages.length)]);
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+      <div className={`
+        relative
+        animate-[bounceIn_3s_cubic-bezier(0.68,-0.55,0.265,1.55)]
+        px-16 py-10 rounded-3xl
+        transform rotate-2
+        ${theme === 'dark' 
+          ? 'bg-gradient-to-br from-gray-800/95 to-gray-900/95 shadow-[0_8px_32px_rgba(0,0,0,0.4)] border-2 border-gray-700/50' 
+          : 'bg-gradient-to-br from-white/95 to-gray-50/95 shadow-[0_8px_32px_rgba(0,0,0,0.15)] border-2 border-gray-200/50'
+        }
+      `}>
+        {/* Decorative elements with longer animations */}
+        <div className="absolute -top-3 -left-3 w-6 h-6 bg-yellow-400 rounded-full animate-[spin_4s_linear_infinite]" />
+        <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-purple-400 rounded-full animate-[spin_4s_linear_infinite_reverse]" />
+        <div className="absolute top-1/2 -left-3 w-4 h-4 bg-green-400 rounded-full animate-[bounce_3s_infinite]" />
+        <div className="absolute top-1/2 -right-3 w-4 h-4 bg-blue-400 rounded-full animate-[bounce_3s_infinite_0.5s]" />
+        
+        <div className="relative">
+          <div className={`
+            text-6xl font-bold mb-6 text-center
+            animate-[rubberBand_3s_ease-in-out]
+            ${theme === 'dark' ? 'text-white' : 'text-gray-800'}
+          `}>
+            {message.ja}
+          </div>
+          <div className={`
+            text-2xl font-medium text-center
+            animate-[fadeInUp_2s_ease-out_0.5s_both]
+            ${theme === 'dark' ? 'text-purple-300' : 'text-purple-500'}
+          `}>
+            {message.en}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Update the ConfirmationModal component
+const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+  const { user, profile } = useAuth();  // Add profile here
+
+  useEffect(() => {
+    if (show) {
+      setUsername('');
+      setError('');
+    }
+  }, [show]);
+
+  const handleConfirm = () => {
+    if (!username) {
+      setError('Please enter your username to confirm');
+      return;
+    }
+    
+    // Use username from profile
+    const userIdentifier = profile?.username;
+    
+    if (!userIdentifier) {
+      setError('Could not verify username. Please try again later.');
+      return;
+    }
+    
+    if (username !== userIdentifier) {
+      setError(`Username does not match. Your username is "${userIdentifier}"`);
+      return;
+    }
+    
+    onConfirm();
+  };
+
+  if (!show) return null;
+
+  // Get username from profile
+  const userIdentifier = profile?.username;
+
+  if (!userIdentifier) {
+    return null;  // Don't show modal if we can't get the username
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <div className={`
+        relative w-[90%] max-w-md p-6 rounded-2xl shadow-xl
+        animate-[bounceIn_0.5s_cubic-bezier(0.68,-0.55,0.265,1.55)]
+        ${theme === 'dark' 
+          ? 'bg-gray-800 border border-gray-700' 
+          : 'bg-white border border-gray-200'
+        }
+      `}>
+        <div className={`text-xl font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+          Wait! Are you sure? 🤔
+        </div>
+        
+        <div className={`mb-6 space-y-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          <p className="text-sm">
+            If you just like the celebration animation, you can:
+          </p>
+          <div className="pl-4 space-y-2">
+            <p className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              Read another article to see it again! 🎉
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              Keep your progress tracked 📈
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              Build your reading streak 🔥
+            </p>
+          </div>
+          
+          <div className={`mt-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+            <p className="text-sm font-medium mb-2">
+              <span className="font-mono text-purple-400">[sudo]</span> Type your username to confirm:
+            </p>
+            <div className="text-xs mb-2 opacity-70 font-mono">
+              <span className="text-green-400">$</span> whoami
+              <br/>
+              <span className="text-blue-400">→</span> {userIdentifier}
+            </div>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-gray-400">$</div>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setError('');
+                }}
+                placeholder={userIdentifier}
+                className={`
+                  w-full pl-7 pr-3 py-2 rounded-lg text-sm font-mono
+                  ${theme === 'dark'
+                    ? 'bg-gray-700 border border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-500'
+                  }
+                  ${error ? 'border-red-500' : ''}
+                `}
+              />
+            </div>
+            {error && (
+              <p className="mt-2 text-xs text-red-500 font-mono">
+                <span className="text-red-400">!</span> {error}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className={`
+              px-4 py-2 rounded-lg font-medium
+              ${theme === 'dark' 
+                ? 'bg-green-600 text-white hover:bg-green-500' 
+                : 'bg-green-500 text-white hover:bg-green-400'
+              }
+            `}
+          >
+            Keep it! 🌟
+          </button>
+          <button
+            onClick={handleConfirm}
+            className={`
+              px-4 py-2 rounded-lg font-medium
+              ${error 
+                ? 'bg-gray-400 cursor-not-allowed text-white' 
+                : theme === 'dark'
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-400'
+                  : 'bg-yellow-500 text-white hover:bg-yellow-400'
+              }
+            `}
+          >
+            Proceed 🔓
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -293,6 +522,8 @@ function NewsReaderContent() {
   const [sentences, setSentences] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showMotivation, setShowMotivation] = useState(false);
+  const [showConfirmUnfinish, setShowConfirmUnfinish] = useState(false);  // Add this line
 
   // Refs
   const sidebarRef = useRef(null);
@@ -1386,7 +1617,73 @@ function NewsReaderContent() {
     }
   }, [user]);
 
-  // Update toggleFinished function
+  // Add this function near other utility functions
+  const triggerCelebration = () => {
+    const duration = 3000; // Increased from 1500ms to 3000ms
+    const end = Date.now() + duration;
+
+    // Show motivational message
+    setShowMotivation(true);
+    setTimeout(() => {
+      setShowMotivation(false);
+    }, 3000); // Increased to match duration
+
+    const colors = ['#FF5757', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6B6B'];
+
+    // Initial burst
+    confetti({
+      particleCount: 100,
+      spread: 100,
+      origin: { y: 0.8 },
+      colors: colors,
+      gravity: 0.8
+    });
+
+    // Continuous side bursts
+    (function frame() {
+      confetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: colors
+      });
+      confetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: colors
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+
+    // Additional bursts at intervals
+    setTimeout(() => {
+      confetti({
+        particleCount: 60,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: colors,
+        gravity: 1
+      });
+    }, 1000);
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 120,
+        origin: { y: 0.8 },
+        colors: colors,
+        gravity: 1.2
+      });
+    }, 2000);
+  };
+
+  // Update the toggleFinished function to include celebration
   const toggleFinished = async () => {
     if (!user) {
       setToastMessage('Tip: Sign in to track your reading progress');
@@ -1399,63 +1696,61 @@ function NewsReaderContent() {
 
     if (finishLoading) return;
 
+    // If trying to unmark, show confirmation first
+    if (isFinished) {
+      setShowConfirmUnfinish(true);
+      return;
+    }
+
     setFinishLoading(true);
     try {
-      if (isFinished) {
-        // Remove from finished
-        await supabase
-          .from('finished_articles')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('url', url);
-        setIsFinished(false);
-      } else {
-        // First get or create the article record
-        const { data: article, error: articleError } = await supabase
+      // First get or create the article record
+      const { data: article, error: articleError } = await supabase
+        .from('articles')
+        .select('id')
+        .eq('url', url)
+        .single();
+
+      if (articleError && articleError.code === 'PGRST116') {
+        // Article doesn't exist, create it
+        const { data: newArticle, error: createError } = await supabase
           .from('articles')
-          .select('id')
-          .eq('url', url)
+          .insert([{
+            url,
+            title: newsTitle,
+            publish_date: newsDate,
+            images: newsImages
+          }])
+          .select()
           .single();
 
-        if (articleError && articleError.code === 'PGRST116') {
-          // Article doesn't exist, create it
-          const { data: newArticle, error: createError } = await supabase
-            .from('articles')
-            .insert([{
-              url,
-              title: newsTitle,
-              publish_date: newsDate,
-              images: newsImages
-            }])
-            .select()
-            .single();
+        if (createError) throw createError;
 
-          if (createError) throw createError;
-
-          // Add to finished articles with new article reference
-          await supabase
-            .from('finished_articles')
-            .insert([{
-              user_id: user.id,
-              url,
-              article_id: newArticle.id,
-              finished_at: new Date().toISOString()
-            }]);
-        } else if (articleError) {
-          throw articleError;
-        } else {
-          // Article exists, use its ID
-          await supabase
-            .from('finished_articles')
-            .insert([{
-              user_id: user.id,
-              url,
-              article_id: article.id,
-              finished_at: new Date().toISOString()
-            }]);
-        }
-        setIsFinished(true);
+        // Add to finished articles with new article reference
+        await supabase
+          .from('finished_articles')
+          .insert([{
+            user_id: user.id,
+            url,
+            article_id: newArticle.id,
+            finished_at: new Date().toISOString()
+          }]);
+      } else if (articleError) {
+        throw articleError;
+      } else {
+        // Article exists, use its ID
+        await supabase
+          .from('finished_articles')
+          .insert([{
+            user_id: user.id,
+            url,
+            article_id: article.id,
+            finished_at: new Date().toISOString()
+          }]);
       }
+      setIsFinished(true);
+      // Trigger celebration animation when marking as finished
+      triggerCelebration();
 
       // Update finished URLs list
       await fetchFinishedArticles();
@@ -1466,12 +1761,24 @@ function NewsReaderContent() {
     }
   };
 
-  // Add this effect near other initialization effects
-  useEffect(() => {
-    if (user && url) {
-      checkFinishStatus();
+  // Add function to handle unfinishing
+  const handleUnfinish = async () => {
+    setFinishLoading(true);
+    try {
+      await supabase
+        .from('finished_articles')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('url', url);
+      setIsFinished(false);
+      await fetchFinishedArticles();
+    } catch (error) {
+      console.error('Error unmarking article:', error);
+    } finally {
+      setFinishLoading(false);
+      setShowConfirmUnfinish(false);
     }
-  }, [user, url]);
+  };
 
   // Add these utility functions near the top with other utility functions
   const renderTitle = (title) => {
@@ -2692,6 +2999,16 @@ function NewsReaderContent() {
           </div>
         </div>
       )}
+      {/* Add Motivational Message */}
+      <MotivationalMessage show={showMotivation} theme={preferenceState.theme} />
+
+      {/* Add Confirmation Modal */}
+      <ConfirmationModal
+        show={showConfirmUnfinish}
+        onConfirm={handleUnfinish}
+        onCancel={() => setShowConfirmUnfinish(false)}
+        theme={preferenceState.theme}
+      />
     </div>
   );
 }

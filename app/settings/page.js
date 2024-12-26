@@ -29,6 +29,64 @@ export default function Settings() {
     edited_duolingo_username: ''
   });
 
+  // Handle avatar change
+  const handleAvatarChange = async (e) => {
+    try {
+      setError(null);
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload an image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+
+      // Create a unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      updateProfile({ avatar_url: publicUrl });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      setError('Failed to upload image');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   // Watch for system theme changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -336,26 +394,14 @@ export default function Settings() {
               <div className="p-8 space-y-8">
                 {/* User info */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  {profile?.avatar_url ? (
-                    <div className="relative">
+                  <div className="relative group">
+                    {profile?.avatar_url ? (
                       <img
                         src={profile.avatar_url}
                         alt="Profile"
                         className="w-16 sm:w-20 h-16 sm:h-20 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
                       />
-                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800 ${
-                        profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
-                      }`}>
-                        <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative">
+                    ) : (
                       <div className={`w-16 sm:w-20 h-16 sm:h-20 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
                         ${profileData.currentTheme === "dark"
                           ? "bg-gray-800 text-gray-200"
@@ -364,18 +410,37 @@ export default function Settings() {
                       >
                         <FaUser className="w-6 sm:w-8 h-6 sm:h-8" />
                       </div>
-                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800 ${
-                        profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
-                      }`}>
-                        <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    )}
+                    <div className={`absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ${
+                      profileData.currentTheme === "dark"
+                        ? "bg-black/50"
+                        : "bg-black/30"
+                    }`}>
+                      <label htmlFor="avatar-upload" className="cursor-pointer p-2">
+                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                      </div>
+                      </label>
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                      />
                     </div>
-                  )}
+                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800 ${
+                      profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+                    }`}>
+                      <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                      </svg>
+                    </div>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className={`flex flex-col gap-2 ${
                       profileData.currentTheme === "dark" ? "text-gray-300" : "text-gray-700"
@@ -623,7 +688,7 @@ export default function Settings() {
                       <div key={level}>
                         <button
                           onClick={() => handleUpdate("japanese_level", level)}
-                          className={`w-full p-3 rounded-lg text-left transition-colors ${
+                          className={`w-full h-full p-3 rounded-lg text-left transition-colors ${
                             profileData.japanese_level === level
                               ? profileData.currentTheme === "dark"
                                 ? "bg-green-500/10 text-green-400 border border-green-500"
@@ -633,9 +698,9 @@ export default function Settings() {
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
                           }`}
                         >
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium">{displayLevel}</div>
-                            <div className={`text-xs ${
+                          <div className="flex flex-col h-[120px]">
+                            <div className="text-sm font-medium mb-2">{displayLevel}</div>
+                            <div className={`text-xs flex-1 ${
                               profileData.japanese_level === level
                                 ? profileData.currentTheme === "dark"
                                   ? "text-green-400/80"
@@ -924,7 +989,7 @@ export default function Settings() {
                 </h2>
               </div>
               <div className="p-6">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => handleUpdate("theme", "light")}
                     className={`p-4 rounded-lg border transition-colors ${
@@ -953,43 +1018,6 @@ export default function Settings() {
                     <div className="flex flex-col items-center gap-2">
                       <FaMoon className="w-5 h-5" />
                       <span className="text-sm font-medium">Dark</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleUpdate("theme", "system")}
-                    className={`p-4 rounded-lg border transition-colors ${
-                      profileData.theme === "system"
-                        ? profileData.currentTheme === "dark"
-                          ? "border-green-500 bg-green-500/10 text-green-400"
-                          : "border-green-500 bg-green-50 text-green-700"
-                        : profileData.currentTheme === "dark"
-                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
-                        : "border-gray-200 hover:border-gray-300 text-gray-700"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <svg
-                        className="w-5 h-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium">System</span>
                     </div>
                   </button>
                 </div>

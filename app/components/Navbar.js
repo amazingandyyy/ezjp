@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaBook, FaUserCircle, FaHeart, FaDownload, FaUser } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
@@ -24,6 +24,7 @@ export default function Navbar({
     longestStreak: 0,
     currentStreak: 0
   });
+  const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
 
   // Handle PWA install prompt
   useEffect(() => {
@@ -133,85 +134,112 @@ export default function Navbar({
     return { longest: longestStreak, current: currentStreak };
   }, []);
 
-  // Add useEffect to fetch stats when dropdown opens
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!user || !showProfile) return;
+  // Add memoized stats calculation
+  const calculatedStats = useMemo(() => {
+    if (!user) return null;
 
+    const fetchStats = async () => {
       try {
         // Get today's date in YYYY-MM-DD format
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayStr = today.toISOString();
 
-        // Fetch user's reading stats
-        const { data: readingStats, error: statsError } = await supabase
-          .from('reading_stats')
-          .select('total_reading_time, total_articles_read')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Fetch all stats in parallel for better performance
+        const [
+          readingStatsResponse,
+          finishedArticlesResponse,
+          finishedCountResponse,
+          todayFinishedResponse
+        ] = await Promise.all([
+          // Fetch user's reading stats
+          supabase
+            .from('reading_stats')
+            .select('total_reading_time, total_articles_read')
+            .eq('user_id', user.id)
+            .maybeSingle(),
+          
+          // Fetch finished articles for streak calculation
+          supabase
+            .from('finished_articles')
+            .select('finished_at')
+            .eq('user_id', user.id)
+            .order('finished_at', { ascending: false }),
+          
+          // Fetch finished articles count
+          supabase
+            .from('finished_articles')
+            .select('id', { count: 'exact' })
+            .eq('user_id', user.id),
+          
+          // Fetch today's finished articles count
+          supabase
+            .from('finished_articles')
+            .select('id', { count: 'exact' })
+            .eq('user_id', user.id)
+            .gte('finished_at', todayStr)
+        ]);
 
-        if (statsError && statsError.code !== 'PGRST116') {
-          console.error('Error fetching reading stats:', statsError);
-        }
-
-        // Fetch finished articles for streak calculation
-        const { data: finished, error: finishedError } = await supabase
-          .from('finished_articles')
-          .select('finished_at')
-          .eq('user_id', user.id)
-          .order('finished_at', { ascending: false });
-
-        if (finishedError) {
-          console.error('Error fetching finished articles:', finishedError);
-        }
+        const readingStats = readingStatsResponse.data;
+        const finished = finishedArticlesResponse.data;
+        const finishedCount = finishedCountResponse.count;
+        const todayFinishedCount = todayFinishedResponse.count;
 
         // Calculate streaks
         const streaks = calculateStreaks(finished || []);
 
-        // Fetch finished articles count
-        const { count: finishedCount, error: finishedCountError } = await supabase
-          .from('finished_articles')
-          .select('id', { count: 'exact' })
-          .eq('user_id', user.id);
-
-        // Fetch today's finished articles count
-        const { count: todayFinishedCount, error: todayFinishedError } = await supabase
-          .from('finished_articles')
-          .select('id', { count: 'exact' })
-          .eq('user_id', user.id)
-          .gte('finished_at', todayStr);
-
-        if (finishedCountError) {
-          console.error('Error fetching finished count:', finishedCountError);
-        }
-
-        if (todayFinishedError) {
-          console.error('Error fetching today finished count:', todayFinishedError);
-        }
-
-        setStats({
+        return {
           totalReadingTime: readingStats?.total_reading_time || 0,
           totalArticlesRead: readingStats?.total_articles_read || 0,
           totalFinishedArticles: finishedCount || 0,
           todayFinishedArticles: todayFinishedCount || 0,
           currentStreak: streaks.current,
           longestStreak: streaks.longest
-        });
+        };
       } catch (error) {
         console.error('Error fetching stats:', error);
+        return null;
       }
     };
 
-    fetchStats();
-  }, [user, showProfile, calculateStreaks]);
+    return fetchStats();
+  }, [user, calculateStreaks, refreshTimestamp]);
+
+  // Update useEffect to handle both initial load and refresh
+  useEffect(() => {
+    if (showProfile && calculatedStats) {
+      calculatedStats.then(newStats => {
+        if (newStats) {
+          setStats(newStats);
+        }
+      });
+    }
+  }, [showProfile, calculatedStats]);
+
+  // Add function to refresh stats
+  const refreshStats = useCallback(() => {
+    setRefreshTimestamp(Date.now());
+  }, []);
+
+  // Add effect to refresh stats periodically when profile is open
+  useEffect(() => {
+    if (showProfile) {
+      // Initial refresh
+      refreshStats();
+
+      // Set up periodic refresh
+      const intervalId = setInterval(refreshStats, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [showProfile, refreshStats]);
 
   // Memoize the stats display
   const StatsDisplay = useMemo(() => (
     <div className="px-4 py-3">
       <div className="grid grid-cols-2 gap-8">
         <div className="flex items-start gap-3">
-          <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
+          <div className={`w-10 h-9 flex items-center justify-center rounded-md ${
             theme === "dark"
               ? "bg-orange-500/10 text-orange-400"
               : "bg-orange-50 text-orange-600"
@@ -248,7 +276,7 @@ export default function Navbar({
           </div>
         </div>
         <div className="flex items-start gap-3">
-          <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
+          <div className={`w-12 h-9 flex items-center justify-center rounded-md ${
             theme === "dark"
               ? "bg-green-500/10 text-green-400"
               : "bg-green-50 text-green-600"
@@ -428,7 +456,7 @@ export default function Navbar({
             {/* Profile panel - only shown when user is logged in and panel is open */}
             {user && showProfile && (
               <div
-                className={`absolute top-full right-0 mt-0 rounded-xl shadow-xl border w-80
+                className={`absolute top-full right-0 mt-0 rounded-xl shadow-xl border w-96
                 ${
                   theme === "dark"
                     ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-sm"
@@ -446,28 +474,28 @@ export default function Navbar({
                         : "hover:bg-gray-100/70"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       {profile?.avatar_url ? (
                         <img
                           src={profile.avatar_url}
                           alt="Profile"
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
+                          className="w-14 h-14 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
                         />
                       ) : (
                         <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
+                          className={`w-14 h-14 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
                           ${
                             theme === "dark"
                               ? "bg-gray-700 text-gray-300"
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          <FaUser className="w-5 h-5" />
+                          <FaUser className="w-6 h-6" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`font-medium truncate ${
+                          className={`text-lg font-medium truncate ${
                             theme === "dark"
                               ? "text-gray-100"
                               : "text-[rgb(19,31,36)]"
@@ -482,6 +510,86 @@ export default function Navbar({
                         >
                           {profile?.username ? user.email : "No username set"}
                         </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats section - update grid gap */}
+                  <div className="px-4 py-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-12 h-12 flex items-center justify-center rounded-md ${
+                          theme === "dark"
+                            ? "bg-orange-500/10 text-orange-400"
+                            : "bg-orange-50 text-orange-600"
+                        }`}>
+                          <svg 
+                            stroke="currentColor" 
+                            fill="currentColor" 
+                            strokeWidth="0" 
+                            viewBox="0 0 384 512" 
+                            className="w-5 h-5 flex-shrink-0" 
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M216 23.86c0-23.8-30.65-32.77-44.15-13.04C48 191.85 224 200 224 288c0 35.63-29.11 64.46-64.85 63.99-35.17-.45-63.15-29.77-63.15-64.94v-85.51c0-21.7-26.47-32.23-41.43-16.5C27.8 213.16 0 261.33 0 320c0 105.87 86.13 192 192 192s192-86.13 192-192c0-170.29-168-193-168-296.14z"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="flex items-baseline gap-1.5">
+                            <p className={`text-2xl font-bold ${
+                              theme === "dark" ? "text-gray-100" : "text-gray-900"
+                            }`}>
+                              {stats.currentStreak}
+                            </p>
+                            <p className={`text-xs font-medium ${
+                              theme === "dark" ? "text-orange-400/90" : "text-orange-600/90"
+                            }`}>
+                              day{stats.currentStreak !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          <p className={`text-xs ${
+                            theme === "dark" ? "text-gray-500" : "text-gray-500"
+                          }`}>
+                            Current Streak
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-12 h-12 flex items-center justify-center rounded-md ${
+                          theme === "dark"
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-green-50 text-green-600"
+                        }`}>
+                          <svg 
+                            className="w-5 h-5 flex-shrink-0" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="flex items-baseline gap-1.5">
+                            <p className={`text-2xl font-bold ${
+                              theme === "dark" ? "text-gray-100" : "text-gray-900"
+                            }`}>
+                              {stats.totalFinishedArticles}
+                            </p>
+                            {stats.todayFinishedArticles > 0 && (
+                              <p className={`text-xs font-medium ${
+                                theme === "dark" ? "text-green-400/90" : "text-green-600/90"
+                              }`}>
+                                +{stats.todayFinishedArticles} today
+                              </p>
+                            )}
+                          </div>
+                          <p className={`text-xs ${
+                            theme === "dark" ? "text-gray-500" : "text-gray-500"
+                          }`}>
+                            Articles Finished
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -586,9 +694,6 @@ export default function Navbar({
                       </div>
                     )}
                   </div>
-
-                  {/* Stats section */}
-                  {StatsDisplay}
 
                   {/* Navigation section */}
                   <div className="p-1">
