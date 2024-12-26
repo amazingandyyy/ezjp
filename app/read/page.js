@@ -498,6 +498,11 @@ const getHostname = (url) => {
 const ProfileDropdown = ({ show, onClose, theme, user, profile, onSignOut }) => {
   if (!show) return null;
 
+  const handleSignOut = async () => {
+    await onSignOut();
+    window.location.reload(); // Add page refresh after sign out
+  };
+
   return (
     <div className="fixed inset-0 z-[60]">
       {/* Backdrop */}
@@ -583,7 +588,7 @@ const ProfileDropdown = ({ show, onClose, theme, user, profile, onSignOut }) => 
           {/* Actions */}
           <div className="space-y-3">
             <button
-              onClick={onSignOut}
+              onClick={handleSignOut}
               className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors
                 ${theme === 'dark' 
                   ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' 
@@ -680,13 +685,20 @@ function NewsReaderContent() {
 
   // Layout classes
   const sidebarClasses = `
-    fixed top-0 h-screen transform transition-all duration-300 ease-in-out z-50
-    ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
-    ${isLargeScreen ? 'lg:fixed lg:top-0' : ''}
-    ${preferenceState.theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-white'} 
-    border-r ${preferenceState.theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}
+    fixed top-0 h-screen transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50
+    ${showSidebar ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+    ${isLargeScreen ? 'lg:fixed lg:top-0 lg:shadow-xl' : ''}
+    ${preferenceState.theme === 'dark' 
+      ? 'bg-[rgb(19,31,36)] backdrop-blur-xl bg-opacity-95' 
+      : 'bg-white backdrop-blur-xl bg-opacity-95'
+    } 
+    border-r ${preferenceState.theme === 'dark' ? 'border-gray-800' : 'border-gray-100'}
     overflow-y-auto
     w-[400px]
+    scrollbar-thin ${preferenceState.theme === 'dark' 
+      ? 'scrollbar-track-gray-800 scrollbar-thumb-gray-700' 
+      : 'scrollbar-track-gray-100 scrollbar-thumb-gray-300'
+    }
   `;
 
   const mainContentClasses = `
@@ -697,6 +709,10 @@ function NewsReaderContent() {
     }
     max-w-3xl mx-auto
     pt-8 p-4 pb-32
+    ${preferenceState.theme === 'dark' ? 'prose-invert' : 'prose'}
+    prose-headings:font-serif
+    prose-p:leading-relaxed
+    prose-p:tracking-wide
   `;
 
   const mainWrapperClasses = `
@@ -704,7 +720,7 @@ function NewsReaderContent() {
   `;
 
   const overlayClasses = `
-    fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300
+    fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-all duration-500
     ${!isLargeScreen && showSidebar ? 'opacity-100' : 'opacity-0 pointer-events-none'}
   `;
 
@@ -713,10 +729,12 @@ function NewsReaderContent() {
     fixed left-0 sm:left-1/2 bottom-0 sm:bottom-6
     w-full sm:w-auto sm:-translate-x-1/2
     px-4 sm:px-6 py-4 pb-8 sm:pb-4 sm:rounded-full
-    ${preferenceState.theme === "dark" ? "bg-gray-800" : "bg-white"} 
+    backdrop-blur-md
+    ${preferenceState.theme === "dark" ? "bg-gray-800/90" : "bg-white/90"} 
     shadow-lg border-t sm:border 
     ${preferenceState.theme === "dark" ? "border-gray-700" : "border-gray-200"}
     z-40
+    transition-all duration-300 ease-in-out
   `;
 
   // Load user preferences
@@ -1486,13 +1504,14 @@ function NewsReaderContent() {
   const floatingNavClasses = `
     fixed top-4 h-12 z-50 rounded-full shadow-lg border px-4
     transition-all duration-300 ease-in-out transform
+    backdrop-blur-md
     ${showSidebar && isLargeScreen 
       ? 'lg:translate-x-[200px] left-1/2 -translate-x-1/2' 
       : 'left-1/2 -translate-x-1/2'
     }
     ${preferenceState.theme === "dark"
-      ? "bg-gray-800/95 border-gray-700 backdrop-blur-sm"
-      : "[color-scheme:light] bg-white/95 border-gray-200 backdrop-blur-sm"
+      ? "bg-gray-800/90 border-gray-700"
+      : "[color-scheme:light] bg-white/90 border-gray-200"
     }
   `;
 
@@ -2081,7 +2100,7 @@ function NewsReaderContent() {
     return processContent(sentence).map((part, i) => {
       if (part.type === "ruby") {
         return (
-          <span key={i}>
+          <span key={i} className="transition-all duration-200">
             <RubyText
               part={part}
               preferenceState={preferenceState}
@@ -2090,7 +2109,7 @@ function NewsReaderContent() {
         );
       } else {
         return (
-          <span key={i}>
+          <span key={i} className="transition-all duration-200">
             {part.content}
           </span>
         );
@@ -2423,16 +2442,19 @@ function NewsReaderContent() {
         {/* Sidebar */}
         <aside ref={sidebarRef} className={sidebarClasses}>
           <div className="p-4">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold">News List</h2>
+                <h2 className={`text-lg font-serif tracking-wide ${
+                  preferenceState.theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                }`}>
+                  News List
+                </h2>
                 <button
                   onClick={() => setShowSidebar(false)}
-                  className={`p-2 rounded-full hover:bg-opacity-80 
-                    ${
-                      preferenceState.theme === "dark"
-                        ? "hover:bg-gray-800"
-                        : "hover:bg-gray-100"
+                  className={`p-2 rounded-full transition-all duration-200
+                    ${preferenceState.theme === 'dark'
+                      ? 'hover:bg-gray-800/80 active:bg-gray-700/80'
+                      : 'hover:bg-gray-100/80 active:bg-gray-200/80'
                     }`}
                 >
                   <svg
@@ -2452,24 +2474,21 @@ function NewsReaderContent() {
               </div>
 
               {user && (
-                <div
-                  className={`flex gap-1 p-1 rounded-lg ${
-                    preferenceState.theme === "dark"
-                      ? "bg-gray-800/50"
-                      : "bg-gray-100"
-                  }`}
-                >
+                <div className={`flex gap-1 p-1 rounded-xl ${
+                  preferenceState.theme === 'dark'
+                    ? 'bg-gray-800/50 backdrop-blur-sm'
+                    : 'bg-gray-100/80 backdrop-blur-sm'
+                }`}>
                   <button
                     onClick={() => setSidebarView("latest")}
-                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
-                      ${
-                        sidebarView === "latest"
-                          ? preferenceState.theme === "dark"
-                            ? "bg-gray-700 text-white shadow-sm"
-                            : "bg-white text-[rgb(19,31,36)] shadow-sm"
-                          : preferenceState.theme === "dark"
-                          ? "text-gray-400 hover:text-gray-200"
-                          : "text-gray-500 hover:text-gray-700"
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2
+                      ${sidebarView === "latest"
+                        ? preferenceState.theme === "dark"
+                          ? "bg-gray-700/90 text-white shadow-sm ring-1 ring-gray-600"
+                          : "bg-white text-[rgb(19,31,36)] shadow-sm ring-1 ring-gray-200"
+                        : preferenceState.theme === "dark"
+                        ? "text-gray-400 hover:text-gray-200"
+                        : "text-gray-500 hover:text-gray-700"
                       }`}
                   >
                     <svg
@@ -2489,15 +2508,14 @@ function NewsReaderContent() {
                   </button>
                   <button
                     onClick={() => setSidebarView("saved")}
-                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-2
-                      ${
-                        sidebarView === "saved"
-                          ? preferenceState.theme === "dark"
-                            ? "bg-gray-700 text-white shadow-sm"
-                            : "bg-white text-[rgb(19,31,36)] shadow-sm"
-                          : preferenceState.theme === "dark"
-                          ? "text-gray-400 hover:text-gray-200"
-                          : "text-gray-500 hover:text-gray-700"
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2
+                      ${sidebarView === "saved"
+                        ? preferenceState.theme === "dark"
+                          ? "bg-gray-700/90 text-white shadow-sm ring-1 ring-gray-600"
+                          : "bg-white text-[rgb(19,31,36)] shadow-sm ring-1 ring-gray-200"
+                        : preferenceState.theme === "dark"
+                        ? "text-gray-400 hover:text-gray-200"
+                        : "text-gray-500 hover:text-gray-700"
                       }`}
                   >
                     <FaHeart className="w-3.5 h-3.5" />
@@ -2506,41 +2524,37 @@ function NewsReaderContent() {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {sidebarView === "latest" ? (
                   recentNews?.length > 0 ? (
                     recentNews.map((article, index) => (
                       <button
                         key={index}
                         onClick={() => {
-                          router.push(
-                            `/read?source=${encodeURIComponent(article.url)}`
-                          );
+                          router.push(`/read?source=${encodeURIComponent(article.url)}`);
                           setShowSidebar(false);
                         }}
-                        className={`w-full text-left p-3 rounded-lg transition-colors flex gap-3
-                        ${
-                          finishedUrls.has(article.url)
+                        className={`w-full text-left p-4 rounded-xl transition-all duration-300 flex gap-4 group
+                          ${finishedUrls.has(article.url)
                             ? "opacity-40 hover:opacity-100"
                             : ""
-                        }
-                          ${
-                            preferenceState.theme === "dark"
-                              ? article.url === sourceUrl
-                                ? "bg-gray-800"
-                                : "hover:bg-gray-800/70"
-                              : article.url === sourceUrl
-                              ? "bg-gray-100"
-                              : "hover:bg-gray-50"
+                          }
+                          ${preferenceState.theme === "dark"
+                            ? article.url === sourceUrl
+                              ? "bg-gray-800/90 ring-1 ring-gray-700"
+                              : "hover:bg-gray-800/70 hover:ring-1 hover:ring-gray-700"
+                            : article.url === sourceUrl
+                            ? "bg-gray-100/90 ring-1 ring-gray-200"
+                            : "hover:bg-gray-50/90 hover:ring-1 hover:ring-gray-200"
                           }`}
                       >
                         <div className="flex-shrink-0 relative">
                           {article.image && (
-                            <div className="w-20 h-20 relative rounded-md overflow-hidden">
+                            <div className="w-20 h-20 relative rounded-lg overflow-hidden ring-1 ring-black/5">
                               <img
                                 src={article.image}
                                 alt=""
-                                className="object-cover w-full h-full"
+                                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                 onError={(e) => {
                                   e.target.style.display = "none";
                                 }}
@@ -2549,12 +2563,12 @@ function NewsReaderContent() {
                           )}
                           <div className="absolute -top-1 -right-1 flex gap-1">
                             {archivedUrls.has(article.url) && (
-                              <div className="bg-red-500 rounded-full p-1 shadow-lg">
+                              <div className="bg-red-500 rounded-full p-1 shadow-lg ring-2 ring-white dark:ring-[rgb(19,31,36)]">
                                 <FaHeart className="w-3 h-3 text-white" />
                               </div>
                             )}
                             {finishedUrls.has(article.url) && (
-                              <div className="bg-green-500 rounded-full p-1 shadow-lg">
+                              <div className="bg-green-500 rounded-full p-1 shadow-lg ring-2 ring-white dark:ring-[rgb(19,31,36)]">
                                 <svg
                                   className="w-3 h-3 text-white"
                                   fill="none"
@@ -2573,36 +2587,28 @@ function NewsReaderContent() {
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3
-                            className={`font-medium mb-1 line-clamp-2 ${
-                              preferenceState.theme === "dark"
-                                ? "text-gray-200"
-                                : "text-[rgb(19,31,36)]"
-                            }`}
-                          >
+                          <h3 className={`font-medium mb-1 line-clamp-2 tracking-wide ${
+                            preferenceState.theme === "dark"
+                              ? "text-gray-200"
+                              : "text-[rgb(19,31,36)]"
+                          }`}>
                             {Array.isArray(article.title)
                               ? article.title
                                   .map((part, i) =>
-                                    part.type === "ruby"
-                                      ? part.kanji
-                                      : part.content
+                                    part.type === "ruby" ? part.kanji : part.content
                                   )
                                   .join("")
                               : article.title}
                           </h3>
-                          <p
-                            className={`text-sm ${
-                              preferenceState.theme === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-600"
-                            }`}
-                          >
+                          <p className={`text-sm ${
+                            preferenceState.theme === "dark"
+                              ? "text-gray-400"
+                              : "text-gray-600"
+                          }`}>
                             {Array.isArray(article.date)
                               ? article.date
                                   .map((part) =>
-                                    part.type === "ruby"
-                                      ? part.kanji
-                                      : part.content
+                                    part.type === "ruby" ? part.kanji : part.content
                                   )
                                   .join("")
                               : formatJapaneseDate(article.date)}
@@ -2611,19 +2617,22 @@ function NewsReaderContent() {
                       </button>
                     ))
                   ) : recentNewsError ? (
-                    <div className="flex items-center justify-center h-32 text-red-500">
-                      Failed to load news. Please try again.
+                    <div className="flex flex-col items-center justify-center h-32 gap-3 p-6 rounded-xl bg-red-500/10">
+                      <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-red-500 text-center font-medium">
+                        Failed to load news. Please try again.
+                      </p>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-32">
-                      <svg
-                        className={`animate-spin h-6 w-6 mb-2 ${
-                          preferenceState.theme === "dark"
-                            ? "text-gray-400"
-                            : "text-[rgb(19,31,36)]"
-                        }`}
-                        viewBox="0 0 24 24"
-                      >
+                    <div className="flex flex-col items-center justify-center h-32 gap-3">
+                      <svg className={`animate-spin h-6 w-6 ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-400"
+                          : "text-[rgb(19,31,36)]"
+                      }`} viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -2639,13 +2648,11 @@ function NewsReaderContent() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         />
                       </svg>
-                      <span
-                        className={
-                          preferenceState.theme === "dark"
-                            ? "text-gray-400"
-                            : "text-gray-500"
-                        }
-                      >
+                      <span className={`text-sm font-medium ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-400"
+                          : "text-gray-500"
+                      }`}>
                         Loading news...
                       </span>
                     </div>
@@ -2713,11 +2720,11 @@ function NewsReaderContent() {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-1.5 min-w-0 truncate transition-opacity duration-150 hover:opacity-70`}
+                          className={`inline-flex items-center gap-1.5 min-w-0 truncate transition-all duration-200 hover:opacity-80`}
                           title={url ? getHostname(url) : "Open original article"}
                         >
                           {isNHKUrl(url) ? (
-                            <NHKLogo className="opacity-90 flex-shrink-0" />
+                            <NHKLogo className="opacity-90 flex-shrink-0 transition-opacity duration-200" />
                           ) : (
                             <FaExternalLinkAlt className="w-3 h-3 flex-shrink-0" />
                           )}
@@ -2729,7 +2736,7 @@ function NewsReaderContent() {
                     </div>
                     <div className="flex items-start gap-4 mb-3">
                       <h2
-                        className={`font-bold leading-snug tracking-tight ${
+                        className={`font-serif leading-snug tracking-tight ${
                           preferenceState.font_size === "medium"
                             ? "text-2xl"
                             : "text-3xl"
@@ -2743,7 +2750,7 @@ function NewsReaderContent() {
                       </h2>
                     </div>
                     <div className="inline-flex items-center">
-                      <span className={`text-sm ${
+                      <span className={`text-sm font-medium ${
                         preferenceState.theme === "dark"
                           ? "text-gray-400"
                           : "text-gray-600"
@@ -2769,17 +2776,17 @@ function NewsReaderContent() {
                         {/* Progress bar on the left */}
                         <div className="flex items-center gap-3">
                           <div
-                            className={`rounded-full w-48 h-3 overflow-hidden ${
+                            className={`rounded-full w-48 h-3 overflow-hidden shadow-inner ${
                               preferenceState.theme === "dark"
-                                ? "bg-gray-800"
+                                ? "bg-gray-800/80"
                                 : "bg-gray-100"
                             }`}
                           >
                             <div
-                              className={`h-full transition-all duration-300 ${
+                              className={`h-full transition-all duration-500 ease-in-out transform ${
                                 preferenceState.theme === "dark"
-                                  ? "bg-green-500/30"
-                                  : "bg-green-600"
+                                  ? "bg-green-500/40"
+                                  : "bg-green-600/90"
                               }`}
                               style={{
                                 width: `${
@@ -2834,23 +2841,23 @@ function NewsReaderContent() {
                             <span
                               key={sIndex}
                               onClick={() => handleSentenceClick(sIndex)}
-                              className={`inline cursor-pointer rounded px-1
-                              ${
-                                sIndex === currentSentence
-                                  ? preferenceState.theme === "dark"
-                                    ? "bg-gray-700/90 ring-1 ring-gray-500"
-                                    : "bg-emerald-50"
-                                  : preferenceState.theme === "dark"
-                                  ? "hover:bg-gray-800/90"
-                                  : "hover:bg-gray-100"
-                              }
-                              ${
-                                (repeatMode === REPEAT_MODES.ONE && sIndex !== currentSentence)
-                                  ? "opacity-30"
-                                  : ""
-                              }
-                              transition-all duration-200
-                            `}
+                              className={`inline cursor-pointer rounded px-1.5 py-0.5
+                                ${
+                                  sIndex === currentSentence
+                                    ? preferenceState.theme === "dark"
+                                      ? "bg-gray-700/90 ring-1 ring-gray-500 shadow-sm"
+                                      : "bg-emerald-50 ring-1 ring-emerald-200 shadow-sm"
+                                    : preferenceState.theme === "dark"
+                                    ? "hover:bg-gray-800/90"
+                                    : "hover:bg-gray-100"
+                                }
+                                ${
+                                  (repeatMode === REPEAT_MODES.ONE && sIndex !== currentSentence)
+                                    ? "opacity-30"
+                                    : ""
+                                }
+                                transition-all duration-300 ease-in-out
+                              `}
                             >
                               {renderSentence(sentence, sIndex)}
                             </span>
