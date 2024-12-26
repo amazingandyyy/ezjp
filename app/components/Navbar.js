@@ -504,11 +504,11 @@ export default function Navbar({
                         <img
                           src={profile.avatar_url}
                           alt="Profile"
-                          className="w-11 h-11 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
+                          className="w-11 h-11 rounded-full object-cover border border-gray-200/10 dark:border-gray-700/50"
                         />
                       ) : (
                         <div
-                          className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
+                          className={`w-11 h-11 rounded-full flex items-center justify-center border border-gray-200/10 dark:border-gray-700/50
                           ${
                             theme === "dark"
                               ? "bg-gray-700 text-gray-300"

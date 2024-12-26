@@ -527,201 +527,239 @@ export default function UserProfile() {
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
       <Navbar theme={theme} hideNewsListButton={true} />
       
-      <div className="container mx-auto px-4 pt-28 pb-32">
+      <div className="container mx-auto px-4 pt-24 pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Profile header */}
-          <div className={`mb-16 ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10">
-              <div className="flex flex-col items-center sm:items-start">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={profile?.username || 'Profile'}
-                    className={`w-32 h-32 rounded-3xl object-cover shadow-xl transform transition-all duration-300 hover:scale-105 ${
-                      theme === 'dark' ? 'ring-2 ring-gray-700' : 'ring-2 ring-gray-200'
-                    }`}
-                  />
-                ) : (
-                  <div className={`w-32 h-32 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl transform transition-all duration-300 hover:scale-105 ${
-                    theme === 'dark' ? 'bg-gray-800/80 text-gray-200' : 'bg-white text-gray-700'
-                  }`}>
-                    {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4">
-                  <h1 className={`text-4xl sm:text-5xl font-bold tracking-tight ${
-                    theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'
-                  }`}>
-                    {profile?.username || 'Anonymous User'}
-                  </h1>
+          <div className={`mb-16 relative ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
+            {/* Background gradient effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/5 rounded-3xl blur-3xl" />
+            
+            <div className="relative">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10">
+                <div className="flex flex-col items-center sm:items-start">
+                  {profile?.avatar_url ? (
+                    <div className="group relative">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
+                      <img
+                        src={profile.avatar_url}
+                        alt={profile?.username || 'Profile'}
+                        className={`relative w-32 h-32 rounded-3xl object-cover shadow-xl transform transition-all duration-500 group-hover:scale-[1.02] ${
+                          theme === 'dark' ? 'ring-1 ring-white/10' : 'ring-1 ring-black/5'
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <div className="group relative">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
+                      <div className={`relative w-32 h-32 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl transform transition-all duration-500 group-hover:scale-[1.02] ${
+                        theme === 'dark' ? 'bg-gray-800/80 text-gray-200' : 'bg-white text-gray-700'
+                      }`}>
+                        {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className={`mt-3 text-sm font-medium tracking-wide ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Joined {new Date(profile?.created_at).toLocaleDateString('en-US', { 
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-
-                {/* Self Introduction */}
-                {profile?.self_introduction && (
-                  <div className={`mt-6 p-6 rounded-2xl backdrop-blur-sm ${
-                    theme === 'dark' ? 'bg-gray-800/30' : 'bg-white/90'
-                  } ${theme === 'dark' ? 'shadow-none' : 'shadow-lg'}`}>
-                    <div className="flex gap-3">
-                      <div className={`text-5xl font-serif ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
-                      <p className={`text-sm leading-relaxed whitespace-pre-wrap italic tracking-wide ${
-                        theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                      }`}>
-                        {profile.self_introduction.toUpperCase()}
-                      </p>
-                      <div className={`text-5xl font-serif self-end ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Japanese Level, Duolingo Username, and Share button side by side */}
-                <div className="mt-6 flex flex-wrap items-center justify-center sm:justify-start gap-4">
-                  {profile?.japanese_level && (
-                    <div className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
-                      theme === 'dark'
-                        ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                        : 'bg-green-50 text-green-600 hover:bg-green-100'
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4">
+                    <h1 className={`text-4xl sm:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r ${
+                      theme === 'dark' 
+                        ? 'from-gray-100 to-gray-300'
+                        : 'from-gray-700 to-gray-900'
                     }`}>
-                      <span>JLPT {profile.japanese_level}</span>
+                      {profile?.username || 'Anonymous User'}
+                    </h1>
+                  </div>
+                  <p className={`mt-3 text-sm font-medium tracking-wide ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Joined {new Date(profile?.created_at).toLocaleDateString('en-US', { 
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+
+                  {/* Self Introduction */}
+                  {profile?.self_introduction && (
+                    <div className={`mt-6 p-6 rounded-2xl backdrop-blur-sm transition-all duration-500 hover:scale-[1.01] ${
+                      theme === 'dark' 
+                        ? 'bg-gray-800/30 hover:bg-gray-800/40 border border-gray-700/50' 
+                        : 'bg-white/90 hover:bg-white border border-gray-200/50'
+                    } ${theme === 'dark' ? 'shadow-none' : 'shadow-lg'}`}>
+                      <div className="flex gap-3">
+                        <div className={`text-5xl font-serif ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                        <p className={`text-sm leading-relaxed whitespace-pre-wrap italic tracking-wide ${
+                          theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {profile.self_introduction.toUpperCase()}
+                        </p>
+                        <div className={`text-5xl font-serif self-end ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}>"</div>
+                      </div>
                     </div>
                   )}
 
-                  {profile?.duolingo_username && (
-                    <a
-                      href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
+                  {/* Japanese Level, Duolingo Username, and Share button */}
+                  <div className="mt-6 flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                    {profile?.japanese_level && (
+                      <div className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
                         theme === 'dark'
-                          ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
-                          : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20'
-                      }`}
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z" fill="currentColor"/>
-                        <path d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                        <path d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                        <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="currentColor"/>
-                        <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                      </svg>
-                      <span>Duolingo Profile</span>
-                    </a>
-                  )}
-
-                  {/* Share button moved here */}
-                  <div className="relative" ref={shareMenuRef}>
-                    <button
-                      onClick={() => setShowShareMenu(!showShareMenu)}
-                      className={`p-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${
-                        theme === 'dark'
-                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
-                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/70'
-                      }`}
-                      title="Share profile"
-                    >
-                      <FaShare className="w-4 h-4" />
-                    </button>
-                    {showShareMenu && (
-                      <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1.5 z-10 backdrop-blur-sm ${
-                        theme === 'dark'
-                          ? 'bg-gray-800/95 border border-gray-700'
-                          : 'bg-white/95 border border-gray-200'
+                          ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20'
+                          : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-200/50'
                       }`}>
-                        <button
-                          onClick={copyToClipboard}
-                          className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
-                            theme === 'dark'
-                              ? 'text-gray-300 hover:bg-gray-700/50'
-                              : 'text-gray-700 hover:bg-gray-50/50'
-                          }`}
-                        >
-                          <FaLink className="w-4 h-4" />
-                          Copy Link
-                        </button>
-                        <button
-                          onClick={shareToTwitter}
-                          className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
-                            theme === 'dark'
-                              ? 'text-gray-300 hover:bg-gray-700/50'
-                              : 'text-gray-700 hover:bg-gray-50/50'
-                          }`}
-                        >
-                          <svg
-                            className="w-3.5 h-3.5"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                            fill="currentColor"
-                          >
-                            <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
-                          </svg>
-                          Share on X
-                        </button>
+                        <span>JLPT {profile.japanese_level}</span>
                       </div>
                     )}
+
+                    {profile?.duolingo_username && (
+                      <a
+                        href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
+                          theme === 'dark'
+                            ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
+                            : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z" fill="currentColor"/>
+                          <path d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                          <path d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                          <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="currentColor"/>
+                          <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
+                        </svg>
+                        <span>Duolingo Profile</span>
+                      </a>
+                    )}
+
+                    {/* Share button */}
+                    <div className="relative" ref={shareMenuRef}>
+                      <button
+                        onClick={() => setShowShareMenu(!showShareMenu)}
+                        className={`p-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${
+                          theme === 'dark'
+                            ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border border-gray-700/50'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/70 border border-gray-200/50'
+                        }`}
+                        title="Share profile"
+                      >
+                        <FaShare className="w-4 h-4" />
+                      </button>
+                      {showShareMenu && (
+                        <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1.5 z-10 backdrop-blur-sm ${
+                          theme === 'dark'
+                            ? 'bg-gray-800/95 border border-gray-700/50'
+                            : 'bg-white/95 border border-gray-200/50'
+                        }`}>
+                          <button
+                            onClick={copyToClipboard}
+                            className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
+                              theme === 'dark'
+                                ? 'text-gray-300 hover:bg-gray-700/50'
+                                : 'text-gray-700 hover:bg-gray-50/50'
+                            }`}
+                          >
+                            <FaLink className="w-4 h-4" />
+                            Copy Link
+                          </button>
+                          <button
+                            onClick={shareToTwitter}
+                            className={`w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
+                              theme === 'dark'
+                                ? 'text-gray-300 hover:bg-gray-700/50'
+                                : 'text-gray-700 hover:bg-gray-50/50'
+                            }`}
+                          >
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              fill="currentColor"
+                            >
+                              <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
+                            </svg>
+                            Share on X
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Stats Section */}
-            <div className={`pt-12 sm:pt-16 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className={`p-8 sm:p-10 rounded-3xl shadow-xl backdrop-blur-sm transition-all duration-300 ${theme === 'dark' ? 'bg-gray-800/80 hover:bg-gray-800/90' : 'bg-white/90 hover:shadow-2xl'}`}>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
-                  <div>
-                    <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                      {stats.longestStreak} days
-                    </div>
-                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaFire className="w-4 h-4 text-orange-500" />
-                      Best Streak
-                    </div>
-                    <div className={`mt-3 text-xs flex items-center gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      <div className={`px-3 py-1.5 rounded-full backdrop-blur-sm ${
-                        stats.currentStreak > 0
-                          ? theme === 'dark'
-                            ? 'bg-orange-500/20 text-orange-300'
-                            : 'bg-orange-100 text-orange-700'
-                          : theme === 'dark'
-                          ? 'bg-gray-700 text-gray-400'
-                          : 'bg-gray-100 text-gray-500'
+              {/* Stats Section */}
+              <div className="pt-12 sm:pt-16">
+                <div className={`relative p-8 sm:p-10 rounded-3xl shadow-xl backdrop-blur-sm transition-all duration-500 group hover:scale-[1.01] ${
+                  theme === 'dark' 
+                    ? 'bg-gray-800/80 hover:bg-gray-800/90 border border-gray-700/50' 
+                    : 'bg-white/90 hover:shadow-2xl border border-gray-200/50'
+                }`}>
+                  {/* Background gradient effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
+                    <div>
+                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                        theme === 'dark' 
+                          ? 'from-gray-100 to-gray-300'
+                          : 'from-gray-700 to-gray-900'
                       }`}>
-                        {stats.currentStreak} days current
+                        {stats.longestStreak} days
+                      </div>
+                      <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <FaFire className="w-4 h-4 text-orange-500" />
+                        Best Streak
+                      </div>
+                      <div className={`mt-3 text-xs flex items-center gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        <div className={`px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors duration-300 ${
+                          stats.currentStreak > 0
+                            ? theme === 'dark'
+                              ? 'bg-orange-500/20 text-orange-300 border border-orange-500/20'
+                              : 'bg-orange-100 text-orange-700 border border-orange-200/50'
+                            : theme === 'dark'
+                            ? 'bg-gray-700 text-gray-400 border border-gray-600/50'
+                            : 'bg-gray-100 text-gray-500 border border-gray-200/50'
+                        }`}>
+                          {stats.currentStreak} days current
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                      {stats.totalFinishedArticles}
+                    <div>
+                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                        theme === 'dark' 
+                          ? 'from-gray-100 to-gray-300'
+                          : 'from-gray-700 to-gray-900'
+                      }`}>
+                        {stats.totalFinishedArticles}
+                      </div>
+                      <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <FaCheck className="w-4 h-4 text-green-500" />
+                        Finished Read
+                      </div>
                     </div>
-                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaCheck className="w-4 h-4 text-green-500" />
-                      Finished Read
+                    <div>
+                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                        theme === 'dark' 
+                          ? 'from-gray-100 to-gray-300'
+                          : 'from-gray-700 to-gray-900'
+                      }`}>
+                        {formatDuration(stats.totalReadingTime)}
+                      </div>
+                      <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <FaClock className="w-4 h-4 text-blue-500" />
+                        Total Reading Time
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                      {formatDuration(stats.totalReadingTime)}
-                    </div>
-                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaClock className="w-4 h-4 text-blue-500" />
-                      Total Reading Time
-                    </div>
-                  </div>
-                  <div>
-                    <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
-                      {stats.totalSavedArticles}
-                    </div>
-                    <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <FaHeart className="w-4 h-4 text-red-500" />
-                      Saved Articles
+                    <div>
+                      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${
+                        theme === 'dark' 
+                          ? 'from-gray-100 to-gray-300'
+                          : 'from-gray-700 to-gray-900'
+                      }`}>
+                        {stats.totalSavedArticles}
+                      </div>
+                      <div className={`text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <FaHeart className="w-4 h-4 text-red-500" />
+                        Saved Articles
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -732,13 +770,21 @@ export default function UserProfile() {
 
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-3xl font-bold mb-10 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+          <h2 className={`text-3xl font-bold mb-10 bg-clip-text text-transparent bg-gradient-to-r ${
+            theme === 'dark' 
+              ? 'from-gray-100 to-gray-300'
+              : 'from-gray-700 to-gray-900'
+          }`}>
             Journey
           </h2>
 
           <div className="relative">
-            {/* Timeline line */}
-            <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-200/70'}`} />
+            {/* Timeline line with gradient */}
+            <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${
+              theme === 'dark'
+                ? 'bg-gradient-to-b from-gray-700/50 via-gray-600/50 to-gray-700/50'
+                : 'bg-gradient-to-b from-gray-200/70 via-gray-300/70 to-gray-200/70'
+            }`} />
 
             <div className="space-y-8">
               {/* Activity items */}
@@ -746,8 +792,14 @@ export default function UserProfile() {
                 <div key={`${item.type}-${index}`} className="relative flex gap-6">
                   {/* Timeline dot and date */}
                   <div className="relative">
-                    <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 shadow-lg ${theme === 'dark' ? 'border-gray-800' : 'border-white'} ${
-                      item.type === "saved" ? "bg-red-500" : item.type === "finished" ? "bg-green-500" : "bg-yellow-500"
+                    <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 shadow-lg transition-transform duration-300 hover:scale-110 ${
+                      theme === 'dark' ? 'border-gray-800' : 'border-white'
+                    } ${
+                      item.type === "saved" 
+                        ? "bg-gradient-to-br from-red-400 to-red-600"
+                        : item.type === "finished"
+                        ? "bg-gradient-to-br from-green-400 to-green-600"
+                        : "bg-gradient-to-br from-yellow-400 to-yellow-600"
                     }`} />
                     <div className={`pl-6 text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       {item.type === 'joined' ? (
@@ -801,14 +853,17 @@ export default function UserProfile() {
                       router.push(
                         `/read?source=${encodeURIComponent(item.data.url)}`
                       )
-                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:opacity-90 text-left ${
+                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-all duration-500 group hover:scale-[1.01] text-left ${
                       theme === 'dark' 
-                        ? 'bg-gray-800/30 hover:bg-gray-800/50' 
-                        : 'bg-white/90 hover:shadow-xl'
+                        ? 'bg-gray-800/30 hover:bg-gray-800/40 border border-gray-700/50' 
+                        : 'bg-white/90 hover:shadow-xl border border-gray-200/50'
                     }`}>
-                      <div className="flex flex-col gap-4">
+                      {/* Background gradient effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="relative flex flex-col gap-4">
                         <div className="flex flex-col sm:flex-row gap-6">
-                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50">
+                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50 transition-transform duration-500 group-hover:scale-[1.02]">
                             {item.data.article?.images?.[0] ? (
                               <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
                                 e.target.parentElement.style.display = "none";
