@@ -132,7 +132,13 @@ export default function Download() {
 
   const handleInstall = async () => {
     if (isMobile) {
-      // For mobile devices, trigger the browser's share button
+      // For iOS Safari, just show a message to use the native share button
+      const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+      if (isIOS) {
+        alert('Please tap the share button (square with arrow) in your Safari browser menu, then scroll down and tap "Add to Home Screen"');
+        return;
+      }
+      // For other mobile devices, use share API
       if (navigator.share) {
         try {
           await navigator.share({
@@ -338,7 +344,7 @@ export default function Download() {
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
               }`}>
                 {/* Desktop Instructions */}
-                <div>
+                <div className="hidden md:block">
                   <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
                     theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
                   }`}>
@@ -369,7 +375,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -377,12 +383,12 @@ export default function Download() {
                           <span>Click the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
                           }`}>2</span>
-                          <span>Or click the menu <FaEllipsisV className="inline w-3.5 h-3.5 mx-1" /> and select "Install EZJP News"</span>
+                          <span>Or click the menu <MenuDotsIcon className="inline mx-1" /> and select "Install EZJP News"</span>
                         </li>
                       </ol>
                     </div>
@@ -405,7 +411,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -413,7 +419,7 @@ export default function Download() {
                           <span>Click the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -426,7 +432,7 @@ export default function Download() {
                 </div>
 
                 {/* Mobile Instructions */}
-                <div>
+                <div className="md:mt-0">
                   <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
                     theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
                   }`}>
@@ -457,7 +463,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -465,7 +471,7 @@ export default function Download() {
                           <span>Tap the Share button <IosShareIcon className="inline" /></span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -473,7 +479,7 @@ export default function Download() {
                           <span>Scroll down and tap "Add to Home Screen"</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -501,7 +507,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -509,7 +515,7 @@ export default function Download() {
                           <span>Tap the install button <FaDownload className="inline w-3.5 h-3.5 ml-1" /> in the address bar</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -571,7 +577,7 @@ export default function Download() {
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
               }`}>
                 {/* Desktop Uninstall */}
-                <div>
+                <div className="hidden md:block">
                   <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
                     theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
                   }`}>
@@ -600,7 +606,7 @@ export default function Download() {
                     </div>
                     <ol className="space-y-3 ml-4 list-none">
                       <li className="flex items-start gap-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                        <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                           theme === 'dark' 
                             ? 'bg-gray-800 text-gray-300' 
                             : 'bg-white text-gray-700'
@@ -608,7 +614,7 @@ export default function Download() {
                         <span>Click the menu icon <MenuDotsIcon className="inline mx-1" /> in the app window</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                        <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                           theme === 'dark' 
                             ? 'bg-gray-800 text-gray-300' 
                             : 'bg-white text-gray-700'
@@ -616,7 +622,7 @@ export default function Download() {
                         <span>Select "Uninstall EZJP News"</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                        <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                           theme === 'dark' 
                             ? 'bg-gray-800 text-gray-300' 
                             : 'bg-white text-gray-700'
@@ -628,7 +634,7 @@ export default function Download() {
                 </div>
 
                 {/* Mobile Uninstall */}
-                <div>
+                <div className="md:mt-0">
                   <h3 className={`text-lg font-medium mb-6 flex items-center gap-3 ${
                     theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
                   }`}>
@@ -659,7 +665,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -667,7 +673,7 @@ export default function Download() {
                           <span>Press and hold the EZJP News icon</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -675,7 +681,7 @@ export default function Download() {
                           <span>Tap "Remove App"</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -703,7 +709,7 @@ export default function Download() {
                       </div>
                       <ol className="space-y-3 ml-4 list-none">
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -711,7 +717,7 @@ export default function Download() {
                           <span>Press and hold the EZJP News icon</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -719,7 +725,7 @@ export default function Download() {
                           <span>Drag to "Uninstall" or tap "Uninstall"</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-medium mt-0.5 ${
+                          <span className={`inline-flex items-center justify-center min-w-[24px] min-h-[24px] w-6 h-6 rounded-full text-sm font-medium shrink-0 ${
                             theme === 'dark' 
                               ? 'bg-gray-800 text-gray-300' 
                               : 'bg-white text-gray-700'
@@ -802,7 +808,7 @@ export default function Download() {
                       <span>In Microsoft Edge</span>
                     </p>
                     <ol className="space-y-3 ml-6 list-decimal marker:text-green-500">
-                      <li className="pl-2">Look for the <span className="font-medium px-1 py-0.5 rounded bg-gray-800">⋯</span> menu in the top-right corner</li>
+                      <li className="pl-2">Look for the <span className={`font-medium px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>⋯</span> menu in the top-right corner</li>
                       <li className="pl-2">Click <span className="font-medium">Apps</span> from the dropdown menu</li>
                       <li className="pl-2">Select <span className="font-medium">EZJP News</span> from your installed apps</li>
                     </ol>
@@ -818,7 +824,7 @@ export default function Download() {
                       <span>In Google Chrome</span>
                     </p>
                     <ol className="space-y-3 ml-6 list-decimal marker:text-green-500">
-                      <li className="pl-2">Find the <span className="font-medium px-1 py-0.5 rounded bg-gray-800">⋮</span> menu in the top-right corner</li>
+                      <li className="pl-2">Find the <span className={`font-medium px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>⋮</span> menu in the top-right corner</li>
                       <li className="pl-2">Look for <span className="font-medium">EZJP News</span> in the menu</li>
                       <li className="pl-2">Click <span className="font-medium">Open in EZJP News</span></li>
                     </ol>
