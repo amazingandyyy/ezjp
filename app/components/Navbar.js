@@ -384,7 +384,7 @@ export default function Navbar({
 
           {/* Logo */}
           <div
-            onClick={() => window.location.href = '/'}
+            onClick={() => router.push('/')}
             className={`cursor-pointer flex items-center justify-center 
               letter-spacing-wide text-2xl hover:opacity-80 active:scale-95 transition-all
               ${
@@ -469,7 +469,7 @@ export default function Navbar({
                   )}
                 </div>
               ) : (
-                <div className="text-sm font-medium flex items-center gap-1.5 px-1">
+                <div className="px-4 py-2 text-sm font-medium flex items-center gap-2">
                   <FaUserCircle className="w-4 h-4" />
                   <span className="tracking-wide">Join</span>
                 </div>

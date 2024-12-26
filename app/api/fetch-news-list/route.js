@@ -8,9 +8,12 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit')) || 12; // Default to 12 items per page
     const offset = parseInt(searchParams.get('offset')) || 0;
 
-    // Fetch from their news list API endpoint
+    // Get the host from the request URL
+    const host = new URL(request.url).origin;
+
+    // Fetch from their news list API endpoint with full URL
     const response = await axios.get(
-      "https://raw.githubusercontent.com/amazingandyyy/n/refs/heads/main/docs/news-list.json"
+      `${host}/sources/www3.nhk.or.jp/news/easy/news-list.json`
     );
 
     const newsData = response.data[0];

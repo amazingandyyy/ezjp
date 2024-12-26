@@ -137,11 +137,49 @@ const RepeatIcon = ({ className, isActive, theme }) => (
 );
 
 // Add this helper function at the top level
+const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+
+    const diffInMilliseconds = now.getTime() - date.getTime();
+    const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    // Calculate remainders
+    const remainingHours = Math.abs(diffInHours % 24);
+    const remainingMinutes = Math.abs(diffInMinutes % 60);
+
+    if (diffInDays >= 7) {
+      return `${Math.floor(diffInDays / 7)}週間前`;
+    } else if (diffInDays > 0) {
+      return `${diffInDays}日${remainingHours}時間前`;
+    } else if (remainingHours > 0) {
+      return `${remainingHours}時間${remainingMinutes}分前`;
+    } else if (remainingMinutes > 0) {
+      return `${remainingMinutes}分前`;
+    } else if (diffInSeconds > 0) {
+      return '1分前';
+    } else {
+      return 'たった今';
+    }
+  } catch (e) {
+    console.error('Error formatting relative time:', e, dateStr);
+    return '';
+  }
+};
+
+// Add this helper function at the top level
 const formatJapaneseDate = (dateStr) => {
   if (!dateStr) return '';
   try {
     const date = new Date(dateStr);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}時${String(date.getMinutes()).padStart(2, '0')}分`;
+    const jpTime = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}時${String(date.getMinutes()).padStart(2, '0')}分`;
+    const relativeTime = formatRelativeTime(dateStr);
+    return relativeTime ? `${jpTime}（${relativeTime}）` : jpTime;
   } catch (e) {
     return dateStr;
   }
@@ -658,15 +696,7 @@ function NewsReaderContent() {
       // Decode the URL before using it
       const decodedUrl = decodeURIComponent(sourceUrl);
       setLoading(true);
-      fetchNews(decodedUrl)
-        .catch(error => {
-          console.error('Error in fetchNews:', error);
-          setError('Failed to load article');
-        })
-        .then(() => {
-          console.log('fetchNews finished');
-          setLoading(false);
-        });
+      fetchNews(decodedUrl);
       setUrl(decodedUrl);
     } else {
       router.push('/');
@@ -680,31 +710,34 @@ function NewsReaderContent() {
     try {
       console.log('Fetching article from API');
       const response = await fetch(`/api/fetch-news?source=${encodeURIComponent(url)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
       
+      if (!response.ok) {
+        setError('This article had an issue loading. Please try another one.');
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
+      
       if (data.error) {
-        throw new Error(data.error);
+        setError(data.message || 'This article had an issue loading. Please try another one.');
+        setLoading(false);
+        return;
       }
 
-      if (!Array.isArray(data.title) || !Array.isArray(data.content)) {
-        throw new Error('Invalid API response format');
-      }
-
-      console.log('Received API response');
-      // Update all states at once
+      // Process the successful response
       setNewsTitle(data.title);
       setNewsContent(data.content);
       setNewsDate(data.published_date || data.date);
       setNewsImages(data.images || []);
       setCurrentSentence(0);
       setSentences(splitIntoSentences(data.content));
+      setLoading(false);  // Add this line to set loading to false after successful fetch
       
     } catch (error) {
       console.error('Error fetching news:', error);
-      throw error;
+      setError('This article had an issue loading. Please try another one.');
+      setLoading(false);
     }
   };
 
@@ -2660,58 +2693,88 @@ function NewsReaderContent() {
                       </p>
                     ))}
 
-                    {/* Mark as Finished button at the bottom of the article */}
-                    <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
-                      <button
-                        onClick={toggleFinished}
-                        disabled={finishLoading}
-                        className={`
-                        px-4 py-2 rounded-lg flex items-center justify-center gap-2
-                        transition-all duration-150
-                        ${
-                          preferenceState.theme === "dark"
-                            ? isFinished
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                            : isFinished
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }
-                        ${finishLoading ? "opacity-50 cursor-not-allowed" : ""}
-                      `}
-                      >
-                        {finishLoading ? (
-                          <div className="w-5 h-5 relative">
-                            <div
-                              className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                                preferenceState.theme === "dark"
-                                  ? "border-gray-300 border-r-transparent"
-                                  : "border-gray-400 border-r-transparent"
-                              }`}
-                            ></div>
-                          </div>
-                        ) : (
-                          <>
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={isFinished ? "2.5" : "2"}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                            <span className="font-medium">
-                              {isFinished ? "Finished Reading" : "Mark as Finished"}
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    {newsContent && newsContent.length > 0 ? (
+                      /* Mark as Finished button at the bottom of the article */
+                      <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
+                        <button
+                          onClick={toggleFinished}
+                          disabled={finishLoading}
+                          className={`
+                          px-4 py-2 rounded-lg flex items-center justify-center gap-2
+                          transition-all duration-150
+                          ${
+                            preferenceState.theme === "dark"
+                              ? isFinished
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                              : isFinished
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }
+                          ${finishLoading ? "opacity-50 cursor-not-allowed" : ""}
+                        `}
+                        >
+                          {finishLoading ? (
+                            <div className="w-5 h-5 relative">
+                              <div
+                                className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                  preferenceState.theme === "dark"
+                                    ? "border-gray-300 border-r-transparent"
+                                    : "border-gray-400 border-r-transparent"
+                                }`}
+                              ></div>
+                            </div>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={isFinished ? "2.5" : "2"}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              <span className="font-medium">
+                                {isFinished ? "Finished Reading" : "Mark as Finished"}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : !loading && error ? (
+                      <div className="mt-8 mb-24 sm:mb-28 flex flex-col items-center justify-center gap-4">
+                        <div className={`p-3 rounded-full ${preferenceState.theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
+                          <svg className={`w-6 h-6 ${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className={`text-lg font-medium ${preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                          Article content not available
+                        </div>
+                        <p className={`text-sm ${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                          This article may have been removed or is no longer accessible
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-8 mb-24 sm:mb-28 flex flex-col items-center justify-center gap-4">
+                        <div className={`p-3 rounded-full ${preferenceState.theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
+                          <svg className={`w-6 h-6 ${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className={`text-lg font-medium ${preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                          Article content not available
+                        </div>
+                        <p className={`text-sm ${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                          This article may have been removed or is no longer accessible
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
