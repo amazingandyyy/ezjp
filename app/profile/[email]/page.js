@@ -888,7 +888,7 @@ export default function UserProfile() {
                 </div>
               ))}
 
-              {savedNews.length === 0 && (
+              {(savedNews.length === 0 && finishedNews.length === 0) && (
                 <div className={`text-center py-20 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   <FaBook className={`w-20 h-20 mx-auto mb-8 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
                   <p className="text-xl font-medium tracking-wide">No reading activity yet</p>

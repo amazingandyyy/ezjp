@@ -18,14 +18,27 @@ export async function GET(request) {
       const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
       
       if (!userError && userData?.user_metadata?.avatar_url) {
-        // Update or create profile with avatar_url
+        // First check if user already has a custom avatar
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        // Only update avatar if there isn't a custom one set
+        const updates = {
+          id: user.id,
+          updated_at: new Date().toISOString()
+        };
+
+        if (!existingProfile?.avatar_url) {
+          updates.avatar_url = userData.user_metadata.avatar_url;
+        }
+
+        // Update or create profile
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({
-            id: user.id,
-            avatar_url: userData.user_metadata.avatar_url,
-            updated_at: new Date().toISOString()
-          }, {
+          .upsert(updates, {
             onConflict: 'id',
             ignoreDuplicates: false
           });

@@ -48,13 +48,13 @@ export default function Settings() {
         return;
       }
 
-      // Create a unique file name
+      // Create a consistent file name with user's folder
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/avatar.${fileExt}`;
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage in user-contents bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from('user-contents')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
@@ -64,7 +64,7 @@ export default function Settings() {
 
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from('user-contents')
         .getPublicUrl(fileName);
 
       // Update profile with new avatar URL

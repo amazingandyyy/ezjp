@@ -33,6 +33,15 @@ const formatRelativeTime = (dateStr) => {
   }
 };
 
+const isToday = (dateStr) => {
+  if (!dateStr) return false;
+  const today = new Date();
+  const date = new Date(dateStr);
+  return date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+};
+
 export default function NewsList() {
   const [newsList, setNewsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -305,71 +314,58 @@ export default function NewsList() {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {newsList
-            .filter(news => !hideFinished || !finishedUrls.has(news.url))
-            .map((news, index) => (
-            <div
-              key={index}
-              onClick={() => handleNewsClick(news.url)}
-              className={`transition-all cursor-pointer group ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
-            >
-              <div className="relative">
-                {news.image && (
-                  <div className="aspect-video relative overflow-hidden rounded-lg">
-                    <img
-                      src={news.image}
-                      alt={news.title}
-                      className="object-cover w-full h-full transition-all duration-700 blur-sm group-hover:scale-110"
-                      onLoad={(e) => {
-                        e.target.classList.remove('blur-sm');
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="absolute top-2 right-2 flex gap-1">
-                  {archivedUrls.has(news.url) && (
-                    <div className="bg-red-500 rounded-full p-1.5 shadow-lg">
-                      <FaHeart className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  {finishedUrls.has(news.url) && (
-                    <div className="bg-emerald-500 rounded-full p-1.5 shadow-lg">
-                      <svg 
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          d="M5 13l4 4L19 7" 
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="pt-3">
-                <h2
-                  className={`text-xl font-semibold mb-2 ${
-                    theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
-                  }`}
-                >
-                  {news.title}
-                </h2>
-                <p
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {formatRelativeTime(news.date)}
-                </p>
-              </div>
+
+        {/* Today's News Section */}
+        {newsList.some(news => isToday(news.date)) && (
+          <div className="mb-12">
+            <h2 className={`text-xl font-semibold mb-6 flex items-center gap-2 ${
+              theme === "dark" ? "text-gray-200" : "text-gray-800"
+            }`}>
+              <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Today's News</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {newsList
+                .filter(news => isToday(news.date))
+                .filter(news => !hideFinished || !finishedUrls.has(news.url))
+                .map((news, index) => (
+                  <NewsCard 
+                    key={index} 
+                    news={news} 
+                    theme={theme}
+                    finishedUrls={finishedUrls}
+                    archivedUrls={archivedUrls}
+                    onClick={() => handleNewsClick(news.url)}
+                  />
+                ))}
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Previous News Section */}
+        <div>
+          <h2 className={`text-xl font-semibold mb-6 ${
+            theme === "dark" ? "text-gray-200" : "text-gray-800"
+          }`}>
+            Previous News
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {newsList
+              .filter(news => !isToday(news.date))
+              .filter(news => !hideFinished || !finishedUrls.has(news.url))
+              .map((news, index) => (
+                <NewsCard 
+                  key={index} 
+                  news={news} 
+                  theme={theme}
+                  finishedUrls={finishedUrls}
+                  archivedUrls={archivedUrls}
+                  onClick={() => handleNewsClick(news.url)}
+                />
+              ))}
+          </div>
         </div>
 
         {/* Loading more indicator */}
@@ -393,3 +389,66 @@ export default function NewsList() {
     </div>
   );
 }
+
+// Extract NewsCard component
+const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`transition-all cursor-pointer group ${finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''}`}
+  >
+    <div className="relative">
+      {news.image && (
+        <div className="aspect-video relative overflow-hidden rounded-lg">
+          <img
+            src={news.image}
+            alt={news.title}
+            className="object-cover w-full h-full transition-all duration-700 blur-sm group-hover:scale-110"
+            onLoad={(e) => {
+              e.target.classList.remove('blur-sm');
+            }}
+          />
+        </div>
+      )}
+      <div className="absolute top-2 right-2 flex gap-1">
+        {archivedUrls.has(news.url) && (
+          <div className="bg-red-500 rounded-full p-1.5 shadow-lg">
+            <FaHeart className="w-4 h-4 text-white" />
+          </div>
+        )}
+        {finishedUrls.has(news.url) && (
+          <div className="bg-emerald-500 rounded-full p-1.5 shadow-lg">
+            <svg 
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="M5 13l4 4L19 7" 
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="pt-3">
+      <h2
+        className={`text-xl font-semibold mb-2 ${
+          theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
+        }`}
+      >
+        {news.title}
+      </h2>
+      <p
+        className={`text-sm ${
+          theme === "dark" ? "text-gray-400" : "text-gray-600"
+        }`}
+      >
+        {formatRelativeTime(news.date)}
+      </p>
+    </div>
+  </div>
+);

@@ -1,6 +1,12 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaBook, FaUserCircle, FaHeart, FaDownload, FaUser } from 'react-icons/fa';
+import {
+  FaBook,
+  FaUserCircle,
+  FaHeart,
+  FaBookOpen,
+  FaUser,
+} from "react-icons/fa";
 import { useAuth } from '../../lib/AuthContext';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
@@ -316,6 +322,23 @@ export default function Navbar({
     </div>
   ), [theme, stats]);
 
+  // Handle theme update
+  const handleUpdate = async (field, value) => {
+    try {
+      if (field === 'theme') {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ theme: value })
+          .eq('id', user.id);
+
+        if (error) throw error;
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16">
       <div
@@ -456,46 +479,46 @@ export default function Navbar({
             {/* Profile panel - only shown when user is logged in and panel is open */}
             {user && showProfile && (
               <div
-                className={`absolute top-full right-0 mt-0 rounded-xl shadow-xl border w-96
+                className={`absolute top-full right-0 mt-1 rounded-2xl shadow-lg border w-[380px] overflow-hidden
                 ${
                   theme === "dark"
-                    ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-sm"
-                    : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-sm"
+                    ? "bg-gray-800/95 border-gray-700/50 backdrop-blur-md"
+                    : "[color-scheme:light] bg-white/95 border-gray-200/50 backdrop-blur-md"
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-2">
-                  {/* User info section */}
+                {/* Profile Section */}
+                <div className="p-3">
                   <div 
                     onClick={() => router.push(`/profile/${encodeURIComponent(profile?.username || user.email)}`)}
-                    className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                    className={`p-3 rounded-xl cursor-pointer transition-colors ${
                       theme === "dark"
-                        ? "hover:bg-gray-700/30"
+                        ? "hover:bg-gray-700/50"
                         : "hover:bg-gray-100/70"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {profile?.avatar_url ? (
                         <img
                           src={profile.avatar_url}
                           alt="Profile"
-                          className="w-14 h-14 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
+                          className="w-11 h-11 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
                         />
                       ) : (
                         <div
-                          className={`w-14 h-14 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
+                          className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
                           ${
                             theme === "dark"
                               ? "bg-gray-700 text-gray-300"
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          <FaUser className="w-6 h-6" />
+                          <FaUser className="w-5 h-5" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-lg font-medium truncate ${
+                          className={`text-[15px] font-medium leading-tight truncate ${
                             theme === "dark"
                               ? "text-gray-100"
                               : "text-[rgb(19,31,36)]"
@@ -504,8 +527,8 @@ export default function Navbar({
                           {profile?.username || user.email}
                         </p>
                         <p
-                          className={`text-sm truncate ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-600"
+                          className={`text-[13px] truncate mt-0.5 ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}
                         >
                           {profile?.username ? user.email : "No username set"}
@@ -514,101 +537,137 @@ export default function Navbar({
                     </div>
                   </div>
 
-                  {/* Stats section - update grid gap */}
-                  <div className="px-4 py-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-12 h-12 flex items-center justify-center rounded-md ${
-                          theme === "dark"
-                            ? "bg-orange-500/10 text-orange-400"
-                            : "bg-orange-50 text-orange-600"
-                        }`}>
-                          <svg 
-                            stroke="currentColor" 
-                            fill="currentColor" 
-                            strokeWidth="0" 
-                            viewBox="0 0 384 512" 
-                            className="w-5 h-5 flex-shrink-0" 
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M216 23.86c0-23.8-30.65-32.77-44.15-13.04C48 191.85 224 200 224 288c0 35.63-29.11 64.46-64.85 63.99-35.17-.45-63.15-29.77-63.15-64.94v-85.51c0-21.7-26.47-32.23-41.43-16.5C27.8 213.16 0 261.33 0 320c0 105.87 86.13 192 192 192s192-86.13 192-192c0-170.29-168-193-168-296.14z"></path>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="flex items-baseline gap-1.5">
-                            <p className={`text-2xl font-bold ${
-                              theme === "dark" ? "text-gray-100" : "text-gray-900"
-                            }`}>
-                              {stats.currentStreak}
-                            </p>
-                            <p className={`text-xs font-medium ${
-                              theme === "dark" ? "text-orange-400/90" : "text-orange-600/90"
-                            }`}>
-                              day{stats.currentStreak !== 1 ? 's' : ''}
-                            </p>
-                          </div>
-                          <p className={`text-xs ${
-                            theme === "dark" ? "text-gray-500" : "text-gray-500"
+                  {/* Stats Section */}
+                  <div className="mt-2">
+                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Current Streak */}
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
+                            theme === "dark"
+                              ? "bg-orange-500/10 text-orange-400"
+                              : "bg-orange-50 text-orange-600"
                           }`}>
-                            Current Streak
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className={`w-12 h-12 flex items-center justify-center rounded-md ${
-                          theme === "dark"
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-green-50 text-green-600"
-                        }`}>
-                          <svg 
-                            className="w-5 h-5 flex-shrink-0" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="flex items-baseline gap-1.5">
-                            <p className={`text-2xl font-bold ${
-                              theme === "dark" ? "text-gray-100" : "text-gray-900"
-                            }`}>
-                              {stats.totalFinishedArticles}
-                            </p>
-                            {stats.todayFinishedArticles > 0 && (
-                              <p className={`text-xs font-medium ${
-                                theme === "dark" ? "text-green-400/90" : "text-green-600/90"
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-1.5">
+                              <p className={`text-2xl font-bold ${
+                                theme === "dark" ? "text-gray-100" : "text-gray-900"
                               }`}>
-                                +{stats.todayFinishedArticles} today
+                                {stats.currentStreak}
                               </p>
-                            )}
+                              <p className={`text-xs font-medium ${
+                                theme === "dark" ? "text-orange-400/90" : "text-orange-600/90"
+                              }`}>
+                                day{stats.currentStreak !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                            <p className={`text-xs ${
+                              theme === "dark" ? "text-gray-400" : "text-gray-500"
+                            }`}>
+                              Current Streak
+                            </p>
                           </div>
-                          <p className={`text-xs ${
-                            theme === "dark" ? "text-gray-500" : "text-gray-500"
+                        </div>
+
+                        {/* Articles Finished */}
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
+                            theme === "dark"
+                              ? "bg-green-500/10 text-green-400"
+                              : "bg-green-50 text-green-600"
                           }`}>
-                            Articles Finished
-                          </p>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-1.5">
+                              <p className={`text-2xl font-bold ${
+                                theme === "dark" ? "text-gray-100" : "text-gray-900"
+                              }`}>
+                                {stats.totalFinishedArticles}
+                              </p>
+                              {stats.todayFinishedArticles > 0 && (
+                                <p className={`text-xs font-medium ${
+                                  theme === "dark" ? "text-green-400/90" : "text-green-600/90"
+                                }`}>
+                                  +{stats.todayFinishedArticles} today
+                                </p>
+                              )}
+                            </div>
+                            <p className={`text-xs ${
+                              theme === "dark" ? "text-gray-400" : "text-gray-500"
+                            }`}>
+                              Articles Finished
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Notifications section */}
-                  <div className="border-y border-gray-200/10">
-                    {!profile?.username && (
-                      <div 
-                        onClick={() => router.push('/settings')}
-                        className={`flex items-start gap-3 p-4 cursor-pointer transition-colors
-                          ${theme === "dark"
-                            ? "hover:bg-gray-700/30 bg-yellow-500/5"
-                            : "hover:bg-gray-100/70 bg-yellow-50/30"
-                          }`}
-                      >
+                {/* Quick Settings */}
+                <div className="p-2">
+                  {/* Theme Toggle */}
+                  <button
+                    onClick={() => handleUpdate("theme", theme === "dark" ? "light" : "dark")}
+                    className={`w-full p-3 rounded-lg text-sm flex items-center justify-between transition-colors
+                      ${
+                        theme === "dark"
+                          ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                          : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 flex items-center justify-center">
+                        {theme === "dark" ? (
+                          <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" 
+                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" 
+                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <span>{theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+                    </div>
+                    <div className={`flex items-center ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}>
+                      <span className="text-xs font-medium mr-2">{theme === "dark" ? "Dark" : "Light"}</span>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Notifications Section */}
+                <div className={`border-t ${theme === "dark" ? "border-gray-700/50" : "border-gray-200/50"}`}>
+                  {!profile?.username && (
+                    <div 
+                      onClick={() => router.push('/settings')}
+                      className={`p-3 cursor-pointer transition-colors
+                        ${theme === "dark"
+                          ? "hover:bg-gray-700/30"
+                          : "hover:bg-gray-100/70"
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
                         <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
                           theme === "dark"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-yellow-100 text-yellow-600"
+                            ? "bg-gray-700/80 text-gray-300"
+                            : "bg-gray-100 text-gray-600"
                         }`}>
                           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" 
@@ -624,14 +683,14 @@ export default function Navbar({
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
-                                ? "bg-yellow-500/20 text-yellow-400"
-                                : "bg-yellow-100 text-yellow-600"
+                                ? "bg-gray-700 text-gray-300"
+                                : "bg-gray-100 text-gray-600"
                             }`}>
                               Required
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-600"
+                            theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}>
                             Make your profile easier to find and share
                           </p>
@@ -644,20 +703,22 @@ export default function Navbar({
                           </svg>
                         </div>
                       </div>
-                    )}
-                    {stats.todayFinishedArticles === 0 && (
-                      <div 
-                        onClick={() => router.push('/')}
-                        className={`flex items-start gap-3 p-4 cursor-pointer transition-colors border-t border-gray-200/10
-                          ${theme === "dark"
-                            ? "hover:bg-gray-700/30 bg-orange-500/5"
-                            : "hover:bg-gray-100/70 bg-orange-50/30"
-                          }`}
-                      >
+                    </div>
+                  )}
+                  {stats.todayFinishedArticles === 0 && (
+                    <div 
+                      onClick={() => router.push('/')}
+                      className={`p-3 cursor-pointer transition-colors border-t border-gray-200/10
+                        ${theme === "dark"
+                          ? "hover:bg-gray-700/30"
+                          : "hover:bg-gray-100/70"
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
                         <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
                           theme === "dark"
-                            ? "bg-orange-500/20 text-orange-400"
-                            : "bg-orange-100 text-orange-600"
+                            ? "bg-gray-700/80 text-gray-300"
+                            : "bg-gray-100 text-gray-600"
                         }`}>
                           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -672,14 +733,14 @@ export default function Navbar({
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
-                                ? "bg-orange-500/20 text-orange-400"
-                                : "bg-orange-100 text-orange-600"
+                                ? "bg-gray-700 text-gray-300"
+                                : "bg-gray-100 text-gray-600"
                             }`}>
                               Daily Goal
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-600"
+                            theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}>
                             Keep your learning streak going
                           </p>
@@ -692,45 +753,68 @@ export default function Navbar({
                           </svg>
                         </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Navigation section */}
-                  <div className="p-1">
-                    <button
-                      onClick={() => router.push('/settings')}
-                      className={`w-full px-3 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
-                        ${
-                          theme === "dark"
-                            ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
-                            : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
-                        }`}
-                    >
-                      <div className="w-7 h-7 flex items-center justify-center">
-                        <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                      <span>Settings</span>
-                    </button>
-                    <button
-                      onClick={() => router.push('/download')}
-                      className={`w-full px-3 py-2.5 rounded-lg text-sm flex items-center gap-3 transition-colors
-                        ${
-                          theme === "dark"
-                            ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
-                            : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
-                        }`}
-                    >
-                      <div className="w-7 h-7 flex items-center justify-center">
-                        <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4 16L4 17C4 18.6569 5.34315 20 7 20L17 20C18.6569 20 20 18.6569 20 17L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <span>Download App</span>
-                    </button>
-                  </div>
+                {/* Navigation Section */}
+                <div className="p-2">
+                  <button
+                    onClick={() => router.push('/settings')}
+                    className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${
+                        theme === "dark"
+                          ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                          : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
+                  >
+                    <div className="w-7 h-7 flex items-center justify-center">
+                      <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c0.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <span>Settings</span>
+                  </button>
+                  <button
+                    onClick={() => router.push('/download')}
+                    className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors mt-1
+                      ${
+                        theme === "dark"
+                          ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                          : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
+                  >
+                    <div className="w-7 h-7 flex items-center justify-center">
+                      <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 16L4 17C4 18.6569 5.34315 20 7 20L17 20C18.6569 20 20 18.6569 20 17L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Download App</span>
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div className={`my-1 border-t ${theme === "dark" ? "border-gray-700/50" : "border-gray-200/50"}`} />
+
+                {/* Sign Out Button */}
+                <div className="p-2">
+                  <button
+                    onClick={signOut}
+                    className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${
+                        theme === "dark"
+                          ? "hover:bg-red-500/10 text-red-400 hover:text-red-300"
+                          : "hover:bg-red-50 text-red-600 hover:text-red-700"
+                      }`}
+                  >
+                    <div className="w-7 h-7 flex items-center justify-center">
+                      <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Sign Out</span>
+                  </button>
                 </div>
               </div>
             )}

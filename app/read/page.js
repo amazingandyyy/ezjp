@@ -330,47 +330,7 @@ const MotivationalMessage = ({ show, theme }) => {
 
 // Update the ConfirmationModal component
 const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState('');
-  const { user, profile } = useAuth();  // Add profile here
-
-  useEffect(() => {
-    if (show) {
-      setUsername('');
-      setError('');
-    }
-  }, [show]);
-
-  const handleConfirm = () => {
-    if (!username) {
-      setError('Please enter your username to confirm');
-      return;
-    }
-    
-    // Use username from profile
-    const userIdentifier = profile?.username;
-    
-    if (!userIdentifier) {
-      setError('Could not verify username. Please try again later.');
-      return;
-    }
-    
-    if (username !== userIdentifier) {
-      setError(`Username does not match. Your username is "${userIdentifier}"`);
-      return;
-    }
-    
-    onConfirm();
-  };
-
   if (!show) return null;
-
-  // Get username from profile
-  const userIdentifier = profile?.username;
-
-  if (!userIdentifier) {
-    return null;  // Don't show modal if we can't get the username
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -389,7 +349,7 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
         
         <div className={`mb-6 space-y-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
           <p className="text-sm">
-            If you just like the celebration animation, you can:
+            If you just want to see the celebration animation again:
           </p>
           <div className="pl-4 space-y-2">
             <p className="flex items-center gap-2">
@@ -406,40 +366,20 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
             </p>
           </div>
           
-          <div className={`mt-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-            <p className="text-sm font-medium mb-2">
-              <span className="font-mono text-purple-400">[sudo]</span> Type your username to confirm:
+          <div className="mt-4">
+            <p className="text-sm font-medium">
+              Unfinishing this article will:
             </p>
-            <div className="text-xs mb-2 opacity-70 font-mono">
-              <span className="text-green-400">$</span> whoami
-              <br/>
-              <span className="text-blue-400">→</span> {userIdentifier}
-            </div>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-gray-400">$</div>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  setError('');
-                }}
-                placeholder={userIdentifier}
-                className={`
-                  w-full pl-7 pr-3 py-2 rounded-lg text-sm font-mono
-                  ${theme === 'dark'
-                    ? 'bg-gray-700 border border-gray-600 text-white placeholder-gray-400'
-                    : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-500'
-                  }
-                  ${error ? 'border-red-500' : ''}
-                `}
-              />
-            </div>
-            {error && (
-              <p className="mt-2 text-xs text-red-500 font-mono">
-                <span className="text-red-400">!</span> {error}
+            <div className="pl-4 mt-2 space-y-2">
+              <p className="flex items-center gap-2">
+                <span className="text-red-500">•</span>
+                Remove it from your finished articles
               </p>
-            )}
+              <p className="flex items-center gap-2">
+                <span className="text-red-500">•</span>
+                Reset your progress for this article
+              </p>
+            </div>
           </div>
         </div>
 
@@ -457,18 +397,16 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
             Keep it! 🌟
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={onConfirm}
             className={`
               px-4 py-2 rounded-lg font-medium
-              ${error 
-                ? 'bg-gray-400 cursor-not-allowed text-white' 
-                : theme === 'dark'
-                  ? 'bg-yellow-500 text-white hover:bg-yellow-400'
-                  : 'bg-yellow-500 text-white hover:bg-yellow-400'
+              ${theme === 'dark'
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                : 'bg-red-50 text-red-600 hover:bg-red-100'
               }
             `}
           >
-            Proceed 🔓
+            Unfinish Article
           </button>
         </div>
       </div>
@@ -1683,7 +1621,7 @@ function NewsReaderContent() {
     }, 2000);
   };
 
-  // Update the toggleFinished function to include celebration
+  // Update the toggleFinished function to include confirmation
   const toggleFinished = async () => {
     if (!user) {
       setToastMessage('Tip: Sign in to track your reading progress');
@@ -1765,11 +1703,16 @@ function NewsReaderContent() {
   const handleUnfinish = async () => {
     setFinishLoading(true);
     try {
+      // Ensure we're using the decoded URL
+      const decodedUrl = decodeURIComponent(url);
+      
+      // Only delete the finished_articles record, don't touch the profile
       await supabase
         .from('finished_articles')
         .delete()
         .eq('user_id', user.id)
-        .eq('url', url);
+        .eq('url', decodedUrl);
+        
       setIsFinished(false);
       await fetchFinishedArticles();
     } catch (error) {
