@@ -686,7 +686,10 @@ export default function Navbar({
                   )}
                   {stats.todayFinishedArticles === 0 && (
                     <div 
-                      onClick={() => router.push('/')}
+                      onClick={() => {
+                        setShowProfile(false);
+                        router.push('/');
+                      }}
                       className={`p-3 cursor-pointer transition-colors border-t border-gray-200/10
                         ${theme === "dark"
                           ? "hover:bg-gray-700/30"
@@ -739,7 +742,27 @@ export default function Navbar({
                 {/* Navigation Section */}
                 <div className="p-2">
                   <button
-                    onClick={() => router.push('/settings')}
+                    onClick={() => {
+                      setShowProfile(false);
+                      router.push('/');
+                    }}
+                    className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
+                      ${
+                        theme === "dark"
+                          ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                          : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                      }`}
+                  >
+                    <div className="w-7 h-7 flex items-center justify-center">
+                      <FaBookOpen className="w-[1.125rem] h-[1.125rem]" />
+                    </div>
+                    <span>Latest News</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowProfile(false);
+                      router.push('/settings');
+                    }}
                     className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
                       ${
                         theme === "dark"
@@ -756,7 +779,10 @@ export default function Navbar({
                     <span>Settings</span>
                   </button>
                   <button
-                    onClick={() => router.push('/download')}
+                    onClick={() => {
+                      setShowProfile(false);
+                      router.push('/download');
+                    }}
                     className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors mt-1
                       ${
                         theme === "dark"
