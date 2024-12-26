@@ -299,7 +299,7 @@ export default function Settings() {
       <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-2xl mx-auto">
           <h1
-            className={`text-xl font-semibold mb-6 ${
+            className={`text-2xl font-semibold mb-8 ${
               profileData.currentTheme === "dark"
                 ? "text-gray-100"
                 : "text-[rgb(19,31,36)]"
@@ -309,42 +309,140 @@ export default function Settings() {
           </h1>
 
           {/* Settings Sections */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Profile Section */}
             <div
-              className={`overflow-hidden rounded-xl shadow-sm ${
-                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              className={`overflow-hidden rounded-2xl shadow-sm border ${
+                profileData.currentTheme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
               }`}
             >
               <div
-                className={`px-6 py-4 border-b ${
+                className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
                     ? "border-gray-700"
                     : "border-gray-100"
                 }`}
               >
                 <h2
-                  className={`text-sm font-medium ${
+                  className={`text-base font-medium ${
                     profileData.currentTheme === "dark"
-                      ? "text-gray-300"
+                      ? "text-gray-200"
                       : "text-gray-900"
                   }`}
                 >
                   Profile Information
                 </h2>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="p-8 space-y-8">
+                {/* User info */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                  {profile?.avatar_url ? (
+                    <div className="relative">
+                      <img
+                        src={profile.avatar_url}
+                        alt="Profile"
+                        className="w-16 sm:w-20 h-16 sm:h-20 rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800"
+                      />
+                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800 ${
+                        profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+                      }`}>
+                        <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <div className={`w-16 sm:w-20 h-16 sm:h-20 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-gray-200 dark:ring-gray-700 dark:ring-offset-gray-800
+                        ${profileData.currentTheme === "dark"
+                          ? "bg-gray-800 text-gray-200"
+                          : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        <FaUser className="w-6 sm:w-8 h-6 sm:h-8" />
+                      </div>
+                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800 ${
+                        profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+                      }`}>
+                        <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className={`flex flex-col gap-2 ${
+                      profileData.currentTheme === "dark" ? "text-gray-300" : "text-gray-700"
+                    }`}>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-lg font-medium whitespace-nowrap">Google Account</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-md ${
+                          profileData.currentTheme === "dark" 
+                            ? "bg-green-500/10 text-green-400" 
+                            : "bg-green-50 text-green-600"
+                        }`}>
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span>Verified</span>
+                          </div>
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className={`${
+                            profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"
+                          } truncate`}>{user?.email}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 ${
+                            profileData.currentTheme === "dark" 
+                              ? "bg-blue-500/10 text-blue-400" 
+                              : "bg-blue-50 text-blue-600"
+                          }`}>
+                            <svg className="w-3 h-3 relative top-[0.5px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0-4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0-4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm0 12a7 7 0 100-14 7 7 0 000 14z" fill="currentColor"/>
+                            </svg>
+                            <span className="relative top-px">2FA Enabled</span>
+                          </span>
+                        </div>
+                        <p className={`text-xs ${
+                          profileData.currentTheme === "dark" ? "text-gray-500" : "text-gray-500"
+                        }`}>
+                          Your account is protected by Google's advanced security features
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Username field */}
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${
-                      profileData.currentTheme === "dark"
-                        ? "text-gray-300"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    Username
-                  </label>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <label
+                      className={`block text-sm font-medium ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Username
+                    </label>
+                    {!profileData.username && (
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${
+                        profileData.currentTheme === "dark"
+                          ? "bg-yellow-500/10 text-yellow-400"
+                          : "bg-yellow-50 text-yellow-600"
+                      }`}>
+                        Missing
+                      </span>
+                    )}
+                  </div>
                   {editState.username ? (
                     <div className="flex items-center gap-2">
                       <input
@@ -884,7 +982,7 @@ export default function Settings() {
                           strokeLinejoin="round"
                         />
                         <path
-                          d="M12 16a4 4 0 100-8 4 4 0 000 8z"
+                          d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
                           stroke="currentColor"
                           strokeWidth="2"
                           strokeLinecap="round"

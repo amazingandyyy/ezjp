@@ -241,13 +241,11 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick }) => {
 const DEFAULT_PREFERENCES = {
   theme: 'light',
   font_size: 'medium',
-  show_furigana: true,
+  show_furigana: false,
   preferred_speed: 1.0,
   preferred_voice: null,
   reading_level: 'beginner'
 };
-
-const LOCAL_STORAGE_KEY = 'easy_jp_news_preferences';
 
 function NewsReaderContent() {
   const searchParams = useSearchParams();
@@ -259,14 +257,7 @@ function NewsReaderContent() {
   const [showProfile, setShowProfile] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
-  const [preferenceState, setPreferenceState] = useState({
-    theme: 'light',
-    font_size: 'medium',
-    show_furigana: true,
-    preferred_speed: 1.0,
-    preferred_voice: null,
-    reading_level: 'beginner'
-  });
+  const [preferenceState, setPreferenceState] = useState(DEFAULT_PREFERENCES);
   const [updatingPreferences, setUpdatingPreferences] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -307,6 +298,10 @@ function NewsReaderContent() {
   const sidebarRef = useRef(null);
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
+
+  // Add this state near other state declarations
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Media query hook
   const useMediaQuery = (query) => {
@@ -364,15 +359,6 @@ function NewsReaderContent() {
   useEffect(() => {
     const loadPreferences = async () => {
       // Try to load from localStorage first
-      const savedPrefs = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedPrefs) {
-        try {
-          const parsedPrefs = JSON.parse(savedPrefs);
-          setPreferenceState(parsedPrefs);
-        } catch (error) {
-          console.error('Error parsing saved preferences:', error);
-        }
-      }
 
       if (!user) {
         return;
@@ -414,8 +400,6 @@ function NewsReaderContent() {
             reading_level: preferences.reading_level || DEFAULT_PREFERENCES.reading_level
           };
 
-          // Save to localStorage and state
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newPrefs));
           setPreferenceState(newPrefs);
 
           if (preferences.preferred_voice && availableVoices.length > 0) {
@@ -446,8 +430,6 @@ function NewsReaderContent() {
     // Update local state first
     setPreferenceState(prev => {
       const newPrefs = { ...prev, [key]: value };
-      // Save to localStorage
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newPrefs));
       return newPrefs;
     });
 
@@ -611,14 +593,15 @@ function NewsReaderContent() {
       const japaneseVoices = voices.filter(voice => voice.lang.includes('ja-JP'));
       setAvailableVoices(japaneseVoices);
       
-      // Try to find Microsoft Keita first
-      const keitaVoice = japaneseVoices.find(voice => 
-        voice.name.toLowerCase().includes('microsoft keita') || 
-        voice.name.toLowerCase().includes('microsoft けいた')
-      );
-      
-      // Set default voice (Keita if available, otherwise first Japanese voice)
+      // Only set default voice if no voice is currently selected
       if (!selectedVoice && japaneseVoices.length > 0) {
+        // Try to find Microsoft Keita first
+        const keitaVoice = japaneseVoices.find(voice => 
+          voice.name.toLowerCase().includes('microsoft keita') || 
+          voice.name.toLowerCase().includes('microsoft けいた')
+        );
+        
+        // Set default voice (Keita if available, otherwise first Japanese voice)
         setSelectedVoice(keitaVoice || japaneseVoices[0]);
       }
     }
@@ -629,7 +612,7 @@ function NewsReaderContent() {
     return () => {
       speechSynthesis.onvoiceschanged = null;
     };
-  }, [selectedVoice]);
+  }, []); // Remove selectedVoice from dependencies
 
   // Helper function to get Japanese voice
   const getJapaneseVoice = async () => {
@@ -820,6 +803,7 @@ function NewsReaderContent() {
     }
   };
 
+  // Update the handleThemeChange function
   const handleThemeChange = async (newTheme) => {
     if (user) {
       try {
@@ -829,6 +813,11 @@ function NewsReaderContent() {
       }
     } else {
       setPreferenceState(prev => ({ ...prev, theme: newTheme }));
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
   };
 
@@ -841,6 +830,11 @@ function NewsReaderContent() {
       }
     } else {
       setPreferenceState(prev => ({ ...prev, font_size: size }));
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
   };
 
@@ -857,7 +851,7 @@ function NewsReaderContent() {
     // Update local state first for immediate feedback
     setPreferenceState(prev => ({
       ...prev,
-      preferred_speed: speedValue // Store as number, not string
+      preferred_speed: speedValue
     }));
 
     if (user) {
@@ -879,11 +873,16 @@ function NewsReaderContent() {
         }
       } catch (error) {
         console.error('Error saving speed:', error);
-        // Revert on error
         setPreferenceState(prev => ({ ...prev, preferred_speed: prev.preferred_speed }));
       } finally {
         setUpdatingPreferences(prev => ({ ...prev, preferred_speed: false }));
       }
+    } else {
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
   };
 
@@ -897,6 +896,11 @@ function NewsReaderContent() {
       }
     } else {
       setPreferenceState(prev => ({ ...prev, preferred_voice: voiceURI }));
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
     setSelectedVoice(voice);
     speechSynthesis.cancel();
@@ -914,6 +918,11 @@ function NewsReaderContent() {
       }
     } else {
       setPreferenceState(prev => ({ ...prev, show_furigana: newValue }));
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
   };
 
@@ -987,7 +996,6 @@ function NewsReaderContent() {
     }
     setIsPlaying(false);
     setIsPaused(false);
-    setAutoPlay(false);
     
     try {
       await playCurrentSentence(index);
@@ -1380,7 +1388,16 @@ function NewsReaderContent() {
 
   // Update toggleFinished function
   const toggleFinished = async () => {
-    if (!user || !url || finishLoading) return;
+    if (!user) {
+      setToastMessage('Tip: Sign in to track your reading progress');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+      return;
+    }
+
+    if (finishLoading) return;
 
     setFinishLoading(true);
     try {
@@ -1513,7 +1530,16 @@ function NewsReaderContent() {
 
   // Toggle save status
   const toggleSave = async () => {
-    if (!user || !url || archiveLoading) return;
+    if (!user) {
+      setToastMessage('Tip: Sign in to save articles for later');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+      return;
+    }
+
+    if (archiveLoading) return;
 
     setArchiveLoading(true);
     try {
@@ -2385,63 +2411,57 @@ function NewsReaderContent() {
                     ))}
 
                     {/* Mark as Finished button at the bottom of the article */}
-                    {user && (
-                      <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
-                        <button
-                          onClick={toggleFinished}
-                          disabled={finishLoading}
-                          className={`
-                          px-4 py-2 rounded-lg flex items-center justify-center gap-2
-                          transition-all duration-150
-                          ${
-                            preferenceState.theme === "dark"
-                              ? isFinished
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                              : isFinished
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          }
-                          ${
-                            finishLoading ? "opacity-50 cursor-not-allowed" : ""
-                          }
-                        `}
-                        >
-                          {finishLoading ? (
-                            <div className="w-5 h-5 relative">
-                              <div
-                                className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                                  preferenceState.theme === "dark"
-                                    ? "border-gray-300 border-r-transparent"
-                                    : "border-gray-400 border-r-transparent"
-                                }`}
-                              ></div>
-                            </div>
-                          ) : (
-                            <>
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={isFinished ? "2.5" : "2"}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                              <span className="font-medium">
-                                {isFinished
-                                  ? "Finished Reading"
-                                  : "Mark as Finished"}
-                              </span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    )}
+                    <div className="mt-8 mb-24 sm:mb-28 flex justify-center">
+                      <button
+                        onClick={toggleFinished}
+                        disabled={finishLoading}
+                        className={`
+                        px-4 py-2 rounded-lg flex items-center justify-center gap-2
+                        transition-all duration-150
+                        ${
+                          preferenceState.theme === "dark"
+                            ? isFinished
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                            : isFinished
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }
+                        ${finishLoading ? "opacity-50 cursor-not-allowed" : ""}
+                      `}
+                      >
+                        {finishLoading ? (
+                          <div className="w-5 h-5 relative">
+                            <div
+                              className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                preferenceState.theme === "dark"
+                                  ? "border-gray-300 border-r-transparent"
+                                  : "border-gray-400 border-r-transparent"
+                              }`}
+                            ></div>
+                          </div>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={isFinished ? "2.5" : "2"}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <span className="font-medium">
+                              {isFinished ? "Finished Reading" : "Mark as Finished"}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -2488,73 +2508,48 @@ function NewsReaderContent() {
         `}
         >
           <div className="flex items-center justify-center gap-3">
-            {/* Original link button */}
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Archive button */}
+            <button
+              onClick={toggleSave}
+              disabled={archiveLoading}
               className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
                 ${
                   preferenceState.theme === "dark"
                     ? "hover:bg-gray-700/50"
                     : "hover:bg-gray-100/50"
                 }
+                ${archiveLoading ? "opacity-50 cursor-not-allowed" : ""}
               `}
-              title={url ? new URL(url).hostname : "Open original article"}
+              title={isArchived ? "Remove from Saved" : "Save Article"}
             >
-              <FaExternalLinkAlt
-                className={`w-4 h-4 ${
-                  preferenceState.theme === "dark"
-                    ? "text-gray-300 hover:text-gray-100"
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              />
-            </a>
-
-            {/* Archive button */}
-            {user && (
-              <button
-                onClick={toggleSave}
-                disabled={archiveLoading}
-                className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
-                  ${
+              {archiveLoading ? (
+                <div className="w-4 h-4 relative">
+                  <div
+                    className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                      preferenceState.theme === "dark"
+                        ? "border-gray-300 border-r-transparent"
+                        : "border-gray-400 border-r-transparent"
+                    }`}
+                  ></div>
+                </div>
+              ) : isArchived ? (
+                <FaHeart
+                  className={`w-4 h-4 ${
                     preferenceState.theme === "dark"
-                      ? "hover:bg-gray-700/50"
-                      : "hover:bg-gray-100/50"
-                  }
-                  ${archiveLoading ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title={isArchived ? "Remove from Saved" : "Save Article"}
-              >
-                {archiveLoading ? (
-                  <div className="w-4 h-4 relative">
-                    <div
-                      className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                        preferenceState.theme === "dark"
-                          ? "border-gray-300 border-r-transparent"
-                          : "border-gray-400 border-r-transparent"
-                      }`}
-                    ></div>
-                  </div>
-                ) : isArchived ? (
-                  <FaHeart
-                    className={`w-4 h-4 ${
-                      preferenceState.theme === "dark"
-                        ? "text-red-400"
-                        : "text-red-500"
-                    }`}
-                  />
-                ) : (
-                  <FaRegHeart
-                    className={`w-4 h-4 ${
-                      preferenceState.theme === "dark"
-                        ? "text-gray-300 hover:text-purple-400"
-                        : "text-gray-600 hover:text-purple-500"
-                    }`}
-                  />
-                )}
-              </button>
-            )}
+                      ? "text-red-400"
+                      : "text-red-500"
+                  }`}
+                />
+              ) : (
+                <FaRegHeart
+                  className={`w-4 h-4 ${
+                    preferenceState.theme === "dark"
+                      ? "text-gray-300 hover:text-purple-400"
+                      : "text-gray-600 hover:text-purple-500"
+                  }`}
+                />
+              )}
+            </button>
 
             {/* Play controls */}
             <div className="flex items-center gap-2">
@@ -2654,6 +2649,47 @@ function NewsReaderContent() {
       {repeatCountdown > 0 && (
         <div className={`${getRepeatCountdownClasses()} mb-20 sm:mb-0`}>
           Repeat sentence in {repeatCountdown} s
+        </div>
+      )}
+
+      {showToast && (
+        <div className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-auto animate-fade-in-out">
+          <div
+            className={`group flex items-center justify-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium cursor-pointer
+            transition-transform duration-300 hover:scale-105 hover:-translate-y-1
+            ${preferenceState.theme === "dark"
+              ? "bg-[rgb(19,31,36)] text-gray-100 border border-purple-500/50 shadow-[0_8px_32px_-8px_rgba(168,85,247,0.5)]"
+              : "bg-white text-gray-700 border border-purple-200/50 shadow-[0_8px_32px_-8px_rgba(168,85,247,0.25)]"
+            }`}
+            onClick={() => {
+              setShowToast(false);
+              const ref = toastMessage.includes('save articles') ? 'heart' 
+                : toastMessage.includes('track your reading') ? 'finished'
+                : 'reader-preference';
+              router.push(`/join?theme=dark&ref=${ref}`);
+            }}
+          >
+            <div className={`p-1.5 rounded-lg transition-colors duration-300 ${preferenceState.theme === "dark" 
+              ? "bg-purple-500/30" 
+              : "bg-purple-100"}`}
+            >
+              <svg className={`w-4 h-4 ${preferenceState.theme === "dark" ? "text-purple-300" : "text-purple-500"}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span>{toastMessage}</span>
+            <div className={`p-1.5 rounded-lg transition-colors duration-300 ${preferenceState.theme === "dark" 
+              ? "bg-purple-500/30 group-hover:bg-purple-500" 
+              : "bg-purple-100 group-hover:bg-purple-500"}`}
+            >
+              <svg className={`w-4 h-4 ${preferenceState.theme === "dark" 
+                ? "text-purple-300 group-hover:text-white" 
+                : "text-purple-500 group-hover:text-white"} transition-colors duration-300`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
         </div>
       )}
     </div>

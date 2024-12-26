@@ -258,7 +258,8 @@ export default function UserProfile() {
           theme,
           self_introduction,
           japanese_level,
-          duolingo_username
+          duolingo_username,
+          avatar_url
         `);
 
         // Check if the identifier is an email or username
@@ -532,11 +533,21 @@ export default function UserProfile() {
           <div className={`mb-16 ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10">
               <div className="flex flex-col items-center sm:items-start">
-                <div className={`w-32 h-32 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl transform transition-all duration-300 hover:scale-105 ${
-                  theme === 'dark' ? 'bg-gray-800/80 text-gray-200' : 'bg-white text-gray-700'
-                }`}>
-                  {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
-                </div>
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile?.username || 'Profile'}
+                    className={`w-32 h-32 rounded-3xl object-cover shadow-xl transform transition-all duration-300 hover:scale-105 ${
+                      theme === 'dark' ? 'ring-2 ring-gray-700' : 'ring-2 ring-gray-200'
+                    }`}
+                  />
+                ) : (
+                  <div className={`w-32 h-32 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl transform transition-all duration-300 hover:scale-105 ${
+                    theme === 'dark' ? 'bg-gray-800/80 text-gray-200' : 'bg-white text-gray-700'
+                  }`}>
+                    {profile?.username?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase()}
+                  </div>
+                )}
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4">

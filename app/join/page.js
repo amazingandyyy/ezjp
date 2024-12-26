@@ -14,6 +14,18 @@ export default function JoinPage() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const themeParam = params.get('theme');
+      if (themeParam === 'dark' || themeParam === 'light') {
+        setTheme(themeParam);
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(themeParam);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (user) {
       router.push('/');
     }
@@ -250,11 +262,11 @@ export default function JoinPage() {
                   icon: (
                     <FaMoon className="h-6 w-6 text-indigo-500/90 dark:text-indigo-400/90 group-hover:text-indigo-600 dark:group-hover:text-indigo-300" />
                   ),
-                  title: "Dark Theme",
+                  title: "Dark Mode",
                   description:
                     "Toggle between light and dark mode for comfortable reading day and night",
                   longDescription:
-                    "Protect your eyes with our carefully designed dark theme. Perfect for late-night reading sessions and reducing eye strain. Click anywhere on this card to try it out!",
+                    "Protect your eyes with our carefully crafted dark mode. Perfect for late-night reading sessions and reducing eye strain. Click anywhere on this card to try it out!",
                   bgColor: "bg-indigo-50/30 dark:bg-indigo-900/20",
                   iconBg: "bg-indigo-100/50 dark:bg-indigo-900/30",
                   hoverBg: "hover:bg-indigo-100/50 dark:hover:bg-indigo-800/30",
