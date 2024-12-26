@@ -2841,18 +2841,19 @@ function NewsReaderContent() {
                             <span
                               key={sIndex}
                               onClick={() => handleSentenceClick(sIndex)}
-                              className={`inline cursor-pointer rounded px-1.5 py-0.5
+                              className={`inline cursor-pointer p-0.5 rounded
                                 ${
                                   sIndex === currentSentence
                                     ? preferenceState.theme === "dark"
-                                      ? "bg-gray-700/90 ring-1 ring-gray-500 shadow-sm"
-                                      : "bg-emerald-50 ring-1 ring-emerald-200 shadow-sm"
+                                      ? "bg-emerald-900/80 shadow-sm"
+                                      : "bg-emerald-100 ring-0 shadow-sm"
                                     : preferenceState.theme === "dark"
-                                    ? "hover:bg-gray-800/90"
+                                    ? "hover:bg-gray-700/80"
                                     : "hover:bg-gray-100"
                                 }
                                 ${
-                                  (repeatMode === REPEAT_MODES.ONE && sIndex !== currentSentence)
+                                  repeatMode === REPEAT_MODES.ONE &&
+                                  sIndex !== currentSentence
                                     ? "opacity-30"
                                     : ""
                                 }
