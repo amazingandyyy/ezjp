@@ -118,7 +118,6 @@ const REPEAT_MODES = {
 // Update RepeatIcon component
 const RepeatIcon = ({ className, mode, theme }) => {
   const isActive = mode !== REPEAT_MODES.NONE;
-  const isRepeatAll = mode === REPEAT_MODES.ALL;
   
   return (
     <div className="relative">
@@ -136,12 +135,14 @@ const RepeatIcon = ({ className, mode, theme }) => {
       </svg>
       {isActive && (
         <>
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-            <div className={`bg-purple-500 rounded w-3 h-2 flex items-center justify-center ring-[0.3px] ${theme === 'dark' ? 'ring-gray-700' : 'ring-white'}`}>
-              <span className="text-[6px] font-bold text-white leading-none tracking-tighter">{isRepeatAll ? "ALL" : "1"}</span>
+          {mode === REPEAT_MODES.ONE && (
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+              <div className={`bg-purple-500 rounded w-3 h-2 flex items-center justify-center ring-[0.3px] ${theme === 'dark' ? 'ring-gray-700' : 'ring-white'}`}>
+                <span className="text-[6px] font-bold text-white leading-none tracking-tighter">1</span>
+              </div>
             </div>
-          </div>
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-purple-500"></div>
+          )}
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500"></div>
         </>
       )}
     </div>
@@ -1066,28 +1067,59 @@ function NewsReaderContent() {
         }
         
         if (repeatMode === REPEAT_MODES.ONE) {
-          setRepeatCountdown(1);
+          let countdownValue = 2;
+          setRepeatCountdown(countdownValue);
           window.repeatInterval = setInterval(() => {
-            setRepeatCountdown(prev => {
-              if (prev <= 0) {
-                clearInterval(window.repeatInterval);
-                window.repeatInterval = null;
-                // Use setTimeout to prevent race condition
-                setTimeout(() => {
-                  playCurrentSentence(index);
-                }, 100);
-                return 0;
-              }
-              return prev - 1;
-            });
+            countdownValue -= 1;
+            setRepeatCountdown(countdownValue);
+            
+            if (countdownValue <= 0) {
+              clearInterval(window.repeatInterval);
+              window.repeatInterval = null;
+              
+              // Wait for a moment after countdown reaches 0 before playing
+              setTimeout(() => {
+                // Create a new utterance for the repeat
+                const repeatUtterance = new SpeechSynthesisUtterance(sentenceText);
+                repeatUtterance.voice = japaneseVoice;
+                repeatUtterance.lang = 'ja-JP';
+                repeatUtterance.rate = speed;
+                
+                // Set up the same onend handler for the new utterance
+                repeatUtterance.onend = utterance.onend;
+                repeatUtterance.onpause = utterance.onpause;
+                repeatUtterance.onresume = utterance.onresume;
+                
+                setIsPlaying(true);
+                speechSynthesis.speak(repeatUtterance);
+              }, 200);
+            }
           }, 1000);
-        } else if (repeatMode === REPEAT_MODES.ALL || index < sentences.length - 1) {
-          const nextIndex = index < sentences.length - 1 ? index + 1 : 0;
-          // Use setTimeout to prevent race condition
+        } else if (repeatMode === REPEAT_MODES.ALL && index < sentences.length - 1) {
+          // If not the last sentence, continue to next sentence
           setTimeout(() => {
-            setCurrentSentence(nextIndex);
-            playCurrentSentence(nextIndex);
+            setCurrentSentence(index + 1);
+            playCurrentSentence(index + 1);
           }, 800);
+        } else if (repeatMode === REPEAT_MODES.ALL && index === sentences.length - 1) {
+          // If last sentence and repeat all mode, start countdown
+          setRepeatCountdown(5);
+          let countdownValue = 5;
+          window.repeatInterval = setInterval(() => {
+            countdownValue -= 1;
+            setRepeatCountdown(countdownValue);
+            
+            if (countdownValue <= 0) {
+              clearInterval(window.repeatInterval);
+              window.repeatInterval = null;
+              
+              // Wait for a moment after countdown reaches 0 before playing
+              setTimeout(() => {
+                setCurrentSentence(0);
+                playCurrentSentence(0);
+              }, 200);
+            }
+          }, 1000);
         }
       };
 
