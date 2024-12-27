@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Get the current branch name
+BRANCH=$(git symbolic-ref --short HEAD)
+
+echo "📥 Pulling latest changes from origin/$BRANCH with rebase..."
+if ! git pull --rebase origin "$BRANCH"; then
+    echo "❌ Pull rebase failed. Please resolve conflicts and try pushing again."
+    exit 1
+fi
+
+echo "✅ Successfully pulled and rebased changes."
+exit 0 

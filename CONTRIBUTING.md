@@ -89,6 +89,18 @@ and troubleshooting common issues.
 5. Make your changes and commit using the convention above
 6. Push to your fork and submit a pull request
 
+## Git Hooks Setup
+
+This repository includes custom Git hooks to help maintain code quality and prevent common issues. To use these hooks:
+
+1. Configure Git to use the custom hooks directory:
+```bash
+git config core.hooksPath .githooks
+```
+
+The following hooks are included:
+- **pre-push**: Automatically runs `git pull --rebase` before pushing to ensure your changes are based on the latest code.
+
 ## Questions?
 
 If you have any questions, please feel free to open an issue for discussion. 

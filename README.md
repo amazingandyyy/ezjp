@@ -1,45 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# EZJP News
 
-## Getting Started
+EZJP is a Japanese news reader designed to help you improve your Japanese reading skills. It provides a clean, distraction-free reading experience with built-in learning tools.
 
-First, run the development server:
+## Features
 
+- 🎯 **Daily Reading Goals**: Set and track your daily reading targets
+- 📚 **Progress Tracking**: Monitor your reading history and improvements
+- 🔍 **Built-in Dictionary**: Look up words while reading
+- 🎮 **Duolingo Integration**: Connect with your Duolingo profile
+- 🌙 **Dark Mode**: Comfortable reading day and night
+- 📰 **Auto-Updated Content**: Fresh news from NHK Easy Japanese updated hourly
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Supabase account
+
+### Quick Start
+
+1. Clone and install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/amazingandyyy/ezjp.git
+cd ezjp
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set up Git hooks:
+```bash
+git config core.hooksPath .githooks
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Start development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-### Development
+### Database Setup
 
 ```bash
 npx supabase link --project-ref ybsqylqrtxgjeyyttkdy
 npx supabase db reset --linked
-
 ```
+
+### News Data
+
+The app automatically fetches news from NHK Easy Japanese every hour using GitHub Actions. The fetched data is stored in `public/sources/`. You can manually trigger the fetch by running:
+
+```bash
+./scripts/fetch-nhk-news.sh
+```
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
