@@ -18,6 +18,19 @@ export default function Settings() {
     intro: false,
     duolingo: false
   });
+
+  // Add handleSignOut function
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setError('Failed to sign out');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   const [profileData, setProfileData] = useState({
     theme: 'light',
     username: '',
@@ -1310,7 +1323,7 @@ export default function Settings() {
             {/* Sign Out Button */}
             <div className="flex justify-end mt-6">
               <button
-                onClick={signOut}
+                onClick={handleSignOut}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   profileData.currentTheme === "dark"
                     ? "text-red-400 hover:bg-gray-800"

@@ -37,6 +37,16 @@ export default function Navbar({
   });
   const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
 
+  // Add handleSignOut function
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   // Handle PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -368,8 +378,8 @@ export default function Navbar({
           {!hideNewsListButton && (
             <button
               onClick={() => onSidebarToggle(!showSidebar)}
-              className={`p-3 rounded-xl shadow-lg border flex items-center justify-center 
-                transition-colors duration-150
+              className={`p-2 rounded-xl shadow-lg border flex items-center justify-center 
+                transition-colors duration-150 w-8 h-8
                 ${
                   theme === "dark"
                     ? "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700"
@@ -378,7 +388,7 @@ export default function Navbar({
               title={showSidebar ? "Hide News List" : "Show News List"}
             >
               <svg
-                className={`w-5 h-5 ${
+                className={`w-4 h-4 ${
                   theme === "dark" ? "text-gray-300" : "text-gray-600"
                 }`}
                 fill="none"
@@ -988,7 +998,7 @@ export default function Navbar({
                 {/* Sign Out Button */}
                 <div className="p-2">
                   <button
-                    onClick={signOut}
+                    onClick={handleSignOut}
                     className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
                       ${
                         theme === "dark"

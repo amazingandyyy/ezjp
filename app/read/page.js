@@ -2126,6 +2126,23 @@ function NewsReaderContent() {
     };
   }, []);
 
+  // Handle clicks outside sidebar
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && 
+          !sidebarRef.current.contains(event.target) && 
+          !event.target.closest('button[title="Show News List"]') && // Exclude the toggle button
+          showSidebar) {
+        setShowSidebar(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSidebar]);
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       {/* Add Navbar */}
@@ -2146,7 +2163,7 @@ function NewsReaderContent() {
       </Navbar>
 
       {/* Settings button and dropdown - bottom right */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-8 sm:bottom-4 right-4 z-50">
         <div ref={settingsRef}>
           <button
             onClick={() => setShowSettings(!showSettings)}
@@ -2472,6 +2489,35 @@ function NewsReaderContent() {
                 </button>
               </div>
 
+              {/* Add Show All News button */}
+              <button
+                onClick={() => router.push('/')}
+                className={`w-full p-3 rounded-xl transition-all duration-200 flex items-center justify-between
+                  ${preferenceState.theme === 'dark'
+                    ? 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-200'
+                    : 'bg-gray-100/80 hover:bg-gray-200/80 text-gray-700'
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${
+                    preferenceState.theme === 'dark'
+                      ? 'bg-gray-700'
+                      : 'bg-white'
+                  }`}>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" 
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M16 2v4M8 2v4M3 10h18" 
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span className="font-medium">Show All News</span>
+                </div>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
               {user && (
                 <div className={`flex gap-1 p-1 rounded-xl ${
                   preferenceState.theme === 'dark'
@@ -2735,7 +2781,7 @@ function NewsReaderContent() {
                     </div>
                     <div className="flex items-start gap-4 mb-3">
                       <h2
-                        className={`font-serif leading-snug tracking-tight ${
+                        className={`font-serif leading-snug tracking-tight w-full break-words overflow-wrap-anywhere ${
                           preferenceState.font_size === "medium"
                             ? "text-2xl"
                             : "text-3xl"
