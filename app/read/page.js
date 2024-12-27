@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
+import useStatsStore from '@/lib/stores/stats';
 
 // Add import for Navbar
 import Navbar from '../components/Navbar';
@@ -652,6 +653,7 @@ function NewsReaderContent() {
   const [loading, setLoading] = useState(false);
   const [showMotivation, setShowMotivation] = useState(false);
   const [showConfirmUnfinish, setShowConfirmUnfinish] = useState(false);  // Add this line
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Refs
   const sidebarRef = useRef(null);
@@ -1761,25 +1763,33 @@ function NewsReaderContent() {
     if (!user || !url) return;
 
     try {
-      const { data, error } = await supabase
+      setFinishLoading(true);
+      const currentUrl = new URL(url);
+      const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
+
+      const { data } = await supabase
         .from('finished_articles')
-        .select(`
-          id,
-          article:articles (
-            id,
-            url
-          )
-        `)
+        .select('id')
         .eq('user_id', user.id)
-        .eq('url', url)
+        .eq('url', urlWithoutParams)
         .single();
       
-      if (error && error.code !== 'PGRST116') throw error;
       setIsFinished(!!data);
     } catch (error) {
-      console.error('Error checking finish status:', error);
+      if (error.code !== 'PGRST116') { // Ignore "not found" errors
+        console.error('Error checking finish status:', error);
+      }
+      setIsFinished(false);
+    } finally {
+      setFinishLoading(false);
     }
   };
+
+  // Add this effect to check status when URL or user changes
+  useEffect(() => {
+    checkFinishStatus();
+    checkSaveStatus();
+  }, [url, user]);
 
   // Add function to fetch finished articles
   const fetchFinishedArticles = async () => {
@@ -1887,7 +1897,15 @@ function NewsReaderContent() {
     }, 2000);
   };
 
-  // Update the toggleFinished function to include confirmation
+  // Add this function to calculate total reading time
+  const calculateTotalReadingTime = (startTime) => {
+    if (!startTime) return 0;
+    const endTime = Date.now();
+    const totalMinutes = (endTime - startTime) / (1000 * 60); // Convert to minutes
+    return Math.round(totalMinutes * 10) / 10; // Round to 1 decimal place
+  };
+
+  // Update the toggleFinished function
   const toggleFinished = async () => {
     if (!user) {
       setToastMessage('Tip: Sign in to track your reading progress');
@@ -1898,29 +1916,34 @@ function NewsReaderContent() {
       return;
     }
 
-    if (finishLoading) return;
-
     // If trying to unmark, show confirmation first
     if (isFinished) {
       setShowConfirmUnfinish(true);
       return;
     }
 
-    setFinishLoading(true);
     try {
-      // First get or create the article record
-      const { data: article, error: articleError } = await supabase
+      setIsUpdating(true);
+      const currentUrl = new URL(url);
+      const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
+
+      // Calculate total reading time
+      const totalReadingTime = calculateTotalReadingTime(readingStartTime);
+
+      // First check if article exists
+      const { data: existingArticle } = await supabase
         .from('articles')
         .select('id')
-        .eq('url', url)
+        .eq('url', urlWithoutParams)
         .single();
 
-      if (articleError && articleError.code === 'PGRST116') {
-        // Article doesn't exist, create it
+      let articleId;
+      if (!existingArticle) {
+        // Create article if it doesn't exist
         const { data: newArticle, error: createError } = await supabase
           .from('articles')
           .insert([{
-            url,
+            url: urlWithoutParams,
             title: newsTitle,
             publish_date: newsDate,
             images: newsImages
@@ -1929,39 +1952,35 @@ function NewsReaderContent() {
           .single();
 
         if (createError) throw createError;
-
-        // Add to finished articles with new article reference
-        await supabase
-          .from('finished_articles')
-          .insert([{
-            user_id: user.id,
-            url,
-            article_id: newArticle.id,
-            finished_at: new Date().toISOString()
-          }]);
-      } else if (articleError) {
-        throw articleError;
+        articleId = newArticle.id;
       } else {
-        // Article exists, use its ID
-        await supabase
-          .from('finished_articles')
-          .insert([{
-            user_id: user.id,
-            url,
-            article_id: article.id,
-            finished_at: new Date().toISOString()
-          }]);
+        articleId = existingArticle.id;
       }
-      setIsFinished(true);
-      // Trigger celebration animation when marking as finished
-      triggerCelebration();
 
-      // Update finished URLs list
-      await fetchFinishedArticles();
+      // Add to finished articles
+      const { error: finishError } = await supabase
+        .from('finished_articles')
+        .insert([{ 
+          user_id: user.id,
+          url: urlWithoutParams,
+          article_id: articleId,
+          finished_at: new Date().toISOString()
+        }]);
+
+      if (finishError) throw finishError;
+
+      // Update reading stats with the calculated time
+      await updateReadingStats(totalReadingTime);
+      
+      // Notify about stats change
+      useStatsStore.getState().notifyStatsChange();
+      
+      setIsFinished(true);
+      triggerCelebration();
     } catch (error) {
-      console.error('Error toggling finish status:', error);
+      console.error('Error toggling finished status:', error);
     } finally {
-      setFinishLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -2278,6 +2297,14 @@ function NewsReaderContent() {
       speechSynthesis.speak(newUtterance);
     }
   }, [preferenceState.preferred_speed]);
+
+  // Update the URL setting code
+  useEffect(() => {
+    if (sourceUrl) {
+      setUrl(sourceUrl);
+      setReadingStartTime(Date.now()); // Reset reading time when URL changes
+    }
+  }, [sourceUrl]);
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>

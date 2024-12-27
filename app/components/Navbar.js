@@ -12,8 +12,8 @@ import {
 import { useAuth } from '../../lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
 import Image from 'next/image';
-import { supabase } from '../../lib/supabase';
 import useSystemStore from '@/lib/stores/system';
+import useStatsStore from '@/lib/stores/stats';
 
 export default function Navbar({ 
   showSidebar, 
@@ -25,21 +25,45 @@ export default function Navbar({
   const { user, profile, signInWithGoogle, signOut } = useAuth();
   const { showUpdatePrompt, applyUpdate } = useUpdate();
   const { version, fetchVersion } = useSystemStore();
+  const { stats, fetchStats } = useStatsStore();
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [stats, setStats] = useState({
-    totalReadingTime: 0,
-    totalArticlesRead: 0,
-    totalSavedArticles: 0,
-    totalFinishedArticles: 0,
-    longestStreak: 0,
-    currentStreak: 0,
-    todayFinishedArticles: 0,
-    dailyArticleGoal: 3,
-    dailyReadingTimeGoal: 15
-  });
-  const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
+
+  // Update stats when profile is opened
+  useEffect(() => {
+    if (showProfile && user) {
+      fetchStats(user.id);
+    }
+  }, [showProfile, user, fetchStats]);
+
+  // Listen for stats updates
+  useEffect(() => {
+    const handleStatsUpdate = () => {
+      if (user && showProfile) {
+        fetchStats(user.id);
+      }
+    };
+
+    window.addEventListener('statsUpdated', handleStatsUpdate);
+    
+    return () => {
+      window.removeEventListener('statsUpdated', handleStatsUpdate);
+    };
+  }, [user, showProfile, fetchStats]);
+
+  // Refresh stats periodically when profile is open
+  useEffect(() => {
+    if (!showProfile || !user) return;
+
+    const intervalId = setInterval(() => {
+      fetchStats(user.id);
+    }, 30000); // Refresh every 30 seconds
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [showProfile, user, fetchStats]);
 
   // Add handleSignOut function
   const handleSignOut = async () => {
@@ -159,94 +183,11 @@ export default function Navbar({
     return { longest: longestStreak, current: currentStreak };
   }, []);
 
-  // Add memoized stats calculation
-  const calculatedStats = useMemo(() => {
-    if (!user) return null;
-
-    const fetchStats = async () => {
-      try {
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayStr = today.toISOString();
-
-        // Fetch all stats in parallel for better performance
-        const [
-          readingStatsResponse,
-          finishedArticlesResponse,
-          finishedCountResponse,
-          todayFinishedResponse,
-          profileResponse
-        ] = await Promise.all([
-          // Fetch user's reading stats
-          supabase
-            .from('reading_stats')
-            .select('total_reading_time, total_articles_read')
-            .eq('user_id', user.id)
-            .maybeSingle(),
-          
-          // Fetch finished articles for streak calculation
-          supabase
-            .from('finished_articles')
-            .select('finished_at')
-            .eq('user_id', user.id)
-            .order('finished_at', { ascending: false }),
-          
-          // Fetch finished articles count
-          supabase
-            .from('finished_articles')
-            .select('id', { count: 'exact' })
-            .eq('user_id', user.id),
-          
-          // Fetch today's finished articles count
-          supabase
-            .from('finished_articles')
-            .select('id', { count: 'exact' })
-            .eq('user_id', user.id)
-            .gte('finished_at', todayStr),
-
-          // Fetch user's profile for daily goals
-          supabase
-            .from('profiles')
-            .select('daily_article_goal, daily_reading_time_goal')
-            .eq('id', user.id)
-            .single()
-        ]);
-
-        const readingStats = readingStatsResponse.data;
-        const finished = finishedArticlesResponse.data;
-        const finishedCount = finishedCountResponse.count;
-        const todayFinishedCount = todayFinishedResponse.count;
-        const profileData = profileResponse.data;
-
-        // Calculate streaks
-        const streaks = calculateStreaks(finished || []);
-
-        return {
-          totalReadingTime: readingStats?.total_reading_time || 0,
-          totalArticlesRead: readingStats?.total_articles_read || 0,
-          totalFinishedArticles: finishedCount || 0,
-          todayFinishedArticles: todayFinishedCount || 0,
-          currentStreak: streaks.current,
-          longestStreak: streaks.longest,
-          dailyArticleGoal: profileData?.daily_article_goal || 3,
-          dailyReadingTimeGoal: profileData?.daily_reading_time_goal || 15
-        };
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        return null;
-      }
-    };
-
-    return fetchStats();
-  }, [user, calculateStreaks, refreshTimestamp]);
-
   // Add function to refresh stats
   const refreshStats = useCallback(() => {
     if (!user) {
       return;
     }
-    setRefreshTimestamp(Date.now());
   }, [user]); // Only depend on user
 
   // Add effect to refresh stats periodically when profile is open
@@ -270,17 +211,6 @@ export default function Navbar({
       window.removeEventListener('goalsUpdated', handleGoalsUpdate);
     };
   }, [refreshStats]);
-
-  // Update stats when calculatedStats changes
-  useEffect(() => {
-    if (calculatedStats) {
-      calculatedStats.then(newStats => {
-        if (newStats) {
-          setStats(newStats);
-        }
-      });
-    }
-  }, [calculatedStats]);
 
   // Memoize the stats display
   const StatsDisplay = useMemo(() => (
