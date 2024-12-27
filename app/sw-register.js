@@ -18,52 +18,23 @@ export default function ServiceWorkerRegistration({ children }) {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      
-      if (isDevelopment) {
-        // Unregister service worker in development
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          for (let registration of registrations) {
-            registration.unregister();
-          }
-        });
-      } else {
-        // Register service worker and handle updates
-        navigator.serviceWorker.register('/sw.js')
-          .then((reg) => {
-            setRegistration(reg);
-
-            // Check for updates immediately
-            reg.update();
-
-            // Check for updates periodically
-            const interval = setInterval(() => {
-              reg.update();
-            }, 1000 * 60 * 60); // Check every hour
-
-            // Handle update found
-            reg.addEventListener('updatefound', () => {
-              const newWorker = reg.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  setShowUpdatePrompt(true);
-                }
-              });
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            
+            newWorker.addEventListener('statechange', () => {
+              // Handle state changes
             });
-
-            // Listen for messages from the service worker
-            navigator.serviceWorker.addEventListener('message', (event) => {
-              if (event.data.type === 'UPDATE_AVAILABLE') {
-                setShowUpdatePrompt(true);
-              }
-            });
-
-            return () => clearInterval(interval);
-          })
-          .catch((err) => {
-            console.error('Service worker registration failed:', err);
           });
-      }
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // Handle controller changes
+      });
     }
   }, []);
 
