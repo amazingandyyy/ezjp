@@ -1211,13 +1211,11 @@ function SettingsContent() {
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label
-                        className={`block text-sm font-medium ${
-                          profileData.currentTheme === "dark"
-                            ? "text-gray-300"
-                            : "text-gray-700"
-                        }`}
-                      >
+                      <label className={`block text-sm font-medium ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}>
                         Daily Articles Goal
                       </label>
                       <div className={`text-sm px-3 py-1 rounded-md ${
@@ -1269,13 +1267,11 @@ function SettingsContent() {
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label
-                        className={`block text-sm font-medium ${
-                          profileData.currentTheme === "dark"
-                            ? "text-gray-300"
-                            : "text-gray-700"
-                        }`}
-                      >
+                      <label className={`block text-sm font-medium ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}>
                         Daily Reading Time Goal
                       </label>
                       <div className={`text-sm px-3 py-1 rounded-md ${
@@ -1295,33 +1291,35 @@ function SettingsContent() {
                     </p>
                   </div>
                   <div className="flex flex-col gap-4">
-                    <div className="grid grid-cols-5 gap-2">
-                      {[3, 10, 30, 60].map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => {
-                            setIsCustomInput(false);
-                            setInputValue('');
-                            setProfileData(prev => ({
-                              ...prev,
-                              daily_reading_time_goal: value
-                            }));
-                            handleUpdate('daily_reading_time_goal', value);
-                          }}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            !isCustomInput && profileData.daily_reading_time_goal === value
-                              ? profileData.currentTheme === "dark"
-                                ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
-                                : "bg-green-50 text-green-600 ring-1 ring-green-500"
-                              : profileData.currentTheme === "dark"
-                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          }`}
-                        >
-                          {value}
-                        </button>
-                      ))}
-                      <div className="relative">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      <div className="col-span-2 sm:col-span-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[3, 10, 30, 60].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => {
+                              setIsCustomInput(false);
+                              setInputValue('');
+                              setProfileData(prev => ({
+                                ...prev,
+                                daily_reading_time_goal: value
+                              }));
+                              handleUpdate('daily_reading_time_goal', value);
+                            }}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              !isCustomInput && profileData.daily_reading_time_goal === value
+                                ? profileData.currentTheme === "dark"
+                                  ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
+                                  : "bg-green-50 text-green-600 ring-1 ring-green-500"
+                                : profileData.currentTheme === "dark"
+                                ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                          >
+                            {value}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="relative col-span-2 sm:col-span-1">
                         <input
                           type="number"
                           min="1"
@@ -1353,7 +1351,7 @@ function SettingsContent() {
                               }
                             }
                           }}
-                          className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          className={`w-full px-4 pr-8 py-2 rounded-lg text-sm font-medium transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                             isCustomInput || ![3, 10, 30, 60].includes(profileData.daily_reading_time_goal)
                               ? profileData.currentTheme === "dark"
                                 ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
@@ -1380,15 +1378,6 @@ function SettingsContent() {
                       </div>
                     </div>
                   </div>
-                  <p
-                    className={`text-xs ${
-                      profileData.currentTheme === "dark"
-                        ? "text-gray-400"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    Set a target for how much time you want to spend reading each day (1-240 minutes)
-                  </p>
                 </div>
               </div>
             </div>
@@ -1481,9 +1470,9 @@ function SettingsContent() {
                             : "text-gray-600"
                         }`}
                       >
-                        Remove all your saved articles. This action cannot be
-                        undone.
-                      </p>
+                          Remove all your saved articles. This action cannot be
+                          undone.
+                        </p>
                     </div>
                     <button
                       onClick={handleResetSavedArticles}
