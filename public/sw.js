@@ -5,7 +5,6 @@ const OFFLINE_URL = '/offline';
 const urlsToCache = [
   '/',
   '/offline',
-  '/join',
   '/download',
   '/icons/favicon.png',
   '/icons/ezjp-app.png',
@@ -31,6 +30,11 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Skip handling URLs with access_token in them
+  if (event.request.url.includes('access_token')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
