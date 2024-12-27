@@ -1022,7 +1022,79 @@ function NewsReaderContent() {
     return keitaVoice || japaneseVoices[0];
   };
 
-  // Update the playCurrentSentence function
+  // Add this useEffect near other useEffects
+  useEffect(() => {
+    // If there's a current utterance playing, update its onend handler
+    if (isPlaying && window.currentUtterance) {
+      const utterance = window.currentUtterance;
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+        
+        // Clear any existing repeat intervals
+        if (window.repeatInterval) {
+          clearInterval(window.repeatInterval);
+          window.repeatInterval = null;
+        }
+        
+        if (repeatMode === REPEAT_MODES.ONE) {
+          let countdownValue = 2;
+          setRepeatCountdown(countdownValue);
+          window.repeatInterval = setInterval(() => {
+            countdownValue -= 1;
+            setRepeatCountdown(countdownValue);
+            
+            if (countdownValue <= 0) {
+              clearInterval(window.repeatInterval);
+              window.repeatInterval = null;
+              
+              setTimeout(() => {
+                const repeatUtterance = new SpeechSynthesisUtterance(sentenceToText(sentences[currentSentence]));
+                repeatUtterance.voice = utterance.voice;
+                repeatUtterance.lang = 'ja-JP';
+                repeatUtterance.rate = utterance.rate;
+                
+                // Store the new utterance
+                window.currentUtterance = repeatUtterance;
+                
+                // Set up the same handlers
+                repeatUtterance.onend = utterance.onend;
+                repeatUtterance.onpause = utterance.onpause;
+                repeatUtterance.onresume = utterance.onresume;
+                
+                setIsPlaying(true);
+                speechSynthesis.speak(repeatUtterance);
+              }, 200);
+            }
+          }, 1000);
+        } else if (repeatMode === REPEAT_MODES.ALL && currentSentence < sentences.length - 1) {
+          setTimeout(() => {
+            setCurrentSentence(currentSentence + 1);
+            playCurrentSentence(currentSentence + 1);
+          }, 800);
+        } else if (repeatMode === REPEAT_MODES.ALL && currentSentence === sentences.length - 1) {
+          let countdownValue = 5;
+          setRepeatCountdown(countdownValue);
+          window.repeatInterval = setInterval(() => {
+            countdownValue -= 1;
+            setRepeatCountdown(countdownValue);
+            
+            if (countdownValue <= 0) {
+              clearInterval(window.repeatInterval);
+              window.repeatInterval = null;
+              
+              setTimeout(() => {
+                setCurrentSentence(0);
+                playCurrentSentence(0);
+              }, 200);
+            }
+          }, 1000);
+        }
+      };
+    }
+  }, [repeatMode, isPlaying]);
+
+  // Update playCurrentSentence to store the utterance
   const playCurrentSentence = async (index = currentSentence) => {
     if (!isBrowser || !sentences[index]) return;
     
@@ -1044,6 +1116,9 @@ function NewsReaderContent() {
       }
 
       const utterance = new SpeechSynthesisUtterance(sentenceText);
+      // Store the utterance globally so we can access it when repeat mode changes
+      window.currentUtterance = utterance;
+      
       utterance.voice = japaneseVoice;
       utterance.lang = 'ja-JP';
       
@@ -1060,7 +1135,7 @@ function NewsReaderContent() {
         setIsPlaying(false);
         setIsPaused(false);
         
-        // Clear any existing repeat intervals before setting up new ones
+        // Clear any existing repeat intervals
         if (window.repeatInterval) {
           clearInterval(window.repeatInterval);
           window.repeatInterval = null;
@@ -1077,15 +1152,15 @@ function NewsReaderContent() {
               clearInterval(window.repeatInterval);
               window.repeatInterval = null;
               
-              // Wait for a moment after countdown reaches 0 before playing
               setTimeout(() => {
-                // Create a new utterance for the repeat
                 const repeatUtterance = new SpeechSynthesisUtterance(sentenceText);
                 repeatUtterance.voice = japaneseVoice;
                 repeatUtterance.lang = 'ja-JP';
                 repeatUtterance.rate = speed;
                 
-                // Set up the same onend handler for the new utterance
+                // Store the new utterance
+                window.currentUtterance = repeatUtterance;
+                
                 repeatUtterance.onend = utterance.onend;
                 repeatUtterance.onpause = utterance.onpause;
                 repeatUtterance.onresume = utterance.onresume;
@@ -1096,15 +1171,13 @@ function NewsReaderContent() {
             }
           }, 1000);
         } else if (repeatMode === REPEAT_MODES.ALL && index < sentences.length - 1) {
-          // If not the last sentence, continue to next sentence
           setTimeout(() => {
             setCurrentSentence(index + 1);
             playCurrentSentence(index + 1);
           }, 800);
         } else if (repeatMode === REPEAT_MODES.ALL && index === sentences.length - 1) {
-          // If last sentence and repeat all mode, start countdown
-          setRepeatCountdown(5);
           let countdownValue = 5;
+          setRepeatCountdown(countdownValue);
           window.repeatInterval = setInterval(() => {
             countdownValue -= 1;
             setRepeatCountdown(countdownValue);
@@ -1113,7 +1186,6 @@ function NewsReaderContent() {
               clearInterval(window.repeatInterval);
               window.repeatInterval = null;
               
-              // Wait for a moment after countdown reaches 0 before playing
               setTimeout(() => {
                 setCurrentSentence(0);
                 playCurrentSentence(0);
@@ -1263,24 +1335,24 @@ function NewsReaderContent() {
       return;
     }
 
-    // Update local state first for immediate feedback
+    // Update local state immediately for instant feedback
     setPreferenceState(prev => ({
       ...prev,
       preferred_speed: speedValue
     }));
 
+    // Save to database in the background if user is logged in
     if (user) {
       try {
         setUpdatingPreferences(prev => ({ ...prev, preferred_speed: true }));
         
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('profiles')
           .update({
             preferred_speed: speedValue,
             updated_at: new Date().toISOString()
           })
-          .eq('id', user.id)
-          .select();
+          .eq('id', user.id);
 
         if (error) {
           console.error('Database error:', error);
@@ -1288,7 +1360,6 @@ function NewsReaderContent() {
         }
       } catch (error) {
         console.error('Error saving speed:', error);
-        setPreferenceState(prev => ({ ...prev, preferred_speed: prev.preferred_speed }));
       } finally {
         setUpdatingPreferences(prev => ({ ...prev, preferred_speed: false }));
       }
@@ -2174,6 +2245,39 @@ function NewsReaderContent() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSidebar]);
+
+  // Add this useEffect to handle speed changes
+  useEffect(() => {
+    if (isPlaying && window.currentUtterance) {
+      const speed = typeof preferenceState.preferred_speed === 'number' && !isNaN(preferenceState.preferred_speed)
+        ? preferenceState.preferred_speed
+        : 1.0;
+
+      // Cancel current speech and restart with new speed
+      const currentText = window.currentUtterance.text;
+      const currentVoice = window.currentUtterance.voice;
+      const currentHandlers = {
+        onend: window.currentUtterance.onend,
+        onpause: window.currentUtterance.onpause,
+        onresume: window.currentUtterance.onresume
+      };
+
+      speechSynthesis.cancel();
+      
+      const newUtterance = new SpeechSynthesisUtterance(currentText);
+      window.currentUtterance = newUtterance;
+      newUtterance.voice = currentVoice;
+      newUtterance.lang = 'ja-JP';
+      newUtterance.rate = speed;
+      
+      // Restore handlers
+      newUtterance.onend = currentHandlers.onend;
+      newUtterance.onpause = currentHandlers.onpause;
+      newUtterance.onresume = currentHandlers.onresume;
+      
+      speechSynthesis.speak(newUtterance);
+    }
+  }, [preferenceState.preferred_speed]);
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
