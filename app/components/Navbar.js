@@ -10,6 +10,7 @@ import {
   FaCheck,
 } from "react-icons/fa";
 import { useAuth } from '../../lib/AuthContext';
+import { useUpdate } from '@/app/sw-register';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 
@@ -21,6 +22,7 @@ export default function Navbar({
 }) {
   const router = useRouter();
   const { user, profile, signInWithGoogle, signOut } = useAuth();
+  const { showUpdatePrompt, applyUpdate } = useUpdate();
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -1013,6 +1015,62 @@ export default function Navbar({
                     <span>Sign Out</span>
                   </button>
                 </div>
+
+                {/* Update notification */}
+                {showUpdatePrompt && (
+                  <button
+                    onClick={() => {
+                      setShowProfile(false);
+                      applyUpdate();
+                    }}
+                    className={`w-full p-3 cursor-pointer transition-colors border-t border-gray-200/10
+                      ${theme === "dark"
+                        ? "hover:bg-gray-700/30"
+                        : "hover:bg-gray-100/70"
+                      }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
+                        theme === "dark"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-green-100 text-green-600"
+                      }`}>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" 
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-medium ${
+                            theme === "dark" ? "text-gray-100" : "text-gray-900"
+                          }`}>
+                            Update Available
+                          </p>
+                          <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
+                            theme === "dark"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-green-100 text-green-600"
+                          }`}>
+                            New
+                          </span>
+                        </div>
+                        <p className={`text-xs mt-0.5 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }`}>
+                          Install the latest version of EZJP News
+                        </p>
+                      </div>
+                      <div className={`flex items-center self-center ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                )}
               </div>
             )}
           </div>

@@ -34,6 +34,13 @@ if (!isDevelopment) {
     );
   });
 
+  // Add message event listener for handling client messages
+  self.addEventListener('message', (event) => {
+    if (event.data === 'skipWaiting') {
+      self.skipWaiting();
+    }
+  });
+
   self.addEventListener('fetch', (event) => {
     // Skip handling URLs with access_token in them
     if (event.request.url.includes('access_token')) {
@@ -89,16 +96,31 @@ if (!isDevelopment) {
     const cacheWhitelist = [CACHE_NAME];
 
     event.waitUntil(
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheWhitelist.indexOf(cacheName) === -1) {
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
+      Promise.all([
+        // Clean up old caches
+        caches.keys().then((cacheNames) => {
+          return Promise.all(
+            cacheNames.map((cacheName) => {
+              if (cacheWhitelist.indexOf(cacheName) === -1) {
+                return caches.delete(cacheName);
+              }
+            })
+          );
+        }),
+        // Claim all clients after activation
+        self.clients.claim()
+      ])
     );
+
+    // Notify all clients about the update
+    const sendUpdateMessageToAllClients = async () => {
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({ type: 'UPDATE_AVAILABLE' });
+      });
+    };
+
+    event.waitUntil(sendUpdateMessageToAllClients());
   });
 } else {
   // In development, immediately claim clients and skip waiting

@@ -1,19 +1,21 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
-import ClientLayout from './client-layout.jsx';
-import { metadata } from './metadata';
+import { AuthProvider } from '@/lib/AuthContext';
+import ServiceWorkerRegistration from './sw-register';
 
-const inter = Inter({ subsets: ['latin'] });
-
-export { metadata };
+export const metadata = {
+  title: 'EZJP News',
+  description: 'Learn Japanese through news articles',
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+      <body>
+        <AuthProvider>
+          <ServiceWorkerRegistration>
+            {children}
+          </ServiceWorkerRegistration>
+        </AuthProvider>
       </body>
     </html>
   );
