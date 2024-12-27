@@ -849,7 +849,9 @@ export default function Navbar({
                           theme === "dark" ? "text-gray-400" : "text-gray-500"
                         }`}>
                           {stats.todayFinishedArticles >= stats.dailyArticleGoal && Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal
-                            ? "Daily goals completed! 🎉"
+                            ? stats.todayFinishedArticles > stats.dailyArticleGoal || Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal
+                              ? `Daily goals completed! Going above and beyond! 🚀`
+                              : "Daily goals completed! 🎉"
                             : stats.todayFinishedArticles >= stats.dailyArticleGoal
                             ? `Almost there! ${Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))} more minutes of reading`
                             : Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal

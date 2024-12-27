@@ -136,12 +136,12 @@ const RepeatIcon = ({ className, mode, theme }) => {
       </svg>
       {isActive && (
         <>
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2">
-            <div className={`bg-purple-500 rounded w-2.5 h-2.5 flex items-center justify-center ring-[0.3px] ${theme === 'dark' ? 'ring-gray-700' : 'ring-white'}`}>
-              <span className="text-[6px] font-bold text-white leading-none">{isRepeatAll ? "∞" : "1"}</span>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+            <div className={`bg-purple-500 rounded w-3 h-2 flex items-center justify-center ring-[0.3px] ${theme === 'dark' ? 'ring-gray-700' : 'ring-white'}`}>
+              <span className="text-[6px] font-bold text-white leading-none tracking-tighter">{isRepeatAll ? "ALL" : "1"}</span>
             </div>
           </div>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500"></div>
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full bg-purple-500"></div>
         </>
       )}
     </div>
@@ -3055,7 +3055,7 @@ function NewsReaderContent() {
               <div className="group relative">
                 <button
                   onClick={handlePrevious}
-                  disabled={currentSentence === 0 || isVoiceLoading}
+                  disabled={currentSentence <= 0 || isVoiceLoading}
                   className={`p-2 rounded-full flex items-center justify-center 
                     ${
                       preferenceState.theme === "dark"
