@@ -13,6 +13,7 @@ import { useAuth } from '../../lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
+import useSystemStore from '@/lib/stores/system';
 
 export default function Navbar({ 
   showSidebar, 
@@ -23,6 +24,7 @@ export default function Navbar({
   const router = useRouter();
   const { user, profile, signInWithGoogle, signOut } = useAuth();
   const { showUpdatePrompt, applyUpdate } = useUpdate();
+  const { version, fetchVersion } = useSystemStore();
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -362,6 +364,11 @@ export default function Navbar({
       console.error('Error updating theme:', error);
     }
   };
+
+  // Fetch version on mount
+  useEffect(() => {
+    fetchVersion();
+  }, [fetchVersion]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16">
@@ -995,6 +1002,13 @@ export default function Navbar({
 
                 {/* Divider */}
                 <div className={`my-1 border-t ${theme === "dark" ? "border-gray-700/50" : "border-gray-200/50"}`} />
+
+                {/* Version Info */}
+                <div className="px-4 py-2">
+                  <div className={`text-xs ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
+                    Version {version || '1.0.0'}
+                  </div>
+                </div>
 
                 {/* Sign Out Button */}
                 <div className="p-2">

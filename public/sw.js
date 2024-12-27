@@ -5,7 +5,6 @@ const OFFLINE_URL = '/offline';
 const urlsToCache = [
   '/',
   '/offline',
-  '/download',
   '/icons/favicon.png',
   '/icons/ezjp-app.png',
   '/icons/NHK_logo_2020.png',

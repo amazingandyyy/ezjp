@@ -3,14 +3,17 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSun, FaMoon, FaUser, FaCheck, FaTimes, FaCheckCircle, FaIdBadge } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
+import { useUpdate } from '@/app/sw-register';
 import { supabase } from '../../lib/supabase';
 import { getSystemTheme, getCurrentTheme } from '../../lib/utils/theme';
 import Navbar from '../components/Navbar';
+import useSystemStore from '@/lib/stores/system';
 
 export default function Settings() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, signOut, profile, updateProfile } = useAuth();
+  const { showUpdatePrompt, applyUpdate } = useUpdate();
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -22,13 +25,14 @@ export default function Settings() {
     intro: false,
     duolingo: false
   });
+  const { version, releaseDate, isLoading, fetchVersion } = useSystemStore();
 
   // Handle URL section parameter
   useEffect(() => {
     const section = searchParams.get('section');
     console.log('Section from searchParams:', section);
     
-    if (section && ['profile', 'appearance', 'goals', 'data'].includes(section)) {
+    if (section && ['profile', 'appearance', 'goals', 'data', 'software'].includes(section)) {
       console.log('Valid section found:', section);
       setActiveSection(section);
       
@@ -54,7 +58,7 @@ export default function Settings() {
   // Add scroll tracking
   useEffect(() => {
     const updateActiveSection = () => {
-      const sections = document.querySelectorAll('#profile, #appearance, #goals, #data');
+      const sections = document.querySelectorAll('#profile, #appearance, #goals, #data, #software');
       const navHeight = 120;
       const fromTop = window.scrollY + navHeight;
 
@@ -494,7 +498,8 @@ export default function Settings() {
                 { id: 'profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
                 { id: 'appearance', label: 'Appearance', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' },
                 { id: 'goals', label: 'Reader\'s Goals', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
-                { id: 'data', label: 'Data Management', icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' }
+                { id: 'data', label: 'Data Management', icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' },
+                { id: 'software', label: 'Software Information', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
               ].map(section => (
                 <button
                   key={section.id}
@@ -1214,10 +1219,10 @@ export default function Settings() {
               >
                 <div className="space-y-1">
                   <h2
-                    className={`text-sm font-medium ${
+                    className={`text-sm font-medium mb-1 ${
                       profileData.currentTheme === "dark"
-                        ? "text-gray-300"
-                        : "text-gray-900"
+                        ? "text-gray-200"
+                        : "text-gray-800"
                     }`}
                   >
                     Reader's Goals
@@ -1276,8 +1281,8 @@ export default function Settings() {
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                             profileData.daily_article_goal === value
                               ? profileData.currentTheme === "dark"
-                                ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
-                                : "bg-green-50 text-green-600 ring-1 ring-green-500"
+                                ? "bg-green-500/10 text-green-400 border border-green-500"
+                                : "bg-green-50 text-green-600 border border-green-500"
                               : profileData.currentTheme === "dark"
                               ? "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
@@ -1421,21 +1426,21 @@ export default function Settings() {
             {/* Data Management Section */}
             <div
               id="data"
-              className={`overflow-hidden rounded-xl shadow-sm ${
-                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              className={`overflow-hidden rounded-2xl shadow-sm border ${
+                profileData.currentTheme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
               }`}
             >
               <div
-                className={`px-6 py-4 border-b ${
+                className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
                     ? "border-gray-700"
                     : "border-gray-100"
                 }`}
               >
                 <h2
-                  className={`text-sm font-medium ${
+                  className={`text-base font-medium ${
                     profileData.currentTheme === "dark"
-                      ? "text-gray-300"
+                      ? "text-gray-200"
                       : "text-gray-900"
                   }`}
                 >
@@ -1536,6 +1541,148 @@ export default function Settings() {
                     </p>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Software Information Section */}
+            <div
+              id="software"
+              className={`overflow-hidden rounded-2xl shadow-sm border ${
+                profileData.currentTheme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
+              }`}
+            >
+              <div
+                className={`px-8 py-5 border-b ${
+                  profileData.currentTheme === "dark"
+                    ? "border-gray-700"
+                    : "border-gray-100"
+                }`}
+              >
+                <h2
+                  className={`text-base font-medium ${
+                    profileData.currentTheme === "dark"
+                      ? "text-gray-200"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Software Information
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <p
+                      className={`text-sm ${
+                        profileData.currentTheme === "dark"
+                          ? "text-gray-400"
+                          : "text-gray-600"
+                      }`}
+                    >
+                        Information about your installed version and available updates.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${
+                    profileData.currentTheme === "dark"
+                      ? "bg-gray-700/50"
+                      : "bg-gray-50"
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
+                          profileData.currentTheme === "dark"
+                            ? "bg-green-500/20 text-green-400"
+                            : "bg-green-100 text-green-600"
+                        }`}>
+                          {isLoading ? (
+                            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 22C17.5228 22 22 17.5228 22 12H20C20 16.4183 16.4183 20 12 20V22Z" fill="currentColor"/>
+                              <path d="M2 12C2 6.47715 6.47715 2 12 2V4C7.58172 4 4 7.58172 4 12H2Z" fill="currentColor"/>
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
+                                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${
+                            profileData.currentTheme === "dark"
+                              ? "text-gray-200"
+                              : "text-gray-800"
+                          }`}>
+                            {isLoading ? 'Checking for Updates...' : 'Installed Version'}
+                          </p>
+                          <div className="space-y-1">
+                            <p className={`text-xs ${
+                              profileData.currentTheme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }`}>
+                              {isLoading ? (
+                                <span className="inline-flex items-center">
+                                  <span className="animate-pulse">Fetching version information...</span>
+                                </span>
+                              ) : (
+                                <>
+                                  Version {version || '1.0.0'}
+                                  {releaseDate && ` (${releaseDate})`}
+                                </>
+                              )}
+                            </p>
+                            <p className={`text-xs ${
+                              profileData.currentTheme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }`}>
+                              <a 
+                                href="https://github.com/amazingandyyy/ezjp/releases" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                View release notes
+                              </a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (showUpdatePrompt) {
+                            applyUpdate();
+                          } else {
+                            fetchVersion();
+                          }
+                        }}
+                        disabled={isLoading}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          profileData.currentTheme === "dark"
+                            ? isLoading 
+                              ? "bg-gray-700/50 text-gray-400 cursor-not-allowed"
+                              : "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                            : isLoading
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-green-50 text-green-600 hover:bg-green-100"
+                        }`}
+                      >
+                        {isLoading ? 'Checking...' : showUpdatePrompt ? 'Install Update' : 'Check for Updates'}
+                      </button>
+                    </div>
+                  </div>
+                  <p
+                    className={`text-xs ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {showUpdatePrompt 
+                      ? 'A new version is available. Click "Install Update" to update the app.'
+                      : 'Your app is up to date with the latest release.'
+                    }
+                  </p>
+                </div>
               </div>
             </div>
 
