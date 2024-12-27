@@ -1589,14 +1589,23 @@ function SettingsContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
-                          profileData.currentTheme === "dark"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-green-100 text-green-600"
+                          showUpdatePrompt
+                            ? profileData.currentTheme === "dark"
+                              ? "bg-blue-500/20 text-blue-400"
+                              : "bg-blue-100 text-blue-600"
+                            : profileData.currentTheme === "dark"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-green-100 text-green-600"
                         }`}>
                           {isLoading ? (
                             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M12 22C17.5228 22 22 17.5228 22 12H20C20 16.4183 16.4183 20 12 20V22Z" fill="currentColor"/>
                               <path d="M2 12C2 6.47715 6.47715 2 12 2V4C7.58172 4 4 7.58172 4 12H2Z" fill="currentColor"/>
+                            </svg>
+                          ) : showUpdatePrompt ? (
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           ) : (
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1611,7 +1620,7 @@ function SettingsContent() {
                               ? "text-gray-200"
                               : "text-gray-800"
                           }`}>
-                            {isLoading ? 'Checking for Updates...' : 'Installed Version'}
+                            {isLoading ? 'Checking for Updates...' : showUpdatePrompt ? 'Update Available' : 'Up to Date'}
                           </p>
                           <div className="space-y-1">
                             <p className={`text-xs ${
@@ -1657,31 +1666,66 @@ function SettingsContent() {
                         }}
                         disabled={isLoading}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          profileData.currentTheme === "dark"
-                            ? isLoading 
+                          isLoading 
+                            ? profileData.currentTheme === "dark"
                               ? "bg-gray-700/50 text-gray-400 cursor-not-allowed"
-                              : "bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                            : isLoading
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "bg-green-50 text-green-600 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : showUpdatePrompt
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                                : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                              : profileData.currentTheme === "dark"
+                                ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                                : "bg-green-50 text-green-600 hover:bg-green-100"
                         }`}
                       >
                         {isLoading ? 'Checking...' : showUpdatePrompt ? 'Install Update' : 'Check for Updates'}
                       </button>
                     </div>
+                    {showUpdatePrompt && (
+                      <div className={`mt-4 p-3 rounded-lg ${
+                        profileData.currentTheme === "dark"
+                          ? "bg-blue-500/10 border border-blue-500/20"
+                          : "bg-blue-50 border border-blue-200"
+                      }`}>
+                        <div className="flex items-start gap-2">
+                          <svg className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                            profileData.currentTheme === "dark"
+                              ? "text-blue-400"
+                              : "text-blue-600"
+                          }`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <div>
+                            <p className={`text-sm font-medium ${
+                              profileData.currentTheme === "dark"
+                                ? "text-blue-400"
+                                : "text-blue-700"
+                            }`}>
+                              A new version is available
+                            </p>
+                            <p className={`text-xs mt-1 ${
+                              profileData.currentTheme === "dark"
+                                ? "text-blue-400/80"
+                                : "text-blue-600/80"
+                            }`}>
+                              Update now to get the latest features, improvements, and bug fixes.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p
-                    className={`text-xs ${
+                  {!showUpdatePrompt && !isLoading && (
+                    <p className={`text-xs ${
                       profileData.currentTheme === "dark"
                         ? "text-gray-400"
                         : "text-gray-600"
-                    }`}
-                  >
-                    {showUpdatePrompt 
-                      ? 'A new version is available. Click "Install Update" to update the app.'
-                      : 'Your app is up to date with the latest release.'
-                    }
-                  </p>
+                    }`}>
+                      Your app is up to date with the latest release.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
