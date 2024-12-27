@@ -84,7 +84,7 @@ export default function JoinPage() {
             <div className="relative p-10 bg-gradient-to-br from-white/95 via-white/90 to-gray-50/80 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-gray-800/80 rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.3)] backdrop-blur-sm border border-gray-100/50 dark:border-gray-700/30 transition-all duration-300">
               <div className="absolute top-6 left-6 text-7xl text-green-500/10 dark:text-green-400/10 font-serif select-none">"</div>
               <div className="relative">
-                <p className="text-lg text-gray-600 dark:text-gray-300 italic space-y-4 leading-relaxed">
+                <div className="text-lg text-gray-600 dark:text-gray-300 italic space-y-4 leading-relaxed">
                   <span className="block">"I'm Andy. In 2024, I've been immersed in learning Japanese, reaching
                   <a 
                     href="https://www.duolingo.com/profile/amazingandyyy"
@@ -101,7 +101,7 @@ export default function JoinPage() {
 
                   <span className="block">So I built EZJP News with love - a simple way to read Japanese news that just works. 
                   Let's build our confidence in Japanese, one article at a time (with continuing Duolingo daily streak of course).</span>
-                </p>
+                </div>
                 <div className="mt-6 flex justify-end items-center">
                   <div className="text-right">
                     <div className="text-base font-semibold text-gray-900 dark:text-white tracking-wide">
@@ -300,7 +300,7 @@ export default function JoinPage() {
                     "Track your reading progress with detailed statistics and learning history",
                   longDescription: (
                     <>
-                      Monitor your learning journey with comprehensive statistics. Track the number of articles read, time spent reading, and vocabulary exposure. Visualize your progress over time and identify areas where you're improving most rapidly.
+                      <span className="block">Monitor your learning journey with comprehensive statistics. Track the number of articles read, time spent reading, and vocabulary exposure. Visualize your progress over time and identify areas where you're improving most rapidly.</span>
                       <div className="mt-2 relative aspect-[3/2] w-full">
                         <Image
                           src="/images/profile-screenshot.png"
@@ -324,7 +324,7 @@ export default function JoinPage() {
                     "Access your bookmarks, preferences, and progress on device, any time",
                   longDescription: (
                     <>
-                      Seamlessly switch between your phone, tablet, or computer. Your reading progress, bookmarks, and preferences automatically sync across all your devices. Start reading on your phone during commute and continue on your computer at home, any time.
+                      <span className="block">Seamlessly switch between your phone, tablet, or computer. Your reading progress, bookmarks, and preferences automatically sync across all your devices. Start reading on your phone during commute and continue on your computer at home, any time.</span>
                       <div className="mt-2 relative aspect-[3/2] w-full">
                         <Image
                           src="/images/sync-proference-screenshot.png"
@@ -348,7 +348,7 @@ export default function JoinPage() {
                     "Set and track daily reading goals to build a consistent learning habit",
                   longDescription: (
                     <>
-                      Stay motivated with personalized daily reading goals. Whether it's reading one article per day or spending 15 minutes with Japanese content, set achievable targets that match your learning pace. Watch your streak grow as you maintain your daily reading habit.
+                      <span className="block">Stay motivated with personalized daily reading goals. Whether it's reading one article per day or spending 15 minutes with Japanese content, set achievable targets that match your learning pace. Watch your streak grow as you maintain your daily reading habit.</span>
                       <div className="mt-2 relative aspect-[3/2] w-full">
                         <Image
                           src="/images/daily-goal-screenshot.png"
@@ -384,11 +384,19 @@ export default function JoinPage() {
                         {benefit.title}
                       </h3>
                       <div className="relative">
-                        <p className={`mt-1 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-500 ease-in-out overflow-hidden ${
-                          expandedBenefit === index || isDesktop || typeof benefit.longDescription !== 'string' ? 'line-clamp-none' : 'line-clamp-1'
-                        }`}>
-                          {expandedBenefit === index || isDesktop || typeof benefit.longDescription !== 'string' ? benefit.longDescription : benefit.description}
-                        </p>
+                        {typeof benefit.longDescription === 'string' ? (
+                          <p className={`mt-1 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-500 ease-in-out overflow-hidden ${
+                            expandedBenefit === index || isDesktop ? 'line-clamp-none' : 'line-clamp-1'
+                          }`}>
+                            {expandedBenefit === index || isDesktop ? benefit.longDescription : benefit.description}
+                          </p>
+                        ) : (
+                          <div className="mt-1">
+                            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              {benefit.longDescription}
+                            </div>
+                          </div>
+                        )}
                         {expandedBenefit !== index && !isDesktop && typeof benefit.longDescription === 'string' && (
                           <button className="text-sm text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 mt-1 transition-colors duration-200">
                             Read more...

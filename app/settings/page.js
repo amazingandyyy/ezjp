@@ -13,11 +13,62 @@ export default function Settings() {
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isCustomInput, setIsCustomInput] = useState(false);
+  const [activeSection, setActiveSection] = useState('profile');
   const [editState, setEditState] = useState({
     username: false,
     intro: false,
     duolingo: false
   });
+
+  // Add scroll tracking
+  useEffect(() => {
+    const updateActiveSection = () => {
+      const sections = document.querySelectorAll('#profile, #appearance, #goals, #data');
+      const navHeight = 120;
+      const fromTop = window.scrollY + navHeight;
+
+      let currentSection = 'profile';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (fromTop >= sectionTop) {
+          currentSection = section.id;
+        }
+      });
+
+      setActiveSection(currentSection);
+    };
+
+    // Initial check
+    updateActiveSection();
+
+    // Add scroll listener
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection);
+    };
+  }, []);
+
+  // Add debounce function
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  // Debounced update function
+  const debouncedUpdate = debounce((value) => {
+    const clampedValue = Math.min(240, Math.max(1, value));
+    setProfileData(prev => ({
+      ...prev,
+      daily_reading_time_goal: clampedValue
+    }));
+    handleUpdate('daily_reading_time_goal', clampedValue);
+  }, 1000);
 
   // Add handleSignOut function
   const handleSignOut = async () => {
@@ -391,10 +442,10 @@ export default function Settings() {
       )}
       <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
 
-      <div className="container mx-auto p-4 pt-24 pb-32">
+      <div className="container mx-auto p-4 pt-20 pb-32">
         <div className="max-w-2xl mx-auto">
           <h1
-            className={`text-2xl font-semibold mb-8 ${
+            className={`text-2xl font-semibold mb-8 pl-2 ${
               profileData.currentTheme === "dark"
                 ? "text-gray-100"
                 : "text-[rgb(19,31,36)]"
@@ -403,10 +454,64 @@ export default function Settings() {
             Account Settings
           </h1>
 
+          {/* Settings Navigation */}
+          <nav className={`sticky top-16 -mx-4 px-4 py-2 mb-8 z-10 backdrop-blur-md bg-opacity-80 ${
+            profileData.currentTheme === "dark"
+              ? "bg-[rgb(19,31,36)] border-b border-gray-800/50"
+              : "bg-gray-50/80 border-b border-gray-200/50"
+          }`}>
+            <div className="flex gap-1.5 overflow-x-auto hide-scrollbar">
+              {[
+                { id: 'profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+                { id: 'appearance', label: 'Appearance', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' },
+                { id: 'goals', label: 'Reader\'s Goals', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+                { id: 'data', label: 'Data Management', icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' }
+              ].map(section => (
+                <button
+                  key={section.id}
+                  onClick={() => {
+                    const element = document.getElementById(section.id);
+                    const navHeight = 120; // Height of navbar + settings nav
+                    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                    const offsetPosition = elementPosition - navHeight;
+
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth'
+                    });
+                    
+                    setActiveSection(section.id);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-medium transition-colors ${
+                    activeSection === section.id
+                      ? profileData.currentTheme === "dark"
+                        ? "bg-green-500/10 text-green-400"
+                        : "bg-green-50 text-green-600"
+                      : profileData.currentTheme === "dark"
+                      ? "text-gray-300 hover:bg-gray-800/80"
+                      : "text-gray-700 hover:bg-white"
+                  }`}
+                >
+                  <svg className={`w-3.5 h-3.5 transition-colors ${
+                    activeSection === section.id
+                      ? profileData.currentTheme === "dark"
+                        ? "text-green-400"
+                        : "text-green-600"
+                      : "text-current"
+                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.icon} />
+                  </svg>
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
           {/* Settings Sections */}
           <div className="space-y-6">
             {/* Profile Section */}
             <div
+              id="profile"
               className={`overflow-hidden rounded-2xl shadow-sm border ${
                 profileData.currentTheme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
               }`}
@@ -1001,6 +1106,7 @@ export default function Settings() {
 
             {/* Appearance Section */}
             <div
+              id="appearance"
               className={`overflow-hidden rounded-xl shadow-sm ${
                 profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
               }`}
@@ -1060,6 +1166,7 @@ export default function Settings() {
 
             {/* Reader's Goals Section */}
             <div
+              id="goals"
               className={`overflow-hidden rounded-xl shadow-sm ${
                 profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
               }`}
@@ -1071,36 +1178,54 @@ export default function Settings() {
                     : "border-gray-100"
                 }`}
               >
-                <h2
-                  className={`text-sm font-medium ${
+                <div className="space-y-1">
+                  <h2
+                    className={`text-sm font-medium ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-300"
+                        : "text-gray-900"
+                    }`}
+                  >
+                    Reader's Goals
+                  </h2>
+                  <p className={`text-xs ${
                     profileData.currentTheme === "dark"
-                      ? "text-gray-300"
-                      : "text-gray-900"
-                  }`}
-                >
-                  Reader's Goals
-                </h2>
+                      ? "text-gray-400"
+                      : "text-gray-600"
+                  }`}>
+                    Set achievable daily goals to build a consistent reading habit. Just like Duolingo streaks, maintaining a daily reading routine is key to improving your Japanese reading skills.
+                  </p>
+                </div>
               </div>
               <div className="p-6 space-y-8">
                 {/* Daily Articles Goal */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label
-                      className={`block text-sm font-medium ${
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label
+                        className={`block text-sm font-medium ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-300"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        Daily Articles Goal
+                      </label>
+                      <div className={`text-sm px-3 py-1 rounded-md ${
                         profileData.currentTheme === "dark"
-                          ? "text-gray-300"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      Daily Articles Goal
-                    </label>
-                    <div className={`text-sm font-medium ${
-                      profileData.currentTheme === "dark"
-                        ? "text-green-400"
-                        : "text-green-600"
-                    }`}>
-                      {profileData.daily_article_goal} articles
+                          ? "bg-green-500/10 text-green-400"
+                          : "bg-green-50 text-green-600"
+                      }`}>
+                        {profileData.daily_article_goal} articles
+                      </div>
                     </div>
+                    <p className={`text-xs ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
+                    }`}>
+                      Challenge yourself to read a specific number of articles each day. Start small and increase gradually as you build confidence.
+                    </p>
                   </div>
                   <div className="flex flex-col gap-4">
                     <div className="grid grid-cols-4 gap-2">
@@ -1120,8 +1245,8 @@ export default function Settings() {
                                 ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
                                 : "bg-green-50 text-green-600 ring-1 ring-green-500"
                               : profileData.currentTheme === "dark"
-                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
                           }`}
                         >
                           {value}
@@ -1129,43 +1254,45 @@ export default function Settings() {
                       ))}
                     </div>
                   </div>
-                  <p
-                    className={`text-xs ${
-                      profileData.currentTheme === "dark"
-                        ? "text-gray-400"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    Set a target for how many articles you want to read each day
-                  </p>
                 </div>
 
                 {/* Daily Reading Time Goal */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label
-                      className={`block text-sm font-medium ${
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label
+                        className={`block text-sm font-medium ${
+                          profileData.currentTheme === "dark"
+                            ? "text-gray-300"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        Daily Reading Time Goal
+                      </label>
+                      <div className={`text-sm px-3 py-1 rounded-md ${
                         profileData.currentTheme === "dark"
-                          ? "text-gray-300"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      Daily Reading Time Goal
-                    </label>
-                    <div className={`text-sm font-medium ${
-                      profileData.currentTheme === "dark"
-                        ? "text-green-400"
-                        : "text-green-600"
-                    }`}>
-                      {profileData.daily_reading_time_goal} minutes
+                          ? "bg-green-500/10 text-green-400"
+                          : "bg-green-50 text-green-600"
+                      }`}>
+                        {profileData.daily_reading_time_goal} minutes
+                      </div>
                     </div>
+                    <p className={`text-xs ${
+                      profileData.currentTheme === "dark"
+                        ? "text-gray-400"
+                        : "text-gray-600"
+                    }`}>
+                      Set aside dedicated time for reading practice. Even a few minutes of focused reading each day can significantly improve your comprehension.
+                    </p>
                   </div>
                   <div className="flex flex-col gap-4">
-                    <div className="grid grid-cols-4 gap-2">
-                      {[3, 5, 15, 30].map((value) => (
+                    <div className="grid grid-cols-5 gap-2">
+                      {[3, 10, 30, 60].map((value) => (
                         <button
                           key={value}
                           onClick={() => {
+                            setIsCustomInput(false);
+                            setInputValue('');
                             setProfileData(prev => ({
                               ...prev,
                               daily_reading_time_goal: value
@@ -1173,7 +1300,7 @@ export default function Settings() {
                             handleUpdate('daily_reading_time_goal', value);
                           }}
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.daily_reading_time_goal === value
+                            !isCustomInput && profileData.daily_reading_time_goal === value
                               ? profileData.currentTheme === "dark"
                                 ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
                                 : "bg-green-50 text-green-600 ring-1 ring-green-500"
@@ -1185,6 +1312,63 @@ export default function Settings() {
                           {value}
                         </button>
                       ))}
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="1"
+                          max="240"
+                          value={isCustomInput ? inputValue : ![3, 10, 30, 60].includes(profileData.daily_reading_time_goal) ? profileData.daily_reading_time_goal : ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setIsCustomInput(true);
+                            setInputValue(value);
+                            
+                            if (value === '') {
+                              return;
+                            }
+
+                            const numValue = parseInt(value);
+                            if (!isNaN(numValue)) {
+                              debouncedUpdate(numValue);
+                            }
+                          }}
+                          onFocus={() => {
+                            setIsCustomInput(true);
+                          }}
+                          onBlur={() => {
+                            if (inputValue === '') {
+                              if (![3, 10, 30, 60].includes(profileData.daily_reading_time_goal)) {
+                                setInputValue(profileData.daily_reading_time_goal.toString());
+                              } else {
+                                setIsCustomInput(false);
+                              }
+                            }
+                          }}
+                          className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            isCustomInput || ![3, 10, 30, 60].includes(profileData.daily_reading_time_goal)
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-green-500/10 text-green-400 ring-1 ring-green-500"
+                                : "bg-green-50 text-green-600 ring-1 ring-green-500"
+                              : profileData.currentTheme === "dark"
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                          placeholder="Custom"
+                        />
+                        <div className={`absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none ${
+                          ![3, 10, 30, 60].includes(profileData.daily_reading_time_goal)
+                            ? profileData.currentTheme === "dark"
+                              ? "text-green-400"
+                              : "text-green-600"
+                            : profileData.currentTheme === "dark"
+                            ? "text-gray-400"
+                            : "text-gray-500"
+                        }`}>
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <p
@@ -1194,7 +1378,7 @@ export default function Settings() {
                         : "text-gray-600"
                     }`}
                   >
-                    Set a target for how much time you want to spend reading each day
+                    Set a target for how much time you want to spend reading each day (1-240 minutes)
                   </p>
                 </div>
               </div>
@@ -1202,6 +1386,7 @@ export default function Settings() {
 
             {/* Data Management Section */}
             <div
+              id="data"
               className={`overflow-hidden rounded-xl shadow-sm ${
                 profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
               }`}
