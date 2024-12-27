@@ -21,17 +21,22 @@ EZJP is a Japanese news reader designed to help you improve your Japanese readin
 
 ### Quick Start
 
-1. Clone and install dependencies:
+1. Clone and install:
 ```bash
 git clone https://github.com/amazingandyyy/ezjp.git
 cd ezjp
-npm install
 ```
 
-2. Set up Git hooks:
+2. Run the setup script:
 ```bash
-git config core.hooksPath .githooks
+./scripts/setup.sh
 ```
+
+This will:
+- Install dependencies
+- Configure Git hooks
+- Make necessary scripts executable
+- Guide you through next steps
 
 3. Start development server:
 ```bash
