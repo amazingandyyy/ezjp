@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/amazingandyyy/ezjp/compare/v1.4.0...v1.5.0) (2024-12-27)
+
+
+### Features
+
+* integrate stats management and enhance Navbar functionality ([c7933d2](https://github.com/amazingandyyy/ezjp/commit/c7933d2957c2f06c8f32186be1f4596bf6679c6a))
+
 # [1.4.0](https://github.com/amazingandyyy/ezjp/compare/v1.3.0...v1.4.0) (2024-12-27)
 
 
