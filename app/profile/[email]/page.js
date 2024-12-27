@@ -768,7 +768,7 @@ export default function UserProfile() {
 
         {/* Activity Section */}
         <div className="max-w-4xl mx-auto">
-          <h2 className={`text-3xl font-bold mb-10 bg-clip-text text-transparent bg-gradient-to-r ${
+          <h2 className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-10 bg-clip-text text-transparent bg-gradient-to-r ${
             theme === 'dark' 
               ? 'from-gray-100 to-gray-300'
               : 'from-gray-700 to-gray-900'
@@ -777,19 +777,19 @@ export default function UserProfile() {
           </h2>
 
           <div className="relative">
-            {/* Timeline line with gradient */}
-            <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${
+            {/* Timeline line with gradient - only visible on sm and up */}
+            <div className={`absolute hidden sm:block left-0 top-0 bottom-0 w-0.5 ${
               theme === 'dark'
                 ? 'bg-gradient-to-b from-gray-700/50 via-gray-600/50 to-gray-700/50'
                 : 'bg-gradient-to-b from-gray-200/70 via-gray-300/70 to-gray-200/70'
             }`} />
 
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {/* Activity items */}
               {getActivityItems().map((item, index) => (
-                <div key={`${item.type}-${index}`} className="relative flex gap-6">
-                  {/* Timeline dot and date */}
-                  <div className="relative">
+                <div key={`${item.type}-${index}`} className="relative sm:flex sm:gap-6">
+                  {/* Timeline dot and date - only visible on sm and up */}
+                  <div className="hidden sm:block relative flex-shrink-0">
                     <div className={`absolute left-0 top-1 w-4 h-4 -ml-2 rounded-full border-2 shadow-lg transition-transform duration-300 hover:scale-110 ${
                       theme === 'dark' ? 'border-gray-800' : 'border-white'
                     } ${
@@ -846,31 +846,59 @@ export default function UserProfile() {
                   </div>
 
                   {/* Article content */}
-                  {item.type !== 'joined' && (
+                  {item.type !== 'joined' ? (
                     <button onClick={() =>
                       router.push(
                         `/read?source=${encodeURIComponent(item.data.url)}`
                       )
-                    } className={`flex-1 ml-4 p-6 rounded-2xl backdrop-blur-sm transition-colors duration-300 ${
+                    } className={`w-full sm:flex-1 p-4 sm:p-6 rounded-xl sm:rounded-2xl backdrop-blur-sm transition-colors duration-300 ${
                       theme === 'dark' 
                         ? 'bg-gray-800/30 hover:bg-gray-800/40 border border-gray-700/50' 
                         : 'bg-white/90 hover:bg-white/95 border border-gray-200/50'
                     }`}>
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-col sm:flex-row gap-6">
-                          <div className="block w-full sm:w-40 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100/50">
+                      <div className="flex flex-col gap-3 sm:gap-4">
+                        {/* Mobile date and status display */}
+                        <div className="flex sm:hidden items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 text-gray-400">
+                            <span>{formatDate(item.date, item.type)[0]}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            {item.type === "saved" ? (
+                              <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
+                                theme === 'dark' 
+                                  ? 'bg-red-500/10 text-red-400'
+                                  : 'bg-red-50 text-red-600'
+                              }`}>
+                                <FaHeart className="w-3 h-3" />
+                                <span>Saved</span>
+                              </div>
+                            ) : (
+                              <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
+                                theme === 'dark' 
+                                  ? 'bg-green-500/10 text-green-400'
+                                  : 'bg-green-50 text-green-600'
+                              }`}>
+                                <FaCheck className="w-3 h-3" />
+                                <span>Finished</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                          <div className="block w-full sm:w-40 h-32 sm:h-32 flex-shrink-0 rounded-lg sm:rounded-xl overflow-hidden bg-gray-100/50">
                             {item.data.article?.images?.[0] ? (
                               <img src={item.data.article.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => {
                                 e.target.parentElement.style.display = "none";
                               }} />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gray-100/50">
-                                <FaBook className="w-12 h-12 text-gray-400" />
+                                <FaBook className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" />
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className={`text-lg font-medium mb-3 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
+                          <div className="flex-1 min-w-0 text-left">
+                            <h3 className={`text-base sm:text-lg font-medium mb-2 sm:mb-3 break-words line-clamp-2 ${theme === 'dark' ? 'text-gray-100' : 'text-[rgb(19,31,36)]'}`}>
                               {(() => {
                                 try {
                                   let title =
@@ -910,7 +938,7 @@ export default function UserProfile() {
                                 }
                               })()}
                             </h3>
-                            <div className="flex flex-wrap gap-4 text-sm">
+                            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
                               <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {item.data.article?.publish_date
                                   ? formatJapaneseDate(
@@ -920,8 +948,8 @@ export default function UserProfile() {
                               </p>
                               {item.type === "saved" &&
                                 item.data.reading_time > 0 && (
-                                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    <FaClock className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <div className={`flex items-center gap-1.5 sm:gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <FaClock className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                                     <span className="whitespace-nowrap">
                                       Read for{" "}
                                       {formatDuration(item.data.reading_time)}
@@ -933,16 +961,31 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </button>
+                  ) : (
+                    // Mobile joined card
+                    <div className="sm:hidden mb-4 p-4 rounded-xl backdrop-blur-sm ${theme === 'dark' ? 'bg-gray-800/30 border border-gray-700/50' : 'bg-white/90 border border-gray-200/50'}">
+                      <div className="flex items-center gap-2 text-sm">
+                        <FaEgg className="w-4 h-4 text-yellow-500" />
+                        <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Joined EZJP as Reader</span>
+                      </div>
+                      <div className="mt-1 text-xs text-gray-400">
+                        {new Date(item.date).toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </div>
+                    </div>
                   )}
-                  {item.type === 'joined' && <div className="flex-1 ml-4" />}
+                  {item.type === 'joined' && <div className="hidden sm:block flex-1" />}
                 </div>
               ))}
 
               {(savedNews.length === 0 && finishedNews.length === 0) && (
-                <div className={`text-center py-20 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <FaBook className={`w-20 h-20 mx-auto mb-8 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
-                  <p className="text-xl font-medium tracking-wide">No reading activity yet</p>
-                  <p className="text-sm mt-3 text-gray-500">
+                <div className={`text-center py-12 sm:py-20 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <FaBook className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <p className="text-lg sm:text-xl font-medium tracking-wide">No reading activity yet</p>
+                  <p className="text-xs sm:text-sm mt-2 sm:mt-3 text-gray-500">
                     This reader's journey will be shown here
                   </p>
                 </div>
