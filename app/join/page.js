@@ -298,8 +298,19 @@ export default function JoinPage() {
                   title: "Learning Statistics",
                   description:
                     "Track your reading progress with detailed statistics and learning history",
-                  longDescription:
-                    "Monitor your learning journey with comprehensive statistics. Track the number of articles read, time spent reading, and vocabulary exposure. Visualize your progress over time and identify areas where you're improving most rapidly.",
+                  longDescription: (
+                    <>
+                      Monitor your learning journey with comprehensive statistics. Track the number of articles read, time spent reading, and vocabulary exposure. Visualize your progress over time and identify areas where you're improving most rapidly.
+                      <div className="mt-2 relative aspect-[3/2] w-full">
+                        <Image
+                          src="/images/profile-screenshot.png"
+                          alt="Learning Statistics Screenshot"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </>
+                  ),
                   bgColor: "bg-emerald-50/30 dark:bg-emerald-900/20",
                   iconBg: "bg-emerald-100/50 dark:bg-emerald-900/30",
                   hoverBg: "hover:bg-emerald-100/50 dark:hover:bg-emerald-800/30"
@@ -311,11 +322,46 @@ export default function JoinPage() {
                   title: "Sync Across Devices",
                   description:
                     "Access your bookmarks, preferences, and progress on device, any time",
-                  longDescription:
-                    "Seamlessly switch between your phone, tablet, or computer. Your reading progress, bookmarks, and preferences automatically sync across all your devices. Start reading on your phone during commute and continue on your computer at home, any time.",
+                  longDescription: (
+                    <>
+                      Seamlessly switch between your phone, tablet, or computer. Your reading progress, bookmarks, and preferences automatically sync across all your devices. Start reading on your phone during commute and continue on your computer at home, any time.
+                      <div className="mt-2 relative aspect-[3/2] w-full">
+                        <Image
+                          src="/images/sync-proference-screenshot.png"
+                          alt="Sync Preferences Screenshot"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </>
+                  ),
                   bgColor: "bg-sky-50/30 dark:bg-sky-900/20",
                   iconBg: "bg-sky-100/50 dark:bg-sky-900/30",
                   hoverBg: "hover:bg-sky-100/50 dark:hover:bg-sky-800/30"
+                },
+                {
+                  icon: (
+                    <FaNewspaper className="h-6 w-6 text-amber-500/90 dark:text-amber-400/90 group-hover:text-amber-600 dark:group-hover:text-amber-300" />
+                  ),
+                  title: "Daily Goals",
+                  description:
+                    "Set and track daily reading goals to build a consistent learning habit",
+                  longDescription: (
+                    <>
+                      Stay motivated with personalized daily reading goals. Whether it's reading one article per day or spending 15 minutes with Japanese content, set achievable targets that match your learning pace. Watch your streak grow as you maintain your daily reading habit.
+                      <div className="mt-2 relative aspect-[3/2] w-full">
+                        <Image
+                          src="/images/daily-goal-screenshot.png"
+                          alt="Daily Goal Feature Screenshot"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </>
+                  ),
+                  bgColor: "bg-amber-50/30 dark:bg-amber-900/20",
+                  iconBg: "bg-amber-100/50 dark:bg-amber-900/30",
+                  hoverBg: "hover:bg-amber-100/50 dark:hover:bg-amber-800/30"
                 }
               ].map((benefit, index) => (
                 <div
@@ -339,11 +385,11 @@ export default function JoinPage() {
                       </h3>
                       <div className="relative">
                         <p className={`mt-1 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-500 ease-in-out overflow-hidden ${
-                          expandedBenefit === index ? 'line-clamp-none' : 'line-clamp-1'
+                          expandedBenefit === index || isDesktop || typeof benefit.longDescription !== 'string' ? 'line-clamp-none' : 'line-clamp-1'
                         }`}>
-                          {expandedBenefit === index || isDesktop ? benefit.longDescription : benefit.description}
+                          {expandedBenefit === index || isDesktop || typeof benefit.longDescription !== 'string' ? benefit.longDescription : benefit.description}
                         </p>
-                        {expandedBenefit !== index && !isDesktop && (
+                        {expandedBenefit !== index && !isDesktop && typeof benefit.longDescription === 'string' && (
                           <button className="text-sm text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 mt-1 transition-colors duration-200">
                             Read more...
                           </button>
@@ -357,7 +403,7 @@ export default function JoinPage() {
           </div>
 
           {/* Follow Note */}
-          <div className="text-center mb-8 lg:mb-16">
+          {/* <div className="text-center mb-8 lg:mb-16">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ✨ At minimum... Follow my 
               <a 
@@ -368,9 +414,9 @@ export default function JoinPage() {
               >
                 Duolingo
               </a>
-              because streaks 🔥 are better with friends! 🤓 😉 ✨
+              because streaks 🔥 are better with friends! 🤓 ✨
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 
