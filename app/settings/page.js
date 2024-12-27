@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSun, FaMoon, FaUser, FaCheck, FaTimes, FaCheckCircle, FaIdBadge } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -9,6 +9,7 @@ import Navbar from '../components/Navbar';
 
 export default function Settings() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, signOut, profile, updateProfile } = useAuth();
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -21,6 +22,34 @@ export default function Settings() {
     intro: false,
     duolingo: false
   });
+
+  // Handle URL section parameter
+  useEffect(() => {
+    const section = searchParams.get('section');
+    console.log('Section from searchParams:', section);
+    
+    if (section && ['profile', 'appearance', 'goals', 'data'].includes(section)) {
+      console.log('Valid section found:', section);
+      setActiveSection(section);
+      
+      const scrollToSection = () => {
+        const element = document.getElementById(section);
+        console.log('Looking for element:', section);
+        
+        if (element) {
+          console.log('Element found, scrolling...');
+          const offset = element.offsetTop - 120;
+          window.scrollTo({
+            top: offset,
+            behavior: 'instant'
+          });
+        }
+      };
+
+      // Try scrolling after a delay to ensure the page is rendered
+      setTimeout(scrollToSection, 100);
+    }
+  }, [searchParams]);
 
   // Add scroll tracking
   useEffect(() => {
@@ -481,6 +510,11 @@ export default function Settings() {
                     });
                     
                     setActiveSection(section.id);
+                    // Update URL using searchParams
+                    const searchParams = new URLSearchParams(window.location.search);
+                    searchParams.set('section', section.id);
+                    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+                    window.history.replaceState({}, '', newUrl);
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-medium transition-colors ${
                     activeSection === section.id

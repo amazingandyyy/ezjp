@@ -1,27 +1,16 @@
 const CACHE_NAME = 'ezjp-cache-v1';
 const OFFLINE_URL = '/offline';
 
+// Only include public routes and static assets
 const urlsToCache = [
   '/',
-  '/manifest.json',
   '/offline',
   '/join',
-  '/settings',
-  '/explorer',
-  '/read',
   '/download',
-  '/profile',
-  '/archive',
-  '/auth/callback',
-  '/globals.css',
-  // Icons and images
   '/icons/favicon.png',
   '/icons/ezjp-app.png',
   '/icons/NHK_logo_2020.png',
-  '/favicon.ico',
-  // Static assets
-  '/_next/static/css/app.css',
-  // Add other static assets that should be cached
+  '/favicon.ico'
 ];
 
 self.addEventListener('install', (event) => {
@@ -29,7 +18,14 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(error => {
+              console.log(`Failed to cache ${url}:`, error);
+              return null;
+            })
+          )
+        );
       })
   );
 });
@@ -55,10 +51,15 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                // Don't cache API requests or authentication endpoints
+                // Don't cache API requests, authentication endpoints, or protected routes
+                const url = new URL(event.request.url);
+                const protectedPaths = ['/settings', '/profile', '/archive', '/read', '/explorer'];
+                const isProtectedPath = protectedPaths.some(path => url.pathname.startsWith(path));
+
                 if (!event.request.url.includes('/api/') && 
                     !event.request.url.includes('/auth/') &&
-                    !event.request.url.includes('/_next/data/')) {
+                    !event.request.url.includes('/_next/data/') &&
+                    !isProtectedPath) {
                   cache.put(event.request, responseToCache);
                 }
               });

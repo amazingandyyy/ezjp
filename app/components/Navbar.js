@@ -272,7 +272,6 @@ export default function Navbar({
     if (calculatedStats) {
       calculatedStats.then(newStats => {
         if (newStats) {
-          console.log('Setting new stats:', newStats);
           setStats(newStats);
         }
       });
@@ -726,7 +725,7 @@ export default function Navbar({
                   <div 
                     onClick={() => {
                       setShowProfile(false);
-                      router.push('/settings');
+                      router.push('/settings?section=goals');
                     }}
                     className={`p-3 cursor-pointer transition-colors ${!profile?.username ? 'border-t border-gray-200/10' : ''} 
                       ${theme === "dark"
