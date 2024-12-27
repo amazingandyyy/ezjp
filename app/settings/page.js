@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSun, FaMoon, FaUser, FaCheck, FaTimes, FaCheckCircle, FaIdBadge } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
@@ -9,9 +9,9 @@ import { getSystemTheme, getCurrentTheme } from '../../lib/utils/theme';
 import Navbar from '../components/Navbar';
 import useSystemStore from '@/lib/stores/system';
 
-export default function Settings() {
-  const router = useRouter();
+function SettingsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user, signOut, profile, updateProfile } = useAuth();
   const { showUpdatePrompt, applyUpdate } = useUpdate();
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
@@ -1227,7 +1227,7 @@ export default function Settings() {
                   >
                     Reader's Goals
                   </h2>
-                  <p className={`text-xs ${
+                  <p className={`text-sm ${
                     profileData.currentTheme === "dark"
                       ? "text-gray-400"
                       : "text-gray-600"
@@ -1703,5 +1703,13 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Settings() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <SettingsContent />
+    </Suspense>
   );
 } 
