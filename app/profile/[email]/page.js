@@ -611,20 +611,29 @@ export default function UserProfile() {
                         href={`https://www.duolingo.com/profile/${encodeURIComponent(profile.duolingo_username)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex h-10 items-center gap-2.5 px-5 rounded-xl text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
+                        className={`group relative inline-flex h-10 items-center gap-2.5 px-5 rounded-xl text-sm font-medium tracking-wide backdrop-blur-sm transition-all duration-300 ${
                           theme === 'dark'
                             ? 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
                             : 'bg-[#58CC02]/10 text-[#58CC02] hover:bg-[#58CC02]/20 border border-[#58CC02]/20'
                         }`}
                       >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z" fill="currentColor"/>
-                          <path d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                          <path d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                          <path d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z" fill="currentColor"/>
-                          <path d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z" fill={theme === 'dark' ? 'rgb(19,31,36)' : 'white'}/>
-                        </svg>
-                        <span>Duolingo Profile</span>
+                        <img 
+                          src="/icons/duolingo-long-text.svg" 
+                          alt="Duolingo" 
+                          className="h-4 w-auto"
+                        />
+                        <span className={`absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${
+                          theme === 'dark'
+                            ? 'bg-gray-800/95 text-gray-200 border border-gray-700/50'
+                            : 'bg-white/95 text-gray-700 border border-gray-200/50'
+                        }`}>
+                          View Duolingo profile (opens in new tab)
+                          <span className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 ${
+                            theme === 'dark'
+                              ? 'bg-gray-800/95 border-r border-b border-gray-700/50'
+                              : 'bg-white/95 border-r border-b border-gray-200/50'
+                          }`}></span>
+                        </span>
                       </a>
                     )}
 
@@ -993,6 +1002,11 @@ export default function UserProfile() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-24 pb-4 w-full text-center">
+        <span className={`text-[8px] opacity-30 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+          The Duolingo logo and brand are trademarks of Duolingo, Inc. EZJP is not affiliated with, endorsed, or sponsored by Duolingo.
+        </span>
       </div>
     </div>
   );

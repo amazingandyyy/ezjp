@@ -464,8 +464,8 @@ function SettingsContent() {
           <div
             className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg text-sm ${
               profileData.currentTheme === "dark"
-                ? "bg-gray-800 text-green-400 border border-gray-700"
-                : "bg-white text-green-600 border border-gray-200"
+                ? "bg-gray-800/90 text-green-400 border border-gray-700/50 backdrop-blur-sm"
+                : "bg-white text-green-600 border border-gray-200/50 shadow-sm"
             }`}
           >
             <FaCheckCircle className="w-4 h-4" />
@@ -475,10 +475,10 @@ function SettingsContent() {
       )}
       <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
 
-      <div className="container mx-auto p-4 pt-24 pb-32">
+      <div className="container mx-auto px-4 pt-24 pb-32 flex-1">
         <div className="max-w-2xl mx-auto">
           <h1
-            className={`text-2xl font-semibold mb-8 pl-2 ${
+            className={`text-3xl font-semibold mb-10 ${
               profileData.currentTheme === "dark"
                 ? "text-gray-100"
                 : "text-[rgb(19,31,36)]"
@@ -488,10 +488,10 @@ function SettingsContent() {
           </h1>
 
           {/* Settings Navigation */}
-          <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-12 z-10 backdrop-blur-md bg-opacity-80 ${
+          <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md bg-opacity-80 ${
             profileData.currentTheme === "dark"
-              ? "bg-[rgb(19,31,36)]/80 border-b border-gray-800/50"
-              : "bg-gray-50/80 border-b border-gray-200/50"
+              ? "bg-[rgb(19,31,36)]/90 border-b border-gray-800/50"
+              : "bg-white/90 border-b border-gray-200/50"
           }`}>
             <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {[
@@ -505,7 +505,7 @@ function SettingsContent() {
                   key={section.id}
                   onClick={() => {
                     const element = document.getElementById(section.id);
-                    const navHeight = 120; // Height of navbar + settings nav
+                    const navHeight = 120;
                     const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
                     const offsetPosition = elementPosition - navHeight;
 
@@ -515,27 +515,26 @@ function SettingsContent() {
                     });
                     
                     setActiveSection(section.id);
-                    // Update URL using searchParams
                     const searchParams = new URLSearchParams(window.location.search);
                     searchParams.set('section', section.id);
                     const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
                     window.history.replaceState({}, '', newUrl);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                     activeSection === section.id
                       ? profileData.currentTheme === "dark"
-                        ? "bg-green-500/10 text-green-400"
-                        : "bg-green-50 text-green-600"
+                        ? "text-white"
+                        : "text-gray-900"
                       : profileData.currentTheme === "dark"
-                      ? "text-gray-300 hover:bg-gray-800/80"
-                      : "text-gray-700 hover:bg-white"
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <svg className={`w-3.5 h-3.5 transition-colors ${
+                  <svg className={`w-4 h-4 transition-colors ${
                     activeSection === section.id
                       ? profileData.currentTheme === "dark"
-                        ? "text-green-400"
-                        : "text-green-600"
+                        ? "text-white"
+                        : "text-gray-900"
                       : "text-current"
                   }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.icon} />
@@ -551,14 +550,14 @@ function SettingsContent() {
             {/* Profile Section */}
             <div
               id="profile"
-              className={`overflow-hidden rounded-2xl shadow-sm border ${
-                profileData.currentTheme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
+              className={`overflow-hidden rounded-2xl shadow-sm border backdrop-blur-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800/80 border-gray-700/50" : "bg-white border-gray-100"
               }`}
             >
               <div
                 className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
-                    ? "border-gray-700"
+                    ? "border-gray-700/50"
                     : "border-gray-100"
                 }`}
               >
@@ -732,56 +731,49 @@ function SettingsContent() {
                             : "text-gray-700"
                         }`}
                       >
-                        <svg
+                        <img
+                          src="/icons/duolingo-app.svg"
+                          alt="Duolingo"
                           className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        {profileData.username ? (
-                          <span>{profileData.username}</span>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className={`${
-                              profileData.currentTheme === "dark"
-                                ? "text-red-400"
-                                : "text-red-600"
-                            }`}>No username set</span>
-                            <span className={`text-sm px-2 py-0.5 rounded-md ${
-                              profileData.currentTheme === "dark"
-                                ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                                : "bg-red-50 text-red-600 border border-red-200"
-                            }`}>Required</span>
-                          </div>
-                        )}
+                        />
+                        <span>
+                          {profileData.duolingo_username ||
+                            "No Duolingo profile linked"}
+                        </span>
                       </div>
-                      <button
-                        onClick={() =>
-                          setEditState((prev) => ({ ...prev, username: true }))
-                        }
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          profileData.currentTheme === "dark"
-                            ? "text-gray-300 hover:bg-gray-700"
-                            : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                      >
-                        Edit
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {profileData.duolingo_username && (
+                          <a
+                            href={`https://www.duolingo.com/profile/${encodeURIComponent(
+                              profileData.duolingo_username
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              profileData.currentTheme === "dark"
+                                ? "text-gray-300 hover:bg-gray-700"
+                                : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                          >
+                            View Profile
+                          </a>
+                        )}
+                        <button
+                          onClick={() =>
+                            setEditState((prev) => ({
+                              ...prev,
+                              duolingo: true,
+                            }))
+                          }
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            profileData.currentTheme === "dark"
+                              ? "text-gray-300 hover:bg-gray-700"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          Edit
+                        </button>
+                      </div>
                     </div>
                   )}
                   {error && (
@@ -819,7 +811,7 @@ function SettingsContent() {
                         }`}
                       >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 16v-4m0-4h.01M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M12 16v-4m0-4h.01M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2v2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8v-2c0-5.523-4.477-10-10-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </a>
                     </div>
@@ -1072,33 +1064,11 @@ function SettingsContent() {
                             : "text-gray-700"
                         }`}
                       >
-                        <svg
+                        <img
+                          src="/icons/duolingo-app.svg"
+                          alt="Duolingo"
                           className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M22.126 12.348c0 5.06-4.104 9.165-9.164 9.165-5.06 0-9.164-4.104-9.164-9.165 0-5.06 4.104-9.164 9.164-9.164 5.06 0 9.164 4.104 9.164 9.164z"
-                            fill="#58CC02"
-                          />
-                          <path
-                            d="M12.962 7.815c0 .662-.537 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.663.538-1.2 1.2-1.2.663 0 1.2.537 1.2 1.2z"
-                            fill="white"
-                          />
-                          <path
-                            d="M15.586 12.348c0 1.457-1.182 2.639-2.639 2.639-1.457 0-2.639-1.182-2.639-2.639 0-1.457 1.182-2.639 2.639-2.639 1.457 0 2.639 1.182 2.639 2.639z"
-                            fill="white"
-                          />
-                          <path
-                            d="M12.947 13.486c-.625 0-1.133-.508-1.133-1.133 0-.625.508-1.133 1.133-1.133.625 0 1.133.508 1.133 1.133 0 .625-.508 1.133-1.133 1.133z"
-                            fill="#58CC02"
-                          />
-                          <path
-                            d="M9.338 7.815c0 .662-.538 1.2-1.2 1.2-.663 0-1.2-.538-1.2-1.2 0-.663.537-1.2 1.2-1.2.662 0 1.2.537 1.2 1.2z"
-                            fill="white"
-                          />
-                        </svg>
+                        />
                         <span>
                           {profileData.duolingo_username ||
                             "No Duolingo profile linked"}
@@ -1146,14 +1116,14 @@ function SettingsContent() {
             {/* Appearance Section */}
             <div
               id="appearance"
-              className={`overflow-hidden rounded-xl shadow-sm ${
-                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              className={`overflow-hidden rounded-2xl shadow-sm border backdrop-blur-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800/80 border-gray-700/50" : "bg-white border-gray-100"
               }`}
             >
               <div
                 className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
-                    ? "border-gray-700"
+                    ? "border-gray-700/50"
                     : "border-gray-100"
                 }`}
               >
@@ -1167,35 +1137,35 @@ function SettingsContent() {
                   Appearance
                 </h2>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => handleUpdate("theme", "light")}
-                    className={`p-4 rounded-lg border transition-colors ${
+                    className={`p-6 rounded-xl border-2 transition-all duration-200 ${
                       profileData.theme === "light"
-                        ? "border-green-500 bg-green-50 text-green-700"
+                        ? "border-green-500 bg-green-50 text-green-700 shadow-sm"
                         : profileData.currentTheme === "dark"
-                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
-                        : "border-gray-200 hover:border-gray-300 text-gray-700"
+                        ? "border-gray-700/50 hover:border-gray-600 text-gray-400 hover:bg-gray-700/50"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    <div className="flex flex-col items-center gap-2">
-                      <FaSun className="w-5 h-5" />
+                    <div className="flex flex-col items-center gap-3">
+                      <FaSun className="w-6 h-6" />
                       <span className="text-sm font-medium">Light</span>
                     </div>
                   </button>
                   <button
                     onClick={() => handleUpdate("theme", "dark")}
-                    className={`p-4 rounded-lg border transition-colors ${
+                    className={`p-6 rounded-xl border-2 transition-all duration-200 ${
                       profileData.theme === "dark"
-                        ? "border-green-500 bg-green-500/10 text-green-400"
+                        ? "border-green-500 bg-green-500/10 text-green-400 shadow-sm"
                         : profileData.currentTheme === "dark"
-                        ? "border-gray-700 hover:border-gray-600 text-gray-400"
-                        : "border-gray-200 hover:border-gray-300 text-gray-700"
+                        ? "border-gray-700/50 hover:border-gray-600 text-gray-400 hover:bg-gray-700/50"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    <div className="flex flex-col items-center gap-2">
-                      <FaMoon className="w-5 h-5" />
+                    <div className="flex flex-col items-center gap-3">
+                      <FaMoon className="w-6 h-6" />
                       <span className="text-sm font-medium">Dark</span>
                     </div>
                   </button>
@@ -1206,20 +1176,20 @@ function SettingsContent() {
             {/* Reader's Goals Section */}
             <div
               id="goals"
-              className={`overflow-hidden rounded-xl shadow-sm ${
-                profileData.currentTheme === "dark" ? "bg-gray-800" : "bg-white"
+              className={`overflow-hidden rounded-2xl shadow-sm border backdrop-blur-sm ${
+                profileData.currentTheme === "dark" ? "bg-gray-800/80 border-gray-700/50" : "bg-white border-gray-100"
               }`}
             >
               <div
                 className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
-                    ? "border-gray-700"
+                    ? "border-gray-700/50"
                     : "border-gray-100"
                 }`}
               >
                 <div className="space-y-1">
                   <h2
-                    className={`text-base font-medium mb-1 ${
+                    className={`text-base font-medium ${
                       profileData.currentTheme === "dark"
                         ? "text-gray-200"
                         : "text-gray-800"
@@ -1232,10 +1202,11 @@ function SettingsContent() {
                       ? "text-gray-400"
                       : "text-gray-600"
                   }`}>
+                    Set your daily reading targets and track your progress
                   </p>
                 </div>
               </div>
-              <div className="p-6 space-y-8">
+              <div className="p-8 space-y-8">
                 {/* Daily Articles Goal */}
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -1251,8 +1222,8 @@ function SettingsContent() {
                       </label>
                       <div className={`text-sm px-3 py-1 rounded-md ${
                         profileData.currentTheme === "dark"
-                          ? "bg-green-500/10 text-green-400"
-                          : "bg-green-50 text-green-600"
+                          ? "bg-green-500/10 text-green-400 ring-1 ring-green-500/20"
+                          : "bg-green-50 text-green-600 ring-1 ring-green-500/20"
                       }`}>
                         {profileData.daily_article_goal} articles
                       </div>
@@ -1309,8 +1280,8 @@ function SettingsContent() {
                       </label>
                       <div className={`text-sm px-3 py-1 rounded-md ${
                         profileData.currentTheme === "dark"
-                          ? "bg-green-500/10 text-green-400"
-                          : "bg-green-50 text-green-600"
+                          ? "bg-green-500/10 text-green-400 ring-1 ring-green-500/20"
+                          : "bg-green-50 text-green-600 ring-1 ring-green-500/20"
                       }`}>
                         {profileData.daily_reading_time_goal} minutes
                       </div>
@@ -1585,7 +1556,7 @@ function SettingsContent() {
                       ? "bg-gray-700/50"
                       : "bg-gray-50"
                   }`}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
                           showUpdatePrompt
@@ -1661,10 +1632,15 @@ function SettingsContent() {
                             applyUpdate();
                           } else {
                             fetchVersion();
+                            setTimeout(() => {
+                              if (isLoading) {
+                                setIsLoading(false);
+                              }
+                            }, 3000);
                           }
                         }}
                         disabled={isLoading}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           isLoading 
                             ? profileData.currentTheme === "dark"
                               ? "bg-gray-700/50 text-gray-400 cursor-not-allowed"
@@ -1693,7 +1669,7 @@ function SettingsContent() {
                               ? "text-blue-400"
                               : "text-blue-600"
                           }`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2v2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8v-2c0-5.523-4.477-10-10-10z" 
+                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2v2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8v-2c0-5.523-4.477-10-10-10z" 
                               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                           <div>
@@ -1716,15 +1692,7 @@ function SettingsContent() {
                       </div>
                     )}
                   </div>
-                  {!showUpdatePrompt && !isLoading && (
-                    <p className={`text-xs ${
-                      profileData.currentTheme === "dark"
-                        ? "text-gray-400"
-                        : "text-gray-600"
-                    }`}>
-                      Your app is up to date with the latest release.
-                    </p>
-                  )}
+                  
                 </div>
               </div>
             </div>
