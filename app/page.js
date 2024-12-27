@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import Explorer from './explorer/page';
 
 export default function Home() {
-  redirect('/explorer');
+  return <Explorer />;
 } 

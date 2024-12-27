@@ -475,7 +475,7 @@ function SettingsContent() {
       )}
       <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
 
-      <div className="container mx-auto p-4 pt-20 pb-32">
+      <div className="container mx-auto p-4 pt-24 pb-32">
         <div className="max-w-2xl mx-auto">
           <h1
             className={`text-2xl font-semibold mb-8 pl-2 ${
@@ -488,12 +488,12 @@ function SettingsContent() {
           </h1>
 
           {/* Settings Navigation */}
-          <nav className={`sticky top-16 -mx-4 px-4 py-2 mb-8 z-10 backdrop-blur-md bg-opacity-80 ${
+          <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-12 z-10 backdrop-blur-md bg-opacity-80 ${
             profileData.currentTheme === "dark"
-              ? "bg-[rgb(19,31,36)] border-b border-gray-800/50"
+              ? "bg-[rgb(19,31,36)]/80 border-b border-gray-800/50"
               : "bg-gray-50/80 border-b border-gray-200/50"
           }`}>
-            <div className="flex gap-1.5 overflow-x-auto hide-scrollbar">
+            <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {[
                 { id: 'profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
                 { id: 'appearance', label: 'Appearance', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' },
@@ -1151,16 +1151,16 @@ function SettingsContent() {
               }`}
             >
               <div
-                className={`px-6 py-4 border-b ${
+                className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
                     ? "border-gray-700"
                     : "border-gray-100"
                 }`}
               >
                 <h2
-                  className={`text-sm font-medium ${
+                  className={`text-base font-medium ${
                     profileData.currentTheme === "dark"
-                      ? "text-gray-300"
+                      ? "text-gray-200"
                       : "text-gray-900"
                   }`}
                 >
@@ -1211,7 +1211,7 @@ function SettingsContent() {
               }`}
             >
               <div
-                className={`px-6 py-4 border-b ${
+                className={`px-8 py-5 border-b ${
                   profileData.currentTheme === "dark"
                     ? "border-gray-700"
                     : "border-gray-100"
@@ -1219,7 +1219,7 @@ function SettingsContent() {
               >
                 <div className="space-y-1">
                   <h2
-                    className={`text-sm font-medium mb-1 ${
+                    className={`text-base font-medium mb-1 ${
                       profileData.currentTheme === "dark"
                         ? "text-gray-200"
                         : "text-gray-800"
@@ -1232,7 +1232,6 @@ function SettingsContent() {
                       ? "text-gray-400"
                       : "text-gray-600"
                   }`}>
-                    Set achievable daily goals to build a consistent reading habit. Just like Duolingo streaks, maintaining a daily reading routine is key to improving your Japanese reading skills.
                   </p>
                 </div>
               </div>
@@ -1459,7 +1458,7 @@ function SettingsContent() {
                   <div className="space-y-4">
                     <div>
                       <h3
-                        className={`text-sm font-medium mb-1 ${
+                        className={`text-base font-medium mb-1 ${
                           profileData.currentTheme === "dark"
                             ? "text-gray-200"
                             : "text-gray-800"
@@ -1496,7 +1495,7 @@ function SettingsContent() {
                   <div className="space-y-4">
                     <div>
                       <h3
-                        className={`text-sm font-medium mb-1 ${
+                        className={`text-base font-medium mb-1 ${
                           profileData.currentTheme === "dark"
                             ? "text-gray-200"
                             : "text-gray-800"
@@ -1694,7 +1693,7 @@ function SettingsContent() {
                               ? "text-blue-400"
                               : "text-blue-600"
                           }`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                            <path d="M13 16h-1v-4h-1m1-4h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2v2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8v-2c0-5.523-4.477-10-10-10z" 
                               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                           <div>
