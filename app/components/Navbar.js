@@ -887,7 +887,7 @@ export default function Navbar({
                     <div className="w-7 h-7 flex items-center justify-center">
                       <FaBookOpen className="w-[1.125rem] h-[1.125rem]" />
                     </div>
-                    <span>Latest News</span>
+                    <span>All News</span>
                   </button>
                   <button
                     onClick={() => {

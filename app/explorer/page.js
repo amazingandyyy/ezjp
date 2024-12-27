@@ -86,7 +86,7 @@ export default function NewsList() {
   const [error, setError] = useState("");
   const [archivedUrls, setArchivedUrls] = useState(new Set());
   const [finishedUrls, setFinishedUrls] = useState(new Set());
-  const [hideFinished, setHideFinished] = useState(false);
+  const [hideFinished, setHideFinished] = useState(true);
   const [finishedStats, setFinishedStats] = useState({ recent: 0, total: 0 });
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -320,7 +320,7 @@ export default function NewsList() {
               theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
             }`}
           >
-            Latest News
+            All News
           </h1>
           {user && (
             <div className="flex items-center gap-5">
@@ -364,21 +364,43 @@ export default function NewsList() {
               </svg>
               <span>Today's News</span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {newsList
-                .filter(news => isToday(news.date))
-                .filter(news => !hideFinished || !finishedUrls.has(news.url))
-                .map((news, index) => (
-                  <NewsCard 
-                    key={index} 
-                    news={news} 
-                    theme={theme}
-                    finishedUrls={finishedUrls}
-                    archivedUrls={archivedUrls}
-                    onClick={() => handleNewsClick(news.url)}
-                  />
-                ))}
-            </div>
+            {user && hideFinished && newsList.filter(news => isToday(news.date)).every(news => finishedUrls.has(news.url)) ? (
+              <div className={`flex flex-col items-center justify-center py-8 rounded-xl ${
+                theme === "dark" ? "bg-gray-800/50" : "bg-gray-50"
+              }`}>
+                <div className="bg-green-500 rounded-full p-3 mb-4">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className={`text-lg font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-200" : "text-gray-800"
+                }`}>
+                  All caught up!
+                </h3>
+                <p className={`text-sm ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}>
+                  You've read all of today's articles
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {newsList
+                  .filter(news => isToday(news.date))
+                  .filter(news => !hideFinished || !finishedUrls.has(news.url))
+                  .map((news, index) => (
+                    <NewsCard 
+                      key={index} 
+                      news={news} 
+                      theme={theme}
+                      finishedUrls={finishedUrls}
+                      archivedUrls={archivedUrls}
+                      onClick={() => handleNewsClick(news.url)}
+                    />
+                  ))}
+              </div>
+            )}
           </div>
         )}
 

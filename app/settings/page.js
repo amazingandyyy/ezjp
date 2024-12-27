@@ -359,7 +359,7 @@ function SettingsContent() {
 
   // Reset handlers
   const handleResetReadingHistory = async () => {
-    if (!window.confirm('Warning: You are about to delete all your reading history.\n\nThis includes:\n- All articles marked as finished\n- Your reading progress tracking\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
+    if (!window.confirm('Warning: You are about to delete all your reading history.\n\nThis includes:\n- All articles marked as finished\n- Your reading progress tracking\n- Your streak records (both best and current streak)\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
       return;
     }
 
@@ -408,7 +408,7 @@ function SettingsContent() {
   };
 
   const handleResetSavedArticles = async () => {
-    if (!window.confirm('Warning: You are about to delete all your saved articles.\n\nThis includes:\n- All articles you have saved for later\n- Your bookmarked articles\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
+    if (!window.confirm('Warning: You are about to delete all your saved articles.\n\nThis includes:\n- All articles you have saved for later\n- Your saved articles\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?')) {
       return;
     }
 
