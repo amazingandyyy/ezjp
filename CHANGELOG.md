@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/amazingandyyy/ezjp/compare/v1.5.0...v1.5.1) (2024-12-27)
+
+
+### Bug Fixes
+
+* update Navbar and NewsList components for improved user experience ([50492f6](https://github.com/amazingandyyy/ezjp/commit/50492f607b4cb8be480122fb823e19e8f1e59425))
+
 # [1.5.0](https://github.com/amazingandyyy/ezjp/compare/v1.4.0...v1.5.0) (2024-12-27)
 
 
