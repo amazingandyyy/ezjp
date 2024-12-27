@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/amazingandyyy/ezjp/compare/v1.0.0...v1.1.0) (2024-12-27)
+
+
+### Features
+
+* update versioning and enhance software information display ([519fae7](https://github.com/amazingandyyy/ezjp/commit/519fae77acc415d3004a6a1056cc1c155ab5e3c4))
+
 # 1.0.0 (2024-12-27)
 
 
