@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/amazingandyyy/ezjp/compare/v1.1.0...v1.2.0) (2024-12-27)
+
+
+### Features
+
+* enhance Settings component with Suspense and improved layout ([8e2a5d7](https://github.com/amazingandyyy/ezjp/commit/8e2a5d7206a58d5791d9b02befc46567e508706e))
+
 # [1.1.0](https://github.com/amazingandyyy/ezjp/compare/v1.0.0...v1.1.0) (2024-12-27)
 
 
