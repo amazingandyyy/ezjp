@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/amazingandyyy/ezjp/compare/v1.3.0...v1.4.0) (2024-12-27)
+
+
+### Features
+
+* enhance UserProfile and Settings components with improved Duolingo integration and styling ([e25c058](https://github.com/amazingandyyy/ezjp/commit/e25c0587c47937f2f580791e8292c8194d6a1b91))
+
 # [1.3.0](https://github.com/amazingandyyy/ezjp/compare/v1.2.0...v1.3.0) (2024-12-27)
 
 
