@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/amazingandyyy/ezjp/compare/v1.2.0...v1.3.0) (2024-12-27)
+
+
+### Features
+
+* implement dark mode support and enhance theme management ([5ff1d82](https://github.com/amazingandyyy/ezjp/commit/5ff1d82731dcc97cd780d82a56b0d3694bf8ac22))
+
 # [1.2.0](https://github.com/amazingandyyy/ezjp/compare/v1.1.0...v1.2.0) (2024-12-27)
 
 
