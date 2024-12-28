@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/amazingandyyy/ezjp/compare/v1.12.0...v1.13.0) (2024-12-28)
+
+
+### Features
+
+* implement changelog page with suggestions functionality ([cb7253c](https://github.com/amazingandyyy/ezjp/commit/cb7253c17238fc4784bec8fda047f7df87fcf2c3))
+
 # [1.12.0](https://github.com/amazingandyyy/ezjp/compare/v1.11.0...v1.12.0) (2024-12-28)
 
 
