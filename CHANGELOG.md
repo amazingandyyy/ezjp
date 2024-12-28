@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/amazingandyyy/ezjp/compare/v1.5.1...v1.6.0) (2024-12-28)
+
+
+### Features
+
+* enhance audio playback controls and speed adjustment in NewsReaderContent ([061802a](https://github.com/amazingandyyy/ezjp/commit/061802a600f56723e3f6027994f3271a6f727c9c))
+
 ## [1.5.1](https://github.com/amazingandyyy/ezjp/compare/v1.5.0...v1.5.1) (2024-12-27)
 
 
