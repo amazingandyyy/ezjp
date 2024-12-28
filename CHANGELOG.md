@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/amazingandyyy/ezjp/compare/v1.6.0...v1.7.0) (2024-12-28)
+
+
+### Features
+
+* update Japanese voice mappings and enhance voice fetching logic ([9d51e7e](https://github.com/amazingandyyy/ezjp/commit/9d51e7e9e1c66a8f7320481f21e92da1173522aa))
+
 # [1.6.0](https://github.com/amazingandyyy/ezjp/compare/v1.5.1...v1.6.0) (2024-12-28)
 
 
