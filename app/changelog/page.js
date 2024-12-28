@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { FaCheck, FaSpinner, FaHourglassHalf } from 'react-icons/fa';
 
 const ChangelogPage = () => {
   const { profile, user } = useAuth();
@@ -19,6 +20,34 @@ const ChangelogPage = () => {
   const [newSuggestion, setNewSuggestion] = useState({ title: '', description: '' });
   const [showNewSuggestionForm, setShowNewSuggestionForm] = useState(false);
   const [editingSuggestion, setEditingSuggestion] = useState(null);
+  const userLevel = profile?.level || 0;
+  const canManageSuggestions = userLevel >= 10;
+
+  // Handle voting
+  const handleVote = async (suggestionId, hasVoted) => {
+    if (!user) return;
+
+    try {
+      if (hasVoted) {
+        // Remove vote
+        await supabase
+          .from('suggestion_votes')
+          .delete()
+          .eq('suggestion_id', suggestionId)
+          .eq('user_id', user.id);
+      } else {
+        // Add vote
+        await supabase
+          .from('suggestion_votes')
+          .insert([{ suggestion_id: suggestionId, user_id: user.id }]);
+      }
+
+      // Refresh suggestions to update vote count
+      fetchSuggestions();
+    } catch (err) {
+      console.error('Error handling vote:', err);
+    }
+  };
 
   // Handle tab changes
   const handleTabChange = (tab) => {
@@ -63,26 +92,6 @@ const ChangelogPage = () => {
       console.error('Error fetching suggestions:', err);
     } finally {
       setLoadingSuggestions(false);
-    }
-  };
-
-  const handleVote = async (suggestionId, hasVoted) => {
-    if (!user) return;
-
-    try {
-      if (hasVoted) {
-        await supabase
-          .from('suggestion_votes')
-          .delete()
-          .match({ suggestion_id: suggestionId, user_id: user.id });
-      } else {
-        await supabase
-          .from('suggestion_votes')
-          .insert({ suggestion_id: suggestionId, user_id: user.id });
-      }
-      fetchSuggestions();
-    } catch (err) {
-      console.error('Error voting:', err);
     }
   };
 
@@ -238,6 +247,237 @@ const ChangelogPage = () => {
   };
 
   const parsedChangelog = formatChangelog(changelog);
+
+  // Add function to handle status update
+  const handleStatusUpdate = async (suggestionId, newStatus) => {
+    if (!canManageSuggestions) return;
+
+    try {
+      const { error } = await supabase
+        .from('suggestions')
+        .update({ status: newStatus })
+        .eq('id', suggestionId);
+
+      if (error) throw error;
+      fetchSuggestions();
+    } catch (err) {
+      console.error('Error updating suggestion status:', err);
+    }
+  };
+
+  // Update the suggestions rendering to include status controls for high level users
+  const renderSuggestionStatus = (suggestion) => {
+    const statusColors = {
+      pending: theme === 'dark' ? 'text-gray-400' : 'text-gray-600',
+      in_progress: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600',
+      done: theme === 'dark' ? 'text-green-400' : 'text-green-600'
+    };
+
+    const statusIcons = {
+      pending: <FaHourglassHalf className="w-4 h-4" />,
+      in_progress: <FaSpinner className="w-4 h-4" />,
+      done: <FaCheck className="w-4 h-4" />
+    };
+
+    if (canManageSuggestions) {
+      return (
+        <div className="flex items-center gap-2">
+          <select
+            value={suggestion.status}
+            onChange={(e) => handleStatusUpdate(suggestion.id, e.target.value)}
+            className={`px-2 py-1 rounded-md text-sm font-medium transition-colors ${
+              theme === 'dark' 
+                ? 'bg-gray-800 border-gray-700 text-gray-200' 
+                : 'bg-white border-gray-200 text-gray-700'
+            } border focus:outline-none focus:ring-2 focus:ring-purple-500`}
+          >
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${statusColors[suggestion.status]}`}>
+        {statusIcons[suggestion.status]}
+        <span>{suggestion.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</span>
+      </div>
+    );
+  };
+
+  // Add function to get suggestion stats
+  const getSuggestionStats = () => {
+    const stats = {
+      pending: suggestions.filter(s => s.status === 'pending').length,
+      in_progress: suggestions.filter(s => s.status === 'in_progress').length,
+      done: suggestions.filter(s => s.status === 'done').length
+    };
+    return stats;
+  };
+
+  // Update the suggestions list rendering
+  const renderSuggestions = () => {
+    if (loadingSuggestions) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className={`w-7 h-7 border-2 rounded-full animate-spin ${
+            theme === 'dark' ? 'border-purple-400 border-t-transparent' : 'border-purple-600 border-t-transparent'
+          }`} />
+          <p className={`mt-3 text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Loading suggestions...
+          </p>
+        </div>
+      );
+    }
+
+    const stats = getSuggestionStats();
+
+    return (
+      <div className="space-y-6">
+        {/* Stats section */}
+        <div className="flex flex-wrap gap-4">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+            theme === 'dark' ? 'bg-gray-800/80' : 'bg-gray-100'
+          }`}>
+            <FaHourglassHalf className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
+            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+              {stats.pending} Pending
+            </span>
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+            theme === 'dark' ? 'bg-yellow-900/20' : 'bg-yellow-50'
+          }`}>
+            <FaSpinner className={`w-4 h-4 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`} />
+            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
+              {stats.in_progress} In Progress
+            </span>
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+            theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'
+          }`}>
+            <FaCheck className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
+            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
+              {stats.done} Completed
+            </span>
+          </div>
+        </div>
+
+        {/* Suggestions list */}
+        {suggestions.map((suggestion) => {
+          const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
+          const isDone = suggestion.status === 'done';
+          const isInProgress = suggestion.status === 'in_progress';
+          
+          return (
+            <div
+              key={suggestion.id}
+              className={`p-6 rounded-xl ${
+                isDone
+                  ? theme === 'dark'
+                    ? 'bg-green-900/20 border-green-800/30'
+                    : 'bg-green-50 border-green-200/50'
+                  : isInProgress
+                    ? theme === 'dark'
+                      ? 'bg-yellow-900/20 border-yellow-800/30'
+                      : 'bg-yellow-50/80 border-yellow-200/50'
+                    : theme === 'dark'
+                      ? 'bg-gray-800/80 border border-gray-700/50'
+                      : 'bg-white border border-gray-200'
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                {/* Vote button */}
+                <button
+                  onClick={() => handleVote(suggestion.id, hasVoted)}
+                  disabled={!user}
+                  className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
+                    hasVoted
+                      ? theme === 'dark'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-purple-100 text-purple-600'
+                      : theme === 'dark'
+                        ? 'bg-gray-900/50 text-gray-400 hover:text-purple-400'
+                        : 'bg-gray-50 text-gray-500 hover:text-purple-600'
+                  }`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium">{suggestion.votes_count}</span>
+                </button>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                        {suggestion.title}
+                      </h3>
+                      {isDone && (
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                          theme === 'dark'
+                            ? 'bg-green-900/40 text-green-400'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
+                          Completed
+                        </span>
+                      )}
+                      {isInProgress && (
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                          theme === 'dark'
+                            ? 'bg-yellow-900/40 text-yellow-400'
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          In Progress
+                        </span>
+                      )}
+                    </div>
+                    {renderSuggestionStatus(suggestion)}
+                  </div>
+                  <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {suggestion.description}
+                  </p>
+                  <div className="mt-4 flex items-center gap-4">
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                      Suggested by {suggestion.profiles.username}
+                    </div>
+                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {new Date(suggestion.created_at).toLocaleDateString()}
+                    </div>
+                    {suggestion.user_id === user?.id && suggestion.votes_count <= 2 && (
+                      <>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                        <button
+                          onClick={() => handleEditSuggestion(suggestion)}
+                          className={`text-xs ${
+                            theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                          }`}
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
@@ -544,122 +784,7 @@ const ChangelogPage = () => {
             )}
 
             {/* Suggestions list */}
-            {loadingSuggestions ? (
-              <div className="flex justify-center py-12">
-                <div className={`w-7 h-7 border-2 rounded-full animate-spin ${
-                  theme === 'dark' ? 'border-purple-400 border-t-transparent' : 'border-purple-600 border-t-transparent'
-                }`} />
-              </div>
-            ) : suggestions.length === 0 ? (
-              <div className={`text-center py-12 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                No suggestions yet. Be the first to suggest a feature!
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {suggestions.map((suggestion) => {
-                  const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
-                  const canEdit = user?.id === suggestion.user_id && suggestion.votes_count <= 2;
-                  return (
-                    <div
-                      key={suggestion.id}
-                      className={`p-4 rounded-lg border ${
-                        theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <button
-                          onClick={() => handleVote(suggestion.id, hasVoted)}
-                          disabled={!user}
-                          className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
-                            hasVoted
-                              ? theme === 'dark'
-                                ? 'bg-purple-500/20 text-purple-400'
-                                : 'bg-purple-100 text-purple-600'
-                              : theme === 'dark'
-                                ? 'bg-gray-900/50 text-gray-400 hover:text-purple-400'
-                                : 'bg-gray-50 text-gray-500 hover:text-purple-600'
-                          }`}
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 15l7-7 7 7"
-                            />
-                          </svg>
-                          <span className="text-sm font-medium">{suggestion.votes_count}</span>
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <h3 className={`text-base font-medium ${
-                              theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
-                            }`}>
-                              {suggestion.title}
-                            </h3>
-                            {canEdit && (
-                              <button
-                                onClick={() => handleEditSuggestion(suggestion)}
-                                className={`shrink-0 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                                }`}
-                                title={suggestion.votes_count > 2 ? "Can't edit suggestions with more than 2 votes" : "Edit suggestion"}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                          <p className={`mt-1 text-sm ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            {suggestion.description}
-                          </p>
-                          <div className="mt-2 flex items-center gap-2">
-                            <div className={`text-xs ${
-                              theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                            }`}>
-                              Suggested by {suggestion.profiles.username}
-                            </div>
-                            <span className={`text-xs ${
-                              theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
-                            }`}>•</span>
-                            <div className={`text-xs ${
-                              theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                            }`}>
-                              {new Date(suggestion.created_at).toLocaleDateString()}
-                            </div>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${
-                              suggestion.status === 'open'
-                                ? theme === 'dark'
-                                  ? 'bg-green-500/20 text-green-400'
-                                  : 'bg-green-100 text-green-600'
-                                : suggestion.status === 'in_progress'
-                                  ? theme === 'dark'
-                                    ? 'bg-blue-500/20 text-blue-400'
-                                    : 'bg-blue-100 text-blue-600'
-                                  : theme === 'dark'
-                                    ? 'bg-gray-800 text-gray-400'
-                                    : 'bg-gray-100 text-gray-600'
-                            }`}>
-                              {suggestion.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {renderSuggestions()}
           </div>
         )}
       </main>

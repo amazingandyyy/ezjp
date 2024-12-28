@@ -125,7 +125,8 @@ function SettingsContent() {
     duolingo_username: '',
     edited_duolingo_username: '',
     daily_article_goal: 3,
-    daily_reading_time_goal: 15
+    daily_reading_time_goal: 15,
+    role: 'normal_user'
   });
 
   // Handle avatar change
@@ -235,7 +236,8 @@ function SettingsContent() {
           duolingo_username: latestProfile.duolingo_username || '',
           edited_duolingo_username: latestProfile.duolingo_username || '',
           daily_article_goal: latestProfile.daily_article_goal || 3,
-          daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15
+          daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15,
+          role: latestProfile.role || 'normal_user'
         });
         setIsProfileLoaded(true);
       } catch (error) {
@@ -737,7 +739,12 @@ function SettingsContent() {
                             Loading...
                           </span>
                         ) : profileData.username ? (
-                          <span>{profileData.username}</span>
+                          <div className="flex flex-col">
+                            <span>{profileData.username}</span>
+                            <span className={`text-xs ${profileData.currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Account Type: {profileData.role.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </span>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             <span className={`text-sm px-2 py-0.5 rounded-md ${
