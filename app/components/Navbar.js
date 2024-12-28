@@ -614,44 +614,44 @@ export default function Navbar({
                       onClick={() => router.push('/settings')}
                       className={`p-3 cursor-pointer transition-colors
                         ${theme === "dark"
-                          ? "hover:bg-gray-700/30"
-                          : "hover:bg-gray-100/70"
+                          ? "bg-yellow-500/10 hover:bg-yellow-500/20"
+                          : "bg-yellow-50 hover:bg-yellow-100/70"
                         }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-9 h-9 flex items-center justify-center rounded-md ${
                           theme === "dark"
-                            ? "bg-gray-700/80 text-gray-300"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-yellow-100 text-yellow-600"
                         }`}>
                           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" 
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
                               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className={`text-sm font-medium ${
-                              theme === "dark" ? "text-gray-100" : "text-gray-900"
+                              theme === "dark" ? "text-yellow-100" : "text-yellow-800"
                             }`}>
                               Set up your username
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
-                                ? "bg-gray-700 text-gray-300"
-                                : "bg-gray-100 text-gray-600"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-yellow-100 text-yellow-600"
                             }`}>
                               Required
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-500"
+                            theme === "dark" ? "text-yellow-300/70" : "text-yellow-700/90"
                           }`}>
                             Make your profile easier to find and share
                           </p>
                         </div>
                         <div className={`flex items-center self-center ${
-                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                          theme === "dark" ? "text-yellow-400" : "text-yellow-600"
                         }`}>
                           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 5l7 7-7 7" />
