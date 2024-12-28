@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/amazingandyyy/ezjp/compare/v1.13.0...v1.14.0) (2024-12-28)
+
+
+### Features
+
+* update settings page to enhance user profile management ([6f3e520](https://github.com/amazingandyyy/ezjp/commit/6f3e520d2e7432e39307dded7c966b64e157882f))
+
 # [1.13.0](https://github.com/amazingandyyy/ezjp/compare/v1.12.0...v1.13.0) (2024-12-28)
 
 
