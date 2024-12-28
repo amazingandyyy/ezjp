@@ -873,6 +873,7 @@ function NewsReaderContent() {
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         
+        // Set up the onended handler for repeat functionality
         audio.onended = () => {
           setIsPlaying(false);
           setIsPaused(false);
@@ -1198,6 +1199,7 @@ function NewsReaderContent() {
         const audio = new Audio(audioCache[cacheKey]);
         audio.playbackRate = preferenceState.preferred_speed || 1.0;
         
+        // Set up the onended handler for repeat functionality
         audio.onended = () => {
           setIsPlaying(false);
           setIsPaused(false);
@@ -1242,6 +1244,7 @@ function NewsReaderContent() {
       const audio = new Audio(url);
       audio.playbackRate = preferenceState.preferred_speed || 1.0;
       
+      // Set up the onended handler for repeat functionality
       audio.onended = () => {
         setIsPlaying(false);
         setIsPaused(false);
@@ -1432,6 +1435,11 @@ function NewsReaderContent() {
       preferred_speed: speedValue
     }));
 
+    // Apply speed to current audio immediately if playing
+    if (currentAudio) {
+      currentAudio.playbackRate = speedValue;
+    }
+
     // Save to database in the background if user is logged in
     if (user) {
       try {
@@ -1462,6 +1470,16 @@ function NewsReaderContent() {
       }, 5000);
     }
   };
+
+  // Update useEffect for speed changes
+  useEffect(() => {
+    if (currentAudio) {
+      const speed = typeof preferenceState.preferred_speed === 'number' && !isNaN(preferenceState.preferred_speed)
+        ? preferenceState.preferred_speed
+        : 1.0;
+      currentAudio.playbackRate = speed;
+    }
+  }, [preferenceState.preferred_speed, currentAudio]);
 
   const toggleFurigana = async () => {
     const newValue = !preferenceState.show_furigana;
@@ -1552,18 +1570,18 @@ function NewsReaderContent() {
   const handleSentenceClick = async (index) => {
     if (index === currentSentence) return;
     
-    setCurrentSentence(index);
-    if (audioElement) {
-      audioElement.pause();
+    // Stop current audio if playing
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
     }
+    
+    setCurrentSentence(index);
     setIsPlaying(false);
     setIsPaused(false);
     
-    try {
-      await playCurrentSentence(index);
-    } catch (error) {
-      console.error('Error playing selected sentence:', error);
-    }
+    // Play the new sentence
+    await playCurrentSentence(index);
   };
 
   // Add this class to the image container
@@ -2601,25 +2619,101 @@ function NewsReaderContent() {
                       theme={preferenceState.theme}
                     />
                   </label>
-                  <select
-                    value={preferenceState.preferred_speed}
-                    onChange={(e) => handleSpeedChange(e.target.value)}
-                    disabled={updatingPreferences.preferred_speed}
-                    className={`w-full p-3 sm:p-2 text-base sm:text-sm rounded transition-all duration-200 border ${
-                      preferenceState.theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-gray-100 focus:border-green-500/50"
-                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)] focus:border-green-500/50"
-                    } ${
-                      updatingPreferences.preferred_speed
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                  >
-                    <option value={0.6}>Very Slow (0.6x)</option>
-                    <option value={0.8}>Slow (0.8x)</option>
-                    <option value={1.0}>Normal (1.0x)</option>
-                    <option value={1.2}>Faster (1.2x)</option>
-                  </select>
+                  <div className="flex flex-col gap-2">
+                    <div className="relative flex items-center">
+                      <input
+                        type="range"
+                        min="0"
+                        max="4"
+                        step="1"
+                        value={(() => {
+                          const speeds = [0.7, 0.85, 1.0, 1.15, 1.3];
+                          return speeds.indexOf(preferenceState.preferred_speed) !== -1 
+                            ? speeds.indexOf(preferenceState.preferred_speed)
+                            : 2; // Default to 1.0
+                        })()}
+                        onChange={(e) => {
+                          const speeds = [0.7, 0.85, 1.0, 1.15, 1.3];
+                          handleSpeedChange(speeds[e.target.value]);
+                        }}
+                        disabled={updatingPreferences.preferred_speed}
+                        className={`w-full h-2 rounded-lg appearance-none cursor-pointer
+                          ${preferenceState.theme === "dark"
+                            ? "bg-gray-700"
+                            : "[color-scheme:light] bg-gray-200"
+                          }
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:w-4
+                          [&::-webkit-slider-thumb]:h-4
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:cursor-pointer
+                          [&::-webkit-slider-thumb]:transition-all
+                          [&::-webkit-slider-thumb]:duration-150
+                          ${preferenceState.theme === "dark"
+                            ? "[&::-webkit-slider-thumb]:bg-green-500 [&::-webkit-slider-thumb]:hover:bg-green-400"
+                            : "[&::-webkit-slider-thumb]:bg-green-600 [&::-webkit-slider-thumb]:hover:bg-green-500"
+                          }
+                        `}
+                      />
+                      {/* Dots */}
+                      <div className="absolute inset-x-0 flex justify-between px-1 pointer-events-none">
+                        {[
+                          { speed: 0.7, label: "Slow" },
+                          { speed: 0.85, label: "Relaxed" },
+                          { speed: 1.0, label: "Normal" },
+                          { speed: 1.15, label: "Fast" },
+                          { speed: 1.3, label: "Very Fast" }
+                        ].map(({ speed, label }) => (
+                          <div key={speed} className="flex flex-col items-center gap-1">
+                            <div className={`w-2 h-2 rounded-full ${
+                              speed === preferenceState.preferred_speed
+                                ? preferenceState.theme === "dark"
+                                  ? "bg-green-500"
+                                  : "bg-green-600"
+                                : preferenceState.theme === "dark"
+                                ? "bg-gray-600"
+                                : "bg-gray-300"
+                            }`} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Labels */}
+                    <div className="flex justify-between px-1">
+                      {[
+                        { speed: 0.7, label: "Slow" },
+                        { speed: 0.85, label: "Relaxed" },
+                        { speed: 1.0, label: "Normal" },
+                        { speed: 1.15, label: "Fast" },
+                        { speed: 1.3, label: "Very Fast" }
+                      ].map(({ speed, label }) => (
+                        <div key={speed} className="flex flex-col items-center">
+                          <span className={`text-xs font-medium ${
+                            speed === preferenceState.preferred_speed
+                              ? preferenceState.theme === "dark"
+                                ? "text-green-500"
+                                : "text-green-600"
+                              : preferenceState.theme === "dark"
+                              ? "text-gray-400"
+                              : "text-gray-500"
+                          }`}>
+                            {label}
+                          </span>
+                          <span className={`text-[10px] ${
+                            speed === preferenceState.preferred_speed
+                              ? preferenceState.theme === "dark"
+                                ? "text-green-500"
+                                : "text-green-600"
+                              : preferenceState.theme === "dark"
+                              ? "text-gray-500"
+                              : "text-gray-400"
+                          }`}>
+                            {speed}x
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Theme controls */}
