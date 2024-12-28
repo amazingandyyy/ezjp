@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/amazingandyyy/ezjp/compare/v1.7.0...v1.7.1) (2024-12-28)
+
+
+### Bug Fixes
+
+* update font size handling in NewsReaderContent for improved readability ([ff013f9](https://github.com/amazingandyyy/ezjp/commit/ff013f9be7137c82c74318e6c57236327a2a11d1))
+
 # [1.7.0](https://github.com/amazingandyyy/ezjp/compare/v1.6.0...v1.7.0) (2024-12-28)
 
 
