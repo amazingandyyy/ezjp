@@ -3524,12 +3524,12 @@ function NewsReaderContent() {
                       key={pIndex}
                       className={`mb-6 px-2 py-1 rounded-md ${
                         preferenceState.font_size === "medium"
-                          ? "text-base leading-relaxed"
-                          : preferenceState.font_size === "large"
                           ? "text-lg leading-relaxed"
-                          : preferenceState.font_size === "x-large"
+                          : preferenceState.font_size === "large"
                           ? "text-xl leading-relaxed"
-                          : "text-2xl leading-relaxed"
+                          : preferenceState.font_size === "x-large"
+                          ? "text-2xl leading-relaxed"
+                          : "text-3xl leading-relaxed"
                       }`}
                     >
                       {sentences.map((sentence, sIndex) => {
