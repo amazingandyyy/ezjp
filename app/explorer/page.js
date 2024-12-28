@@ -482,7 +482,7 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
       finishedUrls.has(news.url) ? 'opacity-40 hover:opacity-100' : ''
     }`}
   >
-    <div className="relative">
+    <div className="relative min-h-[40px]">
       {news.image ? (
         <div className="aspect-video relative overflow-hidden rounded-xl shadow-sm">
           <img
@@ -494,15 +494,24 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
             }}
           />
         </div>
-      ) : isMainichiUrl(news.url) ? (
-        <div className={`aspect-video relative overflow-hidden rounded-xl shadow-sm ${theme === 'dark' ? 'bg-[#1a1f24]' : 'bg-blue-50'} flex items-center justify-center`}>
-          <img
-            src="/icons/Mainichi_logo_2024.png"
-            alt="Mainichi"
-            className="w-48 h-auto transition-all duration-300 group-hover:scale-105 opacity-90"
-          />
+      ) : (
+        <div className={`aspect-video relative overflow-hidden rounded-xl shadow-sm ${
+          theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+        } flex flex-col items-center justify-center gap-3`}>
+          <svg className={`w-12 h-12 ${
+            theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <div className={`text-center ${
+            theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+          }`}>
+            <p className="text-sm">{isMainichiUrl(news.url) ? 'Mainichi' : 'NHK'} news has no image</p>
+            <p className="text-sm">great content inside</p>
+          </div>
         </div>
-      ) : null}
+      )}
       <div className="absolute top-3 right-3 flex gap-2">
         {archivedUrls.has(news.url) && (
           <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg transition-transform duration-300 hover:scale-110">
