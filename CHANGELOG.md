@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/amazingandyyy/ezjp/compare/v1.10.0...v1.11.0) (2024-12-28)
+
+
+### Features
+
+* enhance NewsList component with new placeholder icons and background textures ([94b64cc](https://github.com/amazingandyyy/ezjp/commit/94b64ccbfe6fd21865fd240145dec204a026225c))
+
 # [1.10.0](https://github.com/amazingandyyy/ezjp/compare/v1.9.0...v1.10.0) (2024-12-28)
 
 
