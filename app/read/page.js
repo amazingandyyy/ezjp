@@ -829,17 +829,11 @@ function NewsReaderContent() {
         }
         const data = await response.json();
         
-        // Only use Standard voices
-        const standardVoices = data.voices.filter(voice => voice.name.includes('Standard'));
-        if (!standardVoices.length) {
-          throw new Error('No standard voices available');
-        }
-        
-        setAvailableVoices(standardVoices);
+        setAvailableVoices(data.voices);
         
         // Only set a default voice if none is selected
-        if (standardVoices.length > 0 && !preferenceState.preferred_voice) {
-          setPreferenceState(prev => ({ ...prev, preferred_voice: standardVoices[0].name }));
+        if (data.voices.length > 0 && !preferenceState.preferred_voice) {
+          setPreferenceState(prev => ({ ...prev, preferred_voice: data.voices[0].name }));
         }
       } catch (error) {
         console.error('Error fetching voices:', error);
@@ -2431,20 +2425,18 @@ function NewsReaderContent() {
     }
   }, [sourceUrl]);
 
-  // Add this effect to fetch available voices
+  // Add this useEffect to fetch available voices
   useEffect(() => {
     const fetchVoices = async () => {
       try {
         const response = await fetch('/api/tts/voices');
         if (!response.ok) throw new Error('Failed to fetch voices');
         const data = await response.json();
-        // Only use Standard voices
-        const standardVoices = data.voices.filter(voice => voice.name.includes('Standard'));
-        setAvailableVoices(standardVoices);
+        setAvailableVoices(data.voices);
         
         // Only set a default voice if none is selected
-        if (standardVoices.length > 0 && !preferenceState.preferred_voice) {
-          setPreferenceState(prev => ({ ...prev, preferred_voice: standardVoices[0].name }));
+        if (data.voices.length > 0 && !preferenceState.preferred_voice) {
+          setPreferenceState(prev => ({ ...prev, preferred_voice: data.voices[0].name }));
         }
       } catch (error) {
         console.error('Error fetching voices:', error);

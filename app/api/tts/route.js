@@ -17,14 +17,6 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
-    // Validate that the voice is a Standard voice
-    if (!voice.includes('Standard')) {
-      return NextResponse.json({
-        error: 'Invalid voice',
-        details: 'Only Standard voices are supported'
-      }, { status: 400 });
-    }
-
     // Validate and clamp speed between 0.25 and 4.0 (Google's limits)
     const validSpeed = Math.max(0.25, Math.min(4.0, parseFloat(speed) || 1.0));
 
