@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
@@ -8,48 +8,27 @@ export async function GET(request) {
 
   if (code) {
     const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-    
-    // Exchange the code for a session
-    const { data: { user }, error: authError } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (!authError && user) {
-      // Get user metadata which includes the avatar_url from Google
-      const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
-      
-      if (!userError && userData?.user_metadata?.avatar_url) {
-        // First check if user already has a custom avatar
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('avatar_url')
-          .eq('id', user.id)
-          .single();
-
-        // Only update avatar if there isn't a custom one set
-        const updates = {
-          id: user.id,
-          updated_at: new Date().toISOString()
-        };
-
-        if (!existingProfile?.avatar_url) {
-          updates.avatar_url = userData.user_metadata.avatar_url;
-        }
-
-        // Update or create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(updates, {
-            onConflict: 'id',
-            ignoreDuplicates: false
-          });
-
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
-        }
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          get(name) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name, value, options) {
+            cookieStore.set(name, value, options);
+          },
+          remove(name, options) {
+            cookieStore.set(name, '', options);
+          },
+        },
       }
-    }
+    );
+
+    await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Redirect to the home page
+  // URL to redirect to after sign in process completes
   return NextResponse.redirect(requestUrl.origin);
 } 

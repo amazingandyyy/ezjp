@@ -468,14 +468,14 @@ export async function GET(request) {
         content,
         publish_date,
         images,
-        source,
         fetch_count,
         last_fetched_at
       `)
       .eq('url', sourceUrl)
-      .single();
+      .maybeSingle();
 
-    if (dbError) {
+    // Only warn about actual errors, not "no rows found"
+    if (dbError && dbError.code !== 'PGRST116') {
       console.warn('Database error:', dbError);
     }
 
@@ -505,7 +505,7 @@ export async function GET(request) {
           content,
           published_date: existingArticle.publish_date,
           images: existingArticle.images,
-          source: existingArticle.source,
+          source_domain: existingArticle.source_domain,
           fetch_count: existingArticle.fetch_count + 1,
           last_fetched_at: new Date().toISOString()
         }), {
@@ -529,17 +529,6 @@ export async function GET(request) {
     } = extractArticleContent($, sourceUrl);
 
     // Store in database
-    console.log('Attempting to save article to database:', {
-      url: sourceUrl,
-      source_domain: extractDomain(sourceUrl),
-      title_length: JSON.stringify(title).length,
-      content_length: JSON.stringify(content).length,
-      labels: labels || [],
-      publish_date: published_date,
-      images_count: images?.length,
-      source
-    });
-
     const { data: savedArticle, error: saveError } = await supabase
       .from('articles')
       .upsert({
@@ -553,9 +542,9 @@ export async function GET(request) {
         fetch_count: 1,
         last_fetched_at: new Date().toISOString()
       }, {
-        onConflict: 'url',
-        returning: true
+        onConflict: 'url'
       })
+      .select('id')
       .single();
 
     if (saveError) {
@@ -569,19 +558,13 @@ export async function GET(request) {
       throw saveError;
     }
 
-    console.log('Successfully saved article to database:', {
-      id: savedArticle?.id,
-      url: savedArticle?.url,
-      source: savedArticle?.source
-    });
-
     return new Response(JSON.stringify({
       title,
       labels: labels || [],
       content,
       published_date: published_date,
       images,
-      source,
+      source_domain: extractDomain(sourceUrl),
       fetch_count: 1,
       last_fetched_at: new Date().toISOString()
     }), {
