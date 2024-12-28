@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   FaBook,
   FaUserCircle,
@@ -14,6 +14,7 @@ import { useUpdate } from '@/app/sw-register';
 import Image from 'next/image';
 import useSystemStore from '@/lib/stores/system';
 import useStatsStore from '@/lib/stores/stats';
+import { supabase } from '../../lib/supabase';
 
 export default function Navbar({ 
   showSidebar, 

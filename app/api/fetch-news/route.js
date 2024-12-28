@@ -25,29 +25,26 @@ const shouldRefreshArticle = (lastFetchedAt) => {
   return hoursSinceLastFetch > 24;
 };
 
-// Extract article content from cheerio DOM
-const extractArticleContent = ($) => {
-  // Extract title with ruby text
-  const titleElement = $('.article-title');
-  const processedTitle = [];
-  
-  if (titleElement.length) {
-    titleElement.contents().each((_, element) => {
-      if (element.type === 'text') {
-        const text = $(element).text().trim();
+class NHKEasyNews {
+  static parseRubyText($, element) {
+    const segments = [];
+    
+    element.contents().each((_, el) => {
+      if (el.type === 'text') {
+        const text = $(el).text().trim();
         if (text) {
-          processedTitle.push({
+          segments.push({
             type: 'text',
             content: text
           });
         }
-      } else if (element.tagName === 'ruby') {
-        const $ruby = $(element);
+      } else if (el.tagName === 'ruby') {
+        const $ruby = $(el);
         const kanji = $ruby.contents().filter((_, node) => node.type === 'text').text().trim();
         const reading = $ruby.find('rt').text().trim();
         
         if (kanji && reading) {
-          processedTitle.push({
+          segments.push({
             type: 'ruby',
             kanji,
             reading
@@ -55,154 +52,368 @@ const extractArticleContent = ($) => {
         }
       }
     });
-  }
-
-  // If no title found in the page, try og:title as fallback
-  if (processedTitle.length === 0) {
-    const ogTitle = $('meta[property="og:title"]').attr('content');
-    if (ogTitle) {
-      console.log('Using og:title as fallback:', ogTitle);
-      // Remove the "| NHKやさしいことばニュース | NEWS WEB EASY" part if present
-      const cleanTitle = ogTitle.split('|')[0].trim();
-      processedTitle.push({
-        type: 'text',
-        content: cleanTitle
-      });
-    }
-  }
-
-  // Extract date
-  const dateElement = $('#js-article-date');
-  let publishDate = null;
-  
-  if (dateElement.length) {
-    const dateText = dateElement.text().trim();
-    // Parse Japanese date format: YYYY年MM月DD日 HH時mm分
-    const match = dateText.match(/(\d{4})年(\d{1,2})月(\d{1,2})日\s*(\d{1,2})時(\d{1,2})分/);
-    if (match) {
-      const [_, year, month, day, hour, minute] = match;
-      publishDate = new Date(year, month - 1, day, hour, minute);
-    } else {
-      // Fallback to standard date parsing
-      publishDate = new Date(dateText);
-    }
-  }
-  
-  // Extract images
-  const images = [];
-  
-  // First try to get image from meta og:image
-  const ogImage = $('meta[property="og:image"]').attr('content');
-  if (ogImage) {
-    console.log('Found og:image:', ogImage);
-    images.push(ogImage);
-  }
-  
-  // Then try article images if no og:image found
-  if (images.length === 0) {
-    console.log('No og:image found, checking article images');
-    // Try to get main image first
-    const mainImage = $('#js-article-main-image');
-    console.log('Main image element found:', mainImage.length > 0);
     
-    if (mainImage.length) {
-      const img = mainImage.find('img');
-      console.log('Main image img tag found:', img.length > 0);
-      
-      if (img.length) {
-        const imgSrc = img.attr('src');
-        console.log('Raw image src:', imgSrc);
-        // Handle both relative and absolute URLs
-        const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `https://www3.nhk.or.jp${imgSrc}`;
-        images.push(fullImgSrc);
-      }
-    }
-    
-    // Also try to get image from article figure if still no images
-    if (images.length === 0) {
-      const articleFigure = $('#js-article-figure');
-      console.log('Article figure found:', articleFigure.length > 0);
-      
-      if (articleFigure.length) {
-        const img = articleFigure.find('img');
-        console.log('Article figure img tag found:', img.length > 0);
-        
-        if (img.length) {
-          const imgSrc = img.attr('src');
-          console.log('Raw article figure image src:', imgSrc);
-          // Handle both relative and absolute URLs
-          const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `https://www3.nhk.or.jp${imgSrc}`;
-          images.push(fullImgSrc);
-        }
-      }
-    }
+    return segments;
   }
 
-  console.log('Final extracted images:', images);
+  static parseTitle($) {
+    const titleElement = $('.article-title');
+    let processedTitle = [];
+    
+    if (titleElement.length) {
+      processedTitle = this.parseRubyText($, titleElement);
+    }
 
-  // Process article content
-  const articleBody = $('#js-article-body');
-  const processedContent = [];
-
-  if (articleBody.length) {
-    // Process each paragraph
-    articleBody.find('p').each((_, paragraph) => {
-      const $paragraph = $(paragraph);
-      const paragraphContent = [];
-
-      // Process each span in the paragraph
-      $paragraph.find('span').each((_, span) => {
-        const $span = $(span);
-        
-        // Check if span contains ruby
-        const $ruby = $span.find('ruby');
-        if ($ruby.length) {
-          const kanji = $ruby.contents().filter((_, node) => node.type === 'text').text().trim();
-          const reading = $ruby.find('rt').text().trim();
-          
-          if (kanji && reading) {
-            paragraphContent.push({
-              type: 'ruby',
-              kanji,
-              reading
-            });
-          }
-        } else {
-          // Handle plain text
-          const text = $span.text().trim();
-          if (text) {
-            paragraphContent.push({
-              type: 'text',
-              content: text
-            });
-          }
-        }
-      });
-
-      // Only add paragraph if it has content
-      if (paragraphContent.length > 0) {
-        processedContent.push({
-          type: 'paragraph',
-          content: paragraphContent
+    // Fallback to og:title
+    if (processedTitle.length === 0) {
+      const ogTitle = $('meta[property="og:title"]').attr('content');
+      if (ogTitle) {
+        const cleanTitle = ogTitle.split('|')[0].trim();
+        processedTitle.push({
+          type: 'text',
+          content: cleanTitle
         });
       }
-    });
+    }
+
+    return processedTitle;
   }
 
-  // Clean up empty or invalid entries
-  const cleanContent = processedContent.filter(item => {
-    if (item.type === 'paragraph') {
-      return item.content && item.content.length > 0;
+  static parseDate($) {
+    const dateElement = $('#js-article-date');
+    if (!dateElement.length) return null;
+    
+    const dateText = dateElement.text().trim();
+    const match = dateText.match(/(\d{4})年(\d{1,2})月(\d{1,2})日\s*(\d{1,2})時(\d{1,2})分/);
+    
+    if (match) {
+      const [_, year, month, day, hour, minute] = match;
+      return new Date(year, month - 1, day, hour, minute).toISOString();
     }
-    return false;
-  });
+    
+    return new Date(dateText).toISOString();
+  }
 
-  return {
-    title: processedTitle,
-    content: cleanContent,
-    published_date: publishDate ? publishDate.toISOString() : null,
-    images: images
-  };
+  static parseImages($) {
+    const images = [];
+    
+    // Try og:image first
+    const ogImage = $('meta[property="og:image"]').attr('content');
+    if (ogImage) {
+      images.push(ogImage);
+      return images;
+    }
+    
+    // Try article images
+    const mainImage = $('#js-article-main-image img').attr('src');
+    if (mainImage) {
+      const fullImgSrc = mainImage.startsWith('http') ? mainImage : `https://www3.nhk.or.jp${mainImage}`;
+      images.push(fullImgSrc);
+    }
+    
+    const articleImage = $('#js-article-figure img').attr('src');
+    if (articleImage) {
+      const fullImgSrc = articleImage.startsWith('http') ? articleImage : `https://www3.nhk.or.jp${articleImage}`;
+      images.push(fullImgSrc);
+    }
+    
+    return images;
+  }
+
+  static parseContent($) {
+    const processedContent = [];
+    const articleBody = $('#js-article-body');
+
+    if (articleBody.length) {
+      articleBody.find('p').each((_, paragraph) => {
+        const $paragraph = $(paragraph);
+        const paragraphContent = [];
+
+        $paragraph.find('span').each((_, span) => {
+          const $span = $(span);
+          const $ruby = $span.find('ruby');
+          
+          if ($ruby.length) {
+            const kanji = $ruby.contents().filter((_, node) => node.type === 'text').text().trim();
+            const reading = $ruby.find('rt').text().trim();
+            
+            if (kanji && reading) {
+              paragraphContent.push({
+                type: 'ruby',
+                kanji,
+                reading
+              });
+            }
+          } else {
+            const text = $span.text().trim();
+            if (text) {
+              paragraphContent.push({
+                type: 'text',
+                content: text
+              });
+            }
+          }
+        });
+
+        if (paragraphContent.length > 0) {
+          processedContent.push({
+            type: 'paragraph',
+            content: paragraphContent
+          });
+        }
+      });
+    }
+
+    return processedContent;
+  }
+
+  static parse($) {
+    return {
+      title: this.parseTitle($),
+      content: this.parseContent($),
+      published_date: this.parseDate($),
+      images: this.parseImages($),
+      source: 'nhk'
+    };
+  }
+}
+
+class MainichiMaisho {
+  static parseJapaneseWithFurigana(text) {
+    console.log('Parsing text with furigana:', text);
+    const segments = [];
+    let currentText = '';
+    let i = 0;
+
+    while (i < text.length) {
+      if (text[i] === '（') {
+        // Found start of reading
+        const kanji = currentText;
+        currentText = '';
+        i++;
+        
+        // Extract reading
+        let reading = '';
+        while (i < text.length && text[i] !== '）') {
+          reading += text[i];
+          i++;
+        }
+        
+        if (kanji) {
+          console.log('Found furigana pair:', { kanji, reading });
+          segments.push({
+            type: 'ruby',
+            kanji: kanji,
+            reading: reading
+          });
+        }
+        currentText = '';
+      } else {
+        currentText += text[i];
+      }
+      i++;
+    }
+    
+    // Add any remaining text
+    if (currentText) {
+      console.log('Adding remaining text:', currentText);
+      segments.push({
+        type: 'text',
+        content: currentText
+      });
+    }
+    
+    console.log('Parsed segments:', segments);
+    return segments;
+  }
+
+  static parseTitle($) {
+    console.log('Parsing Mainichi title...');
+    const titleElement = $('meta[name="title"]');
+    console.log('Title meta found:', titleElement.length > 0);
+    const rawTitle = titleElement.attr('content');
+    console.log('Raw title from meta:', rawTitle);
+    
+    // Get the keywordline (series/category) from meta
+    const keywordline = $('meta[name="cXenseParse:mai-keywordline"]').attr('content');
+    console.log('Keywordline found:', keywordline);
+    
+    let title = rawTitle;
+    let labels = [];
+    
+    if (!title) {
+      // Fallback to h1
+      title = $('h1.title, h1.article-title').text().trim();
+      console.log('Fallback h1 title:', title);
+    }
+    
+    if (title) {
+      // Extract labels and clean title
+      const parts = title.split('：');
+      if (parts.length > 1) {
+        // Add the prefix (e.g., "News2024年") to labels
+        labels.push(parts[0].trim());
+        
+        // Get the rest of the title after the colon
+        const afterColon = parts[1].trim();
+        
+        // Split by whitespace to separate category (if any) from title
+        const categoryAndTitle = afterColon.split(/\s+/);
+        if (categoryAndTitle.length > 1) {
+          // Add category to labels
+          labels.push(categoryAndTitle[0].trim());
+          // Use only the actual title part, removing category
+          title = categoryAndTitle.slice(1).join(' ').trim();
+        } else {
+          // If no category, use entire part after colon
+          title = afterColon;
+        }
+      }
+      
+      // Add keywordline to labels if it exists and isn't already included
+      if (keywordline && !labels.includes(keywordline)) {
+        labels.push(keywordline);
+      }
+    }
+    
+    console.log('Processed title:', { title, labels });
+    return {
+      segments: this.parseJapaneseWithFurigana(title || ''),
+      labels: labels
+    };
+  }
+
+  static parseDate($) {
+    console.log('Parsing Mainichi date...');
+    const dateElement = $('meta[name="firstcreate"]');
+    console.log('Date element found:', dateElement.length > 0);
+    const date = dateElement.attr('content');
+    console.log('Parsed date:', date);
+    return date;
+  }
+
+  static parseImages($) {
+    console.log('Parsing Mainichi images...');
+    const images = [];
+    const ogImage = $('meta[property="og:image"]').attr('content');
+    console.log('OG image found:', ogImage);
+    if (ogImage) {
+      images.push(ogImage);
+    }
+
+    // Also try article images
+    const articleImages = $('.article-body img').map((_, img) => $(img).attr('src')).get();
+    console.log('Article images found:', articleImages);
+    images.push(...articleImages);
+
+    console.log('All images:', images);
+    return images;
+  }
+
+  static parseContent($) {
+    console.log('Parsing Mainichi content...');
+    const processedContent = [];
+    
+    // Find the main article content using articledetail-body
+    const articleBody = $('.articledetail-body');
+    console.log('Article detail body found:', articleBody.length > 0);
+    
+    if (articleBody.length > 0) {
+      // Log the structure
+      console.log('Article body HTML structure:', articleBody.html().substring(0, 500) + '...');
+
+      // Process each paragraph in the article body
+      articleBody.children('p').each((index, paragraph) => {
+        const $paragraph = $(paragraph);
+        const text = $paragraph.text().trim();
+        console.log(`Processing paragraph ${index + 1}:`, {
+          text: text.substring(0, 100) + '...',
+          classes: $paragraph.attr('class')
+        });
+        
+        if (text) {
+          const segments = this.parseJapaneseWithFurigana(text);
+          if (segments.length > 0) {
+            processedContent.push({
+              type: 'paragraph',
+              content: segments
+            });
+          }
+        }
+      });
+
+      // If no paragraphs found directly, try getting all text content
+      if (processedContent.length === 0) {
+        console.log('No direct paragraphs found, trying full text content...');
+        const fullText = articleBody.text().trim();
+        
+        // Split by double newlines to separate paragraphs
+        const paragraphs = fullText.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+        console.log('Found paragraphs from full text:', paragraphs.length);
+        
+        paragraphs.forEach((text, index) => {
+          console.log(`Processing split paragraph ${index + 1}:`, text.substring(0, 100) + '...');
+          const segments = this.parseJapaneseWithFurigana(text);
+          if (segments.length > 0) {
+            processedContent.push({
+              type: 'paragraph',
+              content: segments
+            });
+          }
+        });
+      }
+    }
+
+    // If still no content, try meta description as fallback
+    if (processedContent.length === 0) {
+      console.log('No content found in article body, trying description...');
+      const description = $('meta[name="description"]').attr('content');
+      if (description) {
+        const segments = this.parseJapaneseWithFurigana(description);
+        if (segments.length > 0) {
+          processedContent.push({
+            type: 'paragraph',
+            content: segments
+          });
+        }
+      }
+    }
+
+    // Log the results
+    console.log('Content parsing results:', {
+      totalParagraphs: processedContent.length,
+      paragraphLengths: processedContent.map(p => 
+        p.content.reduce((acc, s) => acc + (s.type === 'text' ? s.content.length : s.kanji.length + s.reading.length), 0)
+      ),
+      preview: processedContent.map(p => 
+        p.content.map(s => s.type === 'text' ? s.content : `${s.kanji}(${s.reading})`).join('')
+      ).join('\n').substring(0, 200) + '...'
+    });
+
+    return processedContent;
+  }
+
+  static parse($) {
+    console.log('Starting Mainichi article parsing...');
+    const titleData = this.parseTitle($);
+    const result = {
+      title: titleData.segments,
+      labels: titleData.labels,
+      content: this.parseContent($),
+      published_date: this.parseDate($),
+      images: this.parseImages($),
+      source: 'mainichi'
+    };
+    console.log('Finished parsing Mainichi article:', result);
+    return result;
+  }
+}
+
+// Extract article content based on source
+const extractArticleContent = ($, sourceUrl) => {
+  const domain = extractDomain(sourceUrl);
+  console.log('Extracting content for domain:', domain);
+  return domain === 'mainichi.jp' ? MainichiMaisho.parse($) : NHKEasyNews.parse($);
 };
 
 export async function GET(request) {
@@ -220,7 +431,19 @@ export async function GET(request) {
     // First check if we have this article in our database
     const { data: existingArticle, error: dbError } = await supabase
       .from('articles')
-      .select('*')
+      .select(`
+        id,
+        url,
+        source_domain,
+        title,
+        labels,
+        content,
+        publish_date,
+        images,
+        source,
+        fetch_count,
+        last_fetched_at
+      `)
       .eq('url', sourceUrl)
       .single();
 
@@ -232,7 +455,6 @@ export async function GET(request) {
     if (existingArticle && !shouldRefreshArticle(existingArticle.last_fetched_at)) {
       console.log('Article found in database and is recent enough');
       
-      // Parse JSON strings if they're strings
       const title = typeof existingArticle.title === 'string' 
         ? JSON.parse(existingArticle.title) 
         : existingArticle.title;
@@ -243,74 +465,106 @@ export async function GET(request) {
 
       if (!Array.isArray(title) || !Array.isArray(content)) {
         console.warn('Invalid data format in database, fetching from API');
-        // Continue to API fetch
       } else {
         // Update fetch count and last_fetched_at
         await supabase.rpc('update_article_fetch_stats', {
           article_id: existingArticle.id
         });
-        
+
         return new Response(JSON.stringify({
           title,
+          labels: existingArticle.labels || [],
           content,
           published_date: existingArticle.publish_date,
-          images: existingArticle.images || []
+          images: existingArticle.images,
+          source: existingArticle.source,
+          fetch_count: existingArticle.fetch_count + 1,
+          last_fetched_at: new Date().toISOString()
         }), {
-          status: 200,
           headers: { 'Content-Type': 'application/json' },
         });
       }
     }
 
-    console.log('Article not found in database or needs refresh');
-
-    // If we don't have it or it needs refresh, fetch it
+    // Fetch the article content
+    console.log('Fetching article from source:', sourceUrl);
     const response = await axios.get(sourceUrl);
-    const html = response.data;
-    const $ = cheerio.load(html);
+    const $ = cheerio.load(response.data);
+    
+    const {
+      title,
+      content,
+      published_date,
+      images,
+      source,
+      labels
+    } = extractArticleContent($, sourceUrl);
 
-    // Extract the article content
-    const article = extractArticleContent($);
+    // Store in database
+    console.log('Attempting to save article to database:', {
+      url: sourceUrl,
+      source_domain: extractDomain(sourceUrl),
+      title_length: JSON.stringify(title).length,
+      content_length: JSON.stringify(content).length,
+      labels: labels || [],
+      publish_date: published_date,
+      images_count: images?.length,
+      source
+    });
 
-    // Validate article data
-    if (!Array.isArray(article.title) || !Array.isArray(article.content)) {
-      throw new Error('Invalid article format after extraction');
-    }
-
-    // Upsert the article in our database
-    const { error: upsertError } = await supabase
+    const { data: savedArticle, error: saveError } = await supabase
       .from('articles')
       .upsert({
         url: sourceUrl,
         source_domain: extractDomain(sourceUrl),
-        title: article.title,
-        content: article.content,
-        publish_date: article.published_date,
-        images: article.images,
-        last_fetched_at: new Date().toISOString(),
-        fetch_count: existingArticle ? existingArticle.fetch_count + 1 : 1
+        title: JSON.stringify(title),
+        labels: labels || [],
+        content: JSON.stringify(content),
+        publish_date: published_date,
+        images,
+        fetch_count: 1,
+        last_fetched_at: new Date().toISOString()
       }, {
-        onConflict: 'url'
-      });
+        onConflict: 'url',
+        returning: true
+      })
+      .single();
 
-    if (upsertError) {
-      console.error('Error upserting article:', upsertError);
+    if (saveError) {
+      console.error('Error saving to database:', saveError);
+      console.error('Error details:', {
+        code: saveError.code,
+        message: saveError.message,
+        details: saveError.details,
+        hint: saveError.hint
+      });
+      throw saveError;
     }
 
+    console.log('Successfully saved article to database:', {
+      id: savedArticle?.id,
+      url: savedArticle?.url,
+      source: savedArticle?.source
+    });
+
     return new Response(JSON.stringify({
-      title: article.title,
-      content: article.content,
-      published_date: article.published_date,
-      images: article.images
+      title,
+      labels: labels || [],
+      content,
+      published_date: published_date,
+      images,
+      source,
+      fetch_count: 1,
+      last_fetched_at: new Date().toISOString()
     }), {
-      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error('Error fetching article:', error);
     return new Response(JSON.stringify({ 
       error: 'Failed to fetch article',
-      details: error.message 
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

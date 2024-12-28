@@ -7,22 +7,45 @@ import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Navbar from '../components/Navbar';
 
+// Add helper function to create JST date
+const createJSTDate = (year, month, day, hours = 0, minutes = 0, seconds = 0) => {
+  // Create a date in UTC
+  const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+  return date;
+};
+
 const formatRelativeTime = (dateStr) => {
   if (!dateStr) return '';
   try {
-    // Parse the date string as local time
     const [datePart, timePart] = dateStr.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes, seconds] = timePart.split(':').map(Number);
     
-    // Create date using local timezone
-    const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
-    const offset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - offset);
-    
+    // Create date in JST
+    const jstDate = createJSTDate(year, month, day, hours, minutes, seconds);
     const now = new Date();
 
-    const diffInMilliseconds = now.getTime() - localDate.getTime();
+    // Debug log for date parsing
+    console.log('formatRelativeTime debug:', {
+      input: dateStr,
+      parsed: {
+        datePart,
+        timePart,
+        year,
+        month,
+        day,
+        hours,
+        minutes,
+        seconds
+      },
+      jstDate: jstDate.toISOString(),
+      localJstDate: jstDate.toString(),
+      now: now.toISOString(),
+      localNow: now.toString(),
+      isToday: isToday(dateStr)
+    });
+
+    const diffInMilliseconds = now.getTime() - jstDate.getTime();
     const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -32,33 +55,17 @@ const formatRelativeTime = (dateStr) => {
     const remainingHours = Math.abs(diffInHours % 24);
     const remainingMinutes = Math.abs(diffInMinutes % 60);
 
-    if (isToday(dateStr)) {
-      console.log('Today\'s news debug:', {
-        dateStr,
-        parsedDate: localDate.toISOString(),
-        now: now.toISOString(),
-        diffInMilliseconds,
-        diffInSeconds,
-        diffInMinutes,
-        diffInHours,
-        remainingHours,
-        remainingMinutes
-      });
-    }
-
-    if (diffInDays >= 7) {
-      return `${Math.floor(diffInDays / 7)}週間前`;
-    } else if (diffInDays > 0) {
-      return `${diffInDays}日${remainingHours}時間前`;
-    } else if (remainingHours > 0) {
-      return `${remainingHours}時間${remainingMinutes}分前`;
-    } else if (remainingMinutes > 0) {
-      return `${remainingMinutes}分前`;
-    } else if (diffInSeconds > 0) {
-      return '1分前';
-    } else {
-      return 'たった今';
-    }
+    return diffInDays >= 7 
+      ? `${Math.floor(diffInDays / 7)}週間前`
+      : diffInDays > 0
+      ? `${diffInDays}日${remainingHours}時間前`
+      : remainingHours > 0
+      ? `${remainingHours}時間${remainingMinutes}分前`
+      : remainingMinutes > 0
+      ? `${remainingMinutes}分前`
+      : diffInSeconds > 0
+      ? '1分前'
+      : 'たった今';
   } catch (e) {
     console.error('Error formatting date:', e, dateStr);
     return dateStr;
@@ -68,13 +75,30 @@ const formatRelativeTime = (dateStr) => {
 const isToday = (dateStr) => {
   if (!dateStr) return false;
   try {
-    const [datePart] = dateStr.split(' ');
+    const [datePart, timePart] = dateStr.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
+    const [hours, minutes, seconds] = timePart ? timePart.split(':').map(Number) : [0, 0, 0];
+    
+    // Create date in JST
+    const date = createJSTDate(year, month, day, hours, minutes, seconds);
+    const now = new Date();
+
+    // Calculate time difference in hours
+    const diffInMilliseconds = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
+
+    // Consider it today's news if it's less than 24 hours old
+    return diffInHours < 24;
+  } catch (e) {
+    console.error('Error parsing date:', e, dateStr);
+    return false;
+  }
+};
+
+// Add isMainichiUrl helper function at the top level
+const isMainichiUrl = (url) => {
+  try {
+    return url?.includes('mainichi.jp');
   } catch (e) {
     return false;
   }
@@ -459,7 +483,7 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
     }`}
   >
     <div className="relative">
-      {news.image && (
+      {news.image ? (
         <div className="aspect-video relative overflow-hidden rounded-xl shadow-sm">
           <img
             src={news.image}
@@ -470,7 +494,15 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => (
             }}
           />
         </div>
-      )}
+      ) : isMainichiUrl(news.url) ? (
+        <div className={`aspect-video relative overflow-hidden rounded-xl shadow-sm ${theme === 'dark' ? 'bg-[#1a1f24]' : 'bg-blue-50'} flex items-center justify-center`}>
+          <img
+            src="/icons/Mainichi_logo_2024.png"
+            alt="Mainichi"
+            className="w-48 h-auto transition-all duration-300 group-hover:scale-105 opacity-90"
+          />
+        </div>
+      ) : null}
       <div className="absolute top-3 right-3 flex gap-2">
         {archivedUrls.has(news.url) && (
           <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg transition-transform duration-300 hover:scale-110">

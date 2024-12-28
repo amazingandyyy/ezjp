@@ -192,11 +192,14 @@ const formatJapaneseDate = (dateStr) => {
   try {
     // Convert to JST (UTC+9)
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr; // Return original string if invalid date
+    
     const jstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
     const jpTime = `${jstDate.getUTCFullYear()}年${jstDate.getUTCMonth() + 1}月${jstDate.getUTCDate()}日 ${String(jstDate.getUTCHours()).padStart(2, '0')}時${String(jstDate.getUTCMinutes()).padStart(2, '0')}分`;
     const relativeTime = formatRelativeTime(dateStr);
     return relativeTime ? `${jpTime}（${relativeTime}）` : jpTime;
   } catch (e) {
+    console.error('Error formatting date:', e, dateStr);
     return dateStr;
   }
 };
@@ -488,13 +491,31 @@ const isNHKUrl = (url) => {
 };
 
 // Update NHKLogo component to be smaller
-const NHKLogo = ({ className }) => (
+const NHKLogo = ({ className, theme }) => (
   <img 
     src="/icons/NHK_logo_2020.png" 
     alt="NHK" 
-    className={`h-4 w-auto ${className}`}
+    className={`h-4 w-auto ${className} ${theme === 'dark' ? 'brightness-[1.5] contrast-[1.2] grayscale invert opacity-90' : ''}`}
   />
 );
+
+// Add MainichiLogo component
+const MainichiLogo = ({ className, theme }) => (
+  <img 
+    src="/icons/Mainichi_logo_2024.png" 
+    alt="Mainichi" 
+    className={`h-4 w-auto ${className} ${theme === 'dark' ? 'brightness-[1.5] contrast-[1.2] grayscale invert opacity-90' : ''}`}
+  />
+);
+
+// Add this helper function to check if URL is from Mainichi
+const isMainichiUrl = (url) => {
+  try {
+    return url?.includes('mainichi.jp');
+  } catch (e) {
+    return false;
+  }
+};
 
 // Add helper function to safely get hostname
 const getHostname = (url) => {
@@ -983,10 +1004,19 @@ function NewsReaderContent() {
         throw new Error(data.message || 'This article had an issue loading. Please try another one.');
       }
 
+      // Add debug logging
+      console.log('API Response data:', {
+        publish_date: data.publish_date,
+        published_date: data.published_date,
+        date: data.date
+      });
+
       // Process the successful response
       setNewsTitle(data.title);
       setNewsContent(data.content);
-      setNewsDate(data.published_date || data.date);
+      const dateToUse = data.publish_date || data.published_date || data.date;
+      console.log('Using date:', dateToUse);
+      setNewsDate(dateToUse);
       setNewsImages(data.images || []);
       setCurrentSentence(-1);  // Set to -1 instead of 0
       setSentences(splitIntoSentences(data.content));
@@ -3463,12 +3493,20 @@ function NewsReaderContent() {
                         title={url ? getHostname(url) : "Open original article"}
                       >
                         {isNHKUrl(url) ? (
-                          <NHKLogo className="opacity-90 flex-shrink-0 transition-opacity duration-200" />
+                          <NHKLogo 
+                            className="opacity-90 flex-shrink-0 transition-opacity duration-200" 
+                            theme={preferenceState.theme}
+                          />
+                        ) : isMainichiUrl(url) ? (
+                          <MainichiLogo 
+                            className="opacity-90 flex-shrink-0 transition-opacity duration-200" 
+                            theme={preferenceState.theme}
+                          />
                         ) : (
                           <FaExternalLinkAlt className="w-3 h-3 flex-shrink-0" />
                         )}
                         <span className="font-medium truncate">
-                          {isNHKUrl(url) ? "NEWS WEB EASY" : getHostname(url)}
+                          {isNHKUrl(url) ? "NEWS WEB EASY" : isMainichiUrl(url) ? "小学生新聞" : getHostname(url)}
                         </span>
                       </a>
                     </div>
@@ -3489,11 +3527,15 @@ function NewsReaderContent() {
                     </h2>
                   </div>
                   <div className="inline-flex items-center">
+                    {/* Add debug comment */}
+                    {/* Debug: {JSON.stringify({newsDate})} */}
                     <span className={`text-sm font-medium ${
                       preferenceState.theme === "dark"
                         ? "text-gray-400"
                         : "text-gray-600"
-                    }`}>{formatJapaneseDate(newsDate)}</span>
+                    }`}>
+                      {newsDate && formatJapaneseDate(newsDate)}
+                    </span>
                   </div>
                   {/* News image - always show if available */}
                   {newsImages?.length > 0 && (
@@ -3615,7 +3657,20 @@ function NewsReaderContent() {
                           ? "text-gray-500" 
                           : "text-gray-400"
                       }`}>
-                        Content copyright © {new Date().getFullYear()} {isNHKUrl(url) ? "NHK" : getHostname(url)}. 
+                        {isNHKUrl(url) ? (
+                          <>
+                            Content copyright © {new Date().getFullYear()} NHK.
+                          </>
+                        ) : isMainichiUrl(url) ? (
+                          <>
+                            Content copyright © {new Date().getFullYear()} The Mainichi Newspapers. 
+                            All articles and photos on this site are protected by copyright law.
+                          </>
+                        ) : (
+                          <>
+                            Content copyright © {new Date().getFullYear()} {getHostname(url)}.
+                          </>
+                        )}
                         <a 
                           href={url} 
                           target="_blank" 
