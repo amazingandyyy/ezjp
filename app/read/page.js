@@ -418,7 +418,7 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
           <div className="pl-4 space-y-2">
             <p className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              Read another article to see it again! 🎉
+              Read another article to see it again! ����
             </p>
             <p className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
@@ -1217,7 +1217,7 @@ function NewsReaderContent() {
         audio.onended = () => {
           setIsPlaying(false);
           setIsPaused(false);
-          handleSentenceEnd(index);
+          handleSentenceEnd(index, repeatMode); // Pass current repeatMode
         };
         
         setCurrentAudio(audio);
@@ -1262,7 +1262,7 @@ function NewsReaderContent() {
       audio.onended = () => {
         setIsPlaying(false);
         setIsPaused(false);
-        handleSentenceEnd(index);
+        handleSentenceEnd(index, repeatMode); // Pass current repeatMode
       };
       
       setCurrentAudio(audio);
@@ -1282,11 +1282,18 @@ function NewsReaderContent() {
 
   // Add handleSentenceEnd function to handle repeat logic
   const handleSentenceEnd = (index, mode = repeatMode) => {
-    // Clear any existing interval
+    // Clear any existing interval and timeouts
     if (window.repeatInterval) {
       clearInterval(window.repeatInterval);
       window.repeatInterval = null;
     }
+    if (window.repeatTimeout) {
+      clearTimeout(window.repeatTimeout);
+      window.repeatTimeout = null;
+    }
+
+    // Reset countdown
+    setRepeatCountdown(0);
 
     // Use the provided mode or current state
     const currentMode = mode || repeatMode;
@@ -1302,7 +1309,13 @@ function NewsReaderContent() {
         
         if (countdownValue <= 0) {
           clearInterval(intervalId);
-          setTimeout(() => playCurrentSentence(index), 200);
+          // Store timeout ID for cleanup
+          window.repeatTimeout = setTimeout(() => {
+            // Check if we're still in REPEAT_ONE mode before playing
+            if (repeatMode === REPEAT_MODES.ONE) {
+              playCurrentSentence(index);
+            }
+          }, 200);
         }
       }, 1000);
       
@@ -1311,9 +1324,12 @@ function NewsReaderContent() {
     } else if (currentMode === REPEAT_MODES.ALL) {
       if (index < sentences.length - 1) {
         // If not the last sentence, play next sentence after a short delay
-        setTimeout(() => {
-          setCurrentSentence(index + 1);
-          playCurrentSentence(index + 1);
+        window.repeatTimeout = setTimeout(() => {
+          // Check if we're still in REPEAT_ALL mode before playing
+          if (repeatMode === REPEAT_MODES.ALL) {
+            setCurrentSentence(index + 1);
+            playCurrentSentence(index + 1);
+          }
         }, 800);
       } else {
         // If last sentence, wait 5 seconds and start from beginning
@@ -1328,10 +1344,13 @@ function NewsReaderContent() {
             clearInterval(intervalId);
             window.repeatInterval = null;
             setRepeatCountdown(0);
-            setCurrentSentence(0);
-            setTimeout(() => {
-              playCurrentSentence(0);
-            }, 200);
+            // Check if we're still in REPEAT_ALL mode before playing
+            if (repeatMode === REPEAT_MODES.ALL) {
+              setCurrentSentence(0);
+              window.repeatTimeout = setTimeout(() => {
+                playCurrentSentence(0);
+              }, 200);
+            }
           }
         }, 1000);
         
@@ -1341,15 +1360,19 @@ function NewsReaderContent() {
     } else {
       // For no repeat: continue to next sentence if available, otherwise just stop
       if (index < sentences.length - 1) {
-        setTimeout(() => {
-          setCurrentSentence(index + 1);
-          playCurrentSentence(index + 1);
+        window.repeatTimeout = setTimeout(() => {
+          // Check if we're still in NO_REPEAT mode before playing
+          if (repeatMode === REPEAT_MODES.NONE) {
+            setCurrentSentence(index + 1);
+            playCurrentSentence(index + 1);
+          }
         }, 800);
       } else {
         // If it's the last sentence, just stop
         setIsPlaying(false);
         setIsPaused(false);
         setRepeatCountdown(0);
+        setCurrentSentence(-1); // Reset to beginning
       }
     }
   };
@@ -2185,15 +2208,19 @@ function NewsReaderContent() {
     const nextMode = getNextRepeatMode(repeatMode);
     setRepeatMode(nextMode);
 
+    // Clear all timers
+    if (window.repeatInterval) {
+      clearInterval(window.repeatInterval);
+      window.repeatInterval = null;
+    }
+    if (window.repeatTimeout) {
+      clearTimeout(window.repeatTimeout);
+      window.repeatTimeout = null;
+    }
+    setRepeatCountdown(0);
+
     // Update current audio's onended handler if it exists
     if (currentAudio) {
-      // Stop any existing repeat countdown
-      if (window.repeatInterval) {
-        clearInterval(window.repeatInterval);
-        window.repeatInterval = null;
-        setRepeatCountdown(0);
-      }
-
       // Update the onended handler with the new mode
       currentAudio.onended = () => {
         setIsPlaying(false);
@@ -2201,6 +2228,15 @@ function NewsReaderContent() {
         // Pass the new mode to handleSentenceEnd
         handleSentenceEnd(currentSentence, nextMode);
       };
+
+      // If we're switching from REPEAT_ONE to another mode and audio is not playing,
+      // we need to handle the transition immediately
+      if (repeatMode === REPEAT_MODES.ONE && !isPlaying) {
+        handleSentenceEnd(currentSentence, nextMode);
+      }
+    } else {
+      // If no audio is playing, handle the transition immediately
+      handleSentenceEnd(currentSentence, nextMode);
     }
   };
 
