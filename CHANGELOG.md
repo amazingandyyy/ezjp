@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/amazingandyyy/ezjp/compare/v1.9.0...v1.10.0) (2024-12-28)
+
+
+### Features
+
+* enhance article title parsing and improve UI elements ([298e151](https://github.com/amazingandyyy/ezjp/commit/298e151c26cb4d04e0cdafbc725e518d1d1077cf))
+
 # [1.9.0](https://github.com/amazingandyyy/ezjp/compare/v1.8.0...v1.9.0) (2024-12-28)
 
 
