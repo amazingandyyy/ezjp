@@ -800,13 +800,20 @@ function NewsReaderContent() {
   
   // Voice initialization effect
   useEffect(() => {
-    const fetchVoices = async () => {
+    const fetchVoices = async (retryCount = 0) => {
       try {
         const response = await fetch('/api/tts/voices');
-        if (!response.ok) throw new Error('Failed to fetch voices');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
+        
         // Only use Standard voices
         const standardVoices = data.voices.filter(voice => voice.name.includes('Standard'));
+        if (!standardVoices.length) {
+          throw new Error('No standard voices available');
+        }
+        
         setAvailableVoices(standardVoices);
         
         // Only set a default voice if none is selected
@@ -815,6 +822,13 @@ function NewsReaderContent() {
         }
       } catch (error) {
         console.error('Error fetching voices:', error);
+        // Retry up to 3 times with exponential backoff
+        if (retryCount < 3) {
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+          setTimeout(() => fetchVoices(retryCount + 1), delay);
+        } else {
+          setAudioError('Failed to load voices. Please refresh the page or try again later.');
+        }
       }
     };
 
@@ -1267,41 +1281,76 @@ function NewsReaderContent() {
   };
 
   // Add handleSentenceEnd function to handle repeat logic
-  const handleSentenceEnd = (index) => {
-    if (repeatMode === REPEAT_MODES.ONE) {
+  const handleSentenceEnd = (index, mode = repeatMode) => {
+    // Clear any existing interval
+    if (window.repeatInterval) {
+      clearInterval(window.repeatInterval);
+      window.repeatInterval = null;
+    }
+
+    // Use the provided mode or current state
+    const currentMode = mode || repeatMode;
+
+    if (currentMode === REPEAT_MODES.ONE) {
+      // For repeat one: wait 2 seconds and replay the same sentence
       let countdownValue = 2;
       setRepeatCountdown(countdownValue);
-      window.repeatInterval = setInterval(() => {
+      
+      const intervalId = setInterval(() => {
         countdownValue -= 1;
         setRepeatCountdown(countdownValue);
         
         if (countdownValue <= 0) {
-          clearInterval(window.repeatInterval);
-          window.repeatInterval = null;
+          clearInterval(intervalId);
           setTimeout(() => playCurrentSentence(index), 200);
         }
       }, 1000);
-    } else if (repeatMode === REPEAT_MODES.ALL && index < sentences.length - 1) {
-      setTimeout(() => {
-        setCurrentSentence(index + 1);
-        playCurrentSentence(index + 1);
-      }, 800);
-    } else if (repeatMode === REPEAT_MODES.ALL && index === sentences.length - 1) {
-      let countdownValue = 5;
-      setRepeatCountdown(countdownValue);
-      window.repeatInterval = setInterval(() => {
-        countdownValue -= 1;
+      
+      // Store interval ID for cleanup
+      window.repeatInterval = intervalId;
+    } else if (currentMode === REPEAT_MODES.ALL) {
+      if (index < sentences.length - 1) {
+        // If not the last sentence, play next sentence after a short delay
+        setTimeout(() => {
+          setCurrentSentence(index + 1);
+          playCurrentSentence(index + 1);
+        }, 800);
+      } else {
+        // If last sentence, wait 5 seconds and start from beginning
+        let countdownValue = 5;
         setRepeatCountdown(countdownValue);
         
-        if (countdownValue <= 0) {
-          clearInterval(window.repeatInterval);
-          window.repeatInterval = null;
-          setTimeout(() => {
+        const intervalId = setInterval(() => {
+          countdownValue -= 1;
+          setRepeatCountdown(countdownValue);
+          
+          if (countdownValue <= 0) {
+            clearInterval(intervalId);
+            window.repeatInterval = null;
+            setRepeatCountdown(0);
             setCurrentSentence(0);
-            playCurrentSentence(0);
-          }, 200);
-        }
-      }, 1000);
+            setTimeout(() => {
+              playCurrentSentence(0);
+            }, 200);
+          }
+        }, 1000);
+        
+        // Store interval ID for cleanup
+        window.repeatInterval = intervalId;
+      }
+    } else {
+      // For no repeat: continue to next sentence if available, otherwise just stop
+      if (index < sentences.length - 1) {
+        setTimeout(() => {
+          setCurrentSentence(index + 1);
+          playCurrentSentence(index + 1);
+        }, 800);
+      } else {
+        // If it's the last sentence, just stop
+        setIsPlaying(false);
+        setIsPaused(false);
+        setRepeatCountdown(0);
+      }
     }
   };
 
@@ -2132,17 +2181,41 @@ function NewsReaderContent() {
 
   // Update the repeat toggle button handler
   const handleRepeatToggle = () => {
-    // Cycle through modes: none -> all -> one -> none
-    setRepeatMode(current => {
-      switch (current) {
-        case REPEAT_MODES.NONE:
-          return REPEAT_MODES.ALL;
-        case REPEAT_MODES.ALL:
-          return REPEAT_MODES.ONE;
-        default:
-          return REPEAT_MODES.NONE;
+    // Get next repeat mode
+    const nextMode = getNextRepeatMode(repeatMode);
+    setRepeatMode(nextMode);
+
+    // Update current audio's onended handler if it exists
+    if (currentAudio) {
+      // Stop any existing repeat countdown
+      if (window.repeatInterval) {
+        clearInterval(window.repeatInterval);
+        window.repeatInterval = null;
+        setRepeatCountdown(0);
       }
-    });
+
+      // Update the onended handler with the new mode
+      currentAudio.onended = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+        // Pass the new mode to handleSentenceEnd
+        handleSentenceEnd(currentSentence, nextMode);
+      };
+    }
+  };
+
+  // Add helper function to get next repeat mode
+  const getNextRepeatMode = (currentMode) => {
+    switch (currentMode) {
+      case REPEAT_MODES.NONE:
+        return REPEAT_MODES.ALL;
+      case REPEAT_MODES.ALL:
+        return REPEAT_MODES.ONE;
+      case REPEAT_MODES.ONE:
+        return REPEAT_MODES.NONE;
+      default:
+        return REPEAT_MODES.NONE;
+    }
   };
 
   // Update the sentence rendering to use chunks

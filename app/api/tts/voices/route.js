@@ -7,10 +7,10 @@ const client = new TextToSpeechClient({
 
 // Map of voice names to common Japanese names
 const voiceNameMap = {
-  'ja-JP-Standard-A': 'Akane (明音)',     // Female
-  'ja-JP-Standard-B': 'Kenji (健二)',     // Male
-  'ja-JP-Standard-C': 'Hiroshi (浩)',     // Male (changed from Sakura)
-  'ja-JP-Standard-D': 'Seiki (誠希)'      // Male
+  "ja-JP-Standard-A": "Sakura (桜)", // Female
+  "ja-JP-Standard-B": "Yumi (弓子)", // Female
+  "ja-JP-Standard-C": "Nakayama (中山)", // Male
+  "ja-JP-Standard-D": "Kenji (健二)", // Male
 };
 
 export async function GET() {
