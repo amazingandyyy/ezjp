@@ -246,38 +246,60 @@ const ChangelogPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="mb-8 border-b border-gray-200 dark:border-gray-800">
-          <div className="flex space-x-8">
+        <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md ${
+          theme === 'dark'
+            ? 'bg-[rgb(19,31,36)]/90 border-b border-gray-800/50'
+            : 'bg-gray-50/90 border-b border-gray-200/50'
+        }`}>
+          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setActiveTab('changelog')}
-              className={`pb-4 text-sm font-medium border-b-2 transition-colors duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                 activeTab === 'changelog'
                   ? theme === 'dark'
-                    ? 'border-purple-500 text-purple-400'
-                    : 'border-purple-500 text-purple-600'
+                    ? 'text-white'
+                    : 'text-gray-900'
                   : theme === 'dark'
-                    ? 'border-transparent text-gray-400 hover:text-gray-300'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'text-gray-400 hover:text-gray-300'
+                    : 'text-gray-500 hover:text-gray-700'
               }`}
             >
+              <svg className={`w-4 h-4 transition-colors ${
+                activeTab === 'changelog'
+                  ? theme === 'dark'
+                    ? 'text-white'
+                    : 'text-gray-900'
+                  : 'text-current'
+              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
               Changelog
             </button>
             <button
               onClick={() => setActiveTab('suggestions')}
-              className={`pb-4 text-sm font-medium border-b-2 transition-colors duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                 activeTab === 'suggestions'
                   ? theme === 'dark'
-                    ? 'border-purple-500 text-purple-400'
-                    : 'border-purple-500 text-purple-600'
+                    ? 'text-white'
+                    : 'text-gray-900'
                   : theme === 'dark'
-                    ? 'border-transparent text-gray-400 hover:text-gray-300'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'text-gray-400 hover:text-gray-300'
+                    : 'text-gray-500 hover:text-gray-700'
               }`}
             >
+              <svg className={`w-4 h-4 transition-colors ${
+                activeTab === 'suggestions'
+                  ? theme === 'dark'
+                    ? 'text-white'
+                    : 'text-gray-900'
+                  : 'text-current'
+              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               Suggestions
             </button>
           </div>
-        </div>
+        </nav>
 
         {activeTab === 'changelog' ? (
           // Existing changelog content

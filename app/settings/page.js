@@ -488,10 +488,10 @@ function SettingsContent() {
           </h1>
 
           {/* Settings Navigation */}
-          <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md bg-opacity-80 ${
+          <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md ${
             profileData.currentTheme === "dark"
               ? "bg-[rgb(19,31,36)]/90 border-b border-gray-800/50"
-              : "bg-white/90 border-b border-gray-200/50"
+              : "bg-gray-50/90 border-b border-gray-200/50"
           }`}>
             <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {[
