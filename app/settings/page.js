@@ -731,49 +731,52 @@ function SettingsContent() {
                             : "text-gray-700"
                         }`}
                       >
-                        <img
-                          src="/icons/duolingo-app.svg"
-                          alt="Duolingo"
-                          className="w-5 h-5"
-                        />
-                        <span>
-                          {profileData.duolingo_username ||
-                            "No Duolingo profile linked"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {profileData.duolingo_username && (
-                          <a
-                            href={`https://www.duolingo.com/profile/${encodeURIComponent(
-                              profileData.duolingo_username
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        <FaIdBadge className="w-5 h-5" />
+                        {!isProfileLoaded ? (
+                          <span className={profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+                            Loading...
+                          </span>
+                        ) : profileData.username ? (
+                          <span>{profileData.username}</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm px-2 py-0.5 rounded-md ${
                               profileData.currentTheme === "dark"
+                                ? "bg-red-500/10 text-red-400 ring-1 ring-red-500/20"
+                                : "bg-red-50 text-red-600 ring-1 ring-red-500/20"
+                            }`}>
+                              Required
+                            </span>
+                            <span className={profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+                              No username set
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() =>
+                          setEditState((prev) => ({
+                            ...prev,
+                            username: true,
+                          }))
+                        }
+                        disabled={!isProfileLoaded}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          !isProfileLoaded
+                            ? profileData.currentTheme === "dark"
+                              ? "bg-gray-700/50 text-gray-500 cursor-not-allowed"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : !profileData.username 
+                              ? profileData.currentTheme === "dark"
+                                ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                                : "bg-red-50 text-red-600 hover:bg-red-100"
+                              : profileData.currentTheme === "dark"
                                 ? "text-gray-300 hover:bg-gray-700"
                                 : "text-gray-600 hover:bg-gray-100"
-                            }`}
-                          >
-                            View Profile
-                          </a>
-                        )}
-                        <button
-                          onClick={() =>
-                            setEditState((prev) => ({
-                              ...prev,
-                              duolingo: true,
-                            }))
-                          }
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            profileData.currentTheme === "dark"
-                              ? "text-gray-300 hover:bg-gray-700"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          Edit
-                        </button>
-                      </div>
+                        }`}
+                      >
+                        {!isProfileLoaded ? "Loading..." : !profileData.username ? "Set Username" : "Edit"}
+                      </button>
                     </div>
                   )}
                   {error && (
@@ -1189,7 +1192,7 @@ function SettingsContent() {
               >
                 <div className="space-y-1">
                   <h2
-                    className={`text-base font-medium ${
+                    className={`text-base font-medium mb-1 ${
                       profileData.currentTheme === "dark"
                         ? "text-gray-200"
                         : "text-gray-800"
