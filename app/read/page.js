@@ -408,7 +408,7 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
         }
       `}>
         <div className={`text-xl font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-          Wait! Are you sure? ������������
+          Wait! Are you sure?
         </div>
         
         <div className={`mb-6 space-y-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -425,7 +425,7 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
               Keep your progress tracked 📈
             </p>
             <p className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
+              <span className="text-green-500">��</span>
               Build your reading streak 🔥
             </p>
           </div>
@@ -623,10 +623,9 @@ function NewsReaderContent() {
   const sourceUrl = searchParams.get('source');
   const { user, loading: authLoading, signInWithGoogle, signOut, profile, updateProfile } = useAuth();
 
+  // All state declarations
   const [url, setUrl] = useState('');
   const [showProfile, setShowProfile] = useState(false);
-  const [availableVoices, setAvailableVoices] = useState([]);
-  const [selectedVoice, setSelectedVoice] = useState(null);
   const [preferenceState, setPreferenceState] = useState(DEFAULT_PREFERENCES);
   const [updatingPreferences, setUpdatingPreferences] = useState({});
   const [showSettings, setShowSettings] = useState(false);
@@ -644,8 +643,6 @@ function NewsReaderContent() {
   const [hasRecordedArticle, setHasRecordedArticle] = useState(false);
   const [readingStartTime, setReadingStartTime] = useState(null);
   const [loadingNewsList, setLoadingNewsList] = useState(false);
-
-  // Audio-related states
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isVoiceLoading, setIsVoiceLoading] = useState(false);
@@ -654,8 +651,6 @@ function NewsReaderContent() {
   const [repeatMode, setRepeatMode] = useState(REPEAT_MODES.ALL);
   const [audioCache, setAudioCache] = useState({});
   const [audioElement, setAudioElement] = useState(null);
-
-  // Content-related states
   const [newsTitle, setNewsTitle] = useState([]);
   const [newsContent, setNewsContent] = useState([]);
   const [newsDate, setNewsDate] = useState(null);
@@ -665,17 +660,16 @@ function NewsReaderContent() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showMotivation, setShowMotivation] = useState(false);
-  const [showConfirmUnfinish, setShowConfirmUnfinish] = useState(false);  // Add this line
+  const [showConfirmUnfinish, setShowConfirmUnfinish] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [currentAudio, setCurrentAudio] = useState(null);
 
   // Refs
   const sidebarRef = useRef(null);
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
-
-  // Add this state near other state declarations
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
 
   // Media query hook
   const useMediaQuery = (query) => {
@@ -756,11 +750,7 @@ function NewsReaderContent() {
   // Load user preferences
   useEffect(() => {
     const loadPreferences = async () => {
-      // Try to load from localStorage first
-
-      if (!user) {
-        return;
-      }
+      if (!user) return;
 
       try {
         console.log('Loading user preferences from database...');
@@ -775,11 +765,9 @@ function NewsReaderContent() {
           return;
         }
 
-        console.log('Loaded preferences:', preferences);
-
         if (preferences) {
           // Ensure preferred_speed is a valid number
-          let preferred_speed = 1.0; // Default value
+          let preferred_speed = 1.0;
           if (typeof preferences.preferred_speed === 'number' && !isNaN(preferences.preferred_speed)) {
             preferred_speed = preferences.preferred_speed;
           } else if (typeof preferences.preferred_speed === 'string') {
@@ -789,23 +777,15 @@ function NewsReaderContent() {
             }
           }
 
-          const newPrefs = {
-            theme: preferences.theme || DEFAULT_PREFERENCES.theme,
-            font_size: preferences.font_size || DEFAULT_PREFERENCES.font_size,
-            show_furigana: preferences.show_furigana ?? DEFAULT_PREFERENCES.show_furigana,
+          setPreferenceState(prev => ({
+            ...prev,
+            theme: preferences.theme || prev.theme,
+            font_size: preferences.font_size || prev.font_size,
+            show_furigana: preferences.show_furigana ?? prev.show_furigana,
             preferred_speed: preferred_speed,
-            preferred_voice: preferences.preferred_voice || DEFAULT_PREFERENCES.preferred_voice,
-            reading_level: preferences.reading_level || DEFAULT_PREFERENCES.reading_level
-          };
-
-          setPreferenceState(newPrefs);
-
-          if (preferences.preferred_voice && availableVoices.length > 0) {
-            const savedVoice = availableVoices.find(v => v.voiceURI === preferences.preferred_voice);
-            if (savedVoice) {
-              setSelectedVoice(savedVoice);
-            }
-          }
+            preferred_voice: preferences.preferred_voice || prev.preferred_voice,
+            reading_level: preferences.reading_level || prev.reading_level
+          }));
         }
       } catch (error) {
         console.error('Error in loadPreferences:', error);
@@ -813,7 +793,104 @@ function NewsReaderContent() {
     };
 
     loadPreferences();
-  }, [user, availableVoices]);
+  }, [user]); // Only depend on user changes
+
+  // Remove selectedVoice state
+  const [availableVoices, setAvailableVoices] = useState([]);
+  
+  // Voice initialization effect
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const response = await fetch('/api/tts/voices');
+        if (!response.ok) throw new Error('Failed to fetch voices');
+        const data = await response.json();
+        // Only use Standard voices
+        const standardVoices = data.voices.filter(voice => voice.name.includes('Standard'));
+        setAvailableVoices(standardVoices);
+        
+        // Only set a default voice if none is selected
+        if (standardVoices.length > 0 && !preferenceState.preferred_voice) {
+          setPreferenceState(prev => ({ ...prev, preferred_voice: standardVoices[0].name }));
+        }
+      } catch (error) {
+        console.error('Error fetching voices:', error);
+      }
+    };
+
+    fetchVoices();
+  }, []); // Remove dependency on preferenceState.preferred_voice
+
+  // Update handleVoiceChange to be the single source of voice updates
+  const handleVoiceChange = async (newVoice) => {
+    try {
+      // Stop current audio and clear cache
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+      }
+
+      Object.values(audioCache).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+      setAudioCache({});
+
+      // Update local state immediately
+      setPreferenceState(prev => ({ ...prev, preferred_voice: newVoice }));
+
+      // Save to database if user is logged in
+      if (user) {
+        setUpdatingPreferences(prev => ({ ...prev, preferred_voice: true }));
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            preferred_voice: newVoice,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (error) throw error;
+      }
+
+      // Continue playing if was playing
+      if (isPlaying && sentences[currentSentence]) {
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: sentenceToText(sentences[currentSentence]),
+            speed: preferenceState.preferred_speed,
+            voice: newVoice
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get audio with new voice');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        
+        audio.onended = () => {
+          setIsPlaying(false);
+          setIsPaused(false);
+          handleSentenceEnd(currentSentence);
+        };
+
+        setCurrentAudio(audio);
+        setIsPlaying(true);
+        setIsPaused(false);
+        audio.play();
+      }
+    } catch (error) {
+      console.error('Error in voice change:', error);
+      setAudioError('Failed to change voice. Please try again.');
+    } finally {
+      setUpdatingPreferences(prev => ({ ...prev, preferred_voice: false }));
+    }
+  };
 
   // Update document theme when preference changes
   useEffect(() => {
@@ -976,7 +1053,7 @@ function NewsReaderContent() {
       setAvailableVoices(japaneseVoices);
       
       // Only set default voice if no voice is currently selected
-      if (!selectedVoice && japaneseVoices.length > 0) {
+      if (!preferenceState.preferred_voice && japaneseVoices.length > 0) {
         // Try to find Microsoft Keita first
         const keitaVoice = japaneseVoices.find(voice => 
           voice.name.toLowerCase().includes('microsoft keita') || 
@@ -984,7 +1061,7 @@ function NewsReaderContent() {
         );
         
         // Set default voice (Keita if available, otherwise first Japanese voice)
-        setSelectedVoice(keitaVoice || japaneseVoices[0]);
+        setPreferenceState(prev => ({ ...prev, preferred_voice: keitaVoice || japaneseVoices[0] }));
       }
     }
 
@@ -998,7 +1075,7 @@ function NewsReaderContent() {
 
   // Helper function to get Japanese voice
   const getJapaneseVoice = async () => {
-    if (selectedVoice) return selectedVoice;
+    if (preferenceState.preferred_voice) return preferenceState.preferred_voice;
     
     // Wait for voices to be loaded
     const voices = speechSynthesis.getVoices();
@@ -1099,139 +1176,148 @@ function NewsReaderContent() {
     }
   }, [repeatMode, isPlaying]);
 
-  // Update playCurrentSentence to store the utterance
+  // Update playCurrentSentence function
   const playCurrentSentence = async (index = currentSentence) => {
     if (!isBrowser || !sentences[index]) return;
     
     try {
-      // Clear any existing repeat intervals
-      if (window.repeatInterval) {
-        clearInterval(window.repeatInterval);
-        window.repeatInterval = null;
+      // Stop current audio if playing
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
       }
       
-      speechSynthesis.cancel();
+      setIsVoiceLoading(true);
       setAudioError('');
       
       const sentenceText = sentenceToText(sentences[index]);
-      const japaneseVoice = await getJapaneseVoice();
       
-      if (!japaneseVoice) {
-        throw new Error('No Japanese voice found');
-      }
-
-      const utterance = new SpeechSynthesisUtterance(sentenceText);
-      // Store the utterance globally so we can access it when repeat mode changes
-      window.currentUtterance = utterance;
-      
-      utterance.voice = japaneseVoice;
-      utterance.lang = 'ja-JP';
-      
-      const speed = typeof preferenceState.preferred_speed === 'number' && !isNaN(preferenceState.preferred_speed)
-        ? preferenceState.preferred_speed
-        : 1.0;
-
-      utterance.rate = speed;
-
-      setIsPlaying(true);
-      setIsPaused(false);
-      
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setIsPaused(false);
+      // Check cache first
+      const cacheKey = `${sentenceText}_${preferenceState.preferred_voice}_${preferenceState.preferred_speed}`;
+      if (audioCache[cacheKey]) {
+        const audio = new Audio(audioCache[cacheKey]);
+        audio.playbackRate = preferenceState.preferred_speed || 1.0;
         
-        // Clear any existing repeat intervals
-        if (window.repeatInterval) {
-          clearInterval(window.repeatInterval);
-          window.repeatInterval = null;
-        }
+        audio.onended = () => {
+          setIsPlaying(false);
+          setIsPaused(false);
+          handleSentenceEnd(index);
+        };
         
-        if (repeatMode === REPEAT_MODES.ONE) {
-          let countdownValue = 2;
-          setRepeatCountdown(countdownValue);
-          window.repeatInterval = setInterval(() => {
-            countdownValue -= 1;
-            setRepeatCountdown(countdownValue);
-            
-            if (countdownValue <= 0) {
-              clearInterval(window.repeatInterval);
-              window.repeatInterval = null;
-              
-              setTimeout(() => {
-                const repeatUtterance = new SpeechSynthesisUtterance(sentenceText);
-                repeatUtterance.voice = japaneseVoice;
-                repeatUtterance.lang = 'ja-JP';
-                repeatUtterance.rate = speed;
-                
-                // Store the new utterance
-                window.currentUtterance = repeatUtterance;
-                
-                repeatUtterance.onend = utterance.onend;
-                repeatUtterance.onpause = utterance.onpause;
-                repeatUtterance.onresume = utterance.onresume;
-                
-                setIsPlaying(true);
-                speechSynthesis.speak(repeatUtterance);
-              }, 200);
-            }
-          }, 1000);
-        } else if (repeatMode === REPEAT_MODES.ALL && index < sentences.length - 1) {
-          setTimeout(() => {
-            setCurrentSentence(index + 1);
-            playCurrentSentence(index + 1);
-          }, 800);
-        } else if (repeatMode === REPEAT_MODES.ALL && index === sentences.length - 1) {
-          let countdownValue = 5;
-          setRepeatCountdown(countdownValue);
-          window.repeatInterval = setInterval(() => {
-            countdownValue -= 1;
-            setRepeatCountdown(countdownValue);
-            
-            if (countdownValue <= 0) {
-              clearInterval(window.repeatInterval);
-              window.repeatInterval = null;
-              
-              setTimeout(() => {
-                setCurrentSentence(0);
-                playCurrentSentence(0);
-              }, 200);
-            }
-          }, 1000);
-        }
-      };
-
-      utterance.onpause = () => {
-        setIsPlaying(false);
-        setIsPaused(true);
-      };
-
-      utterance.onresume = () => {
+        setCurrentAudio(audio);
+        setIsVoiceLoading(false);
         setIsPlaying(true);
         setIsPaused(false);
+        audio.play();
+        return;
+      }
+      
+      // Generate new audio
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: sentenceText,
+          speed: preferenceState.preferred_speed,
+          voice: preferenceState.preferred_voice
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || error.error);
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      // Cache the audio URL with voice and speed info
+      setAudioCache(prev => ({
+        ...prev,
+        [cacheKey]: url
+      }));
+      
+      const audio = new Audio(url);
+      audio.playbackRate = preferenceState.preferred_speed || 1.0;
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+        handleSentenceEnd(index);
       };
-
-      speechSynthesis.speak(utterance);
+      
+      setCurrentAudio(audio);
+      setIsVoiceLoading(false);
+      setIsPlaying(true);
+      setIsPaused(false);
+      audio.play();
       
     } catch (error) {
       console.error('Error playing audio:', error);
-      setAudioError('Failed to play audio. Please make sure your browser supports Japanese text-to-speech.');
+      setAudioError(error.message || 'Failed to play audio. Please try again.');
+      setIsVoiceLoading(false);
       setIsPlaying(false);
       setIsPaused(false);
     }
   };
 
-  const pauseAudio = () => {
-    if (!isBrowser) return;
-    speechSynthesis.pause();
-    setIsPlaying(false);
-    setIsPaused(true);
+  // Add handleSentenceEnd function to handle repeat logic
+  const handleSentenceEnd = (index) => {
+    if (repeatMode === REPEAT_MODES.ONE) {
+      let countdownValue = 2;
+      setRepeatCountdown(countdownValue);
+      window.repeatInterval = setInterval(() => {
+        countdownValue -= 1;
+        setRepeatCountdown(countdownValue);
+        
+        if (countdownValue <= 0) {
+          clearInterval(window.repeatInterval);
+          window.repeatInterval = null;
+          setTimeout(() => playCurrentSentence(index), 200);
+        }
+      }, 1000);
+    } else if (repeatMode === REPEAT_MODES.ALL && index < sentences.length - 1) {
+      setTimeout(() => {
+        setCurrentSentence(index + 1);
+        playCurrentSentence(index + 1);
+      }, 800);
+    } else if (repeatMode === REPEAT_MODES.ALL && index === sentences.length - 1) {
+      let countdownValue = 5;
+      setRepeatCountdown(countdownValue);
+      window.repeatInterval = setInterval(() => {
+        countdownValue -= 1;
+        setRepeatCountdown(countdownValue);
+        
+        if (countdownValue <= 0) {
+          clearInterval(window.repeatInterval);
+          window.repeatInterval = null;
+          setTimeout(() => {
+            setCurrentSentence(0);
+            playCurrentSentence(0);
+          }, 200);
+        }
+      }, 1000);
+    }
   };
 
+  // Update pause function
+  const pauseAudio = () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      setIsPlaying(false);
+      setIsPaused(true);
+    }
+  };
+
+  // Update resume function
   const resumeAudio = () => {
-    if (!isBrowser) return;
-    speechSynthesis.resume();
-    setIsPlaying(true);
-    setIsPaused(false);
+    if (currentAudio) {
+      currentAudio.play();
+      setIsPlaying(true);
+      setIsPaused(false);
+    }
   };
 
   const handlePlay = async () => {
@@ -1377,28 +1463,6 @@ function NewsReaderContent() {
     }
   };
 
-  const handleVoiceChange = async (voiceURI) => {
-    const voice = availableVoices.find(v => v.voiceURI === voiceURI);
-    if (user) {
-      try {
-        await savePreferences('preferred_voice', voiceURI);
-      } catch (error) {
-        console.error('Error saving voice:', error);
-      }
-    } else {
-      setPreferenceState(prev => ({ ...prev, preferred_voice: voiceURI }));
-      setToastMessage('Tip: Sign in to remember your reader preferences');
-      setShowToast(true);
-      setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-    }
-    setSelectedVoice(voice);
-    speechSynthesis.cancel();
-    setIsPlaying(false);
-    setIsPaused(false);
-  };
-
   const toggleFurigana = async () => {
     const newValue = !preferenceState.show_furigana;
     if (user) {
@@ -1448,17 +1512,24 @@ function NewsReaderContent() {
 
   useEffect(() => {
     return () => {
+      // Stop any playing audio
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      
       // Clean up cached audio URLs
       Object.values(audioCache).forEach(url => {
         URL.revokeObjectURL(url);
       });
-      // Clean up current audio element
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = '';
-      }
     };
-  }, [audioCache, audioElement]);
+  }, [currentAudio, audioCache]);
+
+  useEffect(() => {
+    if (currentAudio) {
+      currentAudio.playbackRate = preferenceState.preferred_speed || 1.0;
+    }
+  }, [preferenceState.preferred_speed]);
 
   const toggleSettings = () => {
     setShowSettings(!showSettings);
@@ -1671,7 +1742,7 @@ function NewsReaderContent() {
       if (profile.preferred_voice) {
         const savedVoice = availableVoices.find(v => v.voiceURI === profile.preferred_voice);
         if (savedVoice) {
-          setSelectedVoice(savedVoice);
+          setPreferenceState(prev => ({ ...prev, preferred_voice: savedVoice }));
         }
       }
     }
@@ -1849,183 +1920,6 @@ function NewsReaderContent() {
   }, [user]);
 
   // Add this function near other utility functions
-  const triggerCelebration = () => {
-    const duration = 3000; // Increased from 1500ms to 3000ms
-    const end = Date.now() + duration;
-
-    // Show motivational message
-    setShowMotivation(true);
-    setTimeout(() => {
-      setShowMotivation(false);
-    }, 3000); // Increased to match duration
-
-    const colors = ['#FF5757', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6B6B'];
-
-    // Initial burst
-    confetti({
-      particleCount: 100,
-      spread: 100,
-      origin: { y: 0.8 },
-      colors: colors,
-      gravity: 0.8
-    });
-
-    // Continuous side bursts
-    (function frame() {
-      confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: colors
-      });
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: colors
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    }());
-
-    // Additional bursts at intervals
-    setTimeout(() => {
-      confetti({
-        particleCount: 60,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: colors,
-        gravity: 1
-      });
-    }, 1000);
-
-    setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        spread: 120,
-        origin: { y: 0.8 },
-        colors: colors,
-        gravity: 1.2
-      });
-    }, 2000);
-  };
-
-  // Add this function to calculate total reading time
-  const calculateTotalReadingTime = (startTime) => {
-    if (!startTime) return 0;
-    const endTime = Date.now();
-    const totalMinutes = (endTime - startTime) / (1000 * 60); // Convert to minutes
-    return Math.round(totalMinutes * 10) / 10; // Round to 1 decimal place
-  };
-
-  // Update the toggleFinished function
-  const toggleFinished = async () => {
-    if (!user) {
-      setToastMessage('Tip: Sign in to track your reading progress');
-      setShowToast(true);
-      setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-      return;
-    }
-
-    // If trying to unmark, show confirmation first
-    if (isFinished) {
-      setShowConfirmUnfinish(true);
-      return;
-    }
-
-    try {
-      setIsUpdating(true);
-      const currentUrl = new URL(url);
-      const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
-
-      // Calculate total reading time
-      const totalReadingTime = calculateTotalReadingTime(readingStartTime);
-
-      // First check if article exists
-      const { data: existingArticle } = await supabase
-        .from('articles')
-        .select('id')
-        .eq('url', urlWithoutParams)
-        .single();
-
-      let articleId;
-      if (!existingArticle) {
-        // Create article if it doesn't exist
-        const { data: newArticle, error: createError } = await supabase
-          .from('articles')
-          .insert([{
-            url: urlWithoutParams,
-            title: newsTitle,
-            publish_date: newsDate,
-            images: newsImages
-          }])
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        articleId = newArticle.id;
-      } else {
-        articleId = existingArticle.id;
-      }
-
-      // Add to finished articles
-      const { error: finishError } = await supabase
-        .from('finished_articles')
-        .insert([{ 
-          user_id: user.id,
-          url: urlWithoutParams,
-          article_id: articleId,
-          finished_at: new Date().toISOString()
-        }]);
-
-      if (finishError) throw finishError;
-
-      // Update reading stats with the calculated time
-      await updateReadingStats(totalReadingTime);
-      
-      // Notify about stats change
-      useStatsStore.getState().notifyStatsChange();
-      
-      setIsFinished(true);
-      triggerCelebration();
-    } catch (error) {
-      console.error('Error toggling finished status:', error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  // Add function to handle unfinishing
-  const handleUnfinish = async () => {
-    setFinishLoading(true);
-    try {
-      // Ensure we're using the decoded URL
-      const decodedUrl = decodeURIComponent(url);
-      
-      // Only delete the finished_articles record, don't touch the profile
-      await supabase
-        .from('finished_articles')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('url', decodedUrl);
-        
-      setIsFinished(false);
-      await fetchFinishedArticles();
-    } catch (error) {
-      console.error('Error unmarking article:', error);
-    } finally {
-      setFinishLoading(false);
-      setShowConfirmUnfinish(false);
-    }
-  };
-
-  // Add these utility functions near the top with other utility functions
   const renderTitle = (title) => {
     if (!Array.isArray(title)) return null;
     return title.map((part, index) => {
@@ -2380,6 +2274,206 @@ function NewsReaderContent() {
     }
   }, [sourceUrl]);
 
+  // Add this effect to fetch available voices
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const response = await fetch('/api/tts/voices');
+        if (!response.ok) throw new Error('Failed to fetch voices');
+        const data = await response.json();
+        // Only use Standard voices
+        const standardVoices = data.voices.filter(voice => voice.name.includes('Standard'));
+        setAvailableVoices(standardVoices);
+        
+        // Only set a default voice if none is selected
+        if (standardVoices.length > 0 && !preferenceState.preferred_voice) {
+          setPreferenceState(prev => ({ ...prev, preferred_voice: standardVoices[0].name }));
+        }
+      } catch (error) {
+        console.error('Error fetching voices:', error);
+      }
+    };
+
+    fetchVoices();
+  }, []); // Remove dependency on preferenceState.preferred_voice
+
+  // Add function to handle unfinishing
+  const handleUnfinish = async () => {
+    setFinishLoading(true);
+    try {
+      // Ensure we're using the decoded URL
+      const decodedUrl = decodeURIComponent(url);
+      
+      // Only delete the finished_articles record
+      await supabase
+        .from('finished_articles')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('url', decodedUrl);
+        
+      setIsFinished(false);
+      await fetchFinishedArticles();
+    } catch (error) {
+      console.error('Error unmarking article:', error);
+    } finally {
+      setFinishLoading(false);
+      setShowConfirmUnfinish(false);
+    }
+  };
+
+  // Add this function to calculate total reading time
+  const calculateTotalReadingTime = (startTime) => {
+    if (!startTime) return 0;
+    const endTime = Date.now();
+    const totalMinutes = (endTime - startTime) / (1000 * 60); // Convert to minutes
+    return Math.round(totalMinutes * 10) / 10; // Round to 1 decimal place
+  };
+
+  // Update the toggleFinished function
+  const toggleFinished = async () => {
+    if (!user) {
+      setToastMessage('Tip: Sign in to track your reading progress');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+      return;
+    }
+
+    // If trying to unmark, show confirmation first
+    if (isFinished) {
+      setShowConfirmUnfinish(true);
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      const currentUrl = new URL(url);
+      const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
+
+      // Calculate total reading time
+      const totalReadingTime = calculateTotalReadingTime(readingStartTime);
+
+      // First check if article exists
+      const { data: existingArticle } = await supabase
+        .from('articles')
+        .select('id')
+        .eq('url', urlWithoutParams)
+        .single();
+
+      let articleId;
+      if (!existingArticle) {
+        // Create article if it doesn't exist
+        const { data: newArticle, error: createError } = await supabase
+          .from('articles')
+          .insert([{
+            url: urlWithoutParams,
+            title: newsTitle,
+            publish_date: newsDate,
+            images: newsImages
+          }])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        articleId = newArticle.id;
+      } else {
+        articleId = existingArticle.id;
+      }
+
+      // Add to finished articles
+      const { error: finishError } = await supabase
+        .from('finished_articles')
+        .insert([{ 
+          user_id: user.id,
+          url: urlWithoutParams,
+          article_id: articleId,
+          finished_at: new Date().toISOString()
+        }]);
+
+      if (finishError) throw finishError;
+
+      // Update reading stats with the calculated time
+      await updateReadingStats(totalReadingTime);
+      
+      // Notify about stats change
+      useStatsStore.getState().notifyStatsChange();
+      
+      setIsFinished(true);
+      triggerCelebration();
+    } catch (error) {
+      console.error('Error toggling finished status:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Add this function near other utility functions
+  const triggerCelebration = () => {
+    const duration = 3000; // 3 seconds duration
+    const end = Date.now() + duration;
+
+    // Show motivational message
+    setShowMotivation(true);
+    setTimeout(() => {
+      setShowMotivation(false);
+    }, 3000);
+
+    const colors = ['#FF5757', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6B6B'];
+
+    // Initial burst
+    confetti({
+      particleCount: 100,
+      spread: 100,
+      origin: { y: 0.8 },
+      colors: colors,
+      gravity: 0.8
+    });
+
+    // Continuous side bursts
+    (function frame() {
+      confetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: colors
+      });
+      confetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: colors
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+
+    // Additional bursts at intervals
+    setTimeout(() => {
+      confetti({
+        particleCount: 60,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: colors,
+        gravity: 1
+      });
+    }, 1000);
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 120,
+        origin: { y: 0.8 },
+        colors: colors,
+        gravity: 1.2
+      });
+    }, 2000);
+  };
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       {/* Add Navbar */}
@@ -2654,27 +2748,27 @@ function NewsReaderContent() {
                     />
                   </label>
                   <select
-                    value={preferenceState.preferred_voice || ""}
+                    value={preferenceState.preferred_voice || ''}
                     onChange={(e) => handleVoiceChange(e.target.value)}
-                    disabled={updatingPreferences.preferred_voice}
+                    disabled={updatingPreferences.preferred_voice || availableVoices.length === 0 || isVoiceLoading}
                     className={`w-full p-3 sm:p-2 text-base sm:text-sm rounded transition-all duration-200 border ${
                       preferenceState.theme === "dark"
                         ? "bg-gray-800 border-gray-700 text-gray-100 focus:border-green-500/50"
                         : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)] focus:border-green-500/50"
                     } ${
-                      updatingPreferences.preferred_voice
+                      updatingPreferences.preferred_voice || availableVoices.length === 0 || isVoiceLoading
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                   >
                     {availableVoices.map((voice) => (
-                      <option key={voice.voiceURI} value={voice.voiceURI}>
-                        {voice.name} ({voice.lang})
+                      <option key={voice.name} value={voice.name}>
+                        {voice.displayName} ({(voice.ssmlGender || 'unspecified').toLowerCase()})
                       </option>
                     ))}
                     {availableVoices.length === 0 && (
                       <option value="" disabled>
-                        No Japanese voices available
+                        Loading voices...
                       </option>
                     )}
                   </select>
