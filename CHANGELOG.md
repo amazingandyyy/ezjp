@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/amazingandyyy/ezjp/compare/v1.7.1...v1.7.2) (2024-12-28)
+
+
+### Bug Fixes
+
+* enhance repeat functionality in NewsReaderContent ([9b477a6](https://github.com/amazingandyyy/ezjp/commit/9b477a6d8550459d0f89ab3e79165b76ef5f5848))
+
 ## [1.7.1](https://github.com/amazingandyyy/ezjp/compare/v1.7.0...v1.7.1) (2024-12-28)
 
 
