@@ -188,26 +188,55 @@ class MainichiMaisho {
     while (i < text.length) {
       if (text[i] === '（') {
         // Found start of reading
-        const kanji = currentText;
-        currentText = '';
-        i++;
-        
-        // Extract reading
-        let reading = '';
-        while (i < text.length && text[i] !== '）') {
-          reading += text[i];
-          i++;
+        if (currentText) {
+          // Find the last actual kanji portion by working backwards
+          let kanjiEnd = currentText.length;
+          let kanjiStart = kanjiEnd;
+          
+          // Work backwards to find where the actual kanji starts
+          while (kanjiStart > 0 && /[\u4e00-\u9faf\u3400-\u4dbf]/.test(currentText[kanjiStart - 1])) {
+            kanjiStart--;
+          }
+          
+          // If we found kanji characters
+          if (kanjiStart < kanjiEnd) {
+            // Add any text before the kanji as a text segment
+            const preText = currentText.slice(0, kanjiStart).trim();
+            if (preText) {
+              segments.push({
+                type: 'text',
+                content: preText
+              });
+            }
+            
+            // Extract the kanji portion
+            const kanji = currentText.slice(kanjiStart, kanjiEnd);
+            currentText = '';
+            i++; // Skip the opening parenthesis
+            
+            // Extract reading
+            let reading = '';
+            while (i < text.length && text[i] !== '）') {
+              reading += text[i];
+              i++;
+            }
+            
+            if (reading) {
+              segments.push({
+                type: 'ruby',
+                kanji: kanji,
+                reading: reading
+              });
+            }
+          } else {
+            // No kanji found, treat as regular text
+            segments.push({
+              type: 'text',
+              content: currentText
+            });
+            currentText = '';
+          }
         }
-        
-        if (kanji) {
-          console.log('Found furigana pair:', { kanji, reading });
-          segments.push({
-            type: 'ruby',
-            kanji: kanji,
-            reading: reading
-          });
-        }
-        currentText = '';
       } else {
         currentText += text[i];
       }
@@ -216,7 +245,6 @@ class MainichiMaisho {
     
     // Add any remaining text
     if (currentText) {
-      console.log('Adding remaining text:', currentText);
       segments.push({
         type: 'text',
         content: currentText
