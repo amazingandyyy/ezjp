@@ -208,12 +208,25 @@ const formatJapaneseDate = (dateStr) => {
 const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) => {
   const parseTitle = (title) => {
     try {
+      // If title is a string that looks like JSON, parse it
+      if (typeof title === 'string' && (title.startsWith('[') || title.startsWith('{'))) {
+        title = JSON.parse(title);
+      }
+      
       if (Array.isArray(title)) {
-        return title.map(part => part.type === 'ruby' ? part.kanji : part.content).join('');
+        return title.map(part => {
+          if (part.type === 'ruby') {
+            return part.kanji;
+          } else if (part.type === 'text') {
+            return part.content;
+          }
+          return '';
+        }).join('');
       }
       return title;
     } catch (e) {
-      return title;
+      console.error('Error parsing title:', e);
+      return title || '';
     }
   };
 
@@ -236,7 +249,7 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) =>
         <button
           key={index}
           onClick={() => onNewsClick(article.url)}
-          className={`w-full text-left p-4 rounded-xl transition-all duration-300 flex gap-4 group
+          className={`w-full text-left p-4 rounded-xl transition-all duration-300 flex gap-4 group relative
             ${
               theme === "dark"
                 ? article.url === sourceUrl
@@ -248,26 +261,37 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) =>
             }`}
         >
           <div className="flex-shrink-0 relative">
-            {article.article?.images?.[0] && (
+            {article.image || article.article?.images?.[0] ? (
               <div className="w-20 h-20 relative rounded-lg overflow-hidden ring-1 ring-black/5">
                 <img
-                  src={article.article.images[0]}
+                  src={article.image || article.article?.images?.[0]}
                   alt=""
                   className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => {
-                    e.target.style.display = "none";
+                    e.target.parentElement.style.display = "none";
                   }}
                 />
               </div>
+            ) : (
+              <div className={`w-20 h-20 rounded-lg flex items-center justify-center ${
+                theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+              } ring-1 ring-black/5`}>
+                <svg className={`w-8 h-8 ${
+                  theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </div>
             )}
-            <div className="absolute -top-1 -right-1 flex gap-1">
+            <div className="absolute -top-1.5 -right-1.5 flex gap-1">
               <div className="bg-red-500 rounded-full p-1 shadow-lg ring-2 ring-white dark:ring-[rgb(19,31,36)]">
-                <FaHeart className="w-3 h-3 text-white" />
+                <FaHeart className="w-2.5 h-2.5 text-white" />
               </div>
               {finishedUrls.has(article.url) && (
                 <div className="bg-green-500 rounded-full p-1 shadow-lg ring-2 ring-white dark:ring-[rgb(19,31,36)]">
                   <svg
-                    className="w-3 h-3 text-white"
+                    className="w-2.5 h-2.5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -283,20 +307,16 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) =>
               )}
             </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h3
-              className={`font-medium mb-1 line-clamp-2 tracking-wide ${
-                theme === "dark" ? "text-gray-200" : "text-[rgb(19,31,36)]"
-              }`}
-            >
+          <div className="flex-grow min-w-0">
+            <h3 className={`font-medium mb-1 line-clamp-2 ${
+              theme === "dark" ? "text-gray-200" : "text-gray-700"
+            }`}>
               {parseTitle(article.article?.title)}
             </h3>
-            <p
-              className={`text-sm ${
-                theme === "dark" ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {formatJapaneseDate(article.article?.publish_date)}
+            <p className={`text-sm ${
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}>
+              {new Date(article.created_at).toLocaleDateString()}
             </p>
           </div>
         </button>
@@ -360,7 +380,7 @@ const MotivationalMessage = ({ show, theme }) => {
     <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
       <div className={`
         relative
-        animate-[bounceIn_3s_cubic-bezier(0.68,-0.55,0.265,1.55)]
+        animate-[bounceIn_2s_cubic-bezier(0.68,-0.55,0.265,1.55)]
         px-16 py-10 rounded-3xl
         transform rotate-2
         ${theme === 'dark' 
@@ -377,7 +397,7 @@ const MotivationalMessage = ({ show, theme }) => {
         <div className="relative">
           <div className={`
             text-6xl font-bold mb-6 text-center
-            animate-[rubberBand_3s_ease-in-out]
+            animate-[rubberBand_2s_ease-in-out]
             ${theme === 'dark' ? 'text-white' : 'text-gray-800'}
           `}>
             {message.ja}
@@ -421,14 +441,14 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
           <div className="pl-4 space-y-2">
             <p className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              Read another article to see it again! ����
+              Read another article to see it again! 
             </p>
             <p className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
               Keep your progress tracked 📈
             </p>
             <p className="flex items-center gap-2">
-              <span className="text-green-500">��</span>
+              <span className="text-green-500"></span>
               Build your reading streak 🔥
             </p>
           </div>
@@ -2559,68 +2579,58 @@ function NewsReaderContent() {
 
   // Add this function near other utility functions
   const triggerCelebration = () => {
-    const duration = 3000; // 3 seconds duration
+    const duration = 2000; // Reduced from 3000 to 2000ms
     const end = Date.now() + duration;
 
     // Show motivational message
     setShowMotivation(true);
     setTimeout(() => {
       setShowMotivation(false);
-    }, 3000);
+    }, 2000); // Reduced from 3000 to 2000ms
 
-    const colors = ['#FF5757', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6B6B'];
+    const colors = ['#6BCB77', '#4D96FF', '#FFD93D']; // More subtle colors
 
-    // Initial burst
+    // Initial burst - reduced particle count and spread
     confetti({
-      particleCount: 100,
-      spread: 100,
+      particleCount: 50, // Reduced from 100
+      spread: 60, // Reduced from 100
       origin: { y: 0.8 },
       colors: colors,
       gravity: 0.8
     });
 
-    // Continuous side bursts
+    // Continuous side bursts - reduced frequency and count
     (function frame() {
       confetti({
-        particleCount: 4,
+        particleCount: 2, // Reduced from 4
         angle: 60,
-        spread: 55,
+        spread: 40, // Reduced from 55
         origin: { x: 0 },
         colors: colors
       });
       confetti({
-        particleCount: 4,
+        particleCount: 2, // Reduced from 4
         angle: 120,
-        spread: 55,
+        spread: 40, // Reduced from 55
         origin: { x: 1 },
         colors: colors
       });
 
       if (Date.now() < end) {
-        requestAnimationFrame(frame);
+        setTimeout(() => requestAnimationFrame(frame), 100); // Added delay between frames
       }
     }());
 
-    // Additional bursts at intervals
+    // Single additional burst halfway through
     setTimeout(() => {
       confetti({
-        particleCount: 60,
-        spread: 100,
-        origin: { y: 0.6 },
+        particleCount: 30, // Reduced from 60-80
+        spread: 50, // Reduced from 100-120
+        origin: { y: 0.7 },
         colors: colors,
         gravity: 1
       });
     }, 1000);
-
-    setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        spread: 120,
-        origin: { y: 0.8 },
-        colors: colors,
-        gravity: 1.2
-      });
-    }, 2000);
   };
 
   return (
@@ -3218,16 +3228,27 @@ function NewsReaderContent() {
                                   }`}
                               >
                                 <div className="flex-shrink-0 relative">
-                                  {article.image && (
+                                  {article.image || article.article?.images?.[0] ? (
                                     <div className="w-20 h-20 relative rounded-lg overflow-hidden ring-1 ring-black/5">
                                       <img
-                                        src={article.image}
+                                        src={article.image || article.article?.images?.[0]}
                                         alt=""
                                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                         onError={(e) => {
-                                          e.target.style.display = "none";
+                                          e.target.parentElement.style.display = "none";
                                         }}
                                       />
+                                    </div>
+                                  ) : (
+                                    <div className={`w-20 h-20 rounded-lg flex items-center justify-center ${
+                                      preferenceState.theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                                    } ring-1 ring-black/5`}>
+                                      <svg className={`w-8 h-8 ${
+                                        preferenceState.theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+                                      }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 2v4M8 2v4M3 10h18" />
+                                      </svg>
                                     </div>
                                   )}
                                   <div className="absolute -top-1 -right-1 flex gap-1">
@@ -3332,16 +3353,27 @@ function NewsReaderContent() {
                             }`}
                         >
                           <div className="flex-shrink-0 relative">
-                            {article.image && (
+                            {article.image || article.article?.images?.[0] ? (
                               <div className="w-20 h-20 relative rounded-lg overflow-hidden ring-1 ring-black/5">
                                 <img
-                                  src={article.image}
+                                  src={article.image || article.article?.images?.[0]}
                                   alt=""
                                   className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                   onError={(e) => {
-                                    e.target.style.display = "none";
+                                    e.target.parentElement.style.display = "none";
                                   }}
                                 />
+                              </div>
+                            ) : (
+                              <div className={`w-20 h-20 rounded-lg flex items-center justify-center ${
+                                preferenceState.theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                              } ring-1 ring-black/5`}>
+                                <svg className={`w-8 h-8 ${
+                                  preferenceState.theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+                                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 2v4M8 2v4M3 10h18" />
+                                </svg>
                               </div>
                             )}
                             <div className="absolute -top-1 -right-1 flex gap-1">
@@ -3400,9 +3432,9 @@ function NewsReaderContent() {
                   ) : (
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <FaBook className={`w-6 h-6 mb-2 ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        preferenceState.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                       }`} />
-                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
+                      <span className={preferenceState.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
                         No read articles yet
                       </span>
                     </div>
