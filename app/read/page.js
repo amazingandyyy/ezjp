@@ -696,6 +696,8 @@ function NewsReaderContent() {
   const [newsContent, setNewsContent] = useState([]);
   const [newsDate, setNewsDate] = useState(null);
   const [newsImages, setNewsImages] = useState([]);
+  const [newsLabels, setNewsLabels] = useState([]); // Add state for labels
+  const [wordCount, setWordCount] = useState(0); // Add state for word count
   const [currentSentence, setCurrentSentence] = useState(-1);
   const [sentences, setSentences] = useState([]);
   const [error, setError] = useState(null);
@@ -997,7 +999,28 @@ function NewsReaderContent() {
   // Add new state for article loading
   const [loadingArticle, setLoadingArticle] = useState(false);
 
-  // Update fetchNews function
+  // Add helper function to count words
+  const countWords = (content) => {
+    if (!Array.isArray(content)) return 0;
+    
+    let count = 0;
+    content.forEach(paragraph => {
+      if (paragraph.type === 'paragraph') {
+        paragraph.content.forEach(part => {
+          if (part.type === 'ruby') {
+            count++; // Count each kanji compound as one word
+          } else if (part.type === 'text') {
+            // Count Japanese words by splitting on spaces and punctuation
+            const words = part.content.split(/[\s。、！？]/);
+            count += words.filter(word => word.length > 0).length;
+          }
+        });
+      }
+    });
+    return count;
+  };
+
+  // Update fetchNews function to set labels and word count
   const fetchNews = async (url) => {
     if (!url) return;
     
@@ -1018,13 +1041,6 @@ function NewsReaderContent() {
         throw new Error(data.message || 'This article had an issue loading. Please try another one.');
       }
 
-      // Add debug logging
-      console.log('API Response data:', {
-        publish_date: data.publish_date,
-        published_date: data.published_date,
-        date: data.date
-      });
-
       // Process the successful response
       setNewsTitle(data.title);
       setNewsContent(data.content);
@@ -1032,9 +1048,13 @@ function NewsReaderContent() {
       console.log('Using date:', dateToUse);
       setNewsDate(dateToUse);
       setNewsImages(data.images || []);
-      setCurrentSentence(-1);  // Set to -1 instead of 0
+      setNewsLabels(data.labels || []); // Set labels
+      setCurrentSentence(-1);
       setSentences(splitIntoSentences(data.content));
-      setReadingStartTime(Date.now()); // Set reading start time after successful load
+      setReadingStartTime(Date.now());
+      
+      // Calculate and set word count
+      setWordCount(countWords(data.content));
     } catch (error) {
       console.error('Error fetching news:', error);
       setError(error.message || 'This article had an issue loading. Please try another one.');
@@ -1043,8 +1063,10 @@ function NewsReaderContent() {
       setNewsContent([]);
       setNewsDate(null);
       setNewsImages([]);
+      setNewsLabels([]);
       setCurrentSentence(-1);
       setSentences([]);
+      setWordCount(0);
     } finally {
       // Add a minimum loading time to prevent flashing
       const minimumLoadingTime = 300;
@@ -2432,6 +2454,7 @@ function NewsReaderContent() {
       setNewsContent([]);
       setNewsDate(null);
       setNewsImages([]);
+      setNewsLabels([]);
       setCurrentSentence(-1);
       setSentences([]);
       setError(null);
@@ -3534,7 +3557,32 @@ function NewsReaderContent() {
                         </span>
                       </a>
                     </div>
+                    {/* Add word count */}
+                    <div className="inline-flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                      </svg>
+                      <span className="font-medium">{wordCount} words</span>
+                    </div>
                   </div>
+                  {/* Add labels if available */}
+                  {newsLabels?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {newsLabels.map((label, index) => (
+                        <span
+                          key={index}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            ${preferenceState.theme === "dark"
+                              ? "bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/30"
+                              : "bg-purple-50 text-purple-700 ring-1 ring-purple-500/20"
+                            }`}
+                        >
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex items-start gap-4 mb-3">
                     <h2
                       className={`font-serif leading-snug tracking-tight w-full break-words overflow-wrap-anywhere ${
