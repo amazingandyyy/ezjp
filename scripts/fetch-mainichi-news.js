@@ -87,8 +87,21 @@ async function fetchArticleList() {
     const preview = $el.find('.text-ellipsis-2').text().trim();
     
     if (title && link) {
-      // Convert date format from "YYYY/MM/DD HH:mm" to "YYYY-MM-DD HH:mm:ss"
-      const parsedDate = date.replace(/(\d{4})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2})/, '$1-$2-$3 $4:$5:00');
+      // Convert date format from "YYYY/MM/DD HH:mm" to ISO format with JST timezone
+      const parsedDate = date.replace(
+        /(\d{4})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2})/,
+        (_, year, month, day, hour, minute) => {
+          // Create date in JST
+          const jstDate = new Date(Date.UTC(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+            parseInt(hour) - 9, // Convert JST to UTC by subtracting 9 hours
+            parseInt(minute)
+          ));
+          return jstDate.toISOString();
+        }
+      );
       
       // Fix URL formatting - remove any duplicate domains and ensure proper path
       const cleanLink = link.replace(/^\/+/, '').replace(/^mainichi\.jp\//, '');

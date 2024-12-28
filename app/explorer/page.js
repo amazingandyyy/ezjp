@@ -8,44 +8,32 @@ import { supabase } from '../../lib/supabase';
 import Navbar from '../components/Navbar';
 
 // Add helper function to create JST date
-const createJSTDate = (year, month, day, hours = 0, minutes = 0, seconds = 0) => {
-  // Create a date in UTC
-  const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
-  return date;
+const createJSTDate = (isoString) => {
+  // Parse ISO string to UTC date
+  const date = new Date(isoString);
+  // Add 9 hours to convert UTC to JST
+  return new Date(date.getTime() + (9 * 60 * 60 * 1000));
 };
 
 const formatRelativeTime = (dateStr) => {
   if (!dateStr) return '';
   try {
-    const [datePart, timePart] = dateStr.split(' ');
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes, seconds] = timePart.split(':').map(Number);
-    
-    // Create date in JST
-    const jstDate = createJSTDate(year, month, day, hours, minutes, seconds);
+    // Create date in JST from ISO string
+    const jstDate = createJSTDate(dateStr);
     const now = new Date();
+    const jstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
 
     // Debug log for date parsing
     console.log('formatRelativeTime debug:', {
       input: dateStr,
-      parsed: {
-        datePart,
-        timePart,
-        year,
-        month,
-        day,
-        hours,
-        minutes,
-        seconds
-      },
       jstDate: jstDate.toISOString(),
       localJstDate: jstDate.toString(),
-      now: now.toISOString(),
+      jstNow: jstNow.toISOString(),
       localNow: now.toString(),
       isToday: isToday(dateStr)
     });
 
-    const diffInMilliseconds = now.getTime() - jstDate.getTime();
+    const diffInMilliseconds = jstNow.getTime() - jstDate.getTime();
     const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -75,16 +63,13 @@ const formatRelativeTime = (dateStr) => {
 const isToday = (dateStr) => {
   if (!dateStr) return false;
   try {
-    const [datePart, timePart] = dateStr.split(' ');
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes, seconds] = timePart ? timePart.split(':').map(Number) : [0, 0, 0];
-    
-    // Create date in JST
-    const date = createJSTDate(year, month, day, hours, minutes, seconds);
+    // Create date in JST from ISO string
+    const jstDate = createJSTDate(dateStr);
     const now = new Date();
+    const jstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
 
     // Calculate time difference in hours
-    const diffInMilliseconds = now.getTime() - date.getTime();
+    const diffInMilliseconds = jstNow.getTime() - jstDate.getTime();
     const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
 
     // Consider it today's news if it's less than 24 hours old
