@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/amazingandyyy/ezjp/compare/v1.8.0...v1.9.0) (2024-12-28)
+
+
+### Features
+
+* add ruby text styles and enhance furigana parsing logic ([23fa7f7](https://github.com/amazingandyyy/ezjp/commit/23fa7f76f07bd4ae589fb95492b7f38a0d8bcfec))
+
 # [1.8.0](https://github.com/amazingandyyy/ezjp/compare/v1.7.2...v1.8.0) (2024-12-28)
 
 
