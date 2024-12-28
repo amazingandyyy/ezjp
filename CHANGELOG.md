@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/amazingandyyy/ezjp/compare/v1.7.2...v1.8.0) (2024-12-28)
+
+
+### Features
+
+* enhance news fetching and parsing functionality ([0e360ff](https://github.com/amazingandyyy/ezjp/commit/0e360ffd14a55da4fae20ce34815494c88a49ad9))
+
 ## [1.7.2](https://github.com/amazingandyyy/ezjp/compare/v1.7.1...v1.7.2) (2024-12-28)
 
 
