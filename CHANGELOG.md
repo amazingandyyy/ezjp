@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/amazingandyyy/ezjp/compare/v1.14.0...v1.15.0) (2024-12-28)
+
+
+### Features
+
+* enhance changelog page with suggestions tab and improved navigation ([f90efe5](https://github.com/amazingandyyy/ezjp/commit/f90efe5fd2955312d7df8ade5dbb2cffad53df9a))
+
 # [1.14.0](https://github.com/amazingandyyy/ezjp/compare/v1.13.0...v1.14.0) (2024-12-28)
 
 
