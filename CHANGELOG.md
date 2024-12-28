@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/amazingandyyy/ezjp/compare/v1.11.0...v1.12.0) (2024-12-28)
+
+
+### Features
+
+* add word count and labels to NewsReaderContent component ([48ea7f8](https://github.com/amazingandyyy/ezjp/commit/48ea7f8c85f61d23398d051eada6dbf7d98c9f78))
+
 # [1.11.0](https://github.com/amazingandyyy/ezjp/compare/v1.10.0...v1.11.0) (2024-12-28)
 
 
