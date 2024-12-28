@@ -3,19 +3,35 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import { supabase } from '@/lib/supabase';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const ChangelogPage = () => {
   const { profile, user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [changelog, setChangelog] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = profile?.theme || 'light';
-  const [activeTab, setActiveTab] = useState('changelog');
+  const [activeTab, setActiveTab] = useState(searchParams.get('section') === 'suggestions' ? 'suggestions' : 'changelog');
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [newSuggestion, setNewSuggestion] = useState({ title: '', description: '' });
   const [showNewSuggestionForm, setShowNewSuggestionForm] = useState(false);
   const [editingSuggestion, setEditingSuggestion] = useState(null);
+
+  // Handle tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Update URL without refreshing the page
+    const url = new URL(window.location);
+    if (tab === 'suggestions') {
+      url.searchParams.set('section', 'suggestions');
+    } else {
+      url.searchParams.delete('section');
+    }
+    router.replace(url.pathname + url.search);
+  };
 
   // Fetch suggestions
   useEffect(() => {
@@ -225,9 +241,9 @@ const ChangelogPage = () => {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[rgb(19,31,36)]' : 'bg-gray-50'}`}>
-      <div className={`sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-[rgb(19,31,36)]/70 border-b ${
-        theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
-      }`}>
+      <div className={`sticky top-0 z-50 ${
+        theme === 'dark' ? 'bg-[rgb(19,31,36)] border-gray-800' : 'bg-white border-gray-200'
+      } border-b`}>
         <Navbar theme={theme} hideNewsListButton={true} />
       </div>
       
@@ -236,12 +252,12 @@ const ChangelogPage = () => {
           <h1 className={`text-3xl sm:text-4xl font-bold mb-3 tracking-tight ${
             theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
           }`}>
-            Changelog
+            Changelog & Suggestions
           </h1>
           <p className={`text-base sm:text-lg max-w-2xl ${
             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
           }`}>
-            Track all the updates and improvements to EZJP
+            Track updates and improvements to EZJP. Have an idea? Switch to the suggestions tab to share your thoughts!
           </p>
         </div>
 
@@ -253,7 +269,7 @@ const ChangelogPage = () => {
         }`}>
           <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <button
-              onClick={() => setActiveTab('changelog')}
+              onClick={() => handleTabChange('changelog')}
               className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                 activeTab === 'changelog'
                   ? theme === 'dark'
@@ -276,7 +292,7 @@ const ChangelogPage = () => {
               Changelog
             </button>
             <button
-              onClick={() => setActiveTab('suggestions')}
+              onClick={() => handleTabChange('suggestions')}
               className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                 activeTab === 'suggestions'
                   ? theme === 'dark'
@@ -294,7 +310,7 @@ const ChangelogPage = () => {
                     : 'text-gray-900'
                   : 'text-current'
               }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
               Suggestions
             </button>

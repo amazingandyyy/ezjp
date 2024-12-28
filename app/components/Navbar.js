@@ -936,7 +936,15 @@ export default function Navbar({
 
                 {/* Version Info */}
                 <div className="px-4 py-2">
-                  <div className={`text-xs ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
+                  <div 
+                    onClick={() => {
+                      setShowProfile(false);
+                      router.push('/changelog');
+                    }}
+                    className={`text-xs cursor-pointer hover:opacity-80 transition-opacity ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     Version {version || '1.0.0'}
                   </div>
                 </div>
