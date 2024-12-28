@@ -77,7 +77,7 @@ async function fetchArticleList() {
   // Process all articles
   $('.articlelist.is-tophorizontal li').each((_, element) => {
     const $el = $(element);
-    // Skip ad elements
+    // Skip ad elements and 社告 (company announcements)
     if ($el.find('[id^="ad-"]').length > 0) return;
     
     const title = $el.find('.articlelist-title').text().trim();
@@ -85,6 +85,9 @@ async function fetchArticleList() {
     const date = $el.find('.articletag-date').text().trim();
     const category = $el.find('.articlelist-shoulder').text().trim();
     const preview = $el.find('.text-ellipsis-2').text().trim();
+    
+    // Skip if category is 社告
+    if (category === '社告') return;
     
     if (title && link) {
       // Convert date format from "YYYY/MM/DD HH:mm" to ISO format with JST timezone
