@@ -1,12 +1,74 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheck, FaSpinner, FaHourglassHalf } from 'react-icons/fa';
 
-const ChangelogPage = () => {
+// Create a client component for the tab content
+const TabContent = ({ activeTab, onTabChange, theme, children }) => {
+  return (
+    <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md ${
+      theme === 'dark'
+        ? 'bg-[rgb(19,31,36)]/90 border-b border-gray-800/50'
+        : 'bg-gray-50/90 border-b border-gray-200/50'
+    }`}>
+      <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <button
+          onClick={() => onTabChange('changelog')}
+          className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
+            activeTab === 'changelog'
+              ? theme === 'dark'
+                ? 'text-white'
+                : 'text-gray-900'
+              : theme === 'dark'
+                ? 'text-gray-400 hover:text-gray-300'
+                : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <svg className={`w-4 h-4 transition-colors ${
+            activeTab === 'changelog'
+              ? theme === 'dark'
+                ? 'text-white'
+                : 'text-gray-900'
+              : 'text-current'
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Changelog
+        </button>
+        <button
+          onClick={() => onTabChange('suggestions')}
+          className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
+            activeTab === 'suggestions'
+              ? theme === 'dark'
+                ? 'text-white'
+                : 'text-gray-900'
+              : theme === 'dark'
+                ? 'text-gray-400 hover:text-gray-300'
+                : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <svg className={`w-4 h-4 transition-colors ${
+            activeTab === 'suggestions'
+              ? theme === 'dark'
+                ? 'text-white'
+                : 'text-gray-900'
+              : 'text-current'
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          Suggestions
+        </button>
+      </div>
+    </nav>
+  );
+};
+
+// Create a client component for the page content
+const PageContent = () => {
   const { profile, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -134,8 +196,11 @@ const ChangelogPage = () => {
 
   const handleEditSuggestion = (suggestion) => {
     if (suggestion.votes_count > 2) {
-      // Could add a toast notification here if you have a notification system
       console.warn('Cannot edit suggestions with more than 2 votes');
+      return;
+    }
+    if (suggestion.status !== 'pending') {
+      console.warn('Cannot edit suggestions that are in progress or completed');
       return;
     }
     setNewSuggestion({
@@ -317,6 +382,36 @@ const ChangelogPage = () => {
     return stats;
   };
 
+  // Add function to handle suggestion deletion
+  const handleDeleteSuggestion = async (suggestionId, status) => {
+    if (!user) return;
+    
+    // Only check status for non-super admins
+    if (!canManageSuggestions && status !== 'pending') {
+      console.warn('Cannot delete suggestions that are in progress or completed');
+      return;
+    }
+    
+    if (!window.confirm('Are you sure you want to delete this suggestion?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('suggestions')
+        .delete()
+        .eq('id', suggestionId);
+
+      if (error) {
+        console.error('Delete error:', error);
+        return;
+      }
+      fetchSuggestions();
+    } catch (err) {
+      console.error('Error deleting suggestion:', err);
+    }
+  };
+
   // Update the suggestions list rendering
   const renderSuggestions = () => {
     if (loadingSuggestions) {
@@ -369,6 +464,7 @@ const ChangelogPage = () => {
           const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
           const isDone = suggestion.status === 'done';
           const isInProgress = suggestion.status === 'in_progress';
+          const isAuthor = suggestion.user_id === user?.id;
           
           return (
             <div
@@ -456,17 +552,31 @@ const ChangelogPage = () => {
                     <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                       {new Date(suggestion.created_at).toLocaleDateString()}
                     </div>
-                    {suggestion.user_id === user?.id && suggestion.votes_count <= 2 && (
+                    {(isAuthor || canManageSuggestions) && (
                       <>
                         <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                        <button
-                          onClick={() => handleEditSuggestion(suggestion)}
-                          className={`text-xs ${
-                            theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
-                          }`}
-                        >
-                          Edit
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {isAuthor && suggestion.votes_count <= 2 && suggestion.status === 'pending' && (
+                            <button
+                              onClick={() => handleEditSuggestion(suggestion)}
+                              className={`text-xs ${
+                                theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                              }`}
+                            >
+                              Edit
+                            </button>
+                          )}
+                          {(canManageSuggestions || suggestion.status === 'pending') && (
+                            <button
+                              onClick={() => handleDeleteSuggestion(suggestion.id, suggestion.status)}
+                              className={`text-xs ${
+                                theme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
+                              }`}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -501,61 +611,11 @@ const ChangelogPage = () => {
           </p>
         </div>
 
-        {/* Tabs */}
-        <nav className={`sticky top-16 -mx-4 px-4 py-3 mb-10 z-10 backdrop-blur-md ${
-          theme === 'dark'
-            ? 'bg-[rgb(19,31,36)]/90 border-b border-gray-800/50'
-            : 'bg-gray-50/90 border-b border-gray-200/50'
-        }`}>
-          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <button
-              onClick={() => handleTabChange('changelog')}
-              className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
-                activeTab === 'changelog'
-                  ? theme === 'dark'
-                    ? 'text-white'
-                    : 'text-gray-900'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:text-gray-300'
-                    : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <svg className={`w-4 h-4 transition-colors ${
-                activeTab === 'changelog'
-                  ? theme === 'dark'
-                    ? 'text-white'
-                    : 'text-gray-900'
-                  : 'text-current'
-              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              Changelog
-            </button>
-            <button
-              onClick={() => handleTabChange('suggestions')}
-              className={`flex items-center gap-2 px-4 py-2 rounded whitespace-nowrap text-sm font-medium transition-all duration-200 ${
-                activeTab === 'suggestions'
-                  ? theme === 'dark'
-                    ? 'text-white'
-                    : 'text-gray-900'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:text-gray-300'
-                    : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <svg className={`w-4 h-4 transition-colors ${
-                activeTab === 'suggestions'
-                  ? theme === 'dark'
-                    ? 'text-white'
-                    : 'text-gray-900'
-                  : 'text-current'
-              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Suggestions
-            </button>
-          </div>
-        </nav>
+        <TabContent
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          theme={theme}
+        />
 
         {activeTab === 'changelog' ? (
           // Existing changelog content
@@ -789,6 +849,15 @@ const ChangelogPage = () => {
         )}
       </main>
     </div>
+  );
+};
+
+// Main page component
+const ChangelogPage = () => {
+  return (
+    <Suspense fallback={null}>
+      <PageContent />
+    </Suspense>
   );
 };
 
