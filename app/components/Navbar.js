@@ -442,7 +442,7 @@ export default function Navbar({
             {user && showProfile && (
               <div
                 className={`fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full mt-1 
-                  rounded-2xl shadow-lg border-2 overflow-hidden
+                  rounded-2xl shadow-lg border-2 overflow-hidden max-h-[calc(100vh-5rem)] overflow-y-auto
                   sm:w-[320px]
                   ${
                     theme === "dark"
