@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/amazingandyyy/ezjp/compare/v1.15.0...v1.16.0) (2024-12-28)
+
+
+### Features
+
+* enhance changelog and settings pages with user roles and suggestion management ([363b32f](https://github.com/amazingandyyy/ezjp/commit/363b32f0eb5287e83db29d168ff7e618551b186d))
+
 # [1.15.0](https://github.com/amazingandyyy/ezjp/compare/v1.14.0...v1.15.0) (2024-12-28)
 
 
