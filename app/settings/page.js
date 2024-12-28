@@ -1604,8 +1604,7 @@ function SettingsContent() {
                                 : "text-gray-600"
                             }`}>
                               <a 
-                                href="https://github.com/amazingandyyy/ezjp/releases" 
-                                target="_blank" 
+                                href="/changelog" 
                                 rel="noopener noreferrer"
                                 className="hover:underline"
                               >
