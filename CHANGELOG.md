@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/amazingandyyy/ezjp/compare/v1.16.0...v1.17.0) (2024-12-28)
+
+
+### Features
+
+* **changelog:** enhance suggestion management and navigation ([0638287](https://github.com/amazingandyyy/ezjp/commit/0638287cccf08a57e90a93f19f8b2e317118328c))
+
 # [1.16.0](https://github.com/amazingandyyy/ezjp/compare/v1.15.0...v1.16.0) (2024-12-28)
 
 
