@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/amazingandyyy/ezjp/compare/v1.21.2...v1.22.0) (2024-12-29)
+
+
+### Features
+
+* enhance audio playback management in NewsReaderContent ([40e43ba](https://github.com/amazingandyyy/ezjp/commit/40e43ba8d9b6ef1ba4e1eadb1350cc2a48ddf01b))
+
 ## [1.21.2](https://github.com/amazingandyyy/ezjp/compare/v1.21.1...v1.21.2) (2024-12-29)
 
 
