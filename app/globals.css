@@ -53,6 +53,6 @@ rt {
   line-height: 1;
   text-align: center;
   user-select: none;
-  transform: translateY(0.1em);
+  transform: translateY(0.25em);
   @apply text-gray-500 dark:text-gray-400;
 }
