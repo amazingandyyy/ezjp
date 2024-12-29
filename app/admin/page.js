@@ -512,7 +512,8 @@ export default function AdminPage() {
 
         // Check if user is logged in
         if (!user) {
-          throw new Error('Please log in to access this page');
+          window.location.href = '/';
+          return;
         }
 
         // Check if profile is loaded and has admin role
@@ -522,7 +523,8 @@ export default function AdminPage() {
 
         // Check admin role
         if (profile.role_level < 10) {
-          throw new Error('You do not have permission to access this page');
+          window.location.href = '/';
+          return;
         }
 
         const { data, error } = await supabase
@@ -578,7 +580,7 @@ export default function AdminPage() {
               <div className="mt-2 text-sm text-red-700">{error}</div>
               {!user && (
                 <div className="mt-4">
-                  <a href="/login" className="text-sm font-medium text-red-800 hover:text-red-700">
+                  <a href="/join" className="text-sm font-medium text-red-800 hover:text-red-700">
                     Go to Login →
                   </a>
                 </div>
@@ -607,17 +609,19 @@ export default function AdminPage() {
 
   if (!ttsStats) return null;
 
-  const chartData = Object.entries(ttsStats.byDate).map(([date, stats]) => ({
-    date,
-    characters: stats.characters,
-    cost: parseFloat(stats.cost.toFixed(4)),
-    plays: stats.plays
-  }));
+  const chartData = Object.entries(ttsStats.byDate)
+    .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+    .map(([date, stats]) => ({
+      date,
+      characters: stats.characters,
+      cost: parseFloat(stats.cost.toFixed(4)),
+      plays: stats.plays
+    }));
 
   const voiceData = Object.entries(ttsStats.voiceUsage)
     .sort((a, b) => b[1].plays - a[1].plays) // Sort by plays in descending order
     .map(([voice, stats]) => ({
-      voice: `${voiceNameMap[voice] || voice} (${voice})`,
+      voice: `${voiceNameMap[voice] || 'Unknown'} • ${voice}`,
       voiceType: voice.includes('Neural2') ? 'Neural2' : 
                  voice.includes('Wavenet') ? 'Wavenet' : 
                  'Standard',
@@ -1059,45 +1063,76 @@ export default function AdminPage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-6">
-                {/* Voice Type Distribution */}
+                {/* Voice Usage Distribution */}
                 <div>
                   <h3 className={`text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Voice Type Distribution
+                    Voice Usage Distribution
                   </h3>
-                  <div className="h-[250px]">
+                  <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
+                      <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                         <Pie
-                          data={[
-                            { name: 'Neural2', value: ttsStats.voiceTypeDistribution.Neural2.count },
-                            { name: 'Wavenet', value: ttsStats.voiceTypeDistribution.Wavenet.count },
-                            { name: 'Standard', value: ttsStats.voiceTypeDistribution.Standard.count }
-                          ]}
+                          data={voiceData}
                           cx="50%"
                           cy="45%"
-                          labelLine={false}
-                          outerRadius={80}
+                          labelLine={true}
+                          outerRadius={100}
                           fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                          dataKey="plays"
+                          nameKey="voice"
+                          label={({ name, percent }) => {
+                            const [humanName] = name.split(' • ');
+                            return `${humanName} (${(percent * 100).toFixed(0)}%)`;
+                          }}
+                          labelStyle={{
+                            fill: theme === 'dark' ? '#E5E7EB' : '#374151'
+                          }}
+                          activeShape={{ outline: 'none' }}
+                          activeIndex={[]}
+                          isAnimationActive={false}
                         >
-                          <Cell fill="#A855F7" /> {/* Purple-500 for Neural2 */}
-                          <Cell fill="#3B82F6" /> {/* Blue-500 for Wavenet */}
-                          <Cell fill="#10B981" /> {/* Emerald-500 for Standard */}
+                          {voiceData.map((entry, index) => {
+                            let color;
+                            switch (entry.voiceType) {
+                              case 'Neural2':
+                                color = theme === 'dark' ? '#A855F7' : '#9333EA'; // Purple
+                                break;
+                              case 'Wavenet':
+                                color = theme === 'dark' ? '#3B82F6' : '#2563EB'; // Blue
+                                break;
+                              default:
+                                color = theme === 'dark' ? '#10B981' : '#059669'; // Emerald
+                            }
+                            return <Cell key={index} fill={color} />;
+                          })}
                         </Pie>
                         <Tooltip 
-                          formatter={(value, name) => [
-                            <div key="tooltip" className="space-y-1">
-                              <div className="font-medium">{value.toLocaleString()} plays</div>
-                              <div className="text-xs opacity-80">{name} voice type</div>
-                            </div>
-                          ]}
+                          formatter={(value, name) => {
+                            const [humanName, modelName] = name.split(' • ');
+                            const total = voiceData.reduce((sum, item) => sum + item.plays, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return [
+                              <div key="tooltip" className="space-y-2">
+                                <div className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                  {humanName}
+                                </div>
+                                <div className={`font-mono text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {modelName}
+                                </div>
+                                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {value.toLocaleString()} plays ({percentage}%)
+                                </div>
+                              </div>
+                            ];
+                          }}
                           contentStyle={{
-                            backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
-                            border: 'none',
-                            borderRadius: '0.5rem',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                            padding: '0.75rem',
+                            backgroundColor: theme === 'dark' ? '#1E293B' : 'white',
+                            border: theme === 'dark' ? '1px solid #475569' : 'none',
+                            borderRadius: '0.75rem',
+                            boxShadow: theme === 'dark' ? 
+                              '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3)' : 
+                              '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+                            padding: '1rem',
                           }}
                         />
                         <Legend 
@@ -1144,7 +1179,17 @@ export default function AdminPage() {
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
-                          label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                          nameKey="name"
+                          label={({ name, percent }) => {
+                            const [humanName] = name.split(' • ');
+                            return `${humanName} (${(percent * 100).toFixed(0)}%)`;
+                          }}
+                          labelStyle={{
+                            fill: theme === 'dark' ? '#E5E7EB' : '#374151'
+                          }}
+                          activeShape={{ outline: 'none' }}
+                          activeIndex={[]}
+                          isAnimationActive={false}
                         >
                           <Cell fill="#EC4899" /> {/* Pink-500 for Female */}
                           <Cell fill="#6366F1" /> {/* Indigo-500 for Male */}

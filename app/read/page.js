@@ -3128,6 +3128,7 @@ function NewsReaderContent() {
                     {availableVoices.map((voice) => (
                       <option key={voice.name} value={voice.name}>
                         {voice.displayName} ({(voice.ssmlGender || 'unspecified').toLowerCase()})
+                        {(voice.name.includes('Neural2') || voice.name.includes('Wavenet')) && ' (Premium)'}
                       </option>
                     ))}
                     {availableVoices.length === 0 && (
