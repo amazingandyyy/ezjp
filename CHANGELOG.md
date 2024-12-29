@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/amazingandyyy/ezjp/compare/v1.19.0...v1.20.0) (2024-12-29)
+
+
+### Features
+
+* update TTS functionality and enhance admin features ([bf3ef98](https://github.com/amazingandyyy/ezjp/commit/bf3ef986febff290d06e566e8df93cecf90c340a))
+
 # [1.19.0](https://github.com/amazingandyyy/ezjp/compare/v1.18.0...v1.19.0) (2024-12-29)
 
 
