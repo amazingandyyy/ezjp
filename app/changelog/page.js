@@ -84,6 +84,7 @@ const PageContent = () => {
   const [editingSuggestion, setEditingSuggestion] = useState(null);
   const userRoleLevel = profile?.role_level || 0;
   const canManageSuggestions = userRoleLevel >= 10;
+  const [activeStatusFilter, setActiveStatusFilter] = useState(null);
 
   // Handle voting
   const handleVote = async (suggestionId, hasVoted) => {
@@ -417,13 +418,82 @@ const PageContent = () => {
     }
   };
 
+  // Update suggestions rendering to include filtering
+  const filteredSuggestions = suggestions.filter(suggestion => 
+    activeStatusFilter ? suggestion.status === activeStatusFilter : true
+  );
+
+  // Stats section with clickable filters
+  const renderStatsSection = () => {
+    const stats = getSuggestionStats();
+    
+    const renderStatButton = (status, count, icon, colors) => (
+      <button
+        onClick={() => setActiveStatusFilter(activeStatusFilter === status ? null : status)}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 ${
+          activeStatusFilter === status 
+            ? theme === 'dark'
+              ? 'ring-2 ring-offset-2 ring-offset-[rgb(19,31,36)] ' + colors.ringDark
+              : 'ring-2 ring-offset-2 ' + colors.ringLight
+            : ''
+        } ${colors.bg}`}
+      >
+        {icon}
+        <span className={`text-sm font-medium ${colors.text}`}>
+          {count} {status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+        </span>
+      </button>
+    );
+
+    return (
+      <div className="flex flex-wrap gap-4">
+        {renderStatButton('open', stats.open, 
+          <FaHourglassHalf className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />,
+          {
+            bg: theme === 'dark' ? 'bg-gray-800/80' : 'bg-gray-100',
+            text: theme === 'dark' ? 'text-gray-300' : 'text-gray-700',
+            ringDark: 'ring-gray-400',
+            ringLight: 'ring-gray-400'
+          }
+        )}
+        {renderStatButton('in_progress', stats.in_progress,
+          <FaSpinner className={`w-4 h-4 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`} />,
+          {
+            bg: theme === 'dark' ? 'bg-yellow-900/20' : 'bg-yellow-50',
+            text: theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700',
+            ringDark: 'ring-yellow-400',
+            ringLight: 'ring-yellow-400'
+          }
+        )}
+        {renderStatButton('completed', stats.completed,
+          <FaCheck className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />,
+          {
+            bg: theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50',
+            text: theme === 'dark' ? 'text-green-300' : 'text-green-700',
+            ringDark: 'ring-green-400',
+            ringLight: 'ring-green-400'
+          }
+        )}
+        {renderStatButton('closed', stats.closed,
+          <FaTimes className={`w-4 h-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />,
+          {
+            bg: theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50',
+            text: theme === 'dark' ? 'text-red-300' : 'text-red-700',
+            ringDark: 'ring-red-400',
+            ringLight: 'ring-red-400'
+          }
+        )}
+      </div>
+    );
+  };
+
   // Update the suggestions list rendering
   const renderSuggestions = () => {
     if (loadingSuggestions) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
           <div className={`w-7 h-7 border-2 rounded-full animate-spin ${
-            theme === 'dark' ? 'border-purple-400 border-t-transparent' : 'border-purple-600 border-t-transparent'
+            theme === 'dark' ? 'border-green-400 border-t-transparent' : 'border-green-600 border-t-transparent'
           }`} />
           <p className={`mt-3 text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             Loading suggestions...
@@ -432,168 +502,141 @@ const PageContent = () => {
       );
     }
 
-    const stats = getSuggestionStats();
-
     return (
       <div className="space-y-6">
         {/* Stats section */}
-        <div className="flex flex-wrap gap-4">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-            theme === 'dark' ? 'bg-gray-800/80' : 'bg-gray-100'
-          }`}>
-            <FaHourglassHalf className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
-            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-              {stats.open} Open
-            </span>
-          </div>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-            theme === 'dark' ? 'bg-yellow-900/20' : 'bg-yellow-50'
-          }`}>
-            <FaSpinner className={`w-4 h-4 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`} />
-            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
-              {stats.in_progress} In Progress
-            </span>
-          </div>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-            theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'
-          }`}>
-            <FaCheck className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
-            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
-              {stats.completed} Completed
-            </span>
-          </div>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-            theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'
-          }`}>
-            <FaTimes className={`w-4 h-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
-            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>
-              {stats.closed} Closed
-            </span>
-          </div>
-        </div>
+        {renderStatsSection()}
 
         {/* Suggestions list */}
-        {suggestions.map((suggestion) => {
-          const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
-          const isDone = suggestion.status === 'completed';
-          const isInProgress = suggestion.status === 'in_progress';
-          const isAuthor = suggestion.user_id === user?.id;
-          
-          return (
-            <div
-              key={suggestion.id}
-              className={`p-6 rounded-xl ${
-                suggestion.status === 'closed'
-                  ? theme === 'dark'
-                    ? 'bg-red-900/20 border-red-800/30'
-                    : 'bg-red-50 border-red-200/50'
-                  : suggestion.status === 'completed'
-                    ? theme === 'dark'
-                      ? 'bg-green-900/20 border-green-800/30'
-                      : 'bg-green-50 border-green-200/50'
-                    : suggestion.status === 'in_progress'
-                      ? theme === 'dark'
-                        ? 'bg-yellow-900/20 border-yellow-800/30'
-                        : 'bg-yellow-50/80 border-yellow-200/50'
-                      : theme === 'dark'
-                        ? 'bg-gray-800/80 border border-gray-700/50'
-                        : 'bg-white border border-gray-200'
-              }`}
-            >
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-4">
-                  {/* Vote button */}
-                  <button
-                    onClick={() => handleVote(suggestion.id, hasVoted)}
-                    disabled={!user}
-                    className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
-                      hasVoted
-                        ? theme === 'dark'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-green-100 text-green-600'
-                        : theme === 'dark'
-                          ? 'bg-gray-900/50 text-gray-400 hover:text-green-400'
-                          : 'bg-gray-50 text-gray-500 hover:text-green-600'
-                    }`}
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill={hasVoted ? "currentColor" : "none"}
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+        {filteredSuggestions.length === 0 ? (
+          <div className={`text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            No suggestions found {activeStatusFilter && `with status "${activeStatusFilter}"`}
+          </div>
+        ) : (
+          filteredSuggestions.map((suggestion) => {
+            const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
+            const isDone = suggestion.status === 'completed';
+            const isInProgress = suggestion.status === 'in_progress';
+            const isAuthor = suggestion.user_id === user?.id;
+            
+            return (
+              <div
+                key={suggestion.id}
+                className={`p-6 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/20 hover:bg-gray-800/30' +
+                      (suggestion.status === 'closed'
+                        ? ' border-red-900/30 bg-gradient-to-br from-red-950/20 to-transparent'
+                        : suggestion.status === 'completed'
+                          ? ' border-green-900/30 bg-gradient-to-br from-green-950/20 to-transparent'
+                          : suggestion.status === 'in_progress'
+                            ? ' border-yellow-900/30 bg-gradient-to-br from-yellow-950/20 to-transparent'
+                            : ' border-gray-700/50')
+                    : 'bg-white/90 hover:bg-white' +
+                      (suggestion.status === 'closed'
+                        ? ' border-red-200/70 bg-gradient-to-br from-red-50 to-white'
+                        : suggestion.status === 'completed'
+                          ? ' border-green-200/70 bg-gradient-to-br from-green-50 to-white'
+                          : suggestion.status === 'in_progress'
+                            ? ' border-yellow-200/70 bg-gradient-to-br from-yellow-50 to-white'
+                            : ' border-gray-200/70')
+                }`}
+              >
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-start gap-4">
+                    {/* Vote button */}
+                    <button
+                      onClick={() => handleVote(suggestion.id, hasVoted)}
+                      disabled={!user}
+                      className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
+                        hasVoted
+                          ? theme === 'dark'
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-green-100 text-green-600'
+                          : theme === 'dark'
+                            ? 'bg-gray-900/50 text-gray-400 hover:text-green-400'
+                            : 'bg-gray-50 text-gray-500 hover:text-green-600'
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 15l7-7 7 7"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium">{suggestion.votes_count}</span>
-                  </button>
+                      <svg
+                        className="w-4 h-4"
+                        fill={hasVoted ? "currentColor" : "none"}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 15l7-7 7 7"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium">{suggestion.votes_count}</span>
+                    </button>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
-                          {suggestion.title}
-                        </h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                            {suggestion.title}
+                          </h3>
+                        </div>
+                        {renderSuggestionStatus(suggestion)}
                       </div>
-                      {renderSuggestionStatus(suggestion)}
-                    </div>
-                    <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {suggestion.description}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4">
-                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                        Suggested by {suggestion.profiles.username}
+                      <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {suggestion.description}
+                      </p>
+                      <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4">
+                        <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                          Suggested by {suggestion.profiles.username}
+                        </div>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                        <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                          {new Date(suggestion.created_at).toLocaleDateString()}
+                        </div>
+                        {suggestion.status_updated_by && suggestion.status_updated_at && (
+                          <>
+                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Status updated by {suggestion.status_updater?.username || 'Unknown'} • {new Date(suggestion.status_updated_at).toLocaleDateString()}
+                            </div>
+                          </>
+                        )}
+                        {(isAuthor || canManageSuggestions) && (
+                          <>
+                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                            <div className="flex items-center gap-2">
+                              {isAuthor && suggestion.votes_count <= 2 && suggestion.status === 'pending' && (
+                                <button
+                                  onClick={() => handleEditSuggestion(suggestion)}
+                                  className={`text-xs ${
+                                    theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                                  }`}
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              {(canManageSuggestions || (isAuthor && !suggestion.status_updated_by)) && (
+                                <button
+                                  onClick={() => handleDeleteSuggestion(suggestion.id, suggestion.status)}
+                                  className={`text-xs ${
+                                    theme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
+                                  }`}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {new Date(suggestion.created_at).toLocaleDateString()}
-                      </div>
-                      {suggestion.status_updated_by && suggestion.status_updated_at && (
-                        <>
-                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                            Status updated by {suggestion.status_updater?.username || 'Unknown'} • {new Date(suggestion.status_updated_at).toLocaleDateString()}
-                          </div>
-                        </>
-                      )}
-                      {(isAuthor || canManageSuggestions) && (
-                        <>
-                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                          <div className="flex items-center gap-2">
-                            {isAuthor && suggestion.votes_count <= 2 && suggestion.status === 'pending' && (
-                              <button
-                                onClick={() => handleEditSuggestion(suggestion)}
-                                className={`text-xs ${
-                                  theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
-                                }`}
-                              >
-                                Edit
-                              </button>
-                            )}
-                            {(canManageSuggestions || (isAuthor && !suggestion.status_updated_by)) && (
-                              <button
-                                onClick={() => handleDeleteSuggestion(suggestion.id, suggestion.status)}
-                                className={`text-xs ${
-                                  theme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
-                                }`}
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     );
   };
@@ -651,21 +694,29 @@ const PageContent = () => {
           ) : (
             <div className="relative space-y-0">
               {/* Main timeline line */}
-              <div className={`absolute left-[15px] sm:left-[19px] top-0 bottom-0 w-[2px] ${
-                theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'
+              <div className={`absolute left-[15px] sm:left-[19px] top-[10px] bottom-[40px] w-[2px] ${
+                theme === 'dark' 
+                  ? 'bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent'
+                  : 'bg-gradient-to-b from-gray-200 via-gray-200/50 to-transparent'
               }`} />
               
               {parsedChangelog.map((release, index) => (
                 <div 
                   key={index}
-                  className="relative pl-8 sm:pl-10 pb-10"
+                  className="relative pl-8 sm:pl-10 pb-10 group"
                 >
-                  {/* Timeline dot */}
-                  <div className={`absolute left-[11px] sm:left-[15px] top-[29px] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] rounded-full border-[2.5px] ${
+                  {/* Timeline dot with ring effect */}
+                  <div className={`absolute left-[9px] sm:left-[13px] top-[29px] w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] rounded-full transition-all duration-300 ${
                     theme === 'dark' 
-                      ? 'bg-[rgb(19,31,36)] border-gray-600' 
-                      : 'bg-white border-gray-300'
-                  }`} />
+                      ? 'bg-[rgb(19,31,36)] group-hover:ring-2 group-hover:ring-gray-700 group-hover:ring-offset-2 group-hover:ring-offset-[rgb(19,31,36)]' 
+                      : 'bg-white group-hover:ring-2 group-hover:ring-gray-300 group-hover:ring-offset-2 group-hover:ring-offset-gray-50'
+                  }`}>
+                    <div className={`absolute inset-[3px] rounded-full transition-colors duration-300 ${
+                      theme === 'dark'
+                        ? 'bg-gray-600 group-hover:bg-gray-500'
+                        : 'bg-gray-300 group-hover:bg-gray-400'
+                    }`} />
+                  </div>
 
                   {/* Date label */}
                   <time className={`block text-xs sm:text-sm mb-2 font-medium tracking-wide ${
@@ -766,12 +817,15 @@ const PageContent = () => {
               <div className="flex justify-end">
                 <button
                   onClick={() => setShowNewSuggestionForm(true)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     theme === 'dark'
-                      ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                      ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                      : 'bg-green-50 text-green-600 hover:bg-green-100'
                   }`}
                 >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
                   New Suggestion
                 </button>
               </div>
@@ -785,12 +839,14 @@ const PageContent = () => {
 
             {/* New suggestion form */}
             {showNewSuggestionForm && (
-              <div className={`p-4 rounded-lg border ${
-                theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'
+              <div className={`p-6 rounded-xl border shadow-sm ${
+                theme === 'dark' 
+                  ? 'bg-gray-800/30 border-gray-700/50 backdrop-blur-sm' 
+                  : 'bg-white border-gray-200'
               }`}>
-                <form onSubmit={handleSubmitSuggestion} className="space-y-4">
+                <form onSubmit={handleSubmitSuggestion} className="space-y-5">
                   <div>
-                    <label className={`block text-sm font-medium mb-1 ${
+                    <label className={`block text-sm font-medium mb-1.5 ${
                       theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Title
@@ -799,16 +855,17 @@ const PageContent = () => {
                       type="text"
                       value={newSuggestion.title}
                       onChange={(e) => setNewSuggestion(prev => ({ ...prev, title: e.target.value }))}
-                      className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        theme === 'dark'
-                          ? 'bg-gray-900/50 border-gray-700 text-gray-200'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      placeholder="Enter a clear and concise title"
+                      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm transition-shadow duration-200 
+                        ${theme === 'dark'
+                          ? 'bg-gray-900/50 border-gray-700/75 text-gray-200 placeholder-gray-500'
+                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                        } focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500`}
                       required
                     />
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-1 ${
+                    <label className={`block text-sm font-medium mb-1.5 ${
                       theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Description
@@ -816,36 +873,56 @@ const PageContent = () => {
                     <textarea
                       value={newSuggestion.description}
                       onChange={(e) => setNewSuggestion(prev => ({ ...prev, description: e.target.value }))}
-                      className={`w-full px-3 py-2 rounded-lg border ${
-                        theme === 'dark'
-                          ? 'bg-gray-900/50 border-gray-700 text-gray-200'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      rows={4}
+                      placeholder="Provide details about your suggestion..."
+                      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm transition-shadow duration-200 
+                        ${theme === 'dark'
+                          ? 'bg-gray-900/50 border-gray-700/75 text-gray-200 placeholder-gray-500'
+                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                        } focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500`}
+                      rows={6}
                       required
                     />
+                    <p className={`mt-2 text-xs ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      Be specific and include any relevant details that would help others understand your suggestion.
+                    </p>
                   </div>
-                  <div className="flex justify-end space-x-3">
+                  <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       type="button"
                       onClick={handleCancelEdit}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                         theme === 'dark'
-                          ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          ? 'text-gray-300 hover:bg-gray-800'
+                          : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                         theme === 'dark'
-                          ? 'bg-green-500 hover:bg-green-600 text-white'
-                          : 'bg-green-600 hover:bg-green-700 text-white'
+                          ? 'bg-green-500 hover:bg-green-600 text-white shadow-sm shadow-green-500/10'
+                          : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
                       }`}
                     >
-                      {editingSuggestion ? 'Update' : 'Submit'}
+                      {editingSuggestion ? (
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                          </svg>
+                          Update Suggestion
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Submit Suggestion
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
