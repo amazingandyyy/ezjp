@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/amazingandyyy/ezjp/compare/v1.21.0...v1.21.1) (2024-12-29)
+
+
+### Bug Fixes
+
+* improve admin page user access and enhance TTS data visualization ([77cacf4](https://github.com/amazingandyyy/ezjp/commit/77cacf481668d9d74bcd91fff8ffb46a1bca5b8e))
+
 # [1.21.0](https://github.com/amazingandyyy/ezjp/compare/v1.20.0...v1.21.0) (2024-12-29)
 
 
