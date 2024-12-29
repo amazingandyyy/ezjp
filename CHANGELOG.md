@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/amazingandyyy/ezjp/compare/v1.17.0...v1.18.0) (2024-12-29)
+
+
+### Features
+
+* enhance user role management and suggestion functionality ([8a19b7a](https://github.com/amazingandyyy/ezjp/commit/8a19b7a11d4711fba683098385b8bacf081edf36))
+
 # [1.17.0](https://github.com/amazingandyyy/ezjp/compare/v1.16.0...v1.17.0) (2024-12-28)
 
 
