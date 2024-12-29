@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/amazingandyyy/ezjp/compare/v1.18.0...v1.19.0) (2024-12-29)
+
+
+### Features
+
+* **changelog:** implement suggestion filtering and enhance UI components ([300e80c](https://github.com/amazingandyyy/ezjp/commit/300e80cc9914f189c7743b91e5cd9bddb4948ee5))
+
 # [1.18.0](https://github.com/amazingandyyy/ezjp/compare/v1.17.0...v1.18.0) (2024-12-29)
 
 
