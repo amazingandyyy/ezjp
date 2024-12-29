@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
@@ -658,6 +658,10 @@ const ProfileDropdown = ({ show, onClose, theme, user, profile, onSignOut }) => 
   );
 };
 
+// Add at the top with other imports
+// const audioContext = typeof window !== 'undefined' ? new (window.AudioContext || window.webkitAudioContext)() : null;
+
+// Add audioManager instance in the NewsReaderContent component
 function NewsReaderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -708,12 +712,19 @@ function NewsReaderContent() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  // const [audioSource, setAudioSource] = useState(null);
+  // const [gainNode, setGainNode] = useState(null);
   const [currentAudio, setCurrentAudio] = useState(null);
+  const audioRef = useRef(null);
 
   // Refs
   const sidebarRef = useRef(null);
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
+
+  // Add refs for timers
+  const repeatIntervalRef = useRef(null);
+  const repeatTimeoutRef = useRef(null);
 
   // Media query hook
   const useMediaQuery = (query) => {
@@ -874,6 +885,14 @@ function NewsReaderContent() {
 
     fetchVoices();
   }, [user]); // Add user as dependency to update when login status changes
+
+  // Initialize audio context
+  // useEffect(() => {
+  //   if (audioContext?.state === 'suspended') {
+  //     audioContext.resume();
+  //   }
+  //   ...
+  // }, []);
 
   // Function to cleanup current audio
   const cleanupAudio = async () => {
@@ -1237,23 +1256,23 @@ function NewsReaderContent() {
         setIsPaused(false);
         
         // Clear any existing repeat intervals
-        if (window.repeatInterval) {
-          clearInterval(window.repeatInterval);
-          window.repeatInterval = null;
+        if (repeatIntervalRef.current) {
+          clearInterval(repeatIntervalRef.current);
+          repeatIntervalRef.current = null;
         }
         
         if (repeatMode === REPEAT_MODES.ONE) {
           let countdownValue = 2;
           setRepeatCountdown(countdownValue);
-          window.repeatInterval = setInterval(() => {
+          repeatIntervalRef.current = setInterval(() => {
             countdownValue -= 1;
             setRepeatCountdown(countdownValue);
             
             if (countdownValue <= 0) {
-              clearInterval(window.repeatInterval);
-              window.repeatInterval = null;
+              clearInterval(repeatIntervalRef.current);
+              repeatIntervalRef.current = null;
               
-              setTimeout(() => {
+              repeatTimeoutRef.current = setTimeout(() => {
                 const repeatUtterance = new SpeechSynthesisUtterance(sentenceToText(sentences[currentSentence]));
                 repeatUtterance.voice = utterance.voice;
                 repeatUtterance.lang = 'ja-JP';
@@ -1273,22 +1292,22 @@ function NewsReaderContent() {
             }
           }, 1000);
         } else if (repeatMode === REPEAT_MODES.ALL && currentSentence < sentences.length - 1) {
-          setTimeout(() => {
+          repeatTimeoutRef.current = setTimeout(() => {
             setCurrentSentence(currentSentence + 1);
             playCurrentSentence(currentSentence + 1);
           }, 800);
         } else if (repeatMode === REPEAT_MODES.ALL && currentSentence === sentences.length - 1) {
           let countdownValue = 5;
           setRepeatCountdown(countdownValue);
-          window.repeatInterval = setInterval(() => {
+          repeatIntervalRef.current = setInterval(() => {
             countdownValue -= 1;
             setRepeatCountdown(countdownValue);
             
             if (countdownValue <= 0) {
-              clearInterval(window.repeatInterval);
-              window.repeatInterval = null;
+              clearInterval(repeatIntervalRef.current);
+              repeatIntervalRef.current = null;
               
-              setTimeout(() => {
+              repeatTimeoutRef.current = setTimeout(() => {
                 setCurrentSentence(0);
                 playCurrentSentence(0);
               }, 200);
@@ -1313,15 +1332,13 @@ function NewsReaderContent() {
     setIsPaused(false);
   }, [preferenceState.preferred_voice, preferenceState.preferred_speed]);
 
-  // Update playCurrentSentence function
+  // Initialize audio manager (single declaration)
+  // const audioManager = useMemo(() => new AudioManager(), []);
+
+  // Audio playback functions
   const playCurrentSentence = async (index = currentSentence) => {
     if (!isBrowser || !sentences[index] || !currentArticleId) {
-      console.error('Cannot play sentence: missing required data', {
-        isBrowser,
-        hasSentence: !!sentences[index],
-        articleId: currentArticleId,
-        index
-      });
+      console.error('Cannot play sentence: missing required data');
       return;
     }
     
@@ -1329,77 +1346,84 @@ function NewsReaderContent() {
       const sentenceText = sentenceToText(sentences[index]);
       const cacheKey = `${sentenceText}_${preferenceState.preferred_voice}_${preferenceState.preferred_speed}`;
 
-      // Cleanup any existing audio first
-      await cleanupAudio();
-      
       setIsVoiceLoading(true);
       setAudioError('');
       
-      // Check cache first
-      if (audioCache[cacheKey]) {
-        const audio = new Audio(audioCache[cacheKey]);
-        audio.playbackRate = preferenceState.preferred_speed || 1.0;
-        
-        // Set up the onended handler for repeat functionality
-        audio.onended = () => {
-          setIsPlaying(false);
-          setIsPaused(false);
-          handleSentenceEnd(index, repeatMode); // Pass current repeatMode
-        };
-        
-        setCurrentAudio(audio);
-        setIsVoiceLoading(false);
-        setIsPlaying(true);
-        setIsPaused(false);
-        await audio.play();
-        return;
+      // Cleanup previous audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onplay = null;
+        audioRef.current.onpause = null;
+        audioRef.current.onerror = null;
       }
+
+      let audioUrl = audioCache[cacheKey];
       
-      // Generate new audio only if not in cache
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: sentenceText,
-          speed: preferenceState.preferred_speed,
-          voice: preferenceState.preferred_voice,
-          userId: user?.id,
-          articleId: currentArticleId,
-          sentenceIndex: index,
-          characterCount: sentenceText.length
-        }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || error.error);
+      if (!audioUrl) {
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: sentenceText,
+            speed: preferenceState.preferred_speed,
+            voice: preferenceState.preferred_voice,
+            userId: user?.id,
+            articleId: currentArticleId,
+            sentenceIndex: index,
+            characterCount: sentenceText.length
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.details || error.error);
+        }
+        
+        const blob = await response.blob();
+        audioUrl = URL.createObjectURL(blob);
+        
+        setAudioCache(prev => ({
+          ...prev,
+          [cacheKey]: audioUrl
+        }));
       }
-      
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      
-      // Cache the audio URL with voice and speed info
-      setAudioCache(prev => ({
-        ...prev,
-        [cacheKey]: url
-      }));
-      
-      const audio = new Audio(url);
+
+      const audio = new Audio(audioUrl);
       audio.playbackRate = preferenceState.preferred_speed || 1.0;
       
-      // Set up the onended handler for repeat functionality
+      // Set up event handlers
       audio.onended = () => {
         setIsPlaying(false);
         setIsPaused(false);
-        handleSentenceEnd(index, repeatMode); // Pass current repeatMode
+        // Ensure we're using the current index when the audio ends
+        handleSentenceEnd(index, repeatMode);
       };
-      
+
+      audio.onplay = () => {
+        setIsPlaying(true);
+        setIsPaused(false);
+      };
+
+      audio.onpause = () => {
+        setIsPlaying(false);
+        setIsPaused(true);
+      };
+
+      audio.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setAudioError('Failed to play audio. Please try again.');
+        setIsPlaying(false);
+        setIsPaused(false);
+      };
+
+      // Store reference for cleanup
+      audioRef.current = audio;
       setCurrentAudio(audio);
+      
       setIsVoiceLoading(false);
-      setIsPlaying(true);
-      setIsPaused(false);
       await audio.play();
       
     } catch (error) {
@@ -1411,16 +1435,49 @@ function NewsReaderContent() {
     }
   };
 
+  const pauseAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  const resumeAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
+  // Add cleanup
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current = null;
+      }
+      Object.values(audioCache).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, []);
+
+  // Update speed when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = preferenceState.preferred_speed || 1.0;
+    }
+  }, [preferenceState.preferred_speed]);
+
   // Add handleSentenceEnd function to handle repeat logic
   const handleSentenceEnd = (index, mode = repeatMode) => {
     // Clear any existing interval and timeouts
-    if (window.repeatInterval) {
-      clearInterval(window.repeatInterval);
-      window.repeatInterval = null;
+    if (repeatIntervalRef.current) {
+      clearInterval(repeatIntervalRef.current);
+      repeatIntervalRef.current = null;
     }
-    if (window.repeatTimeout) {
-      clearTimeout(window.repeatTimeout);
-      window.repeatTimeout = null;
+    if (repeatTimeoutRef.current) {
+      clearTimeout(repeatTimeoutRef.current);
+      repeatTimeoutRef.current = null;
     }
 
     // Reset countdown
@@ -1434,29 +1491,26 @@ function NewsReaderContent() {
       let countdownValue = 2;
       setRepeatCountdown(countdownValue);
       
-      const intervalId = setInterval(() => {
+      repeatIntervalRef.current = setInterval(() => {
         countdownValue -= 1;
         setRepeatCountdown(countdownValue);
         
         if (countdownValue <= 0) {
-          clearInterval(intervalId);
-          // Store timeout ID for cleanup
-          window.repeatTimeout = setTimeout(() => {
-            // Check if we're still in REPEAT_ONE mode before playing
+          clearInterval(repeatIntervalRef.current);
+          repeatIntervalRef.current = null;
+          
+          // Play the same sentence again
+          repeatTimeoutRef.current = setTimeout(() => {
             if (repeatMode === REPEAT_MODES.ONE) {
               playCurrentSentence(index);
             }
           }, 200);
         }
       }, 1000);
-      
-      // Store interval ID for cleanup
-      window.repeatInterval = intervalId;
     } else if (currentMode === REPEAT_MODES.ALL) {
       if (index < sentences.length - 1) {
         // If not the last sentence, play next sentence after a short delay
-        window.repeatTimeout = setTimeout(() => {
-          // Check if we're still in REPEAT_ALL mode before playing
+        repeatTimeoutRef.current = setTimeout(() => {
           if (repeatMode === REPEAT_MODES.ALL) {
             setCurrentSentence(index + 1);
             playCurrentSentence(index + 1);
@@ -1467,32 +1521,28 @@ function NewsReaderContent() {
         let countdownValue = 5;
         setRepeatCountdown(countdownValue);
         
-        const intervalId = setInterval(() => {
+        repeatIntervalRef.current = setInterval(() => {
           countdownValue -= 1;
           setRepeatCountdown(countdownValue);
           
           if (countdownValue <= 0) {
-            clearInterval(intervalId);
-            window.repeatInterval = null;
+            clearInterval(repeatIntervalRef.current);
+            repeatIntervalRef.current = null;
             setRepeatCountdown(0);
-            // Check if we're still in REPEAT_ALL mode before playing
+            
             if (repeatMode === REPEAT_MODES.ALL) {
               setCurrentSentence(0);
-              window.repeatTimeout = setTimeout(() => {
+              repeatTimeoutRef.current = setTimeout(() => {
                 playCurrentSentence(0);
               }, 200);
             }
           }
         }, 1000);
-        
-        // Store interval ID for cleanup
-        window.repeatInterval = intervalId;
       }
     } else {
-      // For no repeat: continue to next sentence if available, otherwise just stop
+      // For no repeat: continue to next sentence if available
       if (index < sentences.length - 1) {
-        window.repeatTimeout = setTimeout(() => {
-          // Check if we're still in NO_REPEAT mode before playing
+        repeatTimeoutRef.current = setTimeout(() => {
           if (repeatMode === REPEAT_MODES.NONE) {
             setCurrentSentence(index + 1);
             playCurrentSentence(index + 1);
@@ -1505,24 +1555,6 @@ function NewsReaderContent() {
         setRepeatCountdown(0);
         setCurrentSentence(-1); // Reset to beginning
       }
-    }
-  };
-
-  // Update pause function
-  const pauseAudio = () => {
-    if (currentAudio) {
-      currentAudio.pause();
-      setIsPlaying(false);
-      setIsPaused(true);
-    }
-  };
-
-  // Update resume function
-  const resumeAudio = () => {
-    if (currentAudio) {
-      currentAudio.play();
-      setIsPlaying(true);
-      setIsPaused(false);
     }
   };
 
@@ -2335,38 +2367,23 @@ function NewsReaderContent() {
 
   // Update the repeat toggle button handler
   const handleRepeatToggle = () => {
-    // Get next repeat mode
     const nextMode = getNextRepeatMode(repeatMode);
     setRepeatMode(nextMode);
 
     // Clear all timers
-    if (window.repeatInterval) {
-      clearInterval(window.repeatInterval);
-      window.repeatInterval = null;
+    if (repeatIntervalRef.current) {
+      clearInterval(repeatIntervalRef.current);
+      repeatIntervalRef.current = null;
     }
-    if (window.repeatTimeout) {
-      clearTimeout(window.repeatTimeout);
-      window.repeatTimeout = null;
+    if (repeatTimeoutRef.current) {
+      clearTimeout(repeatTimeoutRef.current);
+      repeatTimeoutRef.current = null;
     }
     setRepeatCountdown(0);
 
-    // Update current audio's onended handler if it exists
-    if (currentAudio) {
-      // Update the onended handler with the new mode
-      currentAudio.onended = () => {
-        setIsPlaying(false);
-        setIsPaused(false);
-        // Pass the new mode to handleSentenceEnd
-        handleSentenceEnd(currentSentence, nextMode);
-      };
-
-      // If we're switching from REPEAT_ONE to another mode and audio is not playing,
-      // we need to handle the transition immediately
-      if (repeatMode === REPEAT_MODES.ONE && !isPlaying) {
-        handleSentenceEnd(currentSentence, nextMode);
-      }
-    } else {
-      // If no audio is playing, handle the transition immediately
+    // If we're switching from REPEAT_ONE to another mode and audio is not playing,
+    // we need to handle the transition immediately
+    if (repeatMode === REPEAT_MODES.ONE && !isPlaying) {
       handleSentenceEnd(currentSentence, nextMode);
     }
   };
@@ -2410,9 +2427,13 @@ function NewsReaderContent() {
   // Add cleanup for repeat interval
   useEffect(() => {
     return () => {
-      if (window.repeatInterval) {
-        clearInterval(window.repeatInterval);
-        window.repeatInterval = null;
+      if (repeatIntervalRef.current) {
+        clearInterval(repeatIntervalRef.current);
+        repeatIntervalRef.current = null;
+      }
+      if (repeatTimeoutRef.current) {
+        clearTimeout(repeatTimeoutRef.current);
+        repeatTimeoutRef.current = null;
       }
     };
   }, []);
@@ -2761,6 +2782,20 @@ function NewsReaderContent() {
     };
     fetchArticleId();
   }, [sourceUrl]);
+
+  // Add this near other state declarations
+  // const audioManager = useMemo(() => new AudioManager(), []);
+
+  // Add cleanup
+  useEffect(() => {
+    return () => {
+      // audioManager.unload();
+      // Clean up cached audio URLs
+      Object.values(audioCache).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, []);
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
