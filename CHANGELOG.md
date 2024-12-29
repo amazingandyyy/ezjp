@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/amazingandyyy/ezjp/compare/v1.20.0...v1.21.0) (2024-12-29)
+
+
+### Features
+
+* enhance admin dashboard with detailed TTS analytics and user interaction metrics ([24b5846](https://github.com/amazingandyyy/ezjp/commit/24b58462ea8047e8305dfef59648825b11d212c5))
+
 # [1.20.0](https://github.com/amazingandyyy/ezjp/compare/v1.19.0...v1.20.0) (2024-12-29)
 
 
