@@ -475,7 +475,7 @@ function SettingsContent() {
           </div>
         </div>
       )}
-      <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
+      <Navbar theme={profileData.currentTheme} />
 
       <div className="container mx-auto px-4 pt-24 pb-32 flex-1">
         <div className="max-w-2xl mx-auto">

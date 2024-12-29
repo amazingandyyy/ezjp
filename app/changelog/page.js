@@ -646,7 +646,7 @@ const PageContent = () => {
       <div className={`sticky top-0 z-50 ${
         theme === 'dark' ? 'bg-[rgb(19,31,36)] border-gray-800' : 'bg-white border-gray-200'
       } border-b`}>
-        <Navbar theme={theme} hideNewsListButton={true} />
+        <Navbar theme={theme} />
       </div>
       
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-20 sm:py-24">

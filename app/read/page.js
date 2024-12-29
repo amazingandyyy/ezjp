@@ -281,7 +281,7 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) =>
                 }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                  </svg>
               </div>
             )}
             <div className="absolute -top-1.5 -right-1.5 flex gap-1">
@@ -666,6 +666,7 @@ function NewsReaderContent() {
 
   // All state declarations
   const [url, setUrl] = useState('');
+  const [currentArticleId, setCurrentArticleId] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [preferenceState, setPreferenceState] = useState(DEFAULT_PREFERENCES);
   const [updatingPreferences, setUpdatingPreferences] = useState({});
@@ -853,9 +854,11 @@ function NewsReaderContent() {
         
         setAvailableVoices(data.voices);
         
-        // Only set a default voice if none is selected
-        if (data.voices.length > 0 && !preferenceState.preferred_voice) {
-          setPreferenceState(prev => ({ ...prev, preferred_voice: data.voices[0].name }));
+        // Set default voice based on login status
+        if (!preferenceState.preferred_voice) {
+          // Default voices for different user states
+          const defaultVoice = !user ? 'ja-JP-Standard-D' : 'ja-JP-Wavenet-D';
+          setPreferenceState(prev => ({ ...prev, preferred_voice: defaultVoice }));
         }
       } catch (error) {
         console.error('Error fetching voices:', error);
@@ -870,77 +873,116 @@ function NewsReaderContent() {
     };
 
     fetchVoices();
-  }, []); // Remove dependency on preferenceState.preferred_voice
+  }, [user]); // Add user as dependency to update when login status changes
 
-  // Update handleVoiceChange to be the single source of voice updates
+  // Function to cleanup current audio
+  const cleanupAudio = async () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.onended = null; // Remove event listeners
+      currentAudio.onplay = null;
+      currentAudio.onpause = null;
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+      // Small delay to ensure audio is fully stopped
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  };
+
+  // Handle voice change
   const handleVoiceChange = async (newVoice) => {
     try {
-      // Stop current audio and clear cache
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        setCurrentAudio(null);
-      }
+      setUpdatingPreferences(prev => ({ ...prev, voice: true }));
+      setIsVoiceLoading(true);
+      setIsPlaying(false);
+      setIsPaused(false);
 
+      // Cleanup current audio
+      await cleanupAudio();
+
+      // Clear audio cache first
       Object.values(audioCache).forEach(url => {
         URL.revokeObjectURL(url);
       });
       setAudioCache({});
 
-      // Update local state immediately
-      setPreferenceState(prev => ({ ...prev, preferred_voice: newVoice }));
-
-      // Save to database if user is logged in
+      // Update preference in database if user is logged in
       if (user) {
-        setUpdatingPreferences(prev => ({ ...prev, preferred_voice: true }));
-        const { error } = await supabase
+        const { error: updateError } = await supabase
           .from('profiles')
-          .update({
-            preferred_voice: newVoice,
-            updated_at: new Date().toISOString()
-          })
+          .update({ preferred_voice: newVoice })
           .eq('id', user.id);
 
-        if (error) throw error;
+        if (updateError) throw updateError;
       }
 
-      // Continue playing if was playing
-      if (isPlaying && sentences[currentSentence]) {
+      // Update local state and wait for it to be reflected
+      setPreferenceState(prev => ({
+        ...prev,
+        preferred_voice: newVoice
+      }));
+
+      // Wait for state update to be reflected
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // If there's a current sentence, wait a bit before replaying with new voice
+      if (currentSentence >= 0 && sentences[currentSentence]) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const sentenceText = sentenceToText(sentences[currentSentence]);
+        
+        // Make TTS request with new voice explicitly
         const response = await fetch('/api/tts', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            text: sentenceToText(sentences[currentSentence]),
+            text: sentenceText,
             speed: preferenceState.preferred_speed,
-            voice: newVoice
-          })
+            voice: newVoice, // Use new voice directly
+            userId: user?.id,
+            articleId: currentArticleId,
+            sentenceIndex: currentSentence,
+            characterCount: sentenceText.length
+          }),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to get audio with new voice');
+          const error = await response.json();
+          throw new Error(error.details || error.error);
         }
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        
-        // Set up the onended handler for repeat functionality
+        audio.playbackRate = preferenceState.preferred_speed || 1.0;
+
+        // Set up the onended handler
         audio.onended = () => {
           setIsPlaying(false);
           setIsPaused(false);
-          handleSentenceEnd(currentSentence);
+          handleSentenceEnd(currentSentence, repeatMode);
         };
 
+        // Cache the new audio
+        const cacheKey = `${sentenceText}_${newVoice}_${preferenceState.preferred_speed}`;
+        setAudioCache(prev => ({
+          ...prev,
+          [cacheKey]: url
+        }));
+
         setCurrentAudio(audio);
+        setIsVoiceLoading(false);
         setIsPlaying(true);
         setIsPaused(false);
-        audio.play();
+        await audio.play();
       }
     } catch (error) {
       console.error('Error in voice change:', error);
       setAudioError('Failed to change voice. Please try again.');
     } finally {
-      setUpdatingPreferences(prev => ({ ...prev, preferred_voice: false }));
+      setUpdatingPreferences(prev => ({ ...prev, voice: false }));
+      setIsVoiceLoading(false);
     }
   };
 
@@ -1257,24 +1299,43 @@ function NewsReaderContent() {
     }
   }, [repeatMode, isPlaying]);
 
+  // Add useEffect to clear audio cache when voice or speed changes
+  useEffect(() => {
+    // Clear audio cache when voice or speed changes
+    setAudioCache({});
+    // Also stop current audio if playing
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    setIsPlaying(false);
+    setIsPaused(false);
+  }, [preferenceState.preferred_voice, preferenceState.preferred_speed]);
+
   // Update playCurrentSentence function
   const playCurrentSentence = async (index = currentSentence) => {
-    if (!isBrowser || !sentences[index]) return;
+    if (!isBrowser || !sentences[index] || !currentArticleId) {
+      console.error('Cannot play sentence: missing required data', {
+        isBrowser,
+        hasSentence: !!sentences[index],
+        articleId: currentArticleId,
+        index
+      });
+      return;
+    }
     
     try {
-      // Stop current audio if playing
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
+      const sentenceText = sentenceToText(sentences[index]);
+      const cacheKey = `${sentenceText}_${preferenceState.preferred_voice}_${preferenceState.preferred_speed}`;
+
+      // Cleanup any existing audio first
+      await cleanupAudio();
       
       setIsVoiceLoading(true);
       setAudioError('');
       
-      const sentenceText = sentenceToText(sentences[index]);
-      
       // Check cache first
-      const cacheKey = `${sentenceText}_${preferenceState.preferred_voice}_${preferenceState.preferred_speed}`;
       if (audioCache[cacheKey]) {
         const audio = new Audio(audioCache[cacheKey]);
         audio.playbackRate = preferenceState.preferred_speed || 1.0;
@@ -1290,11 +1351,11 @@ function NewsReaderContent() {
         setIsVoiceLoading(false);
         setIsPlaying(true);
         setIsPaused(false);
-        audio.play();
+        await audio.play();
         return;
       }
       
-      // Generate new audio
+      // Generate new audio only if not in cache
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
@@ -1303,7 +1364,11 @@ function NewsReaderContent() {
         body: JSON.stringify({
           text: sentenceText,
           speed: preferenceState.preferred_speed,
-          voice: preferenceState.preferred_voice
+          voice: preferenceState.preferred_voice,
+          userId: user?.id,
+          articleId: currentArticleId,
+          sentenceIndex: index,
+          characterCount: sentenceText.length
         }),
       });
       
@@ -1335,7 +1400,7 @@ function NewsReaderContent() {
       setIsVoiceLoading(false);
       setIsPlaying(true);
       setIsPaused(false);
-      audio.play();
+      await audio.play();
       
     } catch (error) {
       console.error('Error playing audio:', error);
@@ -2655,6 +2720,47 @@ function NewsReaderContent() {
       });
     }, 1000);
   };
+
+  // Add useEffect to fetch article ID when source URL changes
+  useEffect(() => {
+    const fetchArticleId = async () => {
+      if (!sourceUrl) return;
+      try {
+        // Try to get existing article first
+        const { data: existingArticle, error: selectError } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('url', sourceUrl)
+          .single();
+
+        if (!selectError && existingArticle) {
+          setCurrentArticleId(existingArticle.id);
+          return;
+        }
+
+        // If article doesn't exist yet, wait a bit and try again
+        // This gives time for the article to be inserted
+        setTimeout(async () => {
+          const { data: newArticle, error: retryError } = await supabase
+            .from('articles')
+            .select('id')
+            .eq('url', sourceUrl)
+            .single();
+
+          if (retryError) {
+            console.error('Error fetching article ID after retry:', retryError);
+            return;
+          }
+
+          setCurrentArticleId(newArticle.id);
+        }, 2000); // Wait 2 seconds before retrying
+
+      } catch (error) {
+        console.error('Error fetching article ID:', error);
+      }
+    };
+    fetchArticleId();
+  }, [sourceUrl]);
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>

@@ -910,6 +910,27 @@ export default function Navbar({
                     </div>
                     <span>Settings</span>
                   </button>
+                  {profile?.role_level >= 10 && (
+                    <button
+                      onClick={() => {
+                        setShowProfile(false);
+                        router.push('/admin');
+                      }}
+                      className={`w-full p-3 rounded-lg text-sm flex items-center gap-3 transition-colors
+                        ${
+                          theme === "dark"
+                            ? "hover:bg-gray-700/50 text-gray-200 hover:text-white"
+                            : "hover:bg-gray-100/50 text-gray-700 hover:text-gray-900"
+                        }`}
+                    >
+                      <div className="w-7 h-7 flex items-center justify-center">
+                        <svg className="w-[1.125rem] h-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                      </div>
+                      <span>Admin (restricted)</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setShowProfile(false);
