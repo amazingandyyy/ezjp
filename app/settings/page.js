@@ -126,7 +126,7 @@ function SettingsContent() {
     edited_duolingo_username: '',
     daily_article_goal: 3,
     daily_reading_time_goal: 15,
-    role: 'normal_user'
+    role_level: 0
   });
 
   // Handle avatar change
@@ -237,7 +237,7 @@ function SettingsContent() {
           edited_duolingo_username: latestProfile.duolingo_username || '',
           daily_article_goal: latestProfile.daily_article_goal || 3,
           daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15,
-          role: latestProfile.role || 'normal_user'
+          role_level: latestProfile.role_level || 0
         });
         setIsProfileLoaded(true);
       } catch (error) {
@@ -742,7 +742,7 @@ function SettingsContent() {
                           <div className="flex flex-col">
                             <span>{profileData.username}</span>
                             <span className={`text-xs ${profileData.currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Account Type: {profileData.role.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              Account Type: {profileData.role_level >= 10 ? 'Super Admin' : profileData.role_level >= 1 ? 'Premium User' : 'Normal User'}
                             </span>
                           </div>
                         ) : (

@@ -10,7 +10,7 @@ CREATE POLICY "Users can delete their own pending suggestions or super admins ca
       SELECT 1 
       FROM profiles 
       WHERE id = auth.uid() 
-      AND level >= 10
+      AND role_level >= 10
     )
   );
 

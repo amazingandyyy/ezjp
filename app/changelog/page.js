@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FaCheck, FaSpinner, FaHourglassHalf } from 'react-icons/fa';
+import { FaCheck, FaSpinner, FaHourglassHalf, FaTimes } from 'react-icons/fa';
 
 // Create a client component for the tab content
 const TabContent = ({ activeTab, onTabChange, theme, children }) => {
@@ -82,8 +82,8 @@ const PageContent = () => {
   const [newSuggestion, setNewSuggestion] = useState({ title: '', description: '' });
   const [showNewSuggestionForm, setShowNewSuggestionForm] = useState(false);
   const [editingSuggestion, setEditingSuggestion] = useState(null);
-  const userLevel = profile?.level || 0;
-  const canManageSuggestions = userLevel >= 10;
+  const userRoleLevel = profile?.role_level || 0;
+  const canManageSuggestions = userRoleLevel >= 10;
 
   // Handle voting
   const handleVote = async (suggestionId, hasVoted) => {
@@ -138,12 +138,15 @@ const PageContent = () => {
         .from('suggestions')
         .select(`
           *,
-          profiles (
+          profiles!suggestions_user_id_fkey (
             username,
             avatar_url
           ),
           suggestion_votes (
             user_id
+          ),
+          status_updater:profiles!suggestions_status_updated_by_fkey (
+            username
           )
         `)
         .order('votes_count', { ascending: false });
@@ -199,7 +202,7 @@ const PageContent = () => {
       console.warn('Cannot edit suggestions with more than 2 votes');
       return;
     }
-    if (suggestion.status !== 'pending') {
+    if (suggestion.status !== 'open') {
       console.warn('Cannot edit suggestions that are in progress or completed');
       return;
     }
@@ -313,9 +316,9 @@ const PageContent = () => {
 
   const parsedChangelog = formatChangelog(changelog);
 
-  // Add function to handle status update
+  // Handle status update
   const handleStatusUpdate = async (suggestionId, newStatus) => {
-    if (!canManageSuggestions) return;
+    if (userRoleLevel < 10) return; // Only allow super admins
 
     try {
       const { error } = await supabase
@@ -330,37 +333,38 @@ const PageContent = () => {
     }
   };
 
-  // Update the suggestions rendering to include status controls for high level users
+  // Update the suggestions rendering to include status controls for super admins
   const renderSuggestionStatus = (suggestion) => {
     const statusColors = {
-      pending: theme === 'dark' ? 'text-gray-400' : 'text-gray-600',
+      open: theme === 'dark' ? 'text-gray-400' : 'text-gray-600',
       in_progress: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600',
-      done: theme === 'dark' ? 'text-green-400' : 'text-green-600'
+      completed: theme === 'dark' ? 'text-green-400' : 'text-green-600',
+      closed: theme === 'dark' ? 'text-red-400' : 'text-red-600'
     };
 
     const statusIcons = {
-      pending: <FaHourglassHalf className="w-4 h-4" />,
+      open: <FaHourglassHalf className="w-4 h-4" />,
       in_progress: <FaSpinner className="w-4 h-4" />,
-      done: <FaCheck className="w-4 h-4" />
+      completed: <FaCheck className="w-4 h-4" />,
+      closed: <FaTimes className="w-4 h-4" />
     };
 
-    if (canManageSuggestions) {
+    if (userRoleLevel >= 10) { // Only show status controls to super admins
       return (
-        <div className="flex items-center gap-2">
-          <select
-            value={suggestion.status}
-            onChange={(e) => handleStatusUpdate(suggestion.id, e.target.value)}
-            className={`px-2 py-1 rounded-md text-sm font-medium transition-colors ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-700 text-gray-200' 
-                : 'bg-white border-gray-200 text-gray-700'
-            } border focus:outline-none focus:ring-2 focus:ring-purple-500`}
-          >
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
+        <select
+          value={suggestion.status}
+          onChange={(e) => handleStatusUpdate(suggestion.id, e.target.value)}
+          className={`px-2 py-1 rounded-md text-sm font-medium transition-colors ${
+            theme === 'dark' 
+              ? 'bg-gray-800 border-gray-700 text-gray-200' 
+              : 'bg-white border-gray-200 text-gray-700'
+          } border focus:outline-none focus:ring-2 focus:ring-purple-500`}
+        >
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="closed">Closed</option>
+        </select>
       );
     }
 
@@ -375,9 +379,10 @@ const PageContent = () => {
   // Add function to get suggestion stats
   const getSuggestionStats = () => {
     const stats = {
-      pending: suggestions.filter(s => s.status === 'pending').length,
+      open: suggestions.filter(s => s.status === 'open').length,
       in_progress: suggestions.filter(s => s.status === 'in_progress').length,
-      done: suggestions.filter(s => s.status === 'done').length
+      completed: suggestions.filter(s => s.status === 'completed').length,
+      closed: suggestions.filter(s => s.status === 'closed').length
     };
     return stats;
   };
@@ -438,7 +443,7 @@ const PageContent = () => {
           }`}>
             <FaHourglassHalf className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
             <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-              {stats.pending} Pending
+              {stats.open} Open
             </span>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
@@ -454,7 +459,15 @@ const PageContent = () => {
           }`}>
             <FaCheck className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
             <span className={`text-sm font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
-              {stats.done} Completed
+              {stats.completed} Completed
+            </span>
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+            theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'
+          }`}>
+            <FaTimes className={`w-4 h-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>
+              {stats.closed} Closed
             </span>
           </div>
         </div>
@@ -462,7 +475,7 @@ const PageContent = () => {
         {/* Suggestions list */}
         {suggestions.map((suggestion) => {
           const hasVoted = suggestion.suggestion_votes.some(vote => vote.user_id === user?.id);
-          const isDone = suggestion.status === 'done';
+          const isDone = suggestion.status === 'completed';
           const isInProgress = suggestion.status === 'in_progress';
           const isAuthor = suggestion.user_id === user?.id;
           
@@ -470,115 +483,111 @@ const PageContent = () => {
             <div
               key={suggestion.id}
               className={`p-6 rounded-xl ${
-                isDone
+                suggestion.status === 'closed'
                   ? theme === 'dark'
-                    ? 'bg-green-900/20 border-green-800/30'
-                    : 'bg-green-50 border-green-200/50'
-                  : isInProgress
+                    ? 'bg-red-900/20 border-red-800/30'
+                    : 'bg-red-50 border-red-200/50'
+                  : suggestion.status === 'completed'
                     ? theme === 'dark'
-                      ? 'bg-yellow-900/20 border-yellow-800/30'
-                      : 'bg-yellow-50/80 border-yellow-200/50'
-                    : theme === 'dark'
-                      ? 'bg-gray-800/80 border border-gray-700/50'
-                      : 'bg-white border border-gray-200'
+                      ? 'bg-green-900/20 border-green-800/30'
+                      : 'bg-green-50 border-green-200/50'
+                    : suggestion.status === 'in_progress'
+                      ? theme === 'dark'
+                        ? 'bg-yellow-900/20 border-yellow-800/30'
+                        : 'bg-yellow-50/80 border-yellow-200/50'
+                      : theme === 'dark'
+                        ? 'bg-gray-800/80 border border-gray-700/50'
+                        : 'bg-white border border-gray-200'
               }`}
             >
-              <div className="flex items-start gap-4">
-                {/* Vote button */}
-                <button
-                  onClick={() => handleVote(suggestion.id, hasVoted)}
-                  disabled={!user}
-                  className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
-                    hasVoted
-                      ? theme === 'dark'
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : 'bg-purple-100 text-purple-600'
-                      : theme === 'dark'
-                        ? 'bg-gray-900/50 text-gray-400 hover:text-purple-400'
-                        : 'bg-gray-50 text-gray-500 hover:text-purple-600'
-                  }`}
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-4">
+                  {/* Vote button */}
+                  <button
+                    onClick={() => handleVote(suggestion.id, hasVoted)}
+                    disabled={!user}
+                    className={`flex flex-col items-center px-2 py-1 rounded transition-colors duration-200 ${
+                      hasVoted
+                        ? theme === 'dark'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-green-100 text-green-600'
+                        : theme === 'dark'
+                          ? 'bg-gray-900/50 text-gray-400 hover:text-green-400'
+                          : 'bg-gray-50 text-gray-500 hover:text-green-600'
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 15l7-7 7 7"
-                    />
-                  </svg>
-                  <span className="text-sm font-medium">{suggestion.votes_count}</span>
-                </button>
+                    <svg
+                      className="w-4 h-4"
+                      fill={hasVoted ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 15l7-7 7 7"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium">{suggestion.votes_count}</span>
+                  </button>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
-                        {suggestion.title}
-                      </h3>
-                      {isDone && (
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          theme === 'dark'
-                            ? 'bg-green-900/40 text-green-400'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          Completed
-                        </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                          {suggestion.title}
+                        </h3>
+                      </div>
+                      {renderSuggestionStatus(suggestion)}
+                    </div>
+                    <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {suggestion.description}
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4">
+                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                        Suggested by {suggestion.profiles.username}
+                      </div>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                        {new Date(suggestion.created_at).toLocaleDateString()}
+                      </div>
+                      {suggestion.status_updated_by && suggestion.status_updated_at && (
+                        <>
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Status updated by {suggestion.status_updater?.username || 'Unknown'} • {new Date(suggestion.status_updated_at).toLocaleDateString()}
+                          </div>
+                        </>
                       )}
-                      {isInProgress && (
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          theme === 'dark'
-                            ? 'bg-yellow-900/40 text-yellow-400'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          In Progress
-                        </span>
+                      {(isAuthor || canManageSuggestions) && (
+                        <>
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                          <div className="flex items-center gap-2">
+                            {isAuthor && suggestion.votes_count <= 2 && suggestion.status === 'pending' && (
+                              <button
+                                onClick={() => handleEditSuggestion(suggestion)}
+                                className={`text-xs ${
+                                  theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                                }`}
+                              >
+                                Edit
+                              </button>
+                            )}
+                            {(canManageSuggestions || (isAuthor && !suggestion.status_updated_by)) && (
+                              <button
+                                onClick={() => handleDeleteSuggestion(suggestion.id, suggestion.status)}
+                                className={`text-xs ${
+                                  theme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
+                                }`}
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
-                    {renderSuggestionStatus(suggestion)}
-                  </div>
-                  <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {suggestion.description}
-                  </p>
-                  <div className="mt-4 flex items-center gap-4">
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                      Suggested by {suggestion.profiles.username}
-                    </div>
-                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                      {new Date(suggestion.created_at).toLocaleDateString()}
-                    </div>
-                    {(isAuthor || canManageSuggestions) && (
-                      <>
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                        <div className="flex items-center gap-2">
-                          {isAuthor && suggestion.votes_count <= 2 && suggestion.status === 'pending' && (
-                            <button
-                              onClick={() => handleEditSuggestion(suggestion)}
-                              className={`text-xs ${
-                                theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
-                              }`}
-                            >
-                              Edit
-                            </button>
-                          )}
-                          {(canManageSuggestions || suggestion.status === 'pending') && (
-                            <button
-                              onClick={() => handleDeleteSuggestion(suggestion.id, suggestion.status)}
-                              className={`text-xs ${
-                                theme === 'dark' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
-                              }`}
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
@@ -790,7 +799,7 @@ const PageContent = () => {
                       type="text"
                       value={newSuggestion.title}
                       onChange={(e) => setNewSuggestion(prev => ({ ...prev, title: e.target.value }))}
-                      className={`w-full px-3 py-2 rounded-lg border ${
+                      className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${
                         theme === 'dark'
                           ? 'bg-gray-900/50 border-gray-700 text-gray-200'
                           : 'bg-white border-gray-300 text-gray-900'
@@ -832,8 +841,8 @@ const PageContent = () => {
                       type="submit"
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                         theme === 'dark'
-                          ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                          : 'bg-purple-600 hover:bg-purple-700 text-white'
+                          ? 'bg-green-500 hover:bg-green-600 text-white'
+                          : 'bg-green-600 hover:bg-green-700 text-white'
                       }`}
                     >
                       {editingSuggestion ? 'Update' : 'Submit'}
