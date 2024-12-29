@@ -40,12 +40,11 @@ body {
 /* Ruby text styles */
 ruby {
   display: inline-flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: column-reverse;
   text-align: center;
-  line-height: 1;
+  vertical-align: bottom;
   margin: 0;
-  position: relative;
+  white-space: nowrap;
 }
 
 rt {
@@ -53,9 +52,7 @@ rt {
   font-size: 0.5em;
   line-height: 1;
   text-align: center;
-  position: absolute;
-  top: -1.3em;
-  left: 0;
-  right: 0;
   user-select: none;
+  transform: translateY(0.1em);
+  @apply text-gray-500 dark:text-gray-400;
 }
