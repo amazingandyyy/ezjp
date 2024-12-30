@@ -5,8 +5,7 @@ import axios from "axios";
 import { FaHeart, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
-import useStatsStore from '@/lib/stores/stats';
-import { formatRelativeTime, formatJapaneseDate, createJSTDate } from '@/lib/utils/date';
+import { formatRelativeTime, createJSTDate } from '@/lib/utils/date';
 import { getNewsSource } from '@/lib/utils/urls';
 import Navbar from '@/app/components/Navbar';
 
