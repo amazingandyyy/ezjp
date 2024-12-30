@@ -1,3 +1,10 @@
+# [1.36.0](https://github.com/amazingandyyy/ezjp/compare/v1.35.0...v1.36.0) (2024-12-30)
+
+
+### Features
+
+* enhance translation support in NewsReaderContent component ([42d13b3](https://github.com/amazingandyyy/ezjp/commit/42d13b3d6f4da0951aa27322c00d9b2fc3248702))
+
 # [1.35.0](https://github.com/amazingandyyy/ezjp/compare/v1.34.0...v1.35.0) (2024-12-30)
 
 
