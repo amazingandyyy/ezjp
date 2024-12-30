@@ -1,3 +1,10 @@
+# [1.31.0](https://github.com/amazingandyyy/ezjp/compare/v1.30.0...v1.31.0) (2024-12-30)
+
+
+### Features
+
+* make explore page to support multi languages ([968c1d0](https://github.com/amazingandyyy/ezjp/commit/968c1d0218840385b02c8225d75e6b39520a05f9))
+
 # [1.30.0](https://github.com/amazingandyyy/ezjp/compare/v1.29.0...v1.30.0) (2024-12-30)
 
 
