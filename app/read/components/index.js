@@ -1,5 +1,4 @@
 import { formatJapaneseDate } from '@/lib/utils/date';
-import { isValidUrl } from '@/lib/utils/urls';
 import { REPEAT_MODES } from '../page';
 import { FaHeart } from 'react-icons/fa';
 import { useState } from 'react';
@@ -431,7 +430,6 @@ export {
   LoadingIndicator,
   RubyText,
   processContent,
-  isValidUrl,
   RepeatIcon,
   SavedNewsList,
   MotivationalMessage,

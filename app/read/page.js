@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
+import { isValidUrl } from '@/lib/utils/urls';
 import { 
   FaPlay, 
   FaPause, 
@@ -27,7 +28,6 @@ import {
   LoadingIndicator,
   RubyText,
   processContent,
-  isValidUrl,
   RepeatIcon,
   SavedNewsList,
   MotivationalMessage,
@@ -647,15 +647,6 @@ function NewsReaderContent() {
       
       await new Promise(resolve => setTimeout(resolve, remainingTime));
       setLoadingArticle(false);
-    }
-  };
-
-  const isValidUrl = (urlString) => {
-    try {
-      const url = new URL(urlString);
-      return url.hostname.includes('nhk.or.jp');
-    } catch {
-      return false;
     }
   };
 
