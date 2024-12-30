@@ -124,10 +124,25 @@
     "loading": "Đang tải bài viết...",
     "error": "Không thể tải bài viết",
     "translate": "Dịch",
-    "original": "Nguyên bản",
+    "original": "Bản gốc",
     "save": "Lưu bài viết",
     "unsave": "Bỏ lưu bài viết",
     "saved": "Đã lưu bài viết!",
-    "unsaved": "Đã xóa khỏi mục đã lưu"
+    "unsaved": "Đã xóa bài viết khỏi mục đã lưu"
+  },
+  "explorer": {
+    "title": "Tất cả tin tức",
+    "todayNews": "Tin tức hôm nay",
+    "previousNews": "Tin tức trước đây",
+    "allCaughtUp": "Đã cập nhật tất cả!",
+    "readAllToday": "Bạn đã đọc tất cả bài viết hôm nay",
+    "showAll": "Hiển thị tất cả bài viết",
+    "hideFinished": "Ẩn đã đọc",
+    "noImage": {
+      "mainichi": "Tin tức Mainichi không có hình ảnh",
+      "nhk": "Tin tức NHK không có hình ảnh",
+      "unknown": "Nguồn không xác định không có hình ảnh",
+      "worthReading": "nội dung vẫn đáng để đọc"
+    }
   }
 } 

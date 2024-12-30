@@ -129,5 +129,20 @@
     "unsave": "Artikel nicht mehr speichern",
     "saved": "Artikel gespeichert!",
     "unsaved": "Artikel aus Gespeicherten entfernt"
+  },
+  "explorer": {
+    "title": "Alle Nachrichten",
+    "todayNews": "Heutige Nachrichten",
+    "previousNews": "Vorherige Nachrichten",
+    "allCaughtUp": "Alles erledigt!",
+    "readAllToday": "Sie haben alle Artikel von heute gelesen",
+    "showAll": "Alle Artikel anzeigen",
+    "hideFinished": "Gelesene ausblenden",
+    "noImage": {
+      "mainichi": "Mainichi-Nachricht hat kein Bild",
+      "nhk": "NHK-Nachricht hat kein Bild",
+      "unknown": "Unbekannte Quelle hat kein Bild",
+      "worthReading": "der Inhalt ist trotzdem lesenswert"
+    }
   }
 } 

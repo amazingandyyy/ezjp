@@ -129,5 +129,20 @@
     "unsave": "取消儲存文章",
     "saved": "文章已儲存！",
     "unsaved": "文章已從已儲存中移除"
+  },
+  "explorer": {
+    "title": "所有新聞",
+    "todayNews": "今日新聞",
+    "previousNews": "過往新聞",
+    "allCaughtUp": "全部讀完了！",
+    "readAllToday": "您已讀完今天所有的文章",
+    "showAll": "顯示所有文章",
+    "hideFinished": "隱藏已讀",
+    "noImage": {
+      "mainichi": "每日新聞沒有圖片",
+      "nhk": "NHK新聞沒有圖片",
+      "unknown": "未知來源沒有圖片",
+      "worthReading": "內容仍值得一讀"
+    }
   }
 } 

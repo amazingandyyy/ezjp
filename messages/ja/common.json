@@ -129,5 +129,20 @@
     "unsave": "保存を解除",
     "saved": "記事を保存しました！",
     "unsaved": "記事の保存を解除しました"
+  },
+  "explorer": {
+    "title": "すべてのニュース",
+    "todayNews": "今日のニュース",
+    "previousNews": "過去のニュース",
+    "allCaughtUp": "すべて読み終わりました！",
+    "readAllToday": "今日の記事をすべて読みました",
+    "showAll": "すべての記事を表示",
+    "hideFinished": "読了済みを非表示",
+    "noImage": {
+      "mainichi": "毎日新聞の記事には画像がありません",
+      "nhk": "NHKの記事には画像がありません",
+      "unknown": "この記事には画像がありません",
+      "worthReading": "中身は読む価値があります"
+    }
   }
 } 

@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { formatRelativeTime, createJSTDate } from '@/lib/utils/date';
 import { getNewsSource } from '@/lib/utils/urls';
 import Navbar from '@/app/components/Navbar';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 const isToday = (dateStr) => {
   if (!dateStr) return false;
@@ -166,6 +167,7 @@ export default function NewsList() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   // Get theme from profile if available, otherwise from localStorage
   const [theme, setTheme] = useState('light');
@@ -390,7 +392,7 @@ export default function NewsList() {
               theme === "dark" ? "text-gray-100" : "text-[rgb(19,31,36)]"
             }`}
           >
-            All News
+            {t('explorer.title')}
           </h1>
           {user && (
             <div className="flex items-center gap-5">
@@ -423,7 +425,7 @@ export default function NewsList() {
                   <FaEyeSlash className="w-4 h-4 text-gray-400" />
                 )}
                 <span className="text-sm font-medium">
-                  {hideFinished ? "Show all articles" : "Hide finished"}
+                  {hideFinished ? t('explorer.showAll') : t('explorer.hideFinished')}
                 </span>
               </button>
             </div>
@@ -452,7 +454,7 @@ export default function NewsList() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <span>Today's News</span>
+              <span>{t('explorer.todayNews')}</span>
             </h2>
             {user &&
             hideFinished &&
@@ -484,14 +486,14 @@ export default function NewsList() {
                     theme === "dark" ? "text-gray-200" : "text-gray-800"
                   }`}
                 >
-                  All caught up!
+                  {t('explorer.allCaughtUp')}
                 </h3>
                 <p
                   className={`text-sm ${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
                   }`}
                 >
-                  You've read all of today's articles
+                  {t('explorer.readAllToday')}
                 </p>
               </div>
             ) : (
@@ -523,7 +525,7 @@ export default function NewsList() {
               theme === "dark" ? "text-gray-200" : "text-gray-800"
             }`}
           >
-            Previous News
+            {t('explorer.previousNews')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {newsList
@@ -567,6 +569,7 @@ export default function NewsList() {
 
 // Extract NewsCard component
 const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => {
+  const { t } = useTranslation();
   // Randomly select an icon and its corresponding style
   const randomIndex = useMemo(() => Math.floor(Math.random() * placeholderIcons.length), []);
   const randomIcon = useMemo(() => placeholderIcons[randomIndex], [randomIndex]);
@@ -610,15 +613,15 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => {
                   const source = getNewsSource(news.url);
                   switch (source) {
                     case 'mainichi':
-                      return 'Mainichi';
+                      return t('explorer.noImage.mainichi');
                     case 'nhk':
-                      return 'NHK';
+                      return t('explorer.noImage.nhk');
                     default:
-                      return 'Unknown';
+                      return t('explorer.noImage.unknown');
                   }
-                })()} news has no image
+                })()}
               </p>
-              <p className="text-sm font-medium">content inside still worth reading</p>
+              <p className="text-sm font-medium">{t('explorer.noImage.worthReading')}</p>
             </div>
             <div className="absolute inset-0 bg-white/[0.02] dark:bg-black/[0.02] backdrop-blur-[0.2px] pointer-events-none transition-opacity duration-300 group-hover:opacity-75" />
           </div>

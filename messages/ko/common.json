@@ -129,5 +129,20 @@
     "unsave": "기사 저장 취소",
     "saved": "기사가 저장되었습니다!",
     "unsaved": "저장된 기사에서 제거되었습니다"
+  },
+  "explorer": {
+    "title": "모든 뉴스",
+    "todayNews": "오늘의 뉴스",
+    "previousNews": "이전 뉴스",
+    "allCaughtUp": "모두 읽었습니다!",
+    "readAllToday": "오늘의 모든 기사를 읽었습니다",
+    "showAll": "모든 기사 보기",
+    "hideFinished": "읽은 기사 숨기기",
+    "noImage": {
+      "mainichi": "마이니치 뉴스에는 이미지가 없습니다",
+      "nhk": "NHK 뉴스에는 이미지가 없습니다",
+      "unknown": "알 수 없는 출처의 이미지가 없습니다",
+      "worthReading": "내용은 읽을 가치가 있습니다"
+    }
   }
 } 

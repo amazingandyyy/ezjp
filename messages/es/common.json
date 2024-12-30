@@ -129,5 +129,20 @@
     "unsave": "Desguardar artículo",
     "saved": "¡Artículo guardado!",
     "unsaved": "Artículo eliminado de guardados"
+  },
+  "explorer": {
+    "title": "Todas las noticias",
+    "todayNews": "Noticias de hoy",
+    "previousNews": "Noticias anteriores",
+    "allCaughtUp": "¡Todo al día!",
+    "readAllToday": "Has leído todos los artículos de hoy",
+    "showAll": "Mostrar todos los artículos",
+    "hideFinished": "Ocultar leídos",
+    "noImage": {
+      "mainichi": "La noticia de Mainichi no tiene imagen",
+      "nhk": "La noticia de NHK no tiene imagen",
+      "unknown": "La fuente desconocida no tiene imagen",
+      "worthReading": "el contenido aún vale la pena leerlo"
+    }
   }
 } 

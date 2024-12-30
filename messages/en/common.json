@@ -129,5 +129,20 @@
     "unsave": "Unsave Article",
     "saved": "Article saved!",
     "unsaved": "Article removed from saved"
+  },
+  "explorer": {
+    "title": "All News",
+    "todayNews": "Today's News",
+    "previousNews": "Previous News",
+    "allCaughtUp": "All caught up!",
+    "readAllToday": "You've read all of today's articles",
+    "showAll": "Show all articles",
+    "hideFinished": "Hide finished",
+    "noImage": {
+      "mainichi": "Mainichi news has no image",
+      "nhk": "NHK news has no image",
+      "unknown": "Unknown source has no image",
+      "worthReading": "content inside still worth reading"
+    }
   }
 } 
