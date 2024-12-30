@@ -1630,24 +1630,127 @@ function NewsReaderContent() {
 
   // Update the sentence rendering to use chunks
   const renderSentence = (sentence, index) => {
-    return processContent(sentence).map((part, i) => {
-      if (part.type === "ruby") {
-        return (
-          <span key={i} className="transition-all duration-200">
-            <RubyText
-              part={part}
-              preferenceState={preferenceState}
-            />
-          </span>
-        );
-      } else {
-        return (
-          <span key={i} className="transition-all duration-200">
-            {part.content}
-          </span>
-        );
-      }
-    });
+    if (!isLearningMode) {
+      return processContent(sentence).map((part, i) => {
+        if (part.type === "ruby") {
+          return (
+            <span key={i} className="transition-all duration-200">
+              <RubyText
+                part={part}
+                preferenceState={preferenceState}
+              />
+            </span>
+          );
+        } else {
+          return (
+            <span key={i} className="transition-all duration-200">
+              {part.content}
+            </span>
+          );
+        }
+      });
+    }
+
+    // Learning mode display
+    return (
+      <div className="my-8 first:mt-0 last:mb-0">
+        {/* Sentence content */}
+        <div className={`mb-4 p-4 rounded-xl ${
+          preferenceState.theme === "dark"
+            ? "bg-gray-800/50"
+            : "bg-gray-50"
+        }`}>
+          <div className="text-lg leading-relaxed">
+            {processContent(sentence).map((part, i) => {
+              if (part.type === "ruby") {
+                return (
+                  <span key={i} className="transition-all duration-200">
+                    <RubyText
+                      part={part}
+                      preferenceState={preferenceState}
+                    />
+                  </span>
+                );
+              } else {
+                return (
+                  <span key={i} className="transition-all duration-200">
+                    {part.content}
+                  </span>
+                );
+              }
+            })}
+          </div>
+        </div>
+        
+        {/* Learning mode buttons */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          <button
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+              ${preferenceState.theme === "dark"
+                ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+                : "bg-purple-50 text-purple-700 hover:bg-purple-100"
+              }`}
+            onClick={() => {
+              setCurrentSentence(index);
+              playCurrentSentence(index);
+            }}
+            disabled={isVoiceLoading}
+          >
+            {isVoiceLoading && currentSentence === index ? (
+              <div className="w-4 h-4 relative">
+                <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                  preferenceState.theme === "dark"
+                    ? "border-purple-400 border-r-transparent"
+                    : "border-purple-700 border-r-transparent"
+                }`}></div>
+              </div>
+            ) : (
+              <>Read</>
+            )}
+          </button>
+          <button
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+              ${preferenceState.theme === "dark"
+                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+              }`}
+            onClick={() => alert("Translation feature coming soon!")}
+          >
+            Translation
+          </button>
+          <button
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+              ${preferenceState.theme === "dark"
+                ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                : "bg-green-50 text-green-700 hover:bg-green-100"
+              }`}
+            onClick={() => alert("Learning explanations coming soon!")}
+          >
+            Learning Help
+          </button>
+        </div>
+        
+        {/* Placeholder sections */}
+        <div className={`mb-3 text-sm rounded-lg p-4 ${
+          preferenceState.theme === "dark"
+            ? "bg-gray-800/30"
+            : "bg-gray-50"
+        }`}>
+          <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+            Translation will appear here
+          </div>
+        </div>
+        <div className={`text-sm rounded-lg p-4 ${
+          preferenceState.theme === "dark"
+            ? "bg-gray-800/30"
+            : "bg-gray-50"
+        }`}>
+          <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+            Learning explanations and help will appear here
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Add cleanup for repeat interval
@@ -2018,6 +2121,37 @@ function NewsReaderContent() {
       });
     };
   }, []);
+
+  const [isLearningMode, setIsLearningMode] = useState(false);
+
+  // Add this component near other component definitions
+  const LearningModeButton = ({ theme, isLearningMode, onToggle }) => (
+    <div className="group relative">
+      <button
+        onClick={onToggle}
+        className={`p-2 rounded-full flex items-center justify-center transition-colors duration-150
+          ${theme === "dark" 
+            ? isLearningMode 
+              ? "bg-purple-500/20 text-purple-400" 
+              : "hover:bg-gray-700/50 text-gray-300" 
+            : isLearningMode 
+              ? "bg-purple-100 text-purple-700" 
+              : "hover:bg-gray-100/50 text-gray-600"
+          }`}
+      >
+        <FaBook className="w-4 h-4" />
+      </button>
+      <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
+        opacity-0 group-hover:opacity-100 transition-opacity duration-200
+        ${theme === "dark"
+          ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+          : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+        }`}
+      >
+        {isLearningMode ? "Disable Learning Mode" : "Enable Learning Mode"}
+      </div>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
@@ -3582,6 +3716,13 @@ function NewsReaderContent() {
                 {isArchived ? "Remove from Saved" : "Save Article"}
               </div>
             </div>
+
+            {/* Learning mode toggle */}
+            <LearningModeButton
+              theme={preferenceState.theme}
+              isLearningMode={isLearningMode}
+              onToggle={() => setIsLearningMode(!isLearningMode)}
+            />
 
             {/* Play controls */}
             <div className="flex items-center gap-2">
