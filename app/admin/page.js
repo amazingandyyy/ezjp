@@ -1025,7 +1025,15 @@ export default function AdminPage() {
                           theme === "dark" ? "text-gray-300" : "text-gray-900"
                         }`}
                       >
-                        Time
+                        Model
+                      </th>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
+                        Created At
                       </th>
                     </tr>
                   </thead>
@@ -1118,6 +1126,13 @@ export default function AdminPage() {
                           }`}
                         >
                           ${session.total_cost.toFixed(4)}
+                        </td>
+                        <td
+                          className={`py-4 px-4 text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {session.model_name || "gpt-3.5-turbo-1106"}
                         </td>
                         <td
                           className={`py-4 px-4 text-sm ${

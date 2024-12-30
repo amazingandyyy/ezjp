@@ -1657,28 +1657,27 @@ function NewsReaderContent() {
     return (
       <div className="my-4 first:mt-0 last:mb-0">
         {/* Sentence content */}
-        <div className={`mb-3 p-5 rounded-xl ${
-          preferenceState.theme === "dark"
-            ? "bg-gray-800/50"
-            : "bg-gray-50"
-        }`}>
-          <div className={`${
-            preferenceState.font_size === "medium"
-              ? "text-lg"
-              : preferenceState.font_size === "large"
-              ? "text-xl"
-              : preferenceState.font_size === "x-large"
-              ? "text-2xl"
-              : "text-3xl"
-          } leading-relaxed tracking-wide`}>
+        <div
+          className={`mb-3 p-5 rounded-xl ${
+            preferenceState.theme === "dark" ? "bg-gray-800/50" : "bg-gray-50"
+          }`}
+        >
+          <div
+            className={`${
+              preferenceState.font_size === "medium"
+                ? "text-lg"
+                : preferenceState.font_size === "large"
+                ? "text-xl"
+                : preferenceState.font_size === "x-large"
+                ? "text-2xl"
+                : "text-3xl"
+            } leading-relaxed tracking-wide`}
+          >
             {processContent(sentence).map((part, i) => {
               if (part.type === "ruby") {
                 return (
                   <span key={i} className="transition-all duration-200">
-                    <RubyText
-                      part={part}
-                      preferenceState={preferenceState}
-                    />
+                    <RubyText part={part} preferenceState={preferenceState} />
                   </span>
                 );
               } else {
@@ -1691,14 +1690,15 @@ function NewsReaderContent() {
             })}
           </div>
         </div>
-        
+
         {/* Learning mode buttons */}
         <div className="flex flex-wrap gap-2 mb-3">
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-              ${preferenceState.theme === "dark"
-                ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
-                : "bg-purple-50 text-purple-700 hover:bg-purple-100"
+              ${
+                preferenceState.theme === "dark"
+                  ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+                  : "bg-purple-50 text-purple-700 hover:bg-purple-100"
               }`}
             onClick={() => {
               if (isPlaying && currentSentence === index) {
@@ -1712,11 +1712,13 @@ function NewsReaderContent() {
           >
             {isVoiceLoading && currentSentence === index ? (
               <div className="w-4 h-4 relative">
-                <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                  preferenceState.theme === "dark"
-                    ? "border-purple-400 border-r-transparent"
-                    : "border-purple-700 border-r-transparent"
-                }`}></div>
+                <div
+                  className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                    preferenceState.theme === "dark"
+                      ? "border-purple-400 border-r-transparent"
+                      : "border-purple-700 border-r-transparent"
+                  }`}
+                ></div>
               </div>
             ) : isPlaying && currentSentence === index ? (
               "Pause"
@@ -1726,34 +1728,42 @@ function NewsReaderContent() {
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-              ${preferenceState.theme === "dark"
-                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+              ${
+                preferenceState.theme === "dark"
+                  ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100"
               }
-              ${loadingTranslations[index] ? 'opacity-50 cursor-not-allowed' : ''}
+              ${
+                loadingTranslations[index]
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }
             `}
             onClick={() => translateSentence(sentenceToText(sentence), index)}
             disabled={loadingTranslations[index]}
           >
             {loadingTranslations[index] ? (
               <div className="w-4 h-4 relative">
-                <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                  preferenceState.theme === "dark"
-                    ? "border-blue-400 border-r-transparent"
-                    : "border-blue-700 border-r-transparent"
-                }`}></div>
+                <div
+                  className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                    preferenceState.theme === "dark"
+                      ? "border-blue-400 border-r-transparent"
+                      : "border-blue-700 border-r-transparent"
+                  }`}
+                ></div>
               </div>
             ) : (
-              'Translation'
+              "Translation"
             )}
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-              ${preferenceState.theme === "dark"
-                ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                : "bg-green-50 text-green-700 hover:bg-green-100"
+              ${
+                preferenceState.theme === "dark"
+                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                  : "bg-green-50 text-green-700 hover:bg-green-100"
               }
-              ${loadingTutor[index] ? 'opacity-50 cursor-not-allowed' : ''}
+              ${loadingTutor[index] ? "opacity-50 cursor-not-allowed" : ""}
             `}
             onClick={() => getTutorExplanation(sentenceToText(sentence), index)}
             disabled={loadingTutor[index]}
@@ -1761,77 +1771,108 @@ function NewsReaderContent() {
             {loadingTutor[index] ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 relative">
-                  <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                    preferenceState.theme === "dark"
-                      ? "border-green-400 border-r-transparent"
-                      : "border-green-700 border-r-transparent"
-                  }`}></div>
+                  <div
+                    className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                      preferenceState.theme === "dark"
+                        ? "border-green-400 border-r-transparent"
+                        : "border-green-700 border-r-transparent"
+                    }`}
+                  ></div>
                 </div>
-                <span>AI analyzing...</span>
+                <span>thinking...</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
                 </svg>
                 <span>AI Tutor</span>
               </div>
             )}
           </button>
         </div>
-        
+
         {/* Translation section */}
-        <div className={`mb-3 rounded-xl ${
-          preferenceState.theme === "dark"
-            ? "bg-gray-800/30"
-            : "bg-gray-50"
-        }`}>
+        <div
+          className={`mb-3 rounded-xl ${
+            preferenceState.theme === "dark" ? "bg-gray-800/30" : "bg-gray-50"
+          }`}
+        >
           {translations[index] ? (
             <div className="p-5 space-y-3">
-              <div className={`text-sm font-medium ${
-                preferenceState.theme === "dark"
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }`}>
+              <div
+                className={`text-sm font-medium ${
+                  preferenceState.theme === "dark"
+                    ? "text-gray-400"
+                    : "text-gray-500"
+                }`}
+              >
                 English Translation
               </div>
-              <div className={`${
-                preferenceState.font_size === "medium"
-                  ? "text-base"
-                  : preferenceState.font_size === "large"
-                  ? "text-lg"
-                  : preferenceState.font_size === "x-large"
-                  ? "text-xl"
-                  : "text-2xl"
-              } leading-relaxed tracking-wide`}>
+              <div
+                className={`${
+                  preferenceState.font_size === "medium"
+                    ? "text-base"
+                    : preferenceState.font_size === "large"
+                    ? "text-lg"
+                    : preferenceState.font_size === "x-large"
+                    ? "text-xl"
+                    : "text-2xl"
+                } leading-relaxed tracking-wide`}
+              >
                 {translations[index]}
               </div>
             </div>
           ) : (
-            <div className={`flex items-center gap-2 p-5 ${
-              preferenceState.theme === "dark"
-                ? "text-gray-400"
-                : "text-gray-500"
-            }`}>
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            <div
+              className={`flex items-center gap-2 p-5 ${
+                preferenceState.theme === "dark"
+                  ? "text-gray-400"
+                  : "text-gray-500"
+              }`}
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                />
               </svg>
-              <span className="text-sm font-medium">Click translate to see english translation</span>
+              <span className="text-sm font-medium">
+                Click translate to see english translation
+              </span>
             </div>
           )}
         </div>
-        <div className={`text-sm rounded-xl p-5 ${
-          preferenceState.theme === "dark"
-            ? "bg-gray-800/30"
-            : "bg-gray-50"
-        }`}>
-          <div className={`prose ${preferenceState.theme === "dark" ? "prose-invert" : ""} max-w-none
+        <div
+          className={`text-sm rounded-xl p-5 ${
+            preferenceState.theme === "dark" ? "bg-gray-800/30" : "bg-gray-50"
+          }`}
+        >
+          <div
+            className={`prose ${
+              preferenceState.theme === "dark" ? "prose-invert" : ""
+            } max-w-none
             prose-headings:font-bold prose-headings:tracking-tight
             prose-h1:text-xl prose-h1:mt-0 prose-h1:mb-4 prose-h1:pb-2 prose-h1:border-b ${
-              preferenceState.theme === "dark" 
-                ? "prose-h1:border-gray-700" 
+              preferenceState.theme === "dark"
+                ? "prose-h1:border-gray-700"
                 : "prose-h1:border-gray-200"
             }
             prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3
@@ -1842,88 +1883,269 @@ function NewsReaderContent() {
             [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
             [&_td]:border [&_td]:p-2 [&_td]:text-sm [&_td]:align-middle
             [&_th]:border [&_th]:p-2 [&_th]:text-sm [&_th]:font-bold [&_th]:align-middle
-            ${preferenceState.theme === "dark" 
-              ? "[&_td]:border-gray-700 [&_th]:border-gray-700 [&_th]:bg-gray-800/50"
-              : "[&_td]:border-gray-200 [&_th]:border-gray-200 [&_th]:bg-gray-100"}
+            ${
+              preferenceState.theme === "dark"
+                ? "[&_td]:border-gray-700 [&_th]:border-gray-700 [&_th]:bg-gray-800/50"
+                : "[&_td]:border-gray-200 [&_th]:border-gray-200 [&_th]:bg-gray-100"
+            }
             [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-4
             [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-4
             [&_code]:text-sm [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded
-            ${preferenceState.theme === "dark"
-              ? "[&_code]:bg-gray-800 [&_code]:text-gray-200"
-              : "[&_code]:bg-gray-100 [&_code]:text-gray-800"}
-          `}>
+            ${
+              preferenceState.theme === "dark"
+                ? "[&_code]:bg-gray-800 [&_code]:text-gray-200"
+                : "[&_code]:bg-gray-100 [&_code]:text-gray-800"
+            }
+          `}
+          >
             {tutorExplanations[index] ? (
               <div className="space-y-6">
                 {/* Translation section with no horizontal scroll */}
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight mb-3">Translation</h1>
-                  <div className="text-base leading-relaxed" dangerouslySetInnerHTML={{ 
-                    __html: marked(tutorExplanations[index].split('# Cultural Context')[0].replace('# Translation\n', '')) 
-                  }} />
-                </div>
-                
-                {/* Cultural Context section with no horizontal scroll */}
-                {tutorExplanations[index].includes('# Cultural Context') && (
-                  <div>
-                    <h1 className="text-xl font-bold tracking-tight mb-3">Cultural Context</h1>
-                    <div className="text-base leading-relaxed" dangerouslySetInnerHTML={{ 
+                  <h1 className="text-xl font-bold tracking-tight mb-3">
+                    Translation
+                  </h1>
+                  <div
+                    className="text-base leading-relaxed"
+                    dangerouslySetInnerHTML={{
                       __html: marked(
                         tutorExplanations[index]
-                          .split('# Cultural Context')[1]
-                          .split('# Important Grammar Concepts')[0]
-                          .replace(/^\s*\n/gm, '')
-                      ) 
-                    }} />
+                          .split("# Cultural Context")[0]
+                          .replace("# Translation\n", "")
+                      ),
+                    }}
+                  />
+                </div>
+
+                {/* Cultural Context section with no horizontal scroll */}
+                {tutorExplanations[index].includes("# Cultural Context") && (
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">
+                      Cultural Context
+                    </h1>
+                    <div
+                      className="text-base leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: marked(
+                          tutorExplanations[index]
+                            .split("# Cultural Context")[1]
+                            .split("# Important Grammar Concepts")[0]
+                            .replace(/^\s*\n/gm, "")
+                        ),
+                      }}
+                    />
                   </div>
                 )}
 
                 {/* Important Grammar Concepts section with horizontal scroll if needed */}
-                {tutorExplanations[index].includes('# Important Grammar Concepts') && (
+                {tutorExplanations[index].includes(
+                  "# Important Grammar Concepts"
+                ) && (
                   <div>
-                    <h1 className="text-xl font-bold tracking-tight mb-3">Important Grammar Concepts</h1>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">
+                      Important Grammar Concepts
+                    </h1>
                     <div className="overflow-x-auto -mx-5">
-                      <div className="px-5 min-w-[320px]" dangerouslySetInnerHTML={{ 
-                        __html: marked(
-                          tutorExplanations[index]
-                            .split('# Important Grammar Concepts')[1]
-                            .split('# Key Vocabulary')[0]
-                            .replace(/^\s*\n/gm, '')
-                        ) 
-                      }} />
+                      <div
+                        className="px-5 min-w-[320px]"
+                        dangerouslySetInnerHTML={{
+                          __html: marked(
+                            tutorExplanations[index]
+                              .split("# Important Grammar Concepts")[1]
+                              .split("# Key Vocabulary")[0]
+                              .replace(/^\s*\n/gm, "")
+                          ),
+                        }}
+                      />
                     </div>
                   </div>
                 )}
 
                 {/* Key Vocabulary section with horizontal scroll for table */}
-                {tutorExplanations[index].includes('# Key Vocabulary') && (
+                {tutorExplanations[index].includes("# Key Vocabulary") && (
                   <div>
-                    <h1 className="text-xl font-bold tracking-tight mb-3">Key Vocabulary</h1>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">
+                      Key Vocabulary
+                    </h1>
                     <div className="overflow-x-auto -mx-5">
-                      <div className="px-5 min-w-[600px]" dangerouslySetInnerHTML={{ 
-                        __html: marked(
-                          tutorExplanations[index]
-                            .split('# Key Vocabulary')[1]
-                            .replace(/^\s*\n/gm, '')
-                        ) 
-                      }} />
+                      <div
+                        className="px-5 min-w-[600px]"
+                        dangerouslySetInnerHTML={{
+                          __html: marked(
+                            tutorExplanations[index]
+                              .split("# Key Vocabulary")[1]
+                              .replace(/^\s*\n/gm, "")
+                          ),
+                        }}
+                      />
                     </div>
                   </div>
                 )}
+
+                {/* Follow-up Conversations */}
+                {conversations[index]?.length > 0 && (
+                  <div className="mt-8">
+                    <h1 className="text-xl font-bold tracking-tight mb-4">Follow-up Questions</h1>
+                    <div className="space-y-4">
+                      {conversations[index].map((conv, convIndex) => (
+                        <div key={convIndex} className="space-y-3">
+                          {/* Question */}
+                          <div className={`flex items-start gap-3 ${
+                            preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-700"
+                          }`}>
+                            <div className={`p-2 rounded-lg ${
+                              preferenceState.theme === "dark" 
+                                ? "bg-blue-500/20 text-blue-400" 
+                                : "bg-blue-50 text-blue-700"
+                            }`}>
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">You asked:</p>
+                              <p className="mt-1">{conv.question}</p>
+                            </div>
+                          </div>
+
+                          {/* Answer */}
+                          <div className={`flex items-start gap-3 ${
+                            preferenceState.theme === "dark" ? "text-gray-300" : "text-gray-700"
+                          }`}>
+                            <div className={`p-2 rounded-lg ${
+                              preferenceState.theme === "dark"
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-green-50 text-green-700"
+                            }`}>
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">AI Tutor's response:</p>
+                              <div className="mt-1 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: marked(conv.answer) }} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Follow-up Question Input */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Ask a follow-up question..."
+                      className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
+                        preferenceState.theme === "dark"
+                          ? "bg-gray-800/50 border-gray-700 text-gray-200 placeholder-gray-500 focus:border-gray-600"
+                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-gray-400"
+                      }`}
+                      value={followUpQuestions[index] || ""}
+                      onChange={(e) =>
+                        setFollowUpQuestions((prev) => ({
+                          ...prev,
+                          [index]: e.target.value,
+                        }))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          const question = followUpQuestions[index];
+                          if (question?.trim()) {
+                            getTutorExplanation(
+                              sentenceToText(sentence),
+                              index,
+                              question
+                            );
+                            setFollowUpQuestions((prev) => ({
+                              ...prev,
+                              [index]: "",
+                            }));
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                        ${
+                          preferenceState.theme === "dark"
+                            ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                            : "bg-green-50 text-green-700 hover:bg-green-100"
+                        }
+                        ${
+                          loadingTutor[index]
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }
+                      `}
+                      onClick={() => {
+                        const question = followUpQuestions[index];
+                        if (question?.trim()) {
+                          getTutorExplanation(
+                            sentenceToText(sentence),
+                            index,
+                            question
+                          );
+                          setFollowUpQuestions((prev) => ({
+                            ...prev,
+                            [index]: "",
+                          }));
+                        }
+                      }}
+                      disabled={
+                        loadingTutor[index] || !followUpQuestions[index]?.trim()
+                      }
+                    >
+                      Ask
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+              <div
+                className={`${
+                  preferenceState.theme === "dark"
+                    ? "text-gray-400"
+                    : "text-gray-600"
+                }`}
+              >
                 {loadingTutor[index] ? (
                   <div className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
-                    <span>AI Tutor is analyzing...</span>
+                    <span>AI Tutor is thinking...</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
                     </svg>
                     <span>Click for AI Tutor analysis</span>
                   </div>
@@ -2314,6 +2536,8 @@ function NewsReaderContent() {
   const [loadingTranslations, setLoadingTranslations] = useState({});
   const [tutorExplanations, setTutorExplanations] = useState({});
   const [loadingTutor, setLoadingTutor] = useState({});
+  const [followUpQuestions, setFollowUpQuestions] = useState({});
+  const [conversations, setConversations] = useState({}); // Add this line to track conversation history
 
   // Add this function near other utility functions
   const translateSentence = async (sentenceText, index) => {
@@ -2353,8 +2577,8 @@ function NewsReaderContent() {
   };
 
   // Add this function near other utility functions
-  const getTutorExplanation = async (sentenceText, index) => {
-    if (tutorExplanations[index] || loadingTutor[index]) return;
+  const getTutorExplanation = async (sentenceText, index, followUpQuestion = null) => {
+    if ((tutorExplanations[index] && !followUpQuestion) || loadingTutor[index]) return;
     
     if (!currentArticleId) {
       setTutorExplanations(prev => ({
@@ -2376,7 +2600,8 @@ function NewsReaderContent() {
           text: sentenceText,
           articleId: currentArticleId,
           sentenceIndex: index,
-          userId: user?.id
+          userId: user?.id,
+          followUpQuestion
         }),
       });
 
@@ -2386,16 +2611,44 @@ function NewsReaderContent() {
       }
 
       const data = await response.json();
-      setTutorExplanations(prev => ({
-        ...prev,
-        [index]: data.explanation
-      }));
+      
+      if (followUpQuestion) {
+        // Add the Q&A pair to the conversation history
+        setConversations(prev => ({
+          ...prev,
+          [index]: [
+            ...(prev[index] || []),
+            {
+              question: followUpQuestion,
+              answer: data.explanation
+            }
+          ]
+        }));
+      } else {
+        setTutorExplanations(prev => ({
+          ...prev,
+          [index]: data.explanation
+        }));
+      }
     } catch (error) {
       console.error('Tutor error:', error);
-      setTutorExplanations(prev => ({
-        ...prev,
-        [index]: `Analysis error: ${error.message}`
-      }));
+      if (followUpQuestion) {
+        setConversations(prev => ({
+          ...prev,
+          [index]: [
+            ...(prev[index] || []),
+            {
+              question: followUpQuestion,
+              answer: `Analysis error: ${error.message}`
+            }
+          ]
+        }));
+      } else {
+        setTutorExplanations(prev => ({
+          ...prev,
+          [index]: `Analysis error: ${error.message}`
+        }));
+      }
     } finally {
       setLoadingTutor(prev => ({ ...prev, [index]: false }));
     }

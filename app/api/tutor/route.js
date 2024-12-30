@@ -11,11 +11,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// GPT-3.5-turbo-1106 pricing per 1K tokens
-const INPUT_TOKEN_COST = 0.001;  // $0.001 per 1K input tokens
-const OUTPUT_TOKEN_COST = 0.002; // $0.002 per 1K output tokens
+// GPT-4o mini pricing per 1K tokens
+const INPUT_TOKEN_COST_PER_1K = 0.00015;   // $0.150 per 1M tokens = $0.00015 per 1K tokens
+const OUTPUT_TOKEN_COST_PER_1K = 0.0006;   // $0.600 per 1M tokens = $0.0006 per 1K tokens
 
-const TUTOR_SYSTEM_PROMPT = `You are a professional Japanese language tutor helping English-speaking learners (JLPT N5-N3 level). Format your response in clear sections using markdown:
+const TUTOR_SYSTEM_PROMPT = `You are a professional Japanese language tutor helping English-speaking learners (JLPT N5-N3 level). You should be friendly and conversational, especially when answering follow-up questions.
+
+For initial sentence analysis, format your response in clear sections using markdown:
 
 # Translation
 A natural, easy-to-understand English translation.
@@ -47,11 +49,19 @@ Guidelines:
 - Include sections only if relevant
 - Focus on practical understanding
 - Maintain consistent formatting
-- Be concise but thorough`;
+- Be concise but thorough
+
+For follow-up questions:
+- Be conversational and friendly
+- Start with a brief acknowledgment of the question
+- Give a clear, focused answer
+- Use natural language instead of formal sections
+- Feel free to provide examples if helpful
+- End with encouragement or invitation for more questions`;
 
 export async function POST(request) {
   try {
-    const { text, articleId, sentenceIndex, userId } = await request.json();
+    const { text, articleId, sentenceIndex, userId, followUpQuestion } = await request.json();
 
     if (!text || !articleId || sentenceIndex === undefined) {
       return NextResponse.json(
@@ -60,12 +70,22 @@ export async function POST(request) {
       );
     }
 
+    const messages = [
+      { role: "system", content: TUTOR_SYSTEM_PROMPT },
+      { role: "user", content: `Analyze this Japanese sentence:\n${text}\n\nProvide a structured analysis focusing on grammar, vocabulary, and any cultural points.` }
+    ];
+
+    // Add follow-up question if provided
+    if (followUpQuestion) {
+      messages.push(
+        { role: "assistant", content: "I'll be happy to help you understand more about this sentence." },
+        { role: "user", content: followUpQuestion }
+      );
+    }
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-1106",
-      messages: [
-        { role: "system", content: TUTOR_SYSTEM_PROMPT },
-        { role: "user", content: `Analyze this Japanese sentence:\n${text}\n\nProvide a structured analysis focusing on grammar, vocabulary, and any cultural points.` }
-      ],
+      model: "gpt-4o-mini-2024-07-18",
+      messages,
       temperature: 0.7,
       max_tokens: 1000,
     });
@@ -74,23 +94,26 @@ export async function POST(request) {
     const { prompt_tokens, completion_tokens, total_tokens } = completion.usage;
 
     // Calculate costs in USD
-    const input_cost = (prompt_tokens / 1000) * INPUT_TOKEN_COST;
-    const output_cost = (completion_tokens / 1000) * OUTPUT_TOKEN_COST;
+    const input_cost = (prompt_tokens / 1000) * INPUT_TOKEN_COST_PER_1K;
+    const output_cost = (completion_tokens / 1000) * OUTPUT_TOKEN_COST_PER_1K;
     const total_cost = input_cost + output_cost;
 
-    // Store token usage and costs in database
+    // Insert AI tutor session into database
     const { error: insertError } = await supabase
       .from('ai_tutor_sessions')
       .insert({
+        user_id: userId || null,
         article_id: articleId,
         sentence_index: sentenceIndex,
-        user_id: userId,
-        input_tokens: prompt_tokens,
-        output_tokens: completion_tokens,
-        total_tokens: total_tokens,
-        input_cost: input_cost,
-        output_cost: output_cost,
-        total_cost: total_cost
+        input_tokens: completion.usage.prompt_tokens,
+        output_tokens: completion.usage.completion_tokens,
+        total_tokens: completion.usage.total_tokens,
+        input_cost: (completion.usage.prompt_tokens / 1000) * INPUT_TOKEN_COST_PER_1K,
+        output_cost: (completion.usage.completion_tokens / 1000) * OUTPUT_TOKEN_COST_PER_1K,
+        total_cost: ((completion.usage.prompt_tokens / 1000) * INPUT_TOKEN_COST_PER_1K) + 
+                   ((completion.usage.completion_tokens / 1000) * OUTPUT_TOKEN_COST_PER_1K),
+        is_follow_up: !!followUpQuestion,
+        model_name: "gpt-4o-mini-2024-07-18"
       });
 
     if (insertError) {
