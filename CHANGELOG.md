@@ -1,3 +1,10 @@
+# [1.33.0](https://github.com/amazingandyyy/ezjp/compare/v1.32.0...v1.33.0) (2024-12-30)
+
+
+### Features
+
+* integrate translation support in Navbar component ([8cc09e3](https://github.com/amazingandyyy/ezjp/commit/8cc09e3706d6a3382866ec3f8274b7c607bed909))
+
 # [1.32.0](https://github.com/amazingandyyy/ezjp/compare/v1.31.2...v1.32.0) (2024-12-30)
 
 
