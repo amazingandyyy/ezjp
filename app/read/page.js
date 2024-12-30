@@ -64,6 +64,7 @@ function NewsReaderContent() {
   // All state declarations
   const [url, setUrl] = useState('');
   const [currentArticleId, setCurrentArticleId] = useState(null);
+  const [article, setArticle] = useState(null); // Add article state
   const [showProfile, setShowProfile] = useState(false);
   const [preferenceState, setPreferenceState] = useState(DEFAULT_READER_PREFERENCES);
   const [updatingPreferences, setUpdatingPreferences] = useState({});
@@ -2257,40 +2258,42 @@ function NewsReaderContent() {
   useEffect(() => {
     const fetchArticleId = async () => {
       if (!sourceUrl) return;
-      try {
-        // Try to get existing article first
-        const { data: existingArticle, error: selectError } = await supabase
-          .from('articles')
-          .select('id')
-          .eq('url', sourceUrl)
-          .single();
-
-        if (!selectError && existingArticle) {
-          setCurrentArticleId(existingArticle.id);
-          return;
-        }
-
-        // If article doesn't exist yet, wait a bit and try again
-        // This gives time for the article to be inserted
-        setTimeout(async () => {
-          const { data: newArticle, error: retryError } = await supabase
+      
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 seconds
+      
+      const tryFetchArticle = async (retryCount = 0) => {
+        try {
+          // Try to get existing article first
+          const { data: existingArticle, error: selectError } = await supabase
             .from('articles')
             .select('id')
             .eq('url', sourceUrl)
             .single();
 
-          if (retryError) {
-            console.error('Error fetching article ID after retry:', retryError);
-            return;
+          if (!selectError && existingArticle) {
+            setCurrentArticleId(existingArticle.id);
+            return true;
           }
 
-          setCurrentArticleId(newArticle.id);
-        }, 2000); // Wait 2 seconds before retrying
+          // If we've reached max retries, give up
+          if (retryCount >= maxRetries) {
+            console.error('Failed to fetch article ID after max retries');
+            return false;
+          }
 
-      } catch (error) {
-        console.error('Error fetching article ID:', error);
-      }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return tryFetchArticle(retryCount + 1);
+        } catch (error) {
+          console.error('Error fetching article ID:', error);
+          return false;
+        }
+      };
+
+      tryFetchArticle();
     };
+    
     fetchArticleId();
   }, [sourceUrl]);
 
@@ -2353,6 +2356,14 @@ function NewsReaderContent() {
   const getTutorExplanation = async (sentenceText, index) => {
     if (tutorExplanations[index] || loadingTutor[index]) return;
     
+    if (!currentArticleId) {
+      setTutorExplanations(prev => ({
+        ...prev,
+        [index]: `Please wait a moment for the article to load before requesting AI tutor analysis.`
+      }));
+      return;
+    }
+    
     try {
       setLoadingTutor(prev => ({ ...prev, [index]: true }));
       
@@ -2361,7 +2372,12 @@ function NewsReaderContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: sentenceText }),
+        body: JSON.stringify({ 
+          text: sentenceText,
+          articleId: currentArticleId,
+          sentenceIndex: index,
+          userId: user?.id
+        }),
       });
 
       if (!response.ok) {

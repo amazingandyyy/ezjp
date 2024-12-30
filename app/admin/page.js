@@ -231,6 +231,7 @@ const UserIdWrapper = ({ userId, theme }) => {
 export default function AdminPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const [ttsStats, setTtsStats] = useState(null);
+  const [aiTutorStats, setAiTutorStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -504,8 +505,84 @@ export default function AdminPage() {
     return stats;
   };
 
+  const processAiTutorStats = (data) => {
+    const stats = {
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+      totalTokens: 0,
+      totalCost: 0,
+      byArticle: {},
+      uniqueArticles: new Set(),
+      topArticles: [],
+      byDate: {},
+      sessions: data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    };
+
+    data.forEach(session => {
+      // Update totals
+      stats.totalInputTokens += session.input_tokens;
+      stats.totalOutputTokens += session.output_tokens;
+      stats.totalTokens += session.total_tokens;
+      stats.totalCost += session.total_cost;
+
+      // Track unique articles and group by article
+      if (session.article_id) {
+        stats.uniqueArticles.add(session.article_id);
+        if (!stats.byArticle[session.article_id]) {
+          stats.byArticle[session.article_id] = {
+            sessions: 0,
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0,
+            cost: 0,
+            sentences: new Set()
+          };
+        }
+        stats.byArticle[session.article_id].sessions++;
+        stats.byArticle[session.article_id].inputTokens += session.input_tokens;
+        stats.byArticle[session.article_id].outputTokens += session.output_tokens;
+        stats.byArticle[session.article_id].totalTokens += session.total_tokens;
+        stats.byArticle[session.article_id].cost += session.total_cost;
+        stats.byArticle[session.article_id].sentences.add(session.sentence_index);
+      }
+
+      // Group by date
+      const date = new Date(session.created_at).toLocaleDateString();
+      if (!stats.byDate[date]) {
+        stats.byDate[date] = {
+          sessions: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: 0
+        };
+      }
+      stats.byDate[date].sessions++;
+      stats.byDate[date].inputTokens += session.input_tokens;
+      stats.byDate[date].outputTokens += session.output_tokens;
+      stats.byDate[date].totalTokens += session.total_tokens;
+      stats.byDate[date].cost += session.total_cost;
+    });
+
+    // Process top articles
+    stats.topArticles = Object.entries(stats.byArticle)
+      .map(([id, data]) => ({
+        id,
+        sessions: data.sessions,
+        inputTokens: data.inputTokens,
+        outputTokens: data.outputTokens,
+        totalTokens: data.totalTokens,
+        cost: data.cost,
+        uniqueSentences: data.sentences.size
+      }))
+      .sort((a, b) => b.sessions - a.sessions)
+      .slice(0, 10);
+
+    return stats;
+  };
+
   useEffect(() => {
-    const fetchTTSStats = async () => {
+    const fetchStats = async () => {
       try {
         // Wait for auth to be ready
         if (authLoading) return;
@@ -527,25 +604,36 @@ export default function AdminPage() {
           return;
         }
 
-        const { data, error } = await supabase
+        // Fetch TTS stats
+        const ttsResponse = await supabase
           .from('tts_sessions')
           .select('*')
           .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (ttsResponse.error) throw ttsResponse.error;
+
+        // Fetch AI Tutor stats
+        const aiTutorResponse = await supabase
+          .from('ai_tutor_sessions')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (aiTutorResponse.error) throw aiTutorResponse.error;
 
         // Process the data
-        const stats = processStats(data);
-        setTtsStats(stats);
+        const ttsProcessedStats = processStats(ttsResponse.data);
+        const aiTutorProcessedStats = processAiTutorStats(aiTutorResponse.data);
+        setTtsStats(ttsProcessedStats);
+        setAiTutorStats(aiTutorProcessedStats);
       } catch (err) {
-        console.error('Error fetching TTS stats:', err);
+        console.error('Error fetching stats:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTTSStats();
+    fetchStats();
   }, [user, profile, authLoading]);
 
   // Show loading state while auth is being checked
@@ -607,7 +695,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!ttsStats) return null;
+  if (!ttsStats || !aiTutorStats) return null;
 
   const chartData = Object.entries(ttsStats.byDate)
     .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
@@ -630,7 +718,11 @@ export default function AdminPage() {
     }));
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div
+      className={`min-h-screen ${
+        theme === "dark" ? "bg-gray-900" : "bg-gray-50"
+      }`}
+    >
       <Navbar
         showSidebar={showSidebar}
         onSidebarToggle={setShowSidebar}
@@ -640,182 +732,825 @@ export default function AdminPage() {
 
       <main className="pt-20 pb-8">
         <div className="px-4 sm:px-6 max-w-[1600px] mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-12">
-            <div className="mb-4 sm:mb-0">
-              <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                TTS Analytics
-              </h1>
-              <p className={`mt-1 sm:mt-2 text-sm sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Text-to-Speech usage metrics
-              </p>
+          {/* AI Tutor Analytics Section */}
+          <div className="mb-12 mt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+              <div className="mb-4 sm:mb-0">
+                <h1
+                  className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  AI Tutor Analytics
+                </h1>
+                <p
+                  className={`mt-1 sm:mt-2 text-sm sm:text-base ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  AI Tutor usage and cost metrics
+                </p>
+              </div>
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${
+                  theme === "dark"
+                    ? "bg-gray-800 text-gray-300"
+                    : "bg-white text-gray-600"
+                } shadow-sm text-xs sm:text-sm`}
+              >
+                <FaChartBar className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="font-medium">
+                  Last updated: {new Date().toLocaleString()}
+                </span>
+              </div>
             </div>
-            <div className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600'} shadow-sm text-xs sm:text-sm`}>
-              <FaChartBar className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="font-medium">Last updated: {new Date().toLocaleString()}</span>
+
+            {/* AI Tutor Summary Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {/* Total Cost Card */}
+              <div
+                className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Total Cost
+                    </p>
+                    <p
+                      className={`text-2xl font-bold tracking-tight ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      ${aiTutorStats.totalCost.toFixed(2)}
+                    </p>
+                    <div
+                      className={`text-xs ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      All-time spending
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-emerald-500/10" : "bg-emerald-50"
+                    }`}
+                  >
+                    <FaDollarSign
+                      className={
+                        theme === "dark"
+                          ? "text-emerald-400 w-6 h-6"
+                          : "text-emerald-600 w-6 h-6"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Tokens Card */}
+              <div
+                className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Total Tokens
+                    </p>
+                    <p
+                      className={`text-2xl font-bold tracking-tight ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {aiTutorStats.totalTokens.toLocaleString()}
+                    </p>
+                    <div
+                      className={`text-xs ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      Input: {aiTutorStats.totalInputTokens.toLocaleString()} /
+                      Output: {aiTutorStats.totalOutputTokens.toLocaleString()}
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-blue-500/10" : "bg-blue-50"
+                    }`}
+                  >
+                    <FaFileAlt
+                      className={
+                        theme === "dark"
+                          ? "text-blue-400 w-6 h-6"
+                          : "text-blue-600 w-6 h-6"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Sessions Card */}
+              <div
+                className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Total Sessions
+                    </p>
+                    <p
+                      className={`text-2xl font-bold tracking-tight ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {aiTutorStats.sessions.length.toLocaleString()}
+                    </p>
+                    <div
+                      className={`text-xs ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      Tutor interactions
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-indigo-500/10" : "bg-indigo-50"
+                    }`}
+                  >
+                    <FaChartLine
+                      className={
+                        theme === "dark"
+                          ? "text-indigo-400 w-6 h-6"
+                          : "text-indigo-600 w-6 h-6"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Average Cost Per Session Card */}
+              <div
+                className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Avg Cost/Session
+                    </p>
+                    <p
+                      className={`text-2xl font-bold tracking-tight ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      $
+                      {(
+                        aiTutorStats.totalCost / aiTutorStats.sessions.length
+                      ).toFixed(4)}
+                    </p>
+                    <div
+                      className={`text-xs ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      USD per session
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-purple-500/10" : "bg-purple-50"
+                    }`}
+                  >
+                    <FaChartLine
+                      className={
+                        theme === "dark"
+                          ? "text-purple-400 w-6 h-6"
+                          : "text-purple-600 w-6 h-6"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Sessions Table */}
+            <div
+              className={`p-6 rounded-xl shadow-md ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Recent AI Tutor Sessions
+                  </h2>
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Latest tutor interactions with detailed token and cost
+                    breakdown
+                  </p>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead>
+                    <tr>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
+                        Article & Sentence
+                      </th>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
+                        Tokens (In/Out/Total)
+                      </th>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
+                        Cost
+                      </th>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
+                        Time
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    className={`divide-y ${
+                      theme === "dark"
+                        ? "divide-gray-700/50"
+                        : "divide-gray-200"
+                    }`}
+                  >
+                    {aiTutorStats.sessions.slice(0, 50).map((session) => (
+                      <tr
+                        key={session.id}
+                        className={`transition-colors duration-200 ${
+                          theme === "dark"
+                            ? "hover:bg-gray-700/70"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <td
+                          className={`py-4 px-4 text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          <div className="flex items-start">
+                            <FaNewspaper
+                              className={`mr-2 mt-1 ${
+                                theme === "dark"
+                                  ? "text-gray-500"
+                                  : "text-gray-400"
+                              }`}
+                            />
+                            <div className="flex-1">
+                              <ArticleIdWrapper
+                                articleId={session.article_id}
+                                theme={theme}
+                              />
+                              <div
+                                className={`text-xs mt-1 ${
+                                  theme === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                Sentence {session.sentence_index}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className={`py-4 px-4 text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-blue-400"
+                                    : "text-blue-600"
+                                }
+                              >
+                                {session.input_tokens}
+                              </span>
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-green-400"
+                                    : "text-green-600"
+                                }
+                              >
+                                {session.output_tokens}
+                              </span>
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-purple-400"
+                                    : "text-purple-600"
+                                }
+                              >
+                                {session.total_tokens}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className={`py-4 px-4 text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          ${session.total_cost.toFixed(4)}
+                        </td>
+                        <td
+                          className={`py-4 px-4 text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {new Date(session.created_at).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-12">
+            <div className="mb-4 sm:mb-0">
+              <h1
+                className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}
+              >
+                TTS Analytics
+              </h1>
+              <p
+                className={`mt-1 sm:mt-2 text-sm sm:text-base ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Text-to-Speech usage metrics
+              </p>
+            </div>
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${
+                theme === "dark"
+                  ? "bg-gray-800 text-gray-300"
+                  : "bg-white text-gray-600"
+              } shadow-sm text-xs sm:text-sm`}
+            >
+              <FaChartBar className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="font-medium">
+                Last updated: {new Date().toLocaleString()}
+              </span>
+            </div>
+          </div>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {/* Total Cost Card - Moved to first position */}
-            <div className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
-              theme === 'dark' ? 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Total Cost
                   </p>
                   <div className="flex flex-col">
-                    <p className={`text-sm line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <p
+                      className={`text-sm line-through ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
                       ${ttsStats?.totalCost.toFixed(2)}
                     </p>
-                    <p className={`text-2xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      ${(
-                        Math.max(0, (ttsStats.quotaUsage.Neural2 - MONTHLY_QUOTA.Neural2) * VOICE_COSTS.Neural2) +
-                        Math.max(0, (ttsStats.quotaUsage.Wavenet - MONTHLY_QUOTA.Wavenet) * VOICE_COSTS.Wavenet) +
-                        Math.max(0, (ttsStats.quotaUsage.Standard - MONTHLY_QUOTA.Standard) * VOICE_COSTS.Standard)
+                    <p
+                      className={`text-2xl font-bold tracking-tight ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      $
+                      {(
+                        Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Neural2 -
+                            MONTHLY_QUOTA.Neural2) *
+                            VOICE_COSTS.Neural2
+                        ) +
+                        Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Wavenet -
+                            MONTHLY_QUOTA.Wavenet) *
+                            VOICE_COSTS.Wavenet
+                        ) +
+                        Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Standard -
+                            MONTHLY_QUOTA.Standard) *
+                            VOICE_COSTS.Standard
+                        )
                       ).toFixed(2)}
                     </p>
                   </div>
-                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     After free tier deduction
                   </div>
                 </div>
-                <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
-                  <FaDollarSign className={theme === 'dark' ? 'text-emerald-400 w-6 h-6' : 'text-emerald-600 w-6 h-6'} />
+                <div
+                  className={`p-3 rounded-xl ${
+                    theme === "dark" ? "bg-emerald-500/10" : "bg-emerald-50"
+                  }`}
+                >
+                  <FaDollarSign
+                    className={
+                      theme === "dark"
+                        ? "text-emerald-400 w-6 h-6"
+                        : "text-emerald-600 w-6 h-6"
+                    }
+                  />
                 </div>
               </div>
             </div>
 
             {/* Total Characters Card */}
-            <div className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
-              theme === 'dark' ? 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Total Characters
                   </p>
-                  <p className={`text-2xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <p
+                    className={`text-2xl font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {ttsStats?.totalCharacters.toLocaleString()}
                   </p>
-                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     Processed through TTS API
                   </div>
                 </div>
-                <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
-                  <FaFileAlt className={theme === 'dark' ? 'text-blue-400 w-6 h-6' : 'text-blue-600 w-6 h-6'} />
+                <div
+                  className={`p-3 rounded-xl ${
+                    theme === "dark" ? "bg-blue-500/10" : "bg-blue-50"
+                  }`}
+                >
+                  <FaFileAlt
+                    className={
+                      theme === "dark"
+                        ? "text-blue-400 w-6 h-6"
+                        : "text-blue-600 w-6 h-6"
+                    }
+                  />
                 </div>
               </div>
             </div>
 
             {/* Total Plays Card */}
-            <div className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
-              theme === 'dark' ? 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Total Plays
                   </p>
-                  <p className={`text-2xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <p
+                    className={`text-2xl font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {ttsStats?.totalPlays.toLocaleString()}
                   </p>
-                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     Including repeated plays
                   </div>
                 </div>
-                <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-indigo-500/10' : 'bg-indigo-50'}`}>
-                  <FaPlay className={theme === 'dark' ? 'text-indigo-400 w-6 h-6' : 'text-indigo-600 w-6 h-6'} />
+                <div
+                  className={`p-3 rounded-xl ${
+                    theme === "dark" ? "bg-indigo-500/10" : "bg-indigo-50"
+                  }`}
+                >
+                  <FaPlay
+                    className={
+                      theme === "dark"
+                        ? "text-indigo-400 w-6 h-6"
+                        : "text-indigo-600 w-6 h-6"
+                    }
+                  />
                 </div>
               </div>
             </div>
 
             {/* Average Cost Per Play Card - New */}
-            <div className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
-              theme === 'dark' ? 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Avg Cost/Play
                   </p>
-                  <p className={`text-2xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <p
+                    className={`text-2xl font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     ${(ttsStats?.totalCost / ttsStats?.totalPlays).toFixed(4)}
                   </p>
-                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     USD per play
                   </div>
                 </div>
-                <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-purple-500/10' : 'bg-purple-50'}`}>
-                  <FaChartLine className={theme === 'dark' ? 'text-purple-400 w-6 h-6' : 'text-purple-600 w-6 h-6'} />
+                <div
+                  className={`p-3 rounded-xl ${
+                    theme === "dark" ? "bg-purple-500/10" : "bg-purple-50"
+                  }`}
+                >
+                  <FaChartLine
+                    className={
+                      theme === "dark"
+                        ? "text-purple-400 w-6 h-6"
+                        : "text-purple-600 w-6 h-6"
+                    }
+                  />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Cost Breakdown and Quota Combined */}
-          <div className={`p-6 rounded-xl shadow-md mb-6 ${
-            theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-          }`}>
+          <div
+            className={`p-6 rounded-xl shadow-md mb-6 ${
+              theme === "dark"
+                ? "bg-gray-800/50 border border-gray-700/50"
+                : "bg-white border border-gray-100"
+            }`}
+          >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h2
+                  className={`text-lg font-bold tracking-tight ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Voice Cost Breakdown
                 </h2>
-                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p
+                  className={`mt-1 text-sm ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Cost analysis and quota usage by voice type
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Neural2 Stats */}
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  theme === "dark" ? "bg-gray-700/50" : "bg-gray-50"
+                }`}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Neural2</span>
-                  <div className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>
-                    ${(ttsStats.quotaUsage.Neural2 * VOICE_COSTS.Neural2).toFixed(2)}
+                  <span
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    Neural2
+                  </span>
+                  <div
+                    className={`px-2 py-1 rounded text-xs ${
+                      theme === "dark"
+                        ? "bg-purple-500/20 text-purple-300"
+                        : "bg-purple-100 text-purple-600"
+                    }`}
+                  >
+                    $
+                    {(
+                      ttsStats.quotaUsage.Neural2 * VOICE_COSTS.Neural2
+                    ).toFixed(2)}
                   </div>
                 </div>
                 <div className="text-xs space-y-2">
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Characters Used</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Characters Used
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
                       {ttsStats.quotaUsage.Neural2?.toLocaleString() || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Rate</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>$0.000016/char</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Rate
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      $0.000016/char
+                    </span>
                   </div>
                   <div className="w-full bg-gray-700/30 rounded-full h-2 mt-2">
-                    <div 
+                    <div
                       className="h-2 rounded-full bg-purple-500 transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((ttsStats.quotaUsage.Neural2 / MONTHLY_QUOTA.Neural2) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min(
+                          (ttsStats.quotaUsage.Neural2 /
+                            MONTHLY_QUOTA.Neural2) *
+                            100,
+                          100
+                        )}%`,
                       }}
                     ></div>
                   </div>
                   <div className="flex justify-between text-xs mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }
+                    >
                       Monthly free quota
                     </span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {((ttsStats.quotaUsage.Neural2 / MONTHLY_QUOTA.Neural2) * 100).toFixed(1)}% used
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {(
+                        (ttsStats.quotaUsage.Neural2 / MONTHLY_QUOTA.Neural2) *
+                        100
+                      ).toFixed(1)}
+                      % used
                     </span>
                   </div>
                   <div className="flex justify-between mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Remaining</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                      {(MONTHLY_QUOTA.Neural2 - ttsStats.quotaUsage.Neural2).toLocaleString()}
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Remaining
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      {(
+                        MONTHLY_QUOTA.Neural2 - ttsStats.quotaUsage.Neural2
+                      ).toLocaleString()}
                     </span>
                   </div>
-                  <div className={`mt-3 pt-2 border-t ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
+                  <div
+                    className={`mt-3 pt-2 border-t ${
+                      theme === "dark" ? "border-gray-600" : "border-gray-200"
+                    }`}
+                  >
                     <div className="flex justify-between">
-                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>After Free Tier</span>
-                      <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                        ${Math.max(0, (ttsStats.quotaUsage.Neural2 - MONTHLY_QUOTA.Neural2) * VOICE_COSTS.Neural2).toFixed(2)}
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }
+                      >
+                        After Free Tier
+                      </span>
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }
+                      >
+                        $
+                        {Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Neural2 -
+                            MONTHLY_QUOTA.Neural2) *
+                            VOICE_COSTS.Neural2
+                        ).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -823,51 +1558,141 @@ export default function AdminPage() {
               </div>
 
               {/* Wavenet Stats */}
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  theme === "dark" ? "bg-gray-700/50" : "bg-gray-50"
+                }`}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Wavenet</span>
-                  <div className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-600'}`}>
-                    ${(ttsStats.quotaUsage.Wavenet * VOICE_COSTS.Wavenet).toFixed(2)}
+                  <span
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    Wavenet
+                  </span>
+                  <div
+                    className={`px-2 py-1 rounded text-xs ${
+                      theme === "dark"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : "bg-blue-100 text-blue-600"
+                    }`}
+                  >
+                    $
+                    {(
+                      ttsStats.quotaUsage.Wavenet * VOICE_COSTS.Wavenet
+                    ).toFixed(2)}
                   </div>
                 </div>
                 <div className="text-xs space-y-2">
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Characters Used</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Characters Used
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
                       {ttsStats.quotaUsage.Wavenet?.toLocaleString() || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Rate</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>$0.000016/char</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Rate
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      $0.000016/char
+                    </span>
                   </div>
                   <div className="w-full bg-gray-700/30 rounded-full h-2 mt-2">
-                    <div 
+                    <div
                       className="h-2 rounded-full bg-blue-500 transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((ttsStats.quotaUsage.Wavenet / MONTHLY_QUOTA.Wavenet) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min(
+                          (ttsStats.quotaUsage.Wavenet /
+                            MONTHLY_QUOTA.Wavenet) *
+                            100,
+                          100
+                        )}%`,
                       }}
                     ></div>
                   </div>
                   <div className="flex justify-between text-xs mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }
+                    >
                       Monthly free quota
                     </span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {((ttsStats.quotaUsage.Wavenet / MONTHLY_QUOTA.Wavenet) * 100).toFixed(1)}% used
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {(
+                        (ttsStats.quotaUsage.Wavenet / MONTHLY_QUOTA.Wavenet) *
+                        100
+                      ).toFixed(1)}
+                      % used
                     </span>
                   </div>
                   <div className="flex justify-between mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Remaining</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                      {(MONTHLY_QUOTA.Wavenet - ttsStats.quotaUsage.Wavenet).toLocaleString()}
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Remaining
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      {(
+                        MONTHLY_QUOTA.Wavenet - ttsStats.quotaUsage.Wavenet
+                      ).toLocaleString()}
                     </span>
                   </div>
-                  <div className={`mt-3 pt-2 border-t ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
+                  <div
+                    className={`mt-3 pt-2 border-t ${
+                      theme === "dark" ? "border-gray-600" : "border-gray-200"
+                    }`}
+                  >
                     <div className="flex justify-between">
-                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>After Free Tier</span>
-                      <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                        ${Math.max(0, (ttsStats.quotaUsage.Wavenet - MONTHLY_QUOTA.Wavenet) * VOICE_COSTS.Wavenet).toFixed(2)}
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }
+                      >
+                        After Free Tier
+                      </span>
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }
+                      >
+                        $
+                        {Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Wavenet -
+                            MONTHLY_QUOTA.Wavenet) *
+                            VOICE_COSTS.Wavenet
+                        ).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -875,51 +1700,142 @@ export default function AdminPage() {
               </div>
 
               {/* Standard Stats */}
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  theme === "dark" ? "bg-gray-700/50" : "bg-gray-50"
+                }`}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Standard</span>
-                  <div className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-600'}`}>
-                    ${(ttsStats.quotaUsage.Standard * VOICE_COSTS.Standard).toFixed(2)}
+                  <span
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    Standard
+                  </span>
+                  <div
+                    className={`px-2 py-1 rounded text-xs ${
+                      theme === "dark"
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : "bg-emerald-100 text-emerald-600"
+                    }`}
+                  >
+                    $
+                    {(
+                      ttsStats.quotaUsage.Standard * VOICE_COSTS.Standard
+                    ).toFixed(2)}
                   </div>
                 </div>
                 <div className="text-xs space-y-2">
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Characters Used</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Characters Used
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
                       {ttsStats.quotaUsage.Standard?.toLocaleString() || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Rate</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>$0.000004/char</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Rate
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      $0.000004/char
+                    </span>
                   </div>
                   <div className="w-full bg-gray-700/30 rounded-full h-2 mt-2">
-                    <div 
+                    <div
                       className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((ttsStats.quotaUsage.Standard / MONTHLY_QUOTA.Standard) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min(
+                          (ttsStats.quotaUsage.Standard /
+                            MONTHLY_QUOTA.Standard) *
+                            100,
+                          100
+                        )}%`,
                       }}
                     ></div>
                   </div>
                   <div className="flex justify-between text-xs mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }
+                    >
                       Monthly free quota
                     </span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {((ttsStats.quotaUsage.Standard / MONTHLY_QUOTA.Standard) * 100).toFixed(1)}% used
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {(
+                        (ttsStats.quotaUsage.Standard /
+                          MONTHLY_QUOTA.Standard) *
+                        100
+                      ).toFixed(1)}
+                      % used
                     </span>
                   </div>
                   <div className="flex justify-between mt-1">
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Remaining</span>
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                      {(MONTHLY_QUOTA.Standard - ttsStats.quotaUsage.Standard).toLocaleString()}
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Remaining
+                    </span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      {(
+                        MONTHLY_QUOTA.Standard - ttsStats.quotaUsage.Standard
+                      ).toLocaleString()}
                     </span>
                   </div>
-                  <div className={`mt-3 pt-2 border-t ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
+                  <div
+                    className={`mt-3 pt-2 border-t ${
+                      theme === "dark" ? "border-gray-600" : "border-gray-200"
+                    }`}
+                  >
                     <div className="flex justify-between">
-                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>After Free Tier</span>
-                      <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-                        ${Math.max(0, (ttsStats.quotaUsage.Standard - MONTHLY_QUOTA.Standard) * VOICE_COSTS.Standard).toFixed(2)}
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-400" : "text-gray-500"
+                        }
+                      >
+                        After Free Tier
+                      </span>
+                      <span
+                        className={
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }
+                      >
+                        $
+                        {Math.max(
+                          0,
+                          (ttsStats.quotaUsage.Standard -
+                            MONTHLY_QUOTA.Standard) *
+                            VOICE_COSTS.Standard
+                        ).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -931,15 +1847,27 @@ export default function AdminPage() {
           {/* Daily Usage Analytics and Voice Usage Analytics Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Daily Usage Analytics */}
-            <div className={`p-6 rounded-xl shadow-md ${
-              theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Daily Usage Analytics
                   </h2>
-                  <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Daily trends for character and play usage
                   </p>
                 </div>
@@ -947,49 +1875,66 @@ export default function AdminPage() {
 
               {/* Character Usage Chart */}
               <div className="mb-6">
-                <h3 className={`text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                <h3
+                  className={`text-sm font-medium mb-4 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Character Usage
                 </h3>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        stroke={theme === 'dark' ? '#374151' : '#e5e7eb'}
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={theme === "dark" ? "#374151" : "#e5e7eb"}
                       />
-                      <XAxis 
-                        dataKey="date" 
-                        stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                      <XAxis
+                        dataKey="date"
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
                         fontSize={12}
                       />
-                      <YAxis 
-                        stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                      <YAxis
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
                         fontSize={12}
                       />
-                      <Tooltip 
-                        cursor={{ fill: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }}
+                      <Tooltip
+                        cursor={{
+                          fill:
+                            theme === "dark"
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(0, 0, 0, 0.05)",
+                        }}
                         contentStyle={{
-                          backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                          backgroundColor:
+                            theme === "dark" ? "#1F2937" : "white",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                         }}
                         labelStyle={{
-                          color: theme === 'dark' ? '#E5E7EB' : '#374151',
-                          fontWeight: 'bold',
-                          marginBottom: '4px'
+                          color: theme === "dark" ? "#E5E7EB" : "#374151",
+                          fontWeight: "bold",
+                          marginBottom: "4px",
                         }}
                         itemStyle={{
-                          color: theme === 'dark' ? '#E5E7EB' : '#374151',
-                          padding: '2px 0'
+                          color: theme === "dark" ? "#E5E7EB" : "#374151",
+                          padding: "2px 0",
                         }}
-                        formatter={(value) => [value.toLocaleString(), 'Characters']}
+                        formatter={(value) => [
+                          value.toLocaleString(),
+                          "Characters",
+                        ]}
                       />
-                      <Bar 
-                        dataKey="characters" 
-                        fill={theme === 'dark' ? COLORS.dark.charts.primary : COLORS.light.charts.primary}
-                        name="Characters" 
-                        radius={[4, 4, 0, 0]} 
+                      <Bar
+                        dataKey="characters"
+                        fill={
+                          theme === "dark"
+                            ? COLORS.dark.charts.primary
+                            : COLORS.light.charts.primary
+                        }
+                        name="Characters"
+                        radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -998,49 +1943,63 @@ export default function AdminPage() {
 
               {/* Play Usage Chart */}
               <div>
-                <h3 className={`text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                <h3
+                  className={`text-sm font-medium mb-4 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Play Usage
                 </h3>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        stroke={theme === 'dark' ? '#374151' : '#e5e7eb'}
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={theme === "dark" ? "#374151" : "#e5e7eb"}
                       />
-                      <XAxis 
-                        dataKey="date" 
-                        stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                      <XAxis
+                        dataKey="date"
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
                         fontSize={12}
                       />
-                      <YAxis 
-                        stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                      <YAxis
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
                         fontSize={12}
                       />
-                      <Tooltip 
-                        cursor={{ fill: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }}
+                      <Tooltip
+                        cursor={{
+                          fill:
+                            theme === "dark"
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(0, 0, 0, 0.05)",
+                        }}
                         contentStyle={{
-                          backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                          backgroundColor:
+                            theme === "dark" ? "#1F2937" : "white",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                         }}
                         labelStyle={{
-                          color: theme === 'dark' ? '#E5E7EB' : '#374151',
-                          fontWeight: 'bold',
-                          marginBottom: '4px'
+                          color: theme === "dark" ? "#E5E7EB" : "#374151",
+                          fontWeight: "bold",
+                          marginBottom: "4px",
                         }}
                         itemStyle={{
-                          color: theme === 'dark' ? '#E5E7EB' : '#374151',
-                          padding: '2px 0'
+                          color: theme === "dark" ? "#E5E7EB" : "#374151",
+                          padding: "2px 0",
                         }}
-                        formatter={(value) => [value.toLocaleString(), 'Plays']}
+                        formatter={(value) => [value.toLocaleString(), "Plays"]}
                       />
-                      <Bar 
-                        dataKey="plays" 
-                        fill={theme === 'dark' ? COLORS.dark.charts.success : COLORS.light.charts.success}
-                        name="Plays" 
-                        radius={[4, 4, 0, 0]} 
+                      <Bar
+                        dataKey="plays"
+                        fill={
+                          theme === "dark"
+                            ? COLORS.dark.charts.success
+                            : COLORS.light.charts.success
+                        }
+                        name="Plays"
+                        radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -1049,15 +2008,27 @@ export default function AdminPage() {
             </div>
 
             {/* Voice Usage Analytics */}
-            <div className={`p-6 rounded-xl shadow-md ${
-              theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Voice Usage Analytics
                   </h2>
-                  <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Voice usage distribution and type breakdown
                   </p>
                 </div>
@@ -1065,12 +2036,18 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 gap-6">
                 {/* Voice Usage Distribution */}
                 <div>
-                  <h3 className={`text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <h3
+                    className={`text-sm font-medium mb-4 ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     Voice Usage Distribution
                   </h3>
                   <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <PieChart
+                        margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                      >
                         <Pie
                           data={voiceData}
                           cx="50%"
@@ -1081,75 +2058,118 @@ export default function AdminPage() {
                           dataKey="plays"
                           nameKey="voice"
                           label={({ name, percent }) => {
-                            const [humanName] = name.split(' • ');
-                            return `${humanName} (${(percent * 100).toFixed(0)}%)`;
+                            const [humanName] = name.split(" • ");
+                            return `${humanName} (${(percent * 100).toFixed(
+                              0
+                            )}%)`;
                           }}
                           labelStyle={{
-                            fill: theme === 'dark' ? '#E5E7EB' : '#374151'
+                            fill: theme === "dark" ? "#E5E7EB" : "#374151",
                           }}
-                          activeShape={{ outline: 'none' }}
+                          activeShape={{ outline: "none" }}
                           activeIndex={[]}
                           isAnimationActive={false}
                         >
                           {voiceData.map((entry, index) => {
                             let color;
                             switch (entry.voiceType) {
-                              case 'Neural2':
-                                color = theme === 'dark' ? '#A855F7' : '#9333EA'; // Purple
+                              case "Neural2":
+                                color =
+                                  theme === "dark" ? "#A855F7" : "#9333EA"; // Purple
                                 break;
-                              case 'Wavenet':
-                                color = theme === 'dark' ? '#3B82F6' : '#2563EB'; // Blue
+                              case "Wavenet":
+                                color =
+                                  theme === "dark" ? "#3B82F6" : "#2563EB"; // Blue
                                 break;
                               default:
-                                color = theme === 'dark' ? '#10B981' : '#059669'; // Emerald
+                                color =
+                                  theme === "dark" ? "#10B981" : "#059669"; // Emerald
                             }
                             return <Cell key={index} fill={color} />;
                           })}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value, name) => {
-                            const [humanName, modelName] = name.split(' • ');
-                            const total = voiceData.reduce((sum, item) => sum + item.plays, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
+                            const [humanName, modelName] = name.split(" • ");
+                            const total = voiceData.reduce(
+                              (sum, item) => sum + item.plays,
+                              0
+                            );
+                            const percentage = ((value / total) * 100).toFixed(
+                              1
+                            );
                             return [
                               <div key="tooltip" className="space-y-2">
-                                <div className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <div
+                                  className={`font-semibold text-base ${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-gray-900"
+                                  }`}
+                                >
                                   {humanName}
                                 </div>
-                                <div className={`font-mono text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <div
+                                  className={`font-mono text-xs ${
+                                    theme === "dark"
+                                      ? "text-gray-400"
+                                      : "text-gray-600"
+                                  }`}
+                                >
                                   {modelName}
                                 </div>
-                                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <div
+                                  className={`text-sm font-medium ${
+                                    theme === "dark"
+                                      ? "text-gray-300"
+                                      : "text-gray-700"
+                                  }`}
+                                >
                                   {value.toLocaleString()} plays ({percentage}%)
                                 </div>
-                              </div>
+                              </div>,
                             ];
                           }}
                           contentStyle={{
-                            backgroundColor: theme === 'dark' ? '#1E293B' : 'white',
-                            border: theme === 'dark' ? '1px solid #475569' : 'none',
-                            borderRadius: '0.75rem',
-                            boxShadow: theme === 'dark' ? 
-                              '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3)' : 
-                              '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-                            padding: '1rem',
+                            backgroundColor:
+                              theme === "dark" ? "#1E293B" : "white",
+                            border:
+                              theme === "dark" ? "1px solid #475569" : "none",
+                            borderRadius: "0.75rem",
+                            boxShadow:
+                              theme === "dark"
+                                ? "0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3)"
+                                : "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+                            padding: "1rem",
                           }}
                         />
-                        <Legend 
+                        <Legend
                           verticalAlign="bottom"
                           align="center"
                           content={() => (
-                            <div className={`flex justify-center gap-4 mt-4 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <div
+                              className={`flex justify-center gap-4 mt-4 text-sm ${
+                                theme === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-600"
+                              }`}
+                            >
                               <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full bg-purple-500`}></div>
+                                <div
+                                  className={`w-3 h-3 rounded-full bg-purple-500`}
+                                ></div>
                                 <span>Neural2</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full bg-blue-500`}></div>
+                                <div
+                                  className={`w-3 h-3 rounded-full bg-blue-500`}
+                                ></div>
                                 <span>Wavenet</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full bg-emerald-500`}></div>
+                                <div
+                                  className={`w-3 h-3 rounded-full bg-emerald-500`}
+                                ></div>
                                 <span>Standard</span>
                               </div>
                             </div>
@@ -1162,7 +2182,11 @@ export default function AdminPage() {
 
                 {/* Gender Distribution */}
                 <div>
-                  <h3 className={`text-sm font-medium mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <h3
+                    className={`text-sm font-medium mb-4 ${
+                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     Voice Gender Distribution
                   </h3>
                   <div className="h-[250px]">
@@ -1170,8 +2194,16 @@ export default function AdminPage() {
                       <PieChart>
                         <Pie
                           data={[
-                            { name: 'Female', value: ttsStats.voiceGenderDistribution.female.count },
-                            { name: 'Male', value: ttsStats.voiceGenderDistribution.male.count }
+                            {
+                              name: "Female",
+                              value:
+                                ttsStats.voiceGenderDistribution.female.count,
+                            },
+                            {
+                              name: "Male",
+                              value:
+                                ttsStats.voiceGenderDistribution.male.count,
+                            },
                           ]}
                           cx="50%"
                           cy="45%"
@@ -1181,45 +2213,62 @@ export default function AdminPage() {
                           dataKey="value"
                           nameKey="name"
                           label={({ name, percent }) => {
-                            const [humanName] = name.split(' • ');
-                            return `${humanName} (${(percent * 100).toFixed(0)}%)`;
+                            const [humanName] = name.split(" • ");
+                            return `${humanName} (${(percent * 100).toFixed(
+                              0
+                            )}%)`;
                           }}
                           labelStyle={{
-                            fill: theme === 'dark' ? '#E5E7EB' : '#374151'
+                            fill: theme === "dark" ? "#E5E7EB" : "#374151",
                           }}
-                          activeShape={{ outline: 'none' }}
+                          activeShape={{ outline: "none" }}
                           activeIndex={[]}
                           isAnimationActive={false}
                         >
                           <Cell fill="#EC4899" /> {/* Pink-500 for Female */}
                           <Cell fill="#6366F1" /> {/* Indigo-500 for Male */}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value, name) => [
                             <div key="tooltip" className="space-y-1">
-                              <div className="font-medium">{value.toLocaleString()} plays</div>
-                              <div className="text-xs opacity-80">{name} voices</div>
-                            </div>
+                              <div className="font-medium">
+                                {value.toLocaleString()} plays
+                              </div>
+                              <div className="text-xs opacity-80">
+                                {name} voices
+                              </div>
+                            </div>,
                           ]}
                           contentStyle={{
-                            backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
-                            border: 'none',
-                            borderRadius: '0.5rem',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                            padding: '0.75rem',
+                            backgroundColor:
+                              theme === "dark" ? "#1F2937" : "white",
+                            border: "none",
+                            borderRadius: "0.5rem",
+                            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                            padding: "0.75rem",
                           }}
                         />
-                        <Legend 
+                        <Legend
                           verticalAlign="bottom"
                           align="center"
                           content={() => (
-                            <div className={`flex justify-center gap-4 mt-4 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <div
+                              className={`flex justify-center gap-4 mt-4 text-sm ${
+                                theme === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-600"
+                              }`}
+                            >
                               <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full bg-pink-500`}></div>
+                                <div
+                                  className={`w-3 h-3 rounded-full bg-pink-500`}
+                                ></div>
                                 <span>Female</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full bg-indigo-500`}></div>
+                                <div
+                                  className={`w-3 h-3 rounded-full bg-indigo-500`}
+                                ></div>
                                 <span>Male</span>
                               </div>
                             </div>
@@ -1231,24 +2280,40 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Article Analytics */}
-          <div className="grid grid-cols-1 gap-6">
-            {/* Article Usage Stats - Now full width */}
-            <div className={`p-6 rounded-xl shadow-md ${
-              theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            {/* Article Analytics */}
+            <div
+              className={`p-6 rounded-xl shadow-md ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Article Analytics
                   </h2>
-                  <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Top 10 most accessed articles with sentence-level engagement heatmap
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Top 10 most accessed articles with sentence-level engagement
+                    heatmap
                   </p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    theme === "dark"
+                      ? "bg-gray-700 text-gray-300"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
                   {ttsStats.uniqueArticles.size} unique articles
                 </div>
               </div>
@@ -1256,36 +2321,79 @@ export default function AdminPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
                   <thead>
                     <tr>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Article ID & Heatmap
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Plays
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Characters
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Cost
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Sentences
                       </th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700/50' : 'divide-gray-200'}`}>
+                  <tbody
+                    className={`divide-y ${
+                      theme === "dark"
+                        ? "divide-gray-700/50"
+                        : "divide-gray-200"
+                    }`}
+                  >
                     {ttsStats.topArticles.map((article, index) => (
-                      <tr 
+                      <tr
                         key={article.id}
                         className={`transition-colors duration-200 ${
-                          theme === 'dark' ? 'hover:bg-gray-700/70' : 'hover:bg-gray-50'
+                          theme === "dark"
+                            ? "hover:bg-gray-700/70"
+                            : "hover:bg-gray-50"
                         }`}
                       >
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
                           <div className="flex items-start">
-                            <FaNewspaper className={`mr-2 mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                            <FaNewspaper
+                              className={`mr-2 mt-1 ${
+                                theme === "dark"
+                                  ? "text-gray-500"
+                                  : "text-gray-400"
+                              }`}
+                            />
                             <div className="flex-1">
-                              <ArticleIdWrapper 
+                              <ArticleIdWrapper
                                 articleId={article.id}
                                 showHeatmap={true}
                                 heatmapData={article.heatmap}
@@ -1295,10 +2403,34 @@ export default function AdminPage() {
                             </div>
                           </div>
                         </td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{article.plays.toLocaleString()}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{article.characters.toLocaleString()}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>${article.cost.toFixed(4)}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{article.uniqueSentences}</td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {article.plays.toLocaleString()}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {article.characters.toLocaleString()}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          ${article.cost.toFixed(4)}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {article.uniqueSentences}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1307,19 +2439,37 @@ export default function AdminPage() {
             </div>
 
             {/* User Usage Stats */}
-            <div className={`p-6 rounded-xl shadow-md ${
-              theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-            }`}>
+            <div
+              className={`p-6 rounded-xl shadow-md ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border border-gray-700/50"
+                  : "bg-white border border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     User Analytics
                   </h2>
-                  <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Top 10 most active users
                   </p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    theme === "dark"
+                      ? "bg-gray-700 text-gray-300"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
                   {ttsStats.uniqueUsers.size} unique users
                 </div>
               </div>
@@ -1327,38 +2477,99 @@ export default function AdminPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
                   <thead>
                     <tr>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         User ID
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Plays
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Characters
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Cost
                       </th>
-                      <th scope="col" className={`px-4 py-3.5 text-left text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                      <th
+                        scope="col"
+                        className={`px-4 py-3.5 text-left text-sm font-semibold ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-900"
+                        }`}
+                      >
                         Articles
                       </th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700/50' : 'divide-gray-200'}`}>
+                  <tbody
+                    className={`divide-y ${
+                      theme === "dark"
+                        ? "divide-gray-700/50"
+                        : "divide-gray-200"
+                    }`}
+                  >
                     {ttsStats.topUsers.map((user, index) => (
-                      <tr 
+                      <tr
                         key={user.id}
                         className={`transition-colors duration-200 ${
-                          theme === 'dark' ? 'hover:bg-gray-700/70' : 'hover:bg-gray-50'
+                          theme === "dark"
+                            ? "hover:bg-gray-700/70"
+                            : "hover:bg-gray-50"
                         }`}
                       >
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
                           <UserIdWrapper userId={user.id} theme={theme} />
                         </td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{user.plays.toLocaleString()}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{user.characters.toLocaleString()}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>${user.cost.toFixed(4)}</td>
-                        <td className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{user.uniqueArticles}</td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {user.plays.toLocaleString()}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {user.characters.toLocaleString()}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          ${user.cost.toFixed(4)}
+                        </td>
+                        <td
+                          className={`py-2 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-900"
+                          }`}
+                        >
+                          {user.uniqueArticles}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1368,74 +2579,176 @@ export default function AdminPage() {
           </div>
 
           {/* Reading Patterns Analysis */}
-          <div className={`p-6 rounded-xl shadow-md mt-6 ${
-            theme === 'dark' ? 'bg-gray-800/50 border border-gray-700/50' : 'bg-white border border-gray-100'
-          }`}>
+          <div
+            className={`p-6 rounded-xl shadow-md mt-6 ${
+              theme === "dark"
+                ? "bg-gray-800/50 border border-gray-700/50"
+                : "bg-white border border-gray-100"
+            }`}
+          >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className={`text-lg font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h2
+                  className={`text-lg font-bold tracking-tight ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Reading Behavior Analysis
                 </h2>
-                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p
+                  className={`mt-1 text-sm ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   User interaction patterns and sentence repetition metrics
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-6">
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50 hover:bg-gray-700/70' : 'bg-gray-50'}`}>
-                <h3 className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  theme === "dark"
+                    ? "bg-gray-700/50 hover:bg-gray-700/70"
+                    : "bg-gray-50"
+                }`}
+              >
+                <h3
+                  className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Reading Pattern
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Sequential Reads</span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{ttsStats.readingPatterns.sequentialReads}</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      Sequential Reads
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-900"
+                      }`}
+                    >
+                      {ttsStats.readingPatterns.sequentialReads}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Jump Reads</span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{ttsStats.readingPatterns.jumpReads}</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      Jump Reads
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-900"
+                      }`}
+                    >
+                      {ttsStats.readingPatterns.jumpReads}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50 hover:bg-gray-700/70' : 'bg-gray-50'}`}>
-                <h3 className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  theme === "dark"
+                    ? "bg-gray-700/50 hover:bg-gray-700/70"
+                    : "bg-gray-50"
+                }`}
+              >
+                <h3
+                  className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Repetition Analysis
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Avg. Repeats</span>
-                    <span className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{ttsStats.sentenceRepetition.averageRepeats.toFixed(1)}</span>
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      Avg. Repeats
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-900"
+                      }`}
+                    >
+                      {ttsStats.sentenceRepetition.averageRepeats.toFixed(1)}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4">
-              <h3 className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            <div className="">
+              <h3
+                className={`text-sm font-medium mb-2 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
                 Most Repeated Sentences
               </h3>
               <div className="space-y-2">
-                {ttsStats.sentenceRepetition.mostRepeated.map((sentence, index) => (
-                  <div 
-                    key={`${sentence.article_id}-${sentence.sentence_index}`}
-                    className={`p-2 sm:p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50 hover:bg-gray-700/70' : 'bg-gray-50'}`}
-                  >
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                        <ArticleIdWrapper 
-                          articleId={sentence.article_id}
-                          theme={theme}
-                        />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Sentence {sentence.sentence_index}</span>
-                      </div>
-                      <div className="text-xs sm:text-sm">
-                        <span className={`font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{sentence.count}</span>
-                        <span className={`ml-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>plays</span>
+                {ttsStats.sentenceRepetition.mostRepeated.map(
+                  (sentence, index) => (
+                    <div
+                      key={`${sentence.article_id}-${sentence.sentence_index}`}
+                      className={`p-2 sm:p-3 rounded-lg ${
+                        theme === "dark"
+                          ? "bg-gray-700/50 hover:bg-gray-700/70"
+                          : "bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <ArticleIdWrapper
+                            articleId={sentence.article_id}
+                            theme={theme}
+                          />
+                          <span
+                            className={`text-xs ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            Sentence {sentence.sentence_index}
+                          </span>
+                        </div>
+                        <div className="text-xs sm:text-sm">
+                          <span
+                            className={`font-bold ${
+                              theme === "dark"
+                                ? "text-gray-200"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {sentence.count}
+                          </span>
+                          <span
+                            className={`ml-1 ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            plays
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           </div>
