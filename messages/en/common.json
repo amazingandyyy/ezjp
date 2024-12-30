@@ -148,18 +148,11 @@
     }
   },
   "navbar": {
-    "toggleNewsList": {
-      "show": "Show News List",
-      "hide": "Hide News List"
-    },
-    "join": "Join",
-    "theme": {
-      "switchToLight": "Switch to Light Mode",
-      "switchToDark": "Switch to Dark Mode",
-      "light": "Light",
-      "dark": "Dark"
+    "logo": {
+      "title": "EZJP News"
     },
     "profile": {
+      "avatar": "Profile Picture",
       "setup": "Set up your username",
       "required": "Required",
       "makeEasier": "Make your profile easier to find and share",
@@ -176,6 +169,17 @@
       "days": "days",
       "day1": "Day 1",
       "keepStreak": "Read at least one article to keep your streak going"
+    },
+    "toggleNewsList": {
+      "show": "Show News List",
+      "hide": "Hide News List"
+    },
+    "join": "Join",
+    "theme": {
+      "switchToLight": "Switch to Light Mode",
+      "switchToDark": "Switch to Dark Mode",
+      "light": "Light",
+      "dark": "Dark"
     },
     "menu": {
       "allNews": "All News",

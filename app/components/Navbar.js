@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from '@/lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import Image from 'next/image';
 import useSystemStore from '@/lib/stores/system';
 import useStatsStore from '@/lib/stores/stats';
@@ -27,6 +28,7 @@ export default function Navbar({
   const { showUpdatePrompt, applyUpdate } = useUpdate();
   const { version, fetchVersion } = useSystemStore();
   const { stats, fetchStats } = useStatsStore();
+  const { t } = useTranslation();
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -324,7 +326,7 @@ export default function Navbar({
                     ? "bg-gray-800/95 hover:bg-gray-700/95 border-gray-700"
                     : "[color-scheme:light] bg-white/95 hover:bg-gray-50/95 border-gray-200"
                 }`}
-              title={showSidebar ? "Hide News List" : "Show News List"}
+              title={showSidebar ? t('navbar.toggleNewsList.hide') : t('navbar.toggleNewsList.show')}
             >
               <svg
                 className={`w-4 h-4 ${
@@ -354,7 +356,7 @@ export default function Navbar({
                   ? "text-white"
                   : "[color-scheme:light] text-black"
               }`}
-            title="EZJP News"
+            title={t('navbar.logo.title')}
           >
             <span className="font-extrabold flex items-center">
               EZ
@@ -400,7 +402,7 @@ export default function Navbar({
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
-                      alt="Profile"
+                      alt={t('navbar.profile.avatar')}
                       className={`w-8 h-8 rounded-xl object-cover transition-all duration-200 hover:scale-105 ${
                         showProfile 
                           ? theme === "dark"
@@ -433,7 +435,7 @@ export default function Navbar({
               ) : (
                 <div className="px-4 py-2 text-sm font-medium flex items-center gap-2">
                   <FaUserCircle className="w-4 h-4" />
-                  <span className="tracking-wide">Join</span>
+                  <span className="tracking-wide">{t('navbar.join')}</span>
                 </div>
               )}
             </button>
@@ -495,7 +497,7 @@ export default function Navbar({
                             theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}
                         >
-                          {profile?.username ? user.email : "No username set"}
+                          {profile?.username ? user.email : t('common.noUsername')}
                         </p>
                       </div>
                     </div>
@@ -597,7 +599,7 @@ export default function Navbar({
                           </svg>
                         )}
                       </div>
-                      <span>{theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+                      <span>{theme === "dark" ? t('navbar.theme.light') : t('navbar.theme.dark')}</span>
                     </div>
                     <div className={`flex items-center ${
                       theme === "dark" ? "text-gray-400" : "text-gray-500"
@@ -634,20 +636,20 @@ export default function Navbar({
                             <p className={`text-sm font-medium ${
                               theme === "dark" ? "text-yellow-100" : "text-yellow-800"
                             }`}>
-                              Set up your username
+                              {t('navbar.profile.setup')}
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
                                 ? "bg-yellow-500/20 text-yellow-400"
                                 : "bg-yellow-100 text-yellow-600"
                             }`}>
-                              Required
+                              {t('navbar.profile.required')}
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
                             theme === "dark" ? "text-yellow-300/70" : "text-yellow-700/90"
                           }`}>
-                            Make your profile easier to find and share
+                            {t('navbar.profile.makeEasier')}
                           </p>
                         </div>
                         <div className={`flex items-center self-center ${
@@ -689,7 +691,7 @@ export default function Navbar({
                           <p className={`text-sm font-medium ${
                             theme === "dark" ? "text-gray-100" : "text-gray-900"
                           }`}>
-                            Daily Reading Goals
+                            {t('navbar.profile.readingGoals')}
                           </p>
                         </div>
 
@@ -699,7 +701,7 @@ export default function Navbar({
                             <span className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-600"
                             }`}>
-                              Articles
+                              {t('navbar.profile.articles')}
                             </span>
                             <span className={`text-xs font-medium ${
                               stats.todayFinishedArticles > stats.dailyArticleGoal
@@ -742,7 +744,7 @@ export default function Navbar({
                             <span className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-600"
                             }`}>
-                              Reading Time
+                              {t('navbar.profile.readingTime')}
                             </span>
                             <span className={`text-xs font-medium ${
                               Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal
@@ -799,13 +801,16 @@ export default function Navbar({
                         }`}>
                           {stats.todayFinishedArticles >= stats.dailyArticleGoal && Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal
                             ? stats.todayFinishedArticles > stats.dailyArticleGoal || Math.round(stats.totalReadingTime) > stats.dailyReadingTimeGoal
-                              ? `Daily goals completed! Going above and beyond! 🚀`
-                              : "Daily goals completed! 🎉"
+                              ? t('navbar.profile.goalExceeded')
+                              : t('navbar.profile.goalComplete')
                             : stats.todayFinishedArticles >= stats.dailyArticleGoal
-                            ? `Almost there! ${Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))} more minutes of reading`
+                            ? t('navbar.profile.almostThere', { remaining: Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime)) })
                             : Math.round(stats.totalReadingTime) >= stats.dailyReadingTimeGoal
-                            ? `Keep going! ${stats.dailyArticleGoal - stats.todayFinishedArticles} more articles to go`
-                            : `Today's target: ${stats.dailyArticleGoal - stats.todayFinishedArticles} articles and ${Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))} minutes`}
+                            ? t('navbar.profile.keepGoing', { remaining: stats.dailyArticleGoal - stats.todayFinishedArticles })
+                            : t('navbar.profile.todayTarget', { 
+                                articles: stats.dailyArticleGoal - stats.todayFinishedArticles,
+                                minutes: Math.max(0, stats.dailyReadingTimeGoal - Math.round(stats.totalReadingTime))
+                              })}
                         </p>
                       </div>
                       <div className={`flex items-center self-center ${
@@ -843,20 +848,20 @@ export default function Navbar({
                             <p className={`text-sm font-medium ${
                               theme === "dark" ? "text-gray-100" : "text-gray-900"
                             }`}>
-                              {stats.currentStreak > 0 ? "Extend your streak" : "Start your streak"}
+                              {stats.currentStreak > 0 ? t('navbar.profile.extendStreak') : t('navbar.profile.startStreak')}
                             </p>
                             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                               theme === "dark"
                                 ? "bg-orange-500/20 text-orange-400"
                                 : "bg-orange-100 text-orange-600"
                             }`}>
-                              {stats.currentStreak > 0 ? `${stats.currentStreak} days` : 'Day 1'}
+                              {stats.currentStreak > 0 ? t('navbar.profile.days', { count: stats.currentStreak }) : t('navbar.profile.day1')}
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${
                             theme === "dark" ? "text-gray-400" : "text-gray-500"
                           }`}>
-                            Read at least one article to keep your streak going
+                            {t('navbar.profile.keepStreak')}
                           </p>
                         </div>
                         <div className={`flex items-center self-center ${
@@ -888,7 +893,7 @@ export default function Navbar({
                     <div className="w-7 h-7 flex items-center justify-center">
                       <FaBookOpen className="w-[1.125rem] h-[1.125rem]" />
                     </div>
-                    <span>All News</span>
+                    <span>{t('navbar.menu.allNews')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -908,7 +913,7 @@ export default function Navbar({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
-                    <span>Settings</span>
+                    <span>{t('navbar.menu.settings')}</span>
                   </button>
                   {profile?.role_level >= 10 && (
                     <button
@@ -928,7 +933,7 @@ export default function Navbar({
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                         </svg>
                       </div>
-                      <span>Admin (restricted)</span>
+                      <span>{t('navbar.menu.admin')}</span>
                     </button>
                   )}
                   <button
@@ -948,7 +953,7 @@ export default function Navbar({
                         <path d="M4 16L4 17C4 18.6569 5.34315 20 7 20L17 20C18.6569 20 20 18.6569 20 17L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <span>Download App</span>
+                    <span>{t('navbar.menu.download')}</span>
                   </button>
                 </div>
 
@@ -986,7 +991,7 @@ export default function Navbar({
                         <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <span>Sign Out</span>
+                    <span>{t('navbar.menu.signOut')}</span>
                   </button>
                 </div>
 
@@ -1019,20 +1024,20 @@ export default function Navbar({
                           <p className={`text-sm font-medium ${
                             theme === "dark" ? "text-gray-100" : "text-gray-900"
                           }`}>
-                            Update Available
+                            {t('navbar.update.available')}
                           </p>
                           <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
                             theme === "dark"
                               ? "bg-green-500/20 text-green-400"
                               : "bg-green-100 text-green-600"
                           }`}>
-                            New
+                            {t('navbar.update.new')}
                           </span>
                         </div>
                         <p className={`text-xs mt-0.5 ${
                           theme === "dark" ? "text-gray-400" : "text-gray-500"
                         }`}>
-                          Install the latest version of EZJP News
+                          {t('navbar.update.install')}
                         </p>
                       </div>
                       <div className={`flex items-center self-center ${
