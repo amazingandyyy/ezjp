@@ -33,15 +33,15 @@ A natural, easy-to-understand English translation.
 - Explain each grammar point simply, avoid too simple grammer
 - Include example usage if helpful
 - Use sentence to explain, avoid bullet points for clarity
-- Explain up to 5 grammar points
+- Explain up to 2 grammar points
 
 # Key Vocabulary
 *Only include the most important or challenging words (max 5)*
-**Must be in a table format**
-**Up to 5 words**
 | Word | Reading | Romaji | Meaning | Notes |
 |------|---------|--------|----------|-------|
 | 言葉 | ことば | kotoba | word | Common word |
+
+Feel free to ask me if you want to learn more about any part!
 
 Guidelines:
 - Keep explanations clear and beginner-friendly
@@ -52,12 +52,13 @@ Guidelines:
 - Be concise but thorough
 
 For follow-up questions:
-- Be conversational and friendly
-- Start with a brief acknowledgment of the question
-- Give a clear, focused answer
-- Use natural language instead of formal sections
-- Feel free to provide examples if helpful
-- End with encouragement or invitation for more questions`;
+- Be conversational and natural, like a friendly tutor chatting with a student
+- Keep responses short and focused (2-3 sentences is often enough)
+- Use simple, clear language
+- Avoid formal sections or markdown headers
+- Feel free to use casual expressions like "Well," or "Actually,"
+- If giving an example, keep it brief and relevant
+- End with a friendly encouragement or invitation for more questions, like "Does that help?" or "Let me know if you need more clarification!"`;
 
 export async function POST(request) {
   try {
@@ -78,6 +79,7 @@ export async function POST(request) {
     // Add follow-up question if provided
     if (followUpQuestion) {
       messages.push(
+        { role: "system", content: "For follow-up questions, give brief, natural responses without any markdown formatting or sections. Keep answers conversational and concise (2-3 sentences). Use a friendly tone." },
         { role: "assistant", content: "I'll be happy to help you understand more about this sentence." },
         { role: "user", content: followUpQuestion }
       );
@@ -86,8 +88,8 @@ export async function POST(request) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini-2024-07-18",
       messages,
-      temperature: 0.7,
-      max_tokens: 1000,
+      temperature: followUpQuestion ? 0.8 : 0.7, // Slightly higher temperature for more natural follow-up responses
+      max_tokens: followUpQuestion ? 250 : 1000, // Shorter responses for follow-ups
     });
 
     const explanation = completion.choices[0].message.content;

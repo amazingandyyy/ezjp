@@ -2023,7 +2023,20 @@ function NewsReaderContent() {
                             </div>
                             <div className="flex-1">
                               <p className="font-medium">AI Tutor's response:</p>
-                              <div className="mt-1 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: marked(conv.answer) }} />
+                              {conv.loading ? (
+                                <div className="flex items-center gap-2 mt-2 text-sm">
+                                  <div className="w-4 h-4 relative">
+                                    <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                      preferenceState.theme === "dark"
+                                        ? "border-green-400 border-r-transparent"
+                                        : "border-green-700 border-r-transparent"
+                                    }`}></div>
+                                  </div>
+                                  <span>Thinking...</span>
+                                </div>
+                              ) : (
+                                <div className="mt-1 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: marked(conv.answer) }} />
+                              )}
                             </div>
                           </div>
                         </div>
@@ -2588,6 +2601,21 @@ function NewsReaderContent() {
       return;
     }
     
+    // If it's a follow-up question, add it to conversations immediately
+    if (followUpQuestion) {
+      setConversations(prev => ({
+        ...prev,
+        [index]: [
+          ...(prev[index] || []),
+          {
+            question: followUpQuestion,
+            answer: null, // null indicates loading state
+            loading: true
+          }
+        ]
+      }));
+    }
+    
     try {
       setLoadingTutor(prev => ({ ...prev, [index]: true }));
       
@@ -2613,16 +2641,14 @@ function NewsReaderContent() {
       const data = await response.json();
       
       if (followUpQuestion) {
-        // Add the Q&A pair to the conversation history
+        // Update the last conversation entry with the response
         setConversations(prev => ({
           ...prev,
-          [index]: [
-            ...(prev[index] || []),
-            {
-              question: followUpQuestion,
-              answer: data.explanation
-            }
-          ]
+          [index]: prev[index].map((conv, i) => 
+            i === prev[index].length - 1
+              ? { ...conv, answer: data.explanation, loading: false }
+              : conv
+          )
         }));
       } else {
         setTutorExplanations(prev => ({
@@ -2633,15 +2659,14 @@ function NewsReaderContent() {
     } catch (error) {
       console.error('Tutor error:', error);
       if (followUpQuestion) {
+        // Update the last conversation entry with the error
         setConversations(prev => ({
           ...prev,
-          [index]: [
-            ...(prev[index] || []),
-            {
-              question: followUpQuestion,
-              answer: `Analysis error: ${error.message}`
-            }
-          ]
+          [index]: prev[index].map((conv, i) => 
+            i === prev[index].length - 1
+              ? { ...conv, answer: `Analysis error: ${error.message}`, loading: false }
+              : conv
+          )
         }));
       } else {
         setTutorExplanations(prev => ({
