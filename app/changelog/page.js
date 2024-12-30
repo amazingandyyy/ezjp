@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import Navbar from '../components/Navbar';
+import Navbar from '@/app/components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheck, FaSpinner, FaHourglassHalf, FaTimes } from 'react-icons/fa';

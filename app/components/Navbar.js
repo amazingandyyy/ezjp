@@ -9,12 +9,12 @@ import {
   FaFire,
   FaCheck,
 } from "react-icons/fa";
-import { useAuth } from '../../lib/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
 import Image from 'next/image';
 import useSystemStore from '@/lib/stores/system';
 import useStatsStore from '@/lib/stores/stats';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function Navbar({ 
   showSidebar, 

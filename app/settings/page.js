@@ -2,11 +2,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSun, FaMoon, FaUser, FaCheck, FaTimes, FaCheckCircle, FaIdBadge } from 'react-icons/fa';
-import { useAuth } from '../../lib/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
-import { supabase } from '../../lib/supabase';
-import { getSystemTheme, getCurrentTheme } from '../../lib/utils/theme';
-import Navbar from '../components/Navbar';
+import { supabase } from '@/lib/supabase';
+import { getSystemTheme, getCurrentTheme } from '@/lib/utils/theme';
+import Navbar from '@/app/components/Navbar';
 import useSystemStore from '@/lib/stores/system';
 
 function SettingsContent() {

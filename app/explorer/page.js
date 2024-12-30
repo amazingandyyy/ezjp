@@ -3,12 +3,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
 import { FaHeart, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useAuth } from '../../lib/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabase';
 import useStatsStore from '@/lib/stores/stats';
 import { formatRelativeTime, formatJapaneseDate, createJSTDate } from '@/lib/utils/date';
 import { getNewsSource } from '@/lib/utils/urls';
-import Navbar from '../components/Navbar';
+import Navbar from '@/app/components/Navbar';
 
 const isToday = (dateStr) => {
   if (!dateStr) return false;

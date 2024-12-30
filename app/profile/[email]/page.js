@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FaHeart, FaBook, FaClock, FaEdit, FaCheck, FaTimes, FaUser, FaEgg, FaFire, FaShare, FaTwitter, FaWhatsapp, FaLinkedin, FaLink } from 'react-icons/fa';
-import { supabase } from '../../../lib/supabase';
-import { useAuth } from '../../../lib/AuthContext';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../../components/Navbar';
 
 // Import RubyText component and utility functions from read/page.js

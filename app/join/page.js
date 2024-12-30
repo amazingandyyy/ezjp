@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaGoogle, FaCheck, FaNewspaper, FaLanguage, FaHeart, FaSync, FaMoon } from 'react-icons/fa';
-import { useAuth } from '../../lib/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 import Image from 'next/image';
 
 export default function JoinPage() {

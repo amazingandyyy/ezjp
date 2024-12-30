@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { FaDownload, FaBook, FaDesktop, FaMobile, FaCheck, FaExternalLinkAlt, FaChrome, FaEdge, FaSafari, FaWindows, FaApple, FaAndroid, FaEllipsisV, FaShareAlt, FaSync } from 'react-icons/fa';
-import { useAuth } from '../../lib/AuthContext';
-import Navbar from '../components/Navbar';
+import { useAuth } from '@/lib/AuthContext';
+import Navbar from '@/app/components/Navbar';
 
 // Loading spinner component
 function LoadingSpinner() {
