@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
-import { isValidUrl } from '@/lib/utils/urls';
+import { DEFAULT_READER_PREFERENCES } from '@/lib/constants';
 import { 
   FaPlay, 
   FaPause, 
@@ -48,16 +48,6 @@ export const REPEAT_MODES = {
   NONE: 'none',
   ONE: 'one',
   ALL: 'all'
-};
-
-// Add constants at the top
-export const DEFAULT_PREFERENCES = {
-  theme: "dark",
-  font_size: "large", // second size
-  show_furigana: true,
-  preferred_speed: 1.0,
-  preferred_voice: "ja-JP-Standard-D",
-  reading_level: "beginner",
 };
 
 // Add ProfileDropdown component near the top with other components
@@ -183,7 +173,7 @@ function NewsReaderContent() {
   const [url, setUrl] = useState('');
   const [currentArticleId, setCurrentArticleId] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
-  const [preferenceState, setPreferenceState] = useState(DEFAULT_PREFERENCES);
+  const [preferenceState, setPreferenceState] = useState(DEFAULT_READER_PREFERENCES);
   const [updatingPreferences, setUpdatingPreferences] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
