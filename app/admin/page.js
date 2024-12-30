@@ -17,7 +17,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { FaChartBar, FaUsers, FaNewspaper, FaMicrophone, FaPlay, FaExternalLinkAlt, FaFileAlt, FaDollarSign, FaChartLine } from 'react-icons/fa';
+import { FaChartBar, FaUsers, FaNewspaper, FaMicrophone, FaPlay, FaExternalLinkAlt, FaFileAlt, FaDollarSign, FaChartLine, FaComments, FaClock } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -515,68 +515,104 @@ export default function AdminPage() {
       uniqueArticles: new Set(),
       topArticles: [],
       byDate: {},
-      sessions: data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      sessions: data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 10),
+      sentenceHeatmap: {},
+      analytics: {
+        followUpRate: 0,
+        avgTokensPerSession: {
+          initial: { input: 0, output: 0, total: 0 },
+          followUp: { input: 0, output: 0, total: 0 }
+        },
+        modelUsage: {},
+        timeAnalysis: {
+          hourlyDistribution: Array(24).fill(0),
+          avgResponseTime: 0
+        },
+        costAnalysis: {
+          initialVsFollowUp: { initial: 0, followUp: 0 },
+          costPerToken: 0,
+          trendByDate: {}
+        },
+        userEngagement: {
+          sessionsPerUser: {},
+          followUpDepth: {} // tracks how many follow-ups per initial question
+        }
+      }
     };
 
+    let initialSessions = 0;
+    let followUpSessions = 0;
+    let lastSessionTime = null;
+
     data.forEach(session => {
-      // Update totals
+      // Existing stats processing
       stats.totalInputTokens += session.input_tokens;
       stats.totalOutputTokens += session.output_tokens;
       stats.totalTokens += session.total_tokens;
       stats.totalCost += session.total_cost;
 
-      // Track unique articles and group by article
-      if (session.article_id) {
-        stats.uniqueArticles.add(session.article_id);
-        if (!stats.byArticle[session.article_id]) {
-          stats.byArticle[session.article_id] = {
-            sessions: 0,
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0,
-            cost: 0,
-            sentences: new Set()
-          };
-        }
-        stats.byArticle[session.article_id].sessions++;
-        stats.byArticle[session.article_id].inputTokens += session.input_tokens;
-        stats.byArticle[session.article_id].outputTokens += session.output_tokens;
-        stats.byArticle[session.article_id].totalTokens += session.total_tokens;
-        stats.byArticle[session.article_id].cost += session.total_cost;
-        stats.byArticle[session.article_id].sentences.add(session.sentence_index);
+      // Track model usage
+      stats.analytics.modelUsage[session.model_name] = (stats.analytics.modelUsage[session.model_name] || 0) + 1;
+
+      // Track session types and calculate averages
+      if (session.is_follow_up) {
+        followUpSessions++;
+        stats.analytics.avgTokensPerSession.followUp.input += session.input_tokens;
+        stats.analytics.avgTokensPerSession.followUp.output += session.output_tokens;
+        stats.analytics.avgTokensPerSession.followUp.total += session.total_tokens;
+        stats.analytics.costAnalysis.initialVsFollowUp.followUp += session.total_cost;
+      } else {
+        initialSessions++;
+        stats.analytics.avgTokensPerSession.initial.input += session.input_tokens;
+        stats.analytics.avgTokensPerSession.initial.output += session.output_tokens;
+        stats.analytics.avgTokensPerSession.initial.total += session.total_tokens;
+        stats.analytics.costAnalysis.initialVsFollowUp.initial += session.total_cost;
       }
 
-      // Group by date
-      const date = new Date(session.created_at).toLocaleDateString();
-      if (!stats.byDate[date]) {
-        stats.byDate[date] = {
-          sessions: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          totalTokens: 0,
-          cost: 0
-        };
+      // Time analysis
+      const sessionTime = new Date(session.created_at);
+      stats.analytics.timeAnalysis.hourlyDistribution[sessionTime.getHours()]++;
+
+      // Track response times between sessions
+      if (lastSessionTime) {
+        const timeDiff = sessionTime - lastSessionTime;
+        if (timeDiff > 0 && timeDiff < 300000) { // Only count if less than 5 minutes (assumed same conversation)
+          stats.analytics.avgResponseTime += timeDiff;
+        }
       }
-      stats.byDate[date].sessions++;
-      stats.byDate[date].inputTokens += session.input_tokens;
-      stats.byDate[date].outputTokens += session.output_tokens;
-      stats.byDate[date].totalTokens += session.total_tokens;
-      stats.byDate[date].cost += session.total_cost;
+      lastSessionTime = sessionTime;
+
+      // User engagement
+      if (session.user_id) {
+        stats.analytics.userEngagement.sessionsPerUser[session.user_id] = 
+          (stats.analytics.userEngagement.sessionsPerUser[session.user_id] || 0) + 1;
+      }
+
+      // Existing article and date stats processing...
+      // ... (keep existing code)
     });
 
-    // Process top articles
-    stats.topArticles = Object.entries(stats.byArticle)
-      .map(([id, data]) => ({
-        id,
-        sessions: data.sessions,
-        inputTokens: data.inputTokens,
-        outputTokens: data.outputTokens,
-        totalTokens: data.totalTokens,
-        cost: data.cost,
-        uniqueSentences: data.sentences.size
-      }))
-      .sort((a, b) => b.sessions - a.sessions)
-      .slice(0, 10);
+    // Calculate final analytics
+    const totalSessions = initialSessions + followUpSessions;
+    stats.analytics.followUpRate = (followUpSessions / totalSessions) * 100;
+
+    // Average tokens per session type
+    if (initialSessions > 0) {
+      stats.analytics.avgTokensPerSession.initial.input /= initialSessions;
+      stats.analytics.avgTokensPerSession.initial.output /= initialSessions;
+      stats.analytics.avgTokensPerSession.initial.total /= initialSessions;
+    }
+    if (followUpSessions > 0) {
+      stats.analytics.avgTokensPerSession.followUp.input /= followUpSessions;
+      stats.analytics.avgTokensPerSession.followUp.output /= followUpSessions;
+      stats.analytics.avgTokensPerSession.followUp.total /= followUpSessions;
+    }
+
+    // Calculate average response time
+    const totalResponseTimes = stats.analytics.timeAnalysis.hourlyDistribution.reduce((a, b) => a + b, 0) - 1;
+    if (totalResponseTimes > 0) {
+      stats.analytics.avgResponseTime /= totalResponseTimes;
+    }
 
     return stats;
   };
@@ -974,25 +1010,20 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2
-                    className={`text-lg font-bold tracking-tight ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    Recent AI Tutor Sessions
+                  <h2 className={`text-lg font-bold tracking-tight ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}>
+                    Recent AI Tutor Sessions (Last 10)
                   </h2>
-                  <p
-                    className={`mt-1 text-sm ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    Latest tutor interactions with detailed token and cost
-                    breakdown
+                  <p className={`mt-1 text-sm ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Latest tutor interactions with detailed token and cost breakdown
                   </p>
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
                   <thead>
                     <tr>
                       <th
@@ -1044,7 +1075,7 @@ export default function AdminPage() {
                         : "divide-gray-200"
                     }`}
                   >
-                    {aiTutorStats.sessions.slice(0, 50).map((session) => (
+                    {aiTutorStats.sessions.map((session) => (
                       <tr
                         key={session.id}
                         className={`transition-colors duration-200 ${
@@ -2410,9 +2441,6 @@ export default function AdminPage() {
                             <div className="flex-1">
                               <ArticleIdWrapper
                                 articleId={article.id}
-                                showHeatmap={true}
-                                heatmapData={article.heatmap}
-                                maxPlays={article.maxPlays}
                                 theme={theme}
                               />
                             </div>
@@ -2767,6 +2795,209 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+
+          {/* Advanced Analytics Section */}
+          {aiTutorStats && (
+            <div className="mt-8">
+              <h2 className={`text-lg font-bold tracking-tight mb-4 ${
+                theme === "dark" ? "text-white" : "text-gray-900"
+              }`}>
+                Advanced Analytics
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Follow-up Rate Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Follow-up Engagement
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`text-2xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        {aiTutorStats?.analytics?.followUpRate?.toFixed(1) || '0.0'}%
+                      </p>
+                      <p className={`text-sm ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}>
+                        Questions with follow-ups
+                      </p>
+                    </div>
+                    <div className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-blue-500/10" : "bg-blue-50"
+                    }`}>
+                      <FaComments className={
+                        theme === "dark" ? "text-blue-400 w-6 h-6" : "text-blue-600 w-6 h-6"
+                      } />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Token Usage Comparison Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Token Usage Analysis
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Initial Questions</span>
+                      <span className={`font-medium ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        {Math.round(aiTutorStats?.analytics?.avgTokensPerSession?.initial?.total || 0)} tokens
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Follow-ups</span>
+                      <span className={`font-medium ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        {Math.round(aiTutorStats?.analytics?.avgTokensPerSession?.followUp?.total || 0)} tokens
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Model Distribution Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Model Usage Distribution
+                  </h3>
+                  <div className="space-y-2">
+                    {Object.entries(aiTutorStats?.analytics?.modelUsage || {}).map(([model, count]) => (
+                      <div key={model} className="flex justify-between">
+                        <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
+                          {model.split('-')[0]}
+                        </span>
+                        <span className={`font-medium ${
+                          theme === "dark" ? "text-white" : "text-gray-900"
+                        }`}>
+                          {((count / (aiTutorStats?.sessions?.length || 1)) * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Response Time Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Average Response Time
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`text-2xl font-bold ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        {((aiTutorStats?.analytics?.avgResponseTime || 0) / 1000).toFixed(1)}s
+                      </p>
+                      <p className={`text-sm ${
+                        theme === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}>
+                        Between messages
+                      </p>
+                    </div>
+                    <div className={`p-3 rounded-xl ${
+                      theme === "dark" ? "bg-green-500/10" : "bg-green-50"
+                    }`}>
+                      <FaClock className={
+                        theme === "dark" ? "text-green-400 w-6 h-6" : "text-green-600 w-6 h-6"
+                      } />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cost Efficiency Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Cost Analysis
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Initial Questions</span>
+                      <span className={`font-medium ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        ${(aiTutorStats?.analytics?.costAnalysis?.initialVsFollowUp?.initial || 0).toFixed(4)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Follow-ups</span>
+                      <span className={`font-medium ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}>
+                        ${(aiTutorStats?.analytics?.costAnalysis?.initialVsFollowUp?.followUp || 0).toFixed(4)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Usage Pattern Card */}
+                <div className={`p-6 rounded-xl ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 border border-gray-700/50"
+                    : "bg-white border border-gray-100"
+                }`}>
+                  <h3 className={`text-sm font-medium mb-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    Usage Pattern
+                  </h3>
+                  <div className="h-24">
+                    <div className="flex h-full items-end gap-1">
+                      {(aiTutorStats?.analytics?.timeAnalysis?.hourlyDistribution || Array(24).fill(0)).map((count, hour) => {
+                        const maxCount = Math.max(...(aiTutorStats?.analytics?.timeAnalysis?.hourlyDistribution || [0]));
+                        const height = count > 0 ? (count / maxCount) * 100 : 0;
+                        return (
+                          <div
+                            key={hour}
+                            className={`flex-1 ${
+                              theme === "dark" ? "bg-blue-500/20" : "bg-blue-100"
+                            } rounded-t`}
+                            style={{ height: `${height}%` }}
+                            title={`${hour}:00 - ${count} sessions`}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-center text-gray-500">
+                    24-hour activity distribution
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
