@@ -1243,7 +1243,8 @@ function SettingsContent() {
                       const newValue = e.target.value;
                       setProfileData(prev => ({ ...prev, ui_language: newValue }));
                       handleUpdate('ui_language', newValue);
-                      router.refresh();
+                      // Force reload the page to apply new language
+                      window.location.reload();
                     }}
                     className={`w-full px-3 py-2 rounded-lg text-sm ${
                       profileData.currentTheme === "dark"
