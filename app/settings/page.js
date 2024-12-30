@@ -37,30 +37,43 @@ function SettingsContent() {
     return 'normalUser';
   };
 
-  const [profileData, setProfileData] = useState({
-    theme: profile?.theme || 'light',
-    currentTheme: profile?.theme || 'light',
-    username: profile?.username || '',
-    editedUsername: profile?.username || '',
-    self_introduction: profile?.self_introduction || '',
-    edited_self_introduction: profile?.self_introduction || '',
-    japanese_level: profile?.japanese_level || '',
-    duolingo_username: profile?.duolingo_username || '',
-    edited_duolingo_username: profile?.duolingo_username || '',
-    daily_article_goal: profile?.daily_article_goal || 3,
-    daily_reading_time_goal: profile?.daily_reading_time_goal || 15,
-    role_level: profile?.role_level || 0,
-    preferred_translation_language: profile?.preferred_translation_language || 'en',
-    ui_language: profile?.ui_language || 'en'
+  // Initialize profile data state
+  const [profileData, setProfileData] = useState(() => {
+    const theme = profile?.theme || 'light';
+    const currentTheme = typeof window !== 'undefined' && theme === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : theme;
+
+    return {
+      theme,
+      currentTheme,
+      username: profile?.username || '',
+      editedUsername: profile?.username || '',
+      self_introduction: profile?.self_introduction || '',
+      edited_self_introduction: profile?.self_introduction || '',
+      japanese_level: profile?.japanese_level || '',
+      duolingo_username: profile?.duolingo_username || '',
+      edited_duolingo_username: profile?.duolingo_username || '',
+      daily_article_goal: profile?.daily_article_goal || 3,
+      daily_reading_time_goal: profile?.daily_reading_time_goal || 15,
+      role_level: profile?.role_level || 0,
+      preferred_translation_language: profile?.preferred_translation_language || 'en',
+      ui_language: profile?.ui_language || 'en'
+    };
   });
 
-  // Set initial profile data from auth context
+  // Update profile data when profile changes
   useEffect(() => {
     if (profile) {
+      const theme = profile.theme || 'light';
+      const currentTheme = theme === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : theme;
+
       setProfileData(prev => ({
         ...prev,
-        theme: profile.theme || 'light',
-        currentTheme: profile.theme || 'light',
+        theme,
+        currentTheme,
         username: profile.username || '',
         editedUsername: profile.username || '',
         self_introduction: profile.self_introduction || '',
@@ -78,75 +91,7 @@ function SettingsContent() {
     }
   }, [profile]);
 
-  // Add effect to reload profile when page becomes visible
-  useEffect(() => {
-    if (typeof document === 'undefined' || !user) return;
-
-    const reloadProfile = async () => {
-      try {
-        // Directly fetch the latest profile from database
-        const { data: latestProfile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        if (profileError) throw profileError;
-
-        const theme = latestProfile.theme || 'light';
-        const currentTheme = theme === 'system' 
-          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-          : theme;
-
-        setProfileData(prev => ({
-          ...prev,
-          theme: theme,
-          currentTheme: currentTheme,
-          username: latestProfile.username || '',
-          editedUsername: latestProfile.username || '',
-          self_introduction: latestProfile.self_introduction || '',
-          edited_self_introduction: latestProfile.self_introduction || '',
-          japanese_level: latestProfile.japanese_level || '',
-          duolingo_username: latestProfile.duolingo_username || '',
-          edited_duolingo_username: latestProfile.duolingo_username || '',
-          daily_article_goal: latestProfile.daily_article_goal || 3,
-          daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15,
-          role_level: latestProfile.role_level || 0,
-          preferred_translation_language: latestProfile.preferred_translation_language || 'en',
-          ui_language: latestProfile.ui_language || 'en'
-        }));
-        setIsProfileLoaded(true);
-      } catch (error) {
-        console.error('Error reloading profile:', error);
-        setError(t('settings.errors.loadingFailed'));
-        setIsProfileLoaded(true); // Set to true even on error to prevent infinite loading state
-      }
-    };
-
-    // Initial load
-    reloadProfile();
-
-    // Add visibility change listener
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        reloadProfile();
-      }
-    };
-
-    const handleFocus = () => {
-      reloadProfile();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [user, t]); // Add t to dependencies
-
-  // Add console logs to debug
+  // Debug logs
   console.log('Profile Data:', profileData);
   console.log('Is Profile Loaded:', isProfileLoaded);
   console.log('User:', user);
@@ -374,13 +319,9 @@ function SettingsContent() {
           break;
       }
 
-      // Update database directly using supabase
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', user.id);
-
-      if (error) throw error;
+      // Use AuthContext's updateProfile instead of direct Supabase call
+      const updatedProfile = await updateProfile(updateData);
+      if (!updatedProfile) throw new Error('Failed to update profile');
 
       // Update local state
       if (field === 'theme') {
@@ -391,7 +332,7 @@ function SettingsContent() {
             ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
             : value
         }));
-        window.location.reload();
+        
       } else {
         setProfileData(prev => ({
           ...prev,
@@ -471,7 +412,7 @@ function SettingsContent() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        window.location.reload();
+        
       }, 1000);
     } catch (error) {
       console.error('Error resetting reading history:', error);
@@ -507,7 +448,7 @@ function SettingsContent() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        window.location.reload();
+        
       }, 1000);
     } catch (error) {
       console.error('Error resetting saved articles:', error);
@@ -1243,8 +1184,6 @@ function SettingsContent() {
                       const newValue = e.target.value;
                       setProfileData(prev => ({ ...prev, ui_language: newValue }));
                       handleUpdate('ui_language', newValue);
-                      // Force reload the page to apply new language
-                      window.location.reload();
                     }}
                     className={`w-full px-3 py-2 rounded-lg text-sm ${
                       profileData.currentTheme === "dark"
