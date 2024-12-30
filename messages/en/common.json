@@ -168,7 +168,9 @@
       "startStreak": "Start your streak",
       "days": "days",
       "day1": "Day 1",
-      "keepStreak": "Read at least one article to keep your streak going"
+      "keepStreak": "Read at least one article to keep your streak going",
+      "streak": "Streak",
+      "read": "Read"
     },
     "toggleNewsList": {
       "show": "Show News List",

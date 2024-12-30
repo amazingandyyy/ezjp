@@ -172,22 +172,25 @@
       "install": "Cài đặt phiên bản mới nhất của EZJP News"
     },
     "profile": {
-      "setup": "Thiết lập tên người dùng của bạn",
+      "avatar": "Ảnh đại diện",
+      "setup": "Thiết lập tên người dùng",
       "required": "Bắt buộc",
-      "makeEasier": "Giúp hồ sơ của bạn dễ tìm và chia sẻ hơn",
+      "makeEasier": "Giúp hồ sơ của bạn dễ tìm thấy và chia sẻ hơn",
       "readingGoals": "Mục tiêu đọc hàng ngày",
       "articles": "Bài viết",
       "readingTime": "Thời gian đọc",
-      "goalComplete": "Đã hoàn thành mục tiêu hàng ngày! 🎉",
-      "goalExceeded": "Đã hoàn thành mục tiêu! Vượt xa kỳ vọng! 🚀",
-      "almostThere": "Sắp xong rồi! Còn {{remaining}} phút đọc nữa",
+      "goalComplete": "Hoàn thành mục tiêu hôm nay! 🎉",
+      "goalExceeded": "Hoàn thành mục tiêu! Vượt xa kỳ vọng! 🚀",
+      "almostThere": "Sắp hoàn thành! Còn {{remaining}} phút đọc nữa",
       "keepGoing": "Tiếp tục nào! Còn {{remaining}} bài viết nữa",
       "todayTarget": "Mục tiêu hôm nay: {{articles}} bài viết và {{minutes}} phút",
-      "extendStreak": "Kéo dài chuỗi",
-      "startStreak": "Bắt đầu chuỗi",
+      "extendStreak": "Kéo dài chuỗi ngày",
+      "startStreak": "Bắt đầu chuỗi ngày",
       "days": "ngày",
       "day1": "Ngày 1",
-      "keepStreak": "Đọc ít nhất một bài viết để duy trì chuỗi của bạn"
+      "keepStreak": "Đọc ít nhất một bài viết để duy trì chuỗi ngày",
+      "streak": "Chuỗi ngày",
+      "read": "Đã đọc"
     }
   }
 }

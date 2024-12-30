@@ -172,6 +172,7 @@
       "install": "Neueste Version von EZJP News installieren"
     },
     "profile": {
+      "avatar": "Profilbild",
       "setup": "Legen Sie Ihren Benutzernamen fest",
       "required": "Erforderlich",
       "makeEasier": "Machen Sie Ihr Profil leichter auffindbar und teilbar",
@@ -187,7 +188,9 @@
       "startStreak": "Serie beginnen",
       "days": "Tage",
       "day1": "Tag 1",
-      "keepStreak": "Lesen Sie mindestens einen Artikel, um Ihre Serie fortzusetzen"
+      "keepStreak": "Lesen Sie mindestens einen Artikel, um Ihre Serie fortzusetzen",
+      "streak": "Serie",
+      "read": "Gelesen"
     }
   }
 }

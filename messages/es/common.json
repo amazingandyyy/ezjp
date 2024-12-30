@@ -172,6 +172,7 @@
       "install": "Instalar la última versión de EZJP News"
     },
     "profile": {
+      "avatar": "Foto de perfil",
       "setup": "Configura tu nombre de usuario",
       "required": "Requerido",
       "makeEasier": "Haz que tu perfil sea más fácil de encontrar y compartir",
@@ -180,14 +181,16 @@
       "readingTime": "Tiempo de lectura",
       "goalComplete": "¡Objetivos diarios completados! 🎉",
       "goalExceeded": "¡Objetivos completados! ¡Superándote! 🚀",
-      "almostThere": "¡Casi ahí! {{remaining}} minutos más de lectura",
-      "keepGoing": "¡Sigue así! {{remaining}} artículos más para terminar",
+      "almostThere": "¡Casi allí! {{remaining}} minutos más de lectura",
+      "keepGoing": "¡Sigue así! Faltan {{remaining}} artículos",
       "todayTarget": "Objetivo de hoy: {{articles}} artículos y {{minutes}} minutos",
       "extendStreak": "Extiende tu racha",
       "startStreak": "Comienza tu racha",
       "days": "días",
       "day1": "Día 1",
-      "keepStreak": "Lee al menos un artículo para mantener tu racha"
+      "keepStreak": "Lee al menos un artículo para mantener tu racha",
+      "streak": "Racha",
+      "read": "Leídos"
     }
   }
 }

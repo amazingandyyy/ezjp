@@ -243,7 +243,7 @@ export default function Navbar({
             <p className={`text-xs ${
               theme === "dark" ? "text-gray-400" : "text-gray-500"
             }`}>
-              Streak
+              {t('navbar.profile.streak')}
             </p>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function Navbar({
             <p className={`text-xs ${
               theme === "dark" ? "text-gray-400" : "text-gray-500"
             }`}>
-              Read
+              {t('navbar.profile.read')}
             </p>
           </div>
         </div>
@@ -532,7 +532,7 @@ export default function Navbar({
                             <p className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-500"
                             }`}>
-                              Streak
+                              {t('navbar.profile.streak')}
                             </p>
                           </div>
                         </div>
@@ -564,7 +564,7 @@ export default function Navbar({
                             <p className={`text-xs ${
                               theme === "dark" ? "text-gray-400" : "text-gray-500"
                             }`}>
-                              Read
+                              {t('navbar.profile.read')}
                             </p>
                           </div>
                         </div>
@@ -855,7 +855,7 @@ export default function Navbar({
                                 ? "bg-orange-500/20 text-orange-400"
                                 : "bg-orange-100 text-orange-600"
                             }`}>
-                              {stats.currentStreak > 0 ? t('navbar.profile.days', { count: stats.currentStreak }) : t('navbar.profile.day1')}
+                              {stats.currentStreak > 0 ? `${stats.currentStreak} ${t('navbar.profile.days')}` : t('navbar.profile.day1')}
                             </span>
                           </div>
                           <p className={`text-xs mt-0.5 ${

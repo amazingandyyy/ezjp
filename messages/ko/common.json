@@ -172,22 +172,25 @@
       "install": "EZJP 뉴스의 최신 버전 설치"
     },
     "profile": {
+      "avatar": "프로필 사진",
       "setup": "사용자 이름 설정",
       "required": "필수",
-      "makeEasier": "프로필을 쉽게 찾고 공유할 수 있게 합니다",
+      "makeEasier": "프로필을 더 쉽게 찾고 공유할 수 있게 만들기",
       "readingGoals": "오늘의 독서 목표",
       "articles": "기사",
       "readingTime": "독서 시간",
       "goalComplete": "오늘의 목표 달성! 🎉",
-      "goalExceeded": "목표 달성! 더 높이 도전하세요! 🚀",
-      "almostThere": "거의 다 왔어요! {{remaining}}분 남았습니다",
+      "goalExceeded": "목표 달성! 더 높이 도약하세요! 🚀",
+      "almostThere": "거의 다 왔어요! {{remaining}}분 더 읽기",
       "keepGoing": "계속 하세요! {{remaining}}개의 기사가 남았습니다",
       "todayTarget": "오늘의 목표: {{articles}}개의 기사와 {{minutes}}분",
-      "extendStreak": "연속 기록 이어가기",
+      "extendStreak": "연속 기록 연장하기",
       "startStreak": "연속 기록 시작하기",
       "days": "일",
       "day1": "1일차",
-      "keepStreak": "연속 기록을 유지하려면 최소 1개의 기사를 읽으세요"
+      "keepStreak": "연속 기록을 유지하려면 최소 한 개의 기사를 읽으세요",
+      "streak": "연속 기록",
+      "read": "읽음"
     }
   }
 }
