@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/amazingandyyy/ezjp/compare/v1.24.0...v1.25.0) (2024-12-30)
+
+
+### Features
+
+* enhance AI tutor functionality and integrate cost tracking ([da839eb](https://github.com/amazingandyyy/ezjp/commit/da839eb23def5c7a60cb68846617eec5e94385b1))
+
 # [1.24.0](https://github.com/amazingandyyy/ezjp/compare/v1.23.0...v1.24.0) (2024-12-30)
 
 
