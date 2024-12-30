@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "saved": "Sauvegardés",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès !",
+    "edit": "Modifier",
+    "required": "Requis",
+    "verified": "Vérifié",
+    "noUsername": "Pas de nom d'utilisateur",
+    "setUsername": "Définir le nom d'utilisateur",
+    "viewProfile": "Voir le profil",
+    "checkingUpdates": "Recherche de mises à jour...",
+    "upToDate": "À jour",
+    "updateAvailable": "Mise à jour disponible",
+    "checkForUpdates": "Vérifier les mises à jour",
+    "installUpdate": "Installer la mise à jour",
+    "viewReleaseNotes": "Voir les notes de version"
+  },
+  "settings": {
+    "title": "Paramètres du compte",
+    "sections": {
+      "profile": "Profil",
+      "language": "Langue",
+      "appearance": "Apparence",
+      "goals": "Objectifs de lecture",
+      "data": "Gestion des données",
+      "software": "Informations logicielles"
+    },
+    "profile": {
+      "title": "Informations du profil",
+      "username": "Nom d'utilisateur",
+      "japaneseLevel": "Niveau de japonais",
+      "googleAccount": "Compte Google",
+      "accountSecured": "Votre compte est sécurisé avec la connexion Google",
+      "selfIntroduction": "Présentation",
+      "noIntroduction": "Pas de présentation",
+      "duolingoProfile": "Profil Duolingo",
+      "noDuolingo": "Pas de profil Duolingo lié",
+      "jlptLevels": {
+        "n5": "N5 (Débutant)",
+        "n4": "N4 (Élémentaire)",
+        "n3": "N3 (Intermédiaire)",
+        "n2": "N2 (Avancé)",
+        "n1": "N1 (Expert)",
+        "native": "Natif",
+        "descriptions": {
+          "n5": "Très nouveau en japonais. Peut comprendre et utiliser des expressions familières quotidiennes et des phrases très basiques.",
+          "n4": "Compréhension élémentaire du japonais utilisé dans des situations quotidiennes. Peut lire des passages simples et suivre des conversations lentes.",
+          "n3": "Compréhension du japonais utilisé dans des situations quotidiennes jusqu'à un certain degré. Peut lire des journaux avec un vocabulaire de base.",
+          "n2": "Capacité à comprendre le japonais utilisé dans des situations quotidiennes et dans diverses circonstances. Peut lire les journaux et suivre les informations télévisées.",
+          "n1": "Capacité à comprendre le japonais utilisé dans diverses circonstances. Peut lire couramment les journaux et les magazines.",
+          "native": "Maîtrise native ou quasi-native du japonais."
+        }
+      }
+    },
+    "language": {
+      "title": "Paramètres de langue",
+      "interface": "Langue de l'interface",
+      "interfaceDescription": "Sélectionnez votre langue préférée pour l'interface de l'application",
+      "translation": "Langue de traduction",
+      "translationDescription": "Sélectionnez votre langue préférée pour les traductions d'articles"
+    },
+    "appearance": {
+      "title": "Apparence",
+      "theme": {
+        "title": "Thème",
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+      }
+    },
+    "goals": {
+      "title": "Objectifs de lecture",
+      "description": "Définissez vos objectifs de lecture quotidiens et suivez vos progrès",
+      "articles": {
+        "title": "Objectif quotidien d'articles",
+        "description": "Défiez-vous de lire un nombre spécifique d'articles chaque jour. Commencez petit et augmentez progressivement à mesure que vous gagnez en confiance.",
+        "current": "articles"
+      },
+      "time": {
+        "title": "Objectif quotidien de temps de lecture",
+        "description": "Réservez du temps dédié à la pratique de la lecture. Même quelques minutes de lecture concentrée chaque jour peuvent améliorer significativement votre compréhension.",
+        "current": "minutes",
+        "custom": "Personnalisé"
+      }
+    },
+    "data": {
+      "title": "Gestion des données",
+      "readingHistory": {
+        "title": "Réinitialiser l'historique de lecture",
+        "description": "Supprime tout votre historique d'articles terminés et réinitialise les statistiques de lecture. Cette action ne peut pas être annulée.",
+        "button": "Réinitialiser l'historique de lecture",
+        "warning": "Attention : Vous êtes sur le point de supprimer tout votre historique de lecture.\n\nCela inclut :\n- Tous les articles marqués comme terminés\n- Votre suivi de progression de lecture\n- Vos records de séries (meilleure série et série actuelle)\n\nCette action est PERMANENTE et NE PEUT PAS être annulée. Êtes-vous sûr de vouloir continuer ?",
+        "confirmText": "réinitialiser l'historique de lecture"
+      },
+      "savedArticles": {
+        "title": "Réinitialiser les articles sauvegardés",
+        "description": "Supprime tous vos articles sauvegardés. Cette action ne peut pas être annulée.",
+        "button": "Réinitialiser les articles sauvegardés",
+        "warning": "Attention : Vous êtes sur le point de supprimer tous vos articles sauvegardés.\n\nCela inclut :\n- Tous les articles que vous avez sauvegardés pour plus tard\n- Vos articles sauvegardés\n\nCette action est PERMANENTE et NE PEUT PAS être annulée. Êtes-vous sûr de vouloir continuer ?",
+        "confirmText": "réinitialiser les articles sauvegardés"
+      }
+    },
+    "software": {
+      "title": "Informations logicielles",
+      "description": "Informations sur votre version installée et les mises à jour disponibles.",
+      "version": "Version",
+      "update": "Mise à jour disponible",
+      "updateNow": "Mettre à jour maintenant",
+      "updateDescription": "Mettez à jour maintenant pour obtenir les dernières fonctionnalités, améliorations et corrections de bugs."
+    }
+  },
+  "reader": {
+    "loading": "Chargement de l'article...",
+    "error": "Échec du chargement de l'article",
+    "translate": "Traduire",
+    "original": "Original",
+    "save": "Sauvegarder l'article",
+    "unsave": "Retirer l'article",
+    "saved": "Article sauvegardé !",
+    "unsaved": "Article retiré des sauvegardés"
+  }
+} 

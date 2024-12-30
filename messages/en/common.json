@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Home",
+    "saved": "Saved",
+    "settings": "Settings"
+  },
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "edit": "Edit",
+    "required": "Required",
+    "verified": "Verified",
+    "noUsername": "No username set",
+    "setUsername": "Set Username",
+    "viewProfile": "View Profile",
+    "checkingUpdates": "Checking for Updates...",
+    "upToDate": "Up to Date",
+    "updateAvailable": "Update Available",
+    "checkForUpdates": "Check for Updates",
+    "installUpdate": "Install Update",
+    "viewReleaseNotes": "View release notes"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "sections": {
+      "profile": "Profile",
+      "language": "Language",
+      "appearance": "Appearance",
+      "goals": "Reader's Goals",
+      "data": "Data Management",
+      "software": "Software Information"
+    },
+    "profile": {
+      "title": "Profile Information",
+      "username": "Username",
+      "japaneseLevel": "Japanese Level",
+      "googleAccount": "Google Account",
+      "accountSecured": "Your account is secured with Google Sign In",
+      "selfIntroduction": "Self Introduction",
+      "noIntroduction": "No introduction set",
+      "duolingoProfile": "Duolingo Profile",
+      "noDuolingo": "No Duolingo profile linked",
+      "jlptLevels": {
+        "n5": "N5 (Beginner)",
+        "n4": "N4 (Basic)",
+        "n3": "N3 (Intermediate)",
+        "n2": "N2 (Advanced)",
+        "n1": "N1 (Expert)",
+        "native": "Native",
+        "descriptions": {
+          "n5": "Being very new to Japanese. Can understand and use familiar everyday expressions and very basic phrases.",
+          "n4": "Basic understanding of Japanese used in everyday situations. Can read simple passages and follow slow conversations.",
+          "n3": "Understanding of Japanese used in everyday situations to some degree. Can read newspapers with basic vocabulary.",
+          "n2": "Ability to understand Japanese used in everyday situations and in a variety of circumstances. Can read newspapers and follow TV news.",
+          "n1": "Ability to understand Japanese used in a variety of circumstances. Can read newspapers and magazines fluently.",
+          "native": "Native or near-native proficiency in Japanese."
+        }
+      }
+    },
+    "language": {
+      "title": "Language Settings",
+      "interface": "Interface Language",
+      "interfaceDescription": "Select your preferred language for the application interface",
+      "translation": "Translation Language",
+      "translationDescription": "Select your preferred language for article translations"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": {
+        "title": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "goals": {
+      "title": "Reader's Goals",
+      "description": "Set your daily reading targets and track your progress",
+      "articles": {
+        "title": "Daily Articles Goal",
+        "description": "Challenge yourself to read a specific number of articles each day. Start small and increase gradually as you build confidence.",
+        "current": "articles"
+      },
+      "time": {
+        "title": "Daily Reading Time Goal",
+        "description": "Set aside dedicated time for reading practice. Even a few minutes of focused reading each day can significantly improve your comprehension.",
+        "current": "minutes",
+        "custom": "Custom"
+      }
+    },
+    "data": {
+      "title": "Data Management",
+      "readingHistory": {
+        "title": "Reset Reading History",
+        "description": "Remove all your finished articles history and reset reading stats. This action cannot be undone.",
+        "button": "Reset Reading History",
+        "warning": "Warning: You are about to delete all your reading history.\n\nThis includes:\n- All articles marked as finished\n- Your reading progress tracking\n- Your streak records (both best and current streak)\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?",
+        "confirmText": "reset reading history"
+      },
+      "savedArticles": {
+        "title": "Reset Saved Articles",
+        "description": "Remove all your saved articles. This action cannot be undone.",
+        "button": "Reset Saved Articles",
+        "warning": "Warning: You are about to delete all your saved articles.\n\nThis includes:\n- All articles you have saved for later\n- Your saved articles\n\nThis action is PERMANENT and CANNOT be undone. Are you sure you want to proceed?",
+        "confirmText": "reset saved articles"
+      }
+    },
+    "software": {
+      "title": "Software Information",
+      "description": "Information about your installed version and available updates.",
+      "version": "Version",
+      "update": "Update Available",
+      "updateNow": "Update Now",
+      "updateDescription": "Update now to get the latest features, improvements, and bug fixes."
+    }
+  },
+  "reader": {
+    "loading": "Loading article...",
+    "error": "Failed to load article",
+    "translate": "Translate",
+    "original": "Original",
+    "save": "Save Article",
+    "unsave": "Unsave Article",
+    "saved": "Article saved!",
+    "unsaved": "Article removed from saved"
+  }
+} 

@@ -24,6 +24,7 @@ import { supabase } from '../../lib/supabase';
 import useStatsStore from '@/lib/stores/stats';
 import { formatJapaneseDate } from '@/lib/utils/date';
 import { getNewsSource, getHostname } from '@/lib/utils/urls';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 import {
   LoadingIndicator,
@@ -61,6 +62,7 @@ function NewsReaderContent() {
   const router = useRouter();
   const sourceUrl = searchParams.get('source');
   const { user, signOut, profile } = useAuth();
+  const { t } = useTranslation();
 
   // All state declarations
   const [url, setUrl] = useState('');

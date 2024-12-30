@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "saved": "Guardados",
+    "settings": "Configuración"
+  },
+  "common": {
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "loading": "Cargando...",
+    "error": "Se produjo un error",
+    "success": "¡Éxito!",
+    "edit": "Editar",
+    "required": "Requerido",
+    "verified": "Verificado",
+    "noUsername": "Sin nombre de usuario",
+    "setUsername": "Establecer nombre de usuario",
+    "viewProfile": "Ver perfil",
+    "checkingUpdates": "Buscando actualizaciones...",
+    "upToDate": "Actualizado",
+    "updateAvailable": "Actualización disponible",
+    "checkForUpdates": "Buscar actualizaciones",
+    "installUpdate": "Instalar actualización",
+    "viewReleaseNotes": "Ver notas de la versión"
+  },
+  "settings": {
+    "title": "Configuración de la cuenta",
+    "sections": {
+      "profile": "Perfil",
+      "language": "Idioma",
+      "appearance": "Apariencia",
+      "goals": "Objetivos de lectura",
+      "data": "Gestión de datos",
+      "software": "Información del software"
+    },
+    "profile": {
+      "title": "Información del perfil",
+      "username": "Nombre de usuario",
+      "japaneseLevel": "Nivel de japonés",
+      "googleAccount": "Cuenta de Google",
+      "accountSecured": "Tu cuenta está protegida con inicio de sesión de Google",
+      "selfIntroduction": "Presentación",
+      "noIntroduction": "Sin presentación",
+      "duolingoProfile": "Perfil de Duolingo",
+      "noDuolingo": "Sin perfil de Duolingo vinculado",
+      "jlptLevels": {
+        "n5": "N5 (Principiante)",
+        "n4": "N4 (Básico)",
+        "n3": "N3 (Intermedio)",
+        "n2": "N2 (Avanzado)",
+        "n1": "N1 (Experto)",
+        "native": "Nativo",
+        "descriptions": {
+          "n5": "Muy nuevo en japonés. Puede entender y usar expresiones cotidianas familiares y frases muy básicas.",
+          "n4": "Comprensión básica del japonés usado en situaciones cotidianas. Puede leer pasajes simples y seguir conversaciones lentas.",
+          "n3": "Comprensión del japonés usado en situaciones cotidianas hasta cierto punto. Puede leer periódicos con vocabulario básico.",
+          "n2": "Capacidad para entender japonés usado en situaciones cotidianas y en diversas circunstancias. Puede leer periódicos y seguir noticias de TV.",
+          "n1": "Capacidad para entender japonés usado en diversas circunstancias. Puede leer periódicos y revistas con fluidez.",
+          "native": "Dominio nativo o casi nativo del japonés."
+        }
+      }
+    },
+    "language": {
+      "title": "Configuración de idioma",
+      "interface": "Idioma de la interfaz",
+      "interfaceDescription": "Selecciona tu idioma preferido para la interfaz de la aplicación",
+      "translation": "Idioma de traducción",
+      "translationDescription": "Selecciona tu idioma preferido para las traducciones de artículos"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "theme": {
+        "title": "Tema",
+        "light": "Claro",
+        "dark": "Oscuro",
+        "system": "Sistema"
+      }
+    },
+    "goals": {
+      "title": "Objetivos de lectura",
+      "description": "Establece tus objetivos diarios de lectura y sigue tu progreso",
+      "articles": {
+        "title": "Objetivo diario de artículos",
+        "description": "Desafíate a leer un número específico de artículos cada día. Comienza con pocos y aumenta gradualmente conforme ganes confianza.",
+        "current": "artículos"
+      },
+      "time": {
+        "title": "Objetivo diario de tiempo de lectura",
+        "description": "Reserva tiempo dedicado para la práctica de lectura. Incluso unos minutos de lectura concentrada cada día pueden mejorar significativamente tu comprensión.",
+        "current": "minutos",
+        "custom": "Personalizado"
+      }
+    },
+    "data": {
+      "title": "Gestión de datos",
+      "readingHistory": {
+        "title": "Restablecer historial de lectura",
+        "description": "Elimina todo tu historial de artículos terminados y restablece las estadísticas de lectura. Esta acción no se puede deshacer.",
+        "button": "Restablecer historial de lectura",
+        "warning": "Advertencia: Estás a punto de eliminar todo tu historial de lectura.\n\nEsto incluye:\n- Todos los artículos marcados como terminados\n- Tu seguimiento de progreso de lectura\n- Tus registros de racha (tanto la mejor como la actual)\n\nEsta acción es PERMANENTE y NO SE PUEDE deshacer. ¿Estás seguro de que deseas continuar?",
+        "confirmText": "restablecer historial de lectura"
+      },
+      "savedArticles": {
+        "title": "Restablecer artículos guardados",
+        "description": "Elimina todos tus artículos guardados. Esta acción no se puede deshacer.",
+        "button": "Restablecer artículos guardados",
+        "warning": "Advertencia: Estás a punto de eliminar todos tus artículos guardados.\n\nEsto incluye:\n- Todos los artículos que has guardado para más tarde\n- Tus artículos guardados\n\nEsta acción es PERMANENTE y NO SE PUEDE deshacer. ¿Estás seguro de que deseas continuar?",
+        "confirmText": "restablecer artículos guardados"
+      }
+    },
+    "software": {
+      "title": "Información del software",
+      "description": "Información sobre tu versión instalada y actualizaciones disponibles.",
+      "version": "Versión",
+      "update": "Actualización disponible",
+      "updateNow": "Actualizar ahora",
+      "updateDescription": "Actualiza ahora para obtener las últimas funciones, mejoras y correcciones de errores."
+    }
+  },
+  "reader": {
+    "loading": "Cargando artículo...",
+    "error": "Error al cargar el artículo",
+    "translate": "Traducir",
+    "original": "Original",
+    "save": "Guardar artículo",
+    "unsave": "Desguardar artículo",
+    "saved": "¡Artículo guardado!",
+    "unsaved": "Artículo eliminado de guardados"
+  }
+} 

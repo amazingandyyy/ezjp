@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "saved": "保存済み",
+    "settings": "設定"
+  },
+  "common": {
+    "signIn": "ログイン",
+    "signOut": "ログアウト",
+    "save": "保存",
+    "delete": "削除",
+    "cancel": "キャンセル",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "success": "成功しました！",
+    "edit": "編集",
+    "required": "必須",
+    "verified": "認証済み",
+    "noUsername": "ユーザー名が未設定です",
+    "setUsername": "ユーザー名を設定",
+    "viewProfile": "プロフィールを表示",
+    "checkingUpdates": "アップデートを確認中...",
+    "upToDate": "最新版です",
+    "updateAvailable": "アップデートが利用可能です",
+    "checkForUpdates": "アップデートを確認",
+    "installUpdate": "アップデートをインストール",
+    "viewReleaseNotes": "リリースノートを表示"
+  },
+  "settings": {
+    "title": "アカウント設定",
+    "sections": {
+      "profile": "プロフィール",
+      "language": "言語",
+      "appearance": "外観",
+      "goals": "読書目標",
+      "data": "データ管理",
+      "software": "ソフトウェア情報"
+    },
+    "profile": {
+      "title": "プロフィール情報",
+      "username": "ユーザー名",
+      "japaneseLevel": "日本語レベル",
+      "googleAccount": "Googleアカウント",
+      "accountSecured": "Googleログインで保護されています",
+      "selfIntroduction": "自己紹介",
+      "noIntroduction": "自己紹介が未設定です",
+      "duolingoProfile": "Duolingoプロフィール",
+      "noDuolingo": "Duolingoプロフィールが未連携です",
+      "jlptLevels": {
+        "n5": "N5（初級）",
+        "n4": "N4（基礎）",
+        "n3": "N3（中級）",
+        "n2": "N2（上級）",
+        "n1": "N1（最上級）",
+        "native": "ネイティブ",
+        "descriptions": {
+          "n5": "日本語を始めたばかり。基本的な日常表現や簡単なフレーズを理解し、使用できます。",
+          "n4": "日常的な場面で使用される基本的な日本語を理解。簡単な文章を読み、ゆっくりとした会話を理解できます。",
+          "n3": "日常的な場面である程度の日本語を理解。基本的な語彙を含む新聞を読むことができます。",
+          "n2": "日常的な場面や様々な状況で使用される日本語を理解。新聞を読み、テレビニュースを理解できます。",
+          "n1": "様々な状況で使用される日本語を理解。新聞や雑誌を流暢に読むことができます。",
+          "native": "日本語のネイティブまたはそれに近い熟練度。"
+        }
+      }
+    },
+    "language": {
+      "title": "言語設定",
+      "interface": "インターフェース言語",
+      "interfaceDescription": "アプリケーションのインターフェースに使用する言語を選択してください",
+      "translation": "翻訳言語",
+      "translationDescription": "記事の翻訳に使用する言語を選択してください"
+    },
+    "appearance": {
+      "title": "外観",
+      "theme": {
+        "title": "テーマ",
+        "light": "ライト",
+        "dark": "ダーク",
+        "system": "システム"
+      }
+    },
+    "goals": {
+      "title": "読書目標",
+      "description": "日々の読書目標を設定し、進捗を追跡します",
+      "articles": {
+        "title": "1日の記事目標",
+        "description": "毎日読む記事の数を設定しましょう。少ない数から始めて、自信がついたら徐々に増やしていきましょう。",
+        "current": "記事"
+      },
+      "time": {
+        "title": "1日の読書時間目標",
+        "description": "読書練習のための時間を確保しましょう。毎日数分でも集中して読むことで、理解力は大きく向上します。",
+        "current": "分",
+        "custom": "カスタム"
+      }
+    },
+    "data": {
+      "title": "データ管理",
+      "readingHistory": {
+        "title": "読書履歴のリセット",
+        "description": "読了した記事の履歴と読書統計をすべて削除します。この操作は取り消せません。",
+        "button": "読書履歴をリセット",
+        "warning": "警告：読書履歴をすべて削除しようとしています。\n\n以下が含まれます：\n- 読了済みとマークされた記事\n- 読書進捗の記録\n- 連続記録（最長記録と現在の記録）\n\nこの操作は永久的で、取り消すことはできません。続行しますか？",
+        "confirmText": "読書履歴をリセット"
+      },
+      "savedArticles": {
+        "title": "保存済み記事のリセット",
+        "description": "保存した記事をすべて削除します。この操作は取り消せません。",
+        "button": "保存済み記事をリセット",
+        "warning": "警告：保存済みの記事をすべて削除しようとしています。\n\n以下が含まれます：\n- 後で読むために保存した記事\n- 保存済みの記事\n\nこの操作は永久的で、取り消すことはできません。続行しますか？",
+        "confirmText": "保存済み記事をリセット"
+      }
+    },
+    "software": {
+      "title": "ソフトウェア情報",
+      "description": "インストールされているバージョンと利用可能なアップデートに関する情報です。",
+      "version": "バージョン",
+      "update": "アップデートが利用可能です",
+      "updateNow": "今すぐアップデート",
+      "updateDescription": "最新の機能、改善点、バグ修正を適用するにはアップデートしてください。"
+    }
+  },
+  "reader": {
+    "loading": "記事を読み込み中...",
+    "error": "記事の読み込みに失敗しました",
+    "translate": "翻訳",
+    "original": "原文",
+    "save": "記事を保存",
+    "unsave": "保存を解除",
+    "saved": "記事を保存しました！",
+    "unsaved": "記事の保存を解除しました"
+  }
+} 

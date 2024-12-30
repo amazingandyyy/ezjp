@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Startseite",
+    "saved": "Gespeichert",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "loading": "Lädt...",
+    "error": "Ein Fehler ist aufgetreten",
+    "success": "Erfolgreich!",
+    "edit": "Bearbeiten",
+    "required": "Erforderlich",
+    "verified": "Verifiziert",
+    "noUsername": "Kein Benutzername",
+    "setUsername": "Benutzername festlegen",
+    "viewProfile": "Profil anzeigen",
+    "checkingUpdates": "Suche nach Updates...",
+    "upToDate": "Auf dem neuesten Stand",
+    "updateAvailable": "Update verfügbar",
+    "checkForUpdates": "Nach Updates suchen",
+    "installUpdate": "Update installieren",
+    "viewReleaseNotes": "Versionshinweise anzeigen"
+  },
+  "settings": {
+    "title": "Kontoeinstellungen",
+    "sections": {
+      "profile": "Profil",
+      "language": "Sprache",
+      "appearance": "Erscheinungsbild",
+      "goals": "Leseziele",
+      "data": "Datenverwaltung",
+      "software": "Software-Informationen"
+    },
+    "profile": {
+      "title": "Profilinformationen",
+      "username": "Benutzername",
+      "japaneseLevel": "Japanisch-Niveau",
+      "googleAccount": "Google-Konto",
+      "accountSecured": "Ihr Konto ist mit Google-Anmeldung gesichert",
+      "selfIntroduction": "Selbstvorstellung",
+      "noIntroduction": "Keine Vorstellung vorhanden",
+      "duolingoProfile": "Duolingo-Profil",
+      "noDuolingo": "Kein Duolingo-Profil verknüpft",
+      "jlptLevels": {
+        "n5": "N5 (Anfänger)",
+        "n4": "N4 (Grundlagen)",
+        "n3": "N3 (Mittelstufe)",
+        "n2": "N2 (Fortgeschritten)",
+        "n1": "N1 (Experte)",
+        "native": "Muttersprachler",
+        "descriptions": {
+          "n5": "Sehr neu in Japanisch. Kann vertraute, alltägliche Ausdrücke und sehr einfache Sätze verstehen und verwenden.",
+          "n4": "Grundlegendes Verständnis von Japanisch in Alltagssituationen. Kann einfache Texte lesen und langsamen Gesprächen folgen.",
+          "n3": "Verständnis von Japanisch in Alltagssituationen bis zu einem gewissen Grad. Kann Zeitungen mit grundlegendem Vokabular lesen.",
+          "n2": "Fähigkeit, Japanisch in Alltagssituationen und verschiedenen Umständen zu verstehen. Kann Zeitungen lesen und Fernsehnachrichten folgen.",
+          "n1": "Fähigkeit, Japanisch in verschiedenen Situationen zu verstehen. Kann Zeitungen und Zeitschriften fließend lesen.",
+          "native": "Muttersprachliche oder nahezu muttersprachliche Beherrschung des Japanischen."
+        }
+      }
+    },
+    "language": {
+      "title": "Spracheinstellungen",
+      "interface": "Oberflächensprache",
+      "interfaceDescription": "Wählen Sie Ihre bevorzugte Sprache für die Anwendungsoberfläche",
+      "translation": "Übersetzungssprache",
+      "translationDescription": "Wählen Sie Ihre bevorzugte Sprache für Artikelübersetzungen"
+    },
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "theme": {
+        "title": "Design",
+        "light": "Hell",
+        "dark": "Dunkel",
+        "system": "System"
+      }
+    },
+    "goals": {
+      "title": "Leseziele",
+      "description": "Legen Sie Ihre täglichen Leseziele fest und verfolgen Sie Ihren Fortschritt",
+      "articles": {
+        "title": "Tägliches Artikelziel",
+        "description": "Fordern Sie sich selbst heraus, täglich eine bestimmte Anzahl von Artikeln zu lesen. Beginnen Sie klein und steigern Sie sich allmählich, wenn Sie mehr Selbstvertrauen gewinnen.",
+        "current": "Artikel"
+      },
+      "time": {
+        "title": "Tägliches Lesezeitenziel",
+        "description": "Reservieren Sie Zeit für Leseübungen. Selbst wenige Minuten konzentriertes Lesen pro Tag können Ihr Verständnis erheblich verbessern.",
+        "current": "Minuten",
+        "custom": "Benutzerdefiniert"
+      }
+    },
+    "data": {
+      "title": "Datenverwaltung",
+      "readingHistory": {
+        "title": "Leseverlauf zurücksetzen",
+        "description": "Löscht Ihren gesamten Verlauf gelesener Artikel und setzt die Lesestatistiken zurück. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "button": "Leseverlauf zurücksetzen",
+        "warning": "Warnung: Sie sind dabei, Ihren gesamten Leseverlauf zu löschen.\n\nDies umfasst:\n- Alle als gelesen markierten Artikel\n- Ihre Lesefortschrittsverfolgung\n- Ihre Streak-Aufzeichnungen (beste und aktuelle Streak)\n\nDiese Aktion ist PERMANENT und KANN NICHT rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "confirmText": "leseverlauf zurücksetzen"
+      },
+      "savedArticles": {
+        "title": "Gespeicherte Artikel zurücksetzen",
+        "description": "Löscht alle Ihre gespeicherten Artikel. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "button": "Gespeicherte Artikel zurücksetzen",
+        "warning": "Warnung: Sie sind dabei, alle Ihre gespeicherten Artikel zu löschen.\n\nDies umfasst:\n- Alle Artikel, die Sie für später gespeichert haben\n- Ihre gespeicherten Artikel\n\nDiese Aktion ist PERMANENT und KANN NICHT rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "confirmText": "gespeicherte artikel zurücksetzen"
+      }
+    },
+    "software": {
+      "title": "Software-Informationen",
+      "description": "Informationen über Ihre installierte Version und verfügbare Updates.",
+      "version": "Version",
+      "update": "Update verfügbar",
+      "updateNow": "Jetzt aktualisieren",
+      "updateDescription": "Aktualisieren Sie jetzt, um die neuesten Funktionen, Verbesserungen und Fehlerbehebungen zu erhalten."
+    }
+  },
+  "reader": {
+    "loading": "Artikel wird geladen...",
+    "error": "Fehler beim Laden des Artikels",
+    "translate": "Übersetzen",
+    "original": "Original",
+    "save": "Artikel speichern",
+    "unsave": "Artikel nicht mehr speichern",
+    "saved": "Artikel gespeichert!",
+    "unsaved": "Artikel aus Gespeicherten entfernt"
+  }
+} 

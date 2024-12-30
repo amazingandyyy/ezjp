@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Trang chủ",
+    "saved": "Đã lưu",
+    "settings": "Cài đặt"
+  },
+  "common": {
+    "signIn": "Đăng nhập",
+    "signOut": "Đăng xuất",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "loading": "Đang tải...",
+    "error": "Đã xảy ra lỗi",
+    "success": "Thành công!",
+    "edit": "Chỉnh sửa",
+    "required": "Bắt buộc",
+    "verified": "Đã xác minh",
+    "noUsername": "Chưa đặt tên người dùng",
+    "setUsername": "Đặt tên người dùng",
+    "viewProfile": "Xem hồ sơ",
+    "checkingUpdates": "Đang kiểm tra cập nhật...",
+    "upToDate": "Đã cập nhật",
+    "updateAvailable": "Có bản cập nhật mới",
+    "checkForUpdates": "Kiểm tra cập nhật",
+    "installUpdate": "Cài đặt cập nhật",
+    "viewReleaseNotes": "Xem ghi chú phát hành"
+  },
+  "settings": {
+    "title": "Cài đặt tài khoản",
+    "sections": {
+      "profile": "Hồ sơ",
+      "language": "Ngôn ngữ",
+      "appearance": "Giao diện",
+      "goals": "Mục tiêu đọc",
+      "data": "Quản lý dữ liệu",
+      "software": "Thông tin phần mềm"
+    },
+    "profile": {
+      "title": "Thông tin hồ sơ",
+      "username": "Tên người dùng",
+      "japaneseLevel": "Trình độ tiếng Nhật",
+      "googleAccount": "Tài khoản Google",
+      "accountSecured": "Tài khoản của bạn được bảo vệ bằng đăng nhập Google",
+      "selfIntroduction": "Giới thiệu bản thân",
+      "noIntroduction": "Chưa có giới thiệu",
+      "duolingoProfile": "Hồ sơ Duolingo",
+      "noDuolingo": "Chưa liên kết hồ sơ Duolingo",
+      "jlptLevels": {
+        "n5": "N5 (Sơ cấp)",
+        "n4": "N4 (Cơ bản)",
+        "n3": "N3 (Trung cấp)",
+        "n2": "N2 (Cao cấp)",
+        "n1": "N1 (Thành thạo)",
+        "native": "Bản ngữ",
+        "descriptions": {
+          "n5": "Mới bắt đầu học tiếng Nhật. Có thể hiểu và sử dụng các biểu thức quen thuộc hàng ngày và các câu rất cơ bản.",
+          "n4": "Hiểu biết cơ bản về tiếng Nhật được sử dụng trong tình huống hàng ngày. Có thể đọc các đoạn văn đơn giản và theo dõi các cuộc hội thoại chậm.",
+          "n3": "Hiểu tiếng Nhật được sử dụng trong tình huống hàng ngày ở một mức độ nhất định. Có thể đọc báo với từ vựng cơ bản.",
+          "n2": "Có khả năng hiểu tiếng Nhật được sử dụng trong tình huống hàng ngày và trong nhiều hoàn cảnh khác nhau. Có thể đọc báo và theo dõi tin tức truyền hình.",
+          "n1": "Có khả năng hiểu tiếng Nhật được sử dụng trong nhiều hoàn cảnh khác nhau. Có thể đọc báo và tạp chí một cách trôi chảy.",
+          "native": "Thành thạo tiếng Nhật như người bản ngữ hoặc gần như người bản ngữ."
+        }
+      }
+    },
+    "language": {
+      "title": "Cài đặt ngôn ngữ",
+      "interface": "Ngôn ngữ giao diện",
+      "interfaceDescription": "Chọn ngôn ngữ ưa thích của bạn cho giao diện ứng dụng",
+      "translation": "Ngôn ngữ dịch",
+      "translationDescription": "Chọn ngôn ngữ ưa thích của bạn cho việc dịch bài viết"
+    },
+    "appearance": {
+      "title": "Giao diện",
+      "theme": {
+        "title": "Chủ đề",
+        "light": "Sáng",
+        "dark": "Tối",
+        "system": "Hệ thống"
+      }
+    },
+    "goals": {
+      "title": "Mục tiêu đọc",
+      "description": "Thiết lập mục tiêu đọc hàng ngày và theo dõi tiến độ của bạn",
+      "articles": {
+        "title": "Mục tiêu bài viết hàng ngày",
+        "description": "Thử thách bản thân đọc một số lượng bài viết cụ thể mỗi ngày. Bắt đầu với số lượng nhỏ và tăng dần khi bạn có thêm tự tin.",
+        "current": "bài viết"
+      },
+      "time": {
+        "title": "Mục tiêu thời gian đọc hàng ngày",
+        "description": "Dành thời gian cho việc luyện tập đọc. Chỉ cần vài phút tập trung đọc mỗi ngày cũng có thể cải thiện đáng kể khả năng hiểu của bạn.",
+        "current": "phút",
+        "custom": "Tùy chỉnh"
+      }
+    },
+    "data": {
+      "title": "Quản lý dữ liệu",
+      "readingHistory": {
+        "title": "Đặt lại lịch sử đọc",
+        "description": "Xóa tất cả lịch sử bài viết đã hoàn thành và đặt lại thống kê đọc. Hành động này không thể hoàn tác.",
+        "button": "Đặt lại lịch sử đọc",
+        "warning": "Cảnh báo: Bạn sắp xóa toàn bộ lịch sử đọc của mình.\n\nBao gồm:\n- Tất cả các bài viết đã đánh dấu là hoàn thành\n- Theo dõi tiến độ đọc của bạn\n- Các kỷ lục chuỗi của bạn (cả kỷ lục tốt nhất và hiện tại)\n\nHành động này là VĨNH VIỄN và KHÔNG THỂ hoàn tác. Bạn có chắc chắn muốn tiếp tục không?",
+        "confirmText": "đặt lại lịch sử đọc"
+      },
+      "savedArticles": {
+        "title": "Đặt lại bài viết đã lưu",
+        "description": "Xóa tất cả bài viết đã lưu của bạn. Hành động này không thể hoàn tác.",
+        "button": "Đặt lại bài viết đã lưu",
+        "warning": "Cảnh báo: Bạn sắp xóa tất cả bài viết đã lưu của mình.\n\nBao gồm:\n- Tất cả các bài viết bạn đã lưu để đọc sau\n- Các bài viết đã lưu của bạn\n\nHành động này là VĨNH VIỄN và KHÔNG THỂ hoàn tác. Bạn có chắc chắn muốn tiếp tục không?",
+        "confirmText": "đặt lại bài viết đã lưu"
+      }
+    },
+    "software": {
+      "title": "Thông tin phần mềm",
+      "description": "Thông tin về phiên bản đã cài đặt và các bản cập nhật có sẵn.",
+      "version": "Phiên bản",
+      "update": "Có bản cập nhật mới",
+      "updateNow": "Cập nhật ngay",
+      "updateDescription": "Cập nhật ngay để nhận các tính năng mới nhất, cải tiến và sửa lỗi."
+    }
+  },
+  "reader": {
+    "loading": "Đang tải bài viết...",
+    "error": "Không thể tải bài viết",
+    "translate": "Dịch",
+    "original": "Nguyên bản",
+    "save": "Lưu bài viết",
+    "unsave": "Bỏ lưu bài viết",
+    "saved": "Đã lưu bài viết!",
+    "unsaved": "Đã xóa khỏi mục đã lưu"
+  }
+} 

@@ -1,0 +1,133 @@
+{
+  "navigation": {
+    "home": "Home",
+    "saved": "Salvati",
+    "settings": "Impostazioni"
+  },
+  "common": {
+    "signIn": "Accedi",
+    "signOut": "Esci",
+    "save": "Salva",
+    "delete": "Elimina",
+    "cancel": "Annulla",
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "success": "Successo!",
+    "edit": "Modifica",
+    "required": "Obbligatorio",
+    "verified": "Verificato",
+    "noUsername": "Nessun nome utente",
+    "setUsername": "Imposta nome utente",
+    "viewProfile": "Visualizza profilo",
+    "checkingUpdates": "Ricerca aggiornamenti...",
+    "upToDate": "Aggiornato",
+    "updateAvailable": "Aggiornamento disponibile",
+    "checkForUpdates": "Cerca aggiornamenti",
+    "installUpdate": "Installa aggiornamento",
+    "viewReleaseNotes": "Visualizza note di rilascio"
+  },
+  "settings": {
+    "title": "Impostazioni account",
+    "sections": {
+      "profile": "Profilo",
+      "language": "Lingua",
+      "appearance": "Aspetto",
+      "goals": "Obiettivi di lettura",
+      "data": "Gestione dati",
+      "software": "Informazioni software"
+    },
+    "profile": {
+      "title": "Informazioni profilo",
+      "username": "Nome utente",
+      "japaneseLevel": "Livello di giapponese",
+      "googleAccount": "Account Google",
+      "accountSecured": "Il tuo account è protetto con l'accesso Google",
+      "selfIntroduction": "Presentazione",
+      "noIntroduction": "Nessuna presentazione",
+      "duolingoProfile": "Profilo Duolingo",
+      "noDuolingo": "Nessun profilo Duolingo collegato",
+      "jlptLevels": {
+        "n5": "N5 (Principiante)",
+        "n4": "N4 (Base)",
+        "n3": "N3 (Intermedio)",
+        "n2": "N2 (Avanzato)",
+        "n1": "N1 (Esperto)",
+        "native": "Madrelingua",
+        "descriptions": {
+          "n5": "Molto nuovo al giapponese. Può comprendere e utilizzare espressioni quotidiane familiari e frasi molto basilari.",
+          "n4": "Comprensione base del giapponese usato in situazioni quotidiane. Può leggere passaggi semplici e seguire conversazioni lente.",
+          "n3": "Comprensione del giapponese usato in situazioni quotidiane fino a un certo grado. Può leggere giornali con vocabolario base.",
+          "n2": "Capacità di comprendere il giapponese usato in situazioni quotidiane e in varie circostanze. Può leggere giornali e seguire notiziari TV.",
+          "n1": "Capacità di comprendere il giapponese usato in varie circostanze. Può leggere giornali e riviste fluentemente.",
+          "native": "Padronanza madrelingua o quasi madrelingua del giapponese."
+        }
+      }
+    },
+    "language": {
+      "title": "Impostazioni lingua",
+      "interface": "Lingua interfaccia",
+      "interfaceDescription": "Seleziona la tua lingua preferita per l'interfaccia dell'applicazione",
+      "translation": "Lingua traduzione",
+      "translationDescription": "Seleziona la tua lingua preferita per le traduzioni degli articoli"
+    },
+    "appearance": {
+      "title": "Aspetto",
+      "theme": {
+        "title": "Tema",
+        "light": "Chiaro",
+        "dark": "Scuro",
+        "system": "Sistema"
+      }
+    },
+    "goals": {
+      "title": "Obiettivi di lettura",
+      "description": "Imposta i tuoi obiettivi di lettura giornalieri e monitora i tuoi progressi",
+      "articles": {
+        "title": "Obiettivo articoli giornaliero",
+        "description": "Sfidati a leggere un numero specifico di articoli ogni giorno. Inizia con pochi e aumenta gradualmente man mano che acquisisci fiducia.",
+        "current": "articoli"
+      },
+      "time": {
+        "title": "Obiettivo tempo di lettura giornaliero",
+        "description": "Dedica del tempo alla pratica della lettura. Anche pochi minuti di lettura concentrata ogni giorno possono migliorare significativamente la tua comprensione.",
+        "current": "minuti",
+        "custom": "Personalizzato"
+      }
+    },
+    "data": {
+      "title": "Gestione dati",
+      "readingHistory": {
+        "title": "Reimposta cronologia letture",
+        "description": "Rimuove tutta la cronologia degli articoli completati e reimposta le statistiche di lettura. Questa azione non può essere annullata.",
+        "button": "Reimposta cronologia letture",
+        "warning": "Attenzione: Stai per eliminare tutta la tua cronologia di lettura.\n\nQuesto include:\n- Tutti gli articoli segnati come completati\n- Il tuo monitoraggio dei progressi di lettura\n- I tuoi record di serie consecutive (sia la migliore che quella attuale)\n\nQuesta azione è PERMANENTE e NON PUÒ essere annullata. Sei sicuro di voler procedere?",
+        "confirmText": "reimposta cronologia letture"
+      },
+      "savedArticles": {
+        "title": "Reimposta articoli salvati",
+        "description": "Rimuove tutti i tuoi articoli salvati. Questa azione non può essere annullata.",
+        "button": "Reimposta articoli salvati",
+        "warning": "Attenzione: Stai per eliminare tutti i tuoi articoli salvati.\n\nQuesto include:\n- Tutti gli articoli che hai salvato per dopo\n- I tuoi articoli salvati\n\nQuesta azione è PERMANENTE e NON PUÒ essere annullata. Sei sicuro di voler procedere?",
+        "confirmText": "reimposta articoli salvati"
+      }
+    },
+    "software": {
+      "title": "Informazioni software",
+      "description": "Informazioni sulla tua versione installata e aggiornamenti disponibili.",
+      "version": "Versione",
+      "update": "Aggiornamento disponibile",
+      "updateNow": "Aggiorna ora",
+      "updateDescription": "Aggiorna ora per ottenere le ultime funzionalità, miglioramenti e correzioni di bug."
+    }
+  },
+  "reader": {
+    "loading": "Caricamento articolo...",
+    "error": "Impossibile caricare l'articolo",
+    "translate": "Traduci",
+    "original": "Originale",
+    "save": "Salva articolo",
+    "unsave": "Rimuovi articolo",
+    "saved": "Articolo salvato!",
+    "unsaved": "Articolo rimosso dai salvati"
+  }
+} 
