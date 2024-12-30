@@ -1,3 +1,10 @@
+## [1.31.2](https://github.com/amazingandyyy/ezjp/compare/v1.31.1...v1.31.2) (2024-12-30)
+
+
+### Bug Fixes
+
+* update language change handling in SettingsContent ([7cc3832](https://github.com/amazingandyyy/ezjp/commit/7cc383272b744bc04980d56aa7237874f8190862))
+
 ## [1.31.1](https://github.com/amazingandyyy/ezjp/compare/v1.31.0...v1.31.1) (2024-12-30)
 
 
