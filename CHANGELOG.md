@@ -1,3 +1,11 @@
+# [1.23.0](https://github.com/amazingandyyy/ezjp/compare/v1.22.0...v1.23.0) (2024-12-30)
+
+
+### Features
+
+* add translation feature and update dependencies ([d47d2a5](https://github.com/amazingandyyy/ezjp/commit/d47d2a59af13bc082de69508f07f2e61cc9badd3))
+* implement learning mode in NewsReaderContent component ([9f9d346](https://github.com/amazingandyyy/ezjp/commit/9f9d3467d80eaffa79183afbaf3ecef016f795c8))
+
 # [1.22.0](https://github.com/amazingandyyy/ezjp/compare/v1.21.2...v1.22.0) (2024-12-29)
 
 
