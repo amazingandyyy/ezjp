@@ -40,6 +40,7 @@ import {
 
 // Add import for Navbar
 import Navbar from '../components/Navbar';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 
 // Add this helper function at the top level
 const isBrowser = typeof window !== 'undefined';
@@ -66,7 +67,10 @@ function NewsReaderContent() {
   const [currentArticleId, setCurrentArticleId] = useState(null);
   const [article, setArticle] = useState(null); // Add article state
   const [showProfile, setShowProfile] = useState(false);
-  const [preferenceState, setPreferenceState] = useState(DEFAULT_READER_PREFERENCES);
+  const [preferenceState, setPreferenceState] = useState({
+    ...DEFAULT_READER_PREFERENCES,
+    preferred_translation_language: 'en'
+  });
   const [updatingPreferences, setUpdatingPreferences] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -231,7 +235,8 @@ function NewsReaderContent() {
             show_furigana: preferences.show_furigana ?? prev.show_furigana,
             preferred_speed: preferred_speed,
             preferred_voice: preferences.preferred_voice || prev.preferred_voice,
-            reading_level: preferences.reading_level || prev.reading_level
+            reading_level: preferences.reading_level || prev.reading_level,
+            preferred_translation_language: preferences.preferred_translation_language || prev.preferred_translation_language
           }));
         }
       } catch (error) {
@@ -1252,7 +1257,8 @@ function NewsReaderContent() {
         show_furigana: profile.show_furigana ?? true,
         preferred_speed: profile.preferred_speed || 1.0,
         preferred_voice: profile.preferred_voice || null,
-        reading_level: profile.reading_level || 'beginner'
+        reading_level: profile.reading_level || 'beginner',
+        preferred_translation_language: profile.preferred_translation_language || 'en'
       });
       
       if (profile.preferred_voice) {
@@ -1694,12 +1700,6 @@ function NewsReaderContent() {
         {/* Learning mode buttons */}
         <div className="flex flex-wrap gap-2 mb-3">
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-              ${
-                preferenceState.theme === "dark"
-                  ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
-                  : "bg-purple-50 text-purple-700 hover:bg-purple-100"
-              }`}
             onClick={() => {
               if (isPlaying && currentSentence === index) {
                 pauseAudio();
@@ -1709,6 +1709,11 @@ function NewsReaderContent() {
               }
             }}
             disabled={isVoiceLoading}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+              ${preferenceState.theme === "dark"
+                ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+                : "bg-purple-50 text-purple-700 hover:bg-purple-100"
+              }`}
           >
             {isVoiceLoading && currentSentence === index ? (
               <div className="w-4 h-4 relative">
@@ -1726,36 +1731,36 @@ function NewsReaderContent() {
               "Read"
             )}
           </button>
-          <button
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-              ${
-                preferenceState.theme === "dark"
+
+          {/* Translation controls */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => translateSentence(sentenceToText(sentence), index)}
+              disabled={loadingTranslations[index]}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                ${preferenceState.theme === "dark"
                   ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                   : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-              }
-              ${
-                loadingTranslations[index]
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              }
-            `}
-            onClick={() => translateSentence(sentenceToText(sentence), index)}
-            disabled={loadingTranslations[index]}
-          >
-            {loadingTranslations[index] ? (
-              <div className="w-4 h-4 relative">
-                <div
-                  className={`absolute inset-0 rounded-full border-2 animate-spin ${
-                    preferenceState.theme === "dark"
-                      ? "border-blue-400 border-r-transparent"
-                      : "border-blue-700 border-r-transparent"
-                  }`}
-                ></div>
-              </div>
-            ) : (
-              "Translation"
-            )}
-          </button>
+                }
+                ${loadingTranslations[index] ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+            >
+              {loadingTranslations[index] ? (
+                <div className="w-4 h-4 relative">
+                  <div
+                    className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                      preferenceState.theme === "dark"
+                        ? "border-blue-400 border-r-transparent"
+                        : "border-blue-700 border-r-transparent"
+                    }`}
+                  ></div>
+                </div>
+              ) : (
+                `Translate to ${SUPPORTED_LANGUAGES[preferenceState.preferred_translation_language]}`
+              )}
+            </button>
+          </div>
+
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
               ${
@@ -2552,38 +2557,30 @@ function NewsReaderContent() {
   const [followUpQuestions, setFollowUpQuestions] = useState({});
   const [conversations, setConversations] = useState({}); // Add this line to track conversation history
 
-  // Add this function near other utility functions
-  const translateSentence = async (sentenceText, index) => {
-    if (translations[index] || loadingTranslations[index]) return;
-    
+  // Add this near other state declarations
+  const [targetLanguage, setTargetLanguage] = useState('en');
+
+  // Update the translateSentence function
+  const translateSentence = async (text, index) => {
     try {
       setLoadingTranslations(prev => ({ ...prev, [index]: true }));
-      
       const response = await fetch('/api/translate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: sentenceText }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          text,
+          target: preferenceState.preferred_translation_language
+        }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || error.error || 'Translation failed');
-      }
+      if (!response.ok) throw new Error('Translation failed');
 
-      const data = await response.json();
-      setTranslations(prev => ({
-        ...prev,
-        [index]: data.translation
-      }));
+      const { translation } = await response.json();
+      setTranslations(prev => ({ ...prev, [index]: translation }));
     } catch (error) {
       console.error('Translation error:', error);
-      // Show error in the translation section
-      setTranslations(prev => ({
-        ...prev,
-        [index]: `Translation error: ${error.message}`
-      }));
+      setToastMessage('Failed to translate text');
+      setShowToast(true);
     } finally {
       setLoadingTranslations(prev => ({ ...prev, [index]: false }));
     }
@@ -2707,6 +2704,44 @@ function NewsReaderContent() {
       </div>
     </div>
   );
+
+  // Add translation language change handler
+  const handleTranslationLanguageChange = async (language) => {
+    if (user) {
+      try {
+        setUpdatingPreferences(prev => ({ ...prev, preferred_translation_language: true }));
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            preferred_translation_language: language,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (error) throw error;
+        
+        setPreferenceState(prev => ({
+          ...prev,
+          preferred_translation_language: language
+        }));
+      } catch (error) {
+        console.error('Error saving translation language:', error);
+      } finally {
+        setUpdatingPreferences(prev => ({ ...prev, preferred_translation_language: false }));
+      }
+    } else {
+      setPreferenceState(prev => ({
+        ...prev,
+        preferred_translation_language: language
+      }));
+      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+  };
 
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
@@ -3094,6 +3129,33 @@ function NewsReaderContent() {
                         Loading voices...
                       </option>
                     )}
+                  </select>
+                </div>
+
+                {/* Translation Language control */}
+                <div className="space-y-3 sm:space-y-2">
+                  <label className={`text-base sm:text-sm font-medium flex items-center ${
+                    preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"
+                  }`}>
+                    Translation Language
+                    <LoadingIndicator
+                      loading={updatingPreferences.preferred_translation_language}
+                      theme={preferenceState.theme}
+                    />
+                  </label>
+                  <select
+                    value={preferenceState.preferred_translation_language}
+                    onChange={(e) => handleTranslationLanguageChange(e.target.value)}
+                    disabled={updatingPreferences.preferred_translation_language}
+                    className={`w-full p-3 sm:p-2 text-base sm:text-sm rounded transition-all duration-200 border ${
+                      preferenceState.theme === "dark"
+                        ? "bg-gray-800 border-gray-700 text-gray-100 focus:border-green-500/50"
+                        : "[color-scheme:light] bg-white border-gray-300 text-[rgb(19,31,36)] focus:border-green-500/50"
+                    } ${updatingPreferences.preferred_translation_language ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {Object.entries(SUPPORTED_LANGUAGES).map(([code, name]) => (
+                      <option key={code} value={code}>{name}</option>
+                    ))}
                   </select>
                 </div>
               </div>

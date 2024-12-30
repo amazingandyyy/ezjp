@@ -27,7 +27,7 @@ const LoadingIndicator = ({ loading, theme }) => {
 };
 
 // Add RubyText component
-const RubyText = ({ part, preferenceState }) => {
+const RubyText = ({ part, preferenceState = { show_furigana: true } }) => {
   if (!part || part.type !== 'ruby' || !part.kanji || !part.reading) {
     return null;
   }
@@ -42,7 +42,7 @@ const RubyText = ({ part, preferenceState }) => {
 };
 
 // Add this function near other utility functions
-  const renderTitle = (title) => {
+  const renderTitle = (title, preferenceState) => {
     if (!Array.isArray(title)) return null;
     return title.map((part, index) => {
       if (part.type === 'ruby') {

@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
 import { supabase } from '@/lib/supabase';
 import { getSystemTheme, getCurrentTheme } from '@/lib/utils/theme';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 import Navbar from '@/app/components/Navbar';
 import useSystemStore from '@/lib/stores/system';
 
@@ -126,7 +127,8 @@ function SettingsContent() {
     edited_duolingo_username: '',
     daily_article_goal: 3,
     daily_reading_time_goal: 15,
-    role_level: 0
+    role_level: 0,
+    preferred_translation_language: 'en'
   });
 
   // Handle avatar change
@@ -237,7 +239,8 @@ function SettingsContent() {
           edited_duolingo_username: latestProfile.duolingo_username || '',
           daily_article_goal: latestProfile.daily_article_goal || 3,
           daily_reading_time_goal: latestProfile.daily_reading_time_goal || 15,
-          role_level: latestProfile.role_level || 0
+          role_level: latestProfile.role_level || 0,
+          preferred_translation_language: latestProfile.preferred_translation_language || 'en'
         });
         setIsProfileLoaded(true);
       } catch (error) {
@@ -300,6 +303,9 @@ function SettingsContent() {
           break;
         case 'daily_reading_time_goal':
           updateData = { daily_reading_time_goal: value };
+          break;
+        case 'preferred_translation_language':
+          updateData = { preferred_translation_language: value };
           break;
       }
 
@@ -1120,6 +1126,28 @@ function SettingsContent() {
                     </div>
                   )}
                 </div>
+
+                {/* Add translation language preference */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2">
+                    Preferred Translation Language
+                  </label>
+                  <select
+                    value={profileData.preferred_translation_language}
+                    onChange={(e) => handleUpdate('preferred_translation_language', e.target.value)}
+                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  >
+                    {Object.entries(SUPPORTED_LANGUAGES).map(([code, name]) => (
+                      <option key={code} value={code}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Select your preferred language for article translations
+                  </p>
+                </div>
+                {/* End translation language preference */}
               </div>
             </div>
 
