@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/amazingandyyy/ezjp/compare/v1.26.0...v1.27.0) (2024-12-30)
+
+
+### Features
+
+* enhance admin page analytics and session tracking ([ba6a951](https://github.com/amazingandyyy/ezjp/commit/ba6a95184469b19fb0b70d900df0149369fba911))
+
 # [1.26.0](https://github.com/amazingandyyy/ezjp/compare/v1.25.0...v1.26.0) (2024-12-30)
 
 
