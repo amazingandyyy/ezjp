@@ -1,3 +1,10 @@
+# [1.32.0](https://github.com/amazingandyyy/ezjp/compare/v1.31.2...v1.32.0) (2024-12-30)
+
+
+### Features
+
+* add fetching version message to multiple languages ([6ee157e](https://github.com/amazingandyyy/ezjp/commit/6ee157e6a4a30e09b2845ba4a325491007c8f9be))
+
 ## [1.31.2](https://github.com/amazingandyyy/ezjp/compare/v1.31.1...v1.31.2) (2024-12-30)
 
 
