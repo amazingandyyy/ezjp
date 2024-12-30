@@ -1653,14 +1653,22 @@ function NewsReaderContent() {
 
     // Learning mode display
     return (
-      <div className="my-8 first:mt-0 last:mb-0">
+      <div className="my-4 first:mt-0 last:mb-0">
         {/* Sentence content */}
-        <div className={`mb-4 p-4 rounded-xl ${
+        <div className={`mb-3 p-5 rounded-xl ${
           preferenceState.theme === "dark"
             ? "bg-gray-800/50"
             : "bg-gray-50"
         }`}>
-          <div className="text-lg leading-relaxed">
+          <div className={`${
+            preferenceState.font_size === "medium"
+              ? "text-lg"
+              : preferenceState.font_size === "large"
+              ? "text-xl"
+              : preferenceState.font_size === "x-large"
+              ? "text-2xl"
+              : "text-3xl"
+          } leading-relaxed tracking-wide`}>
             {processContent(sentence).map((part, i) => {
               if (part.type === "ruby") {
                 return (
@@ -1691,8 +1699,12 @@ function NewsReaderContent() {
                 : "bg-purple-50 text-purple-700 hover:bg-purple-100"
               }`}
             onClick={() => {
-              setCurrentSentence(index);
-              playCurrentSentence(index);
+              if (isPlaying && currentSentence === index) {
+                pauseAudio();
+              } else {
+                setCurrentSentence(index);
+                playCurrentSentence(index);
+              }
             }}
             disabled={isVoiceLoading}
           >
@@ -1704,8 +1716,10 @@ function NewsReaderContent() {
                     : "border-purple-700 border-r-transparent"
                 }`}></div>
               </div>
+            ) : isPlaying && currentSentence === index ? (
+              "Pause"
             ) : (
-              <>Read</>
+              "Read"
             )}
           </button>
           <button
@@ -1713,10 +1727,23 @@ function NewsReaderContent() {
               ${preferenceState.theme === "dark"
                 ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-              }`}
-            onClick={() => alert("Translation feature coming soon!")}
+              }
+              ${loadingTranslations[index] ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+            onClick={() => translateSentence(sentenceToText(sentence), index)}
+            disabled={loadingTranslations[index]}
           >
-            Translation
+            {loadingTranslations[index] ? (
+              <div className="w-4 h-4 relative">
+                <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                  preferenceState.theme === "dark"
+                    ? "border-blue-400 border-r-transparent"
+                    : "border-blue-700 border-r-transparent"
+                }`}></div>
+              </div>
+            ) : (
+              'Translation'
+            )}
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
@@ -1724,29 +1751,66 @@ function NewsReaderContent() {
                 ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                 : "bg-green-50 text-green-700 hover:bg-green-100"
               }`}
-            onClick={() => alert("Learning explanations coming soon!")}
+            onClick={() => alert("Tutor feature coming soon!")}
           >
-            Learning Help
+            Tutor
           </button>
         </div>
         
-        {/* Placeholder sections */}
-        <div className={`mb-3 text-sm rounded-lg p-4 ${
+        {/* Translation section */}
+        <div className={`mb-3 rounded-xl overflow-hidden ${
           preferenceState.theme === "dark"
             ? "bg-gray-800/30"
             : "bg-gray-50"
         }`}>
-          <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-            Translation will appear here
+          <div className={`p-6 ${
+            translations[index] 
+              ? preferenceState.theme === "dark"
+                ? "text-gray-200"
+                : "text-gray-700"
+              : preferenceState.theme === "dark"
+              ? "text-gray-400"
+              : "text-gray-500"
+          }`}>
+            {translations[index] ? (
+              <div className="space-y-3">
+                <div className={`text-sm font-medium ${
+                  preferenceState.theme === "dark"
+                    ? "text-gray-400"
+                    : "text-gray-500"
+                }`}>
+                  English Translation
+                </div>
+                <div className={`${
+                  preferenceState.font_size === "medium"
+                    ? "text-base"
+                    : preferenceState.font_size === "large"
+                    ? "text-lg"
+                    : preferenceState.font_size === "x-large"
+                    ? "text-xl"
+                    : "text-2xl"
+                } leading-relaxed`}>
+                  {translations[index]}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                <span>Click the Translation button to see the English translation</span>
+              </div>
+            )}
           </div>
         </div>
-        <div className={`text-sm rounded-lg p-4 ${
+        <div className={`text-sm rounded-xl p-5 ${
           preferenceState.theme === "dark"
             ? "bg-gray-800/30"
             : "bg-gray-50"
         }`}>
           <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-            Learning explanations and help will appear here
+            AI tutor explanations will appear here
           </div>
         </div>
       </div>
@@ -2123,6 +2187,47 @@ function NewsReaderContent() {
   }, []);
 
   const [isLearningMode, setIsLearningMode] = useState(false);
+
+  // Add these state variables near other state declarations
+  const [translations, setTranslations] = useState({});
+  const [loadingTranslations, setLoadingTranslations] = useState({});
+
+  // Add this function near other utility functions
+  const translateSentence = async (sentenceText, index) => {
+    if (translations[index] || loadingTranslations[index]) return;
+    
+    try {
+      setLoadingTranslations(prev => ({ ...prev, [index]: true }));
+      
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: sentenceText }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || error.error || 'Translation failed');
+      }
+
+      const data = await response.json();
+      setTranslations(prev => ({
+        ...prev,
+        [index]: data.translation
+      }));
+    } catch (error) {
+      console.error('Translation error:', error);
+      // Show error in the translation section
+      setTranslations(prev => ({
+        ...prev,
+        [index]: `Translation error: ${error.message}`
+      }));
+    } finally {
+      setLoadingTranslations(prev => ({ ...prev, [index]: false }));
+    }
+  };
 
   // Add this component near other component definitions
   const LearningModeButton = ({ theme, isLearningMode, onToggle }) => (
@@ -3385,7 +3490,7 @@ function NewsReaderContent() {
 
                 <div>
                   {newsContent.map((paragraph, pIndex) => (
-                    <p
+                    <div
                       key={pIndex}
                       className={`mb-6 px-2 py-1 rounded-md ${
                         preferenceState.font_size === "medium"
@@ -3408,8 +3513,8 @@ function NewsReaderContent() {
                         return (
                           <span
                             key={sIndex}
-                            onClick={() => handleSentenceClick(sIndex)}
-                            className={`inline cursor-pointer p-0.5 rounded
+                            onClick={() => !isLearningMode && handleSentenceClick(sIndex)}
+                            className={`inline ${!isLearningMode ? 'cursor-pointer' : ''} p-0.5 rounded
                               ${
                                 currentSentence >= 0 &&
                                 sIndex === currentSentence
@@ -3417,8 +3522,8 @@ function NewsReaderContent() {
                                     ? "bg-emerald-900/80 shadow-sm"
                                     : "bg-emerald-100 ring-0 shadow-sm"
                                   : preferenceState.theme === "dark"
-                                  ? "hover:bg-gray-700/80"
-                                  : "hover:bg-gray-100"
+                                  ? !isLearningMode ? "hover:bg-gray-700/80" : ""
+                                  : !isLearningMode ? "hover:bg-gray-100" : ""
                               }
                               ${
                                 repeatMode === REPEAT_MODES.ONE &&
@@ -3434,7 +3539,7 @@ function NewsReaderContent() {
                           </span>
                         );
                       })}
-                    </p>
+                    </div>
                   ))}
 
                   {newsContent && newsContent.length > 0 ? (
