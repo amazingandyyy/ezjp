@@ -1,3 +1,10 @@
+# [1.35.0](https://github.com/amazingandyyy/ezjp/compare/v1.34.0...v1.35.0) (2024-12-30)
+
+
+### Features
+
+* add language parameter handling in Navbar component ([4784402](https://github.com/amazingandyyy/ezjp/commit/4784402ee909b9ba0e7702e491743d7532bad3a4))
+
 # [1.34.0](https://github.com/amazingandyyy/ezjp/compare/v1.33.0...v1.34.0) (2024-12-30)
 
 
