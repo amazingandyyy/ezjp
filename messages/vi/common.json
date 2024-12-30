@@ -117,7 +117,8 @@
       "version": "Phiên bản",
       "update": "Có bản cập nhật mới",
       "updateNow": "Cập nhật ngay",
-      "updateDescription": "Cập nhật ngay để nhận các tính năng mới nhất, cải tiến và sửa lỗi."
+      "updateDescription": "Cập nhật ngay để nhận các tính năng mới nhất, cải tiến và sửa lỗi.",
+      "fetchingVersion": "Đang kiểm tra phiên bản..."
     }
   },
   "reader": {

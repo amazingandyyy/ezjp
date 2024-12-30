@@ -117,7 +117,8 @@
       "version": "バージョン",
       "update": "アップデートが利用可能です",
       "updateNow": "今すぐアップデート",
-      "updateDescription": "最新の機能、改善点、バグ修正を適用するにはアップデートしてください。"
+      "updateDescription": "最新の機能、改善点、バグ修正を適用するにはアップデートしてください。",
+      "fetchingVersion": "バージョンを確認中..."
     }
   },
   "reader": {

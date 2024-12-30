@@ -117,7 +117,8 @@
       "version": "Versione",
       "update": "Aggiornamento disponibile",
       "updateNow": "Aggiorna ora",
-      "updateDescription": "Aggiorna ora per ottenere le ultime funzionalità, miglioramenti e correzioni di bug."
+      "updateDescription": "Aggiorna ora per ottenere le ultime funzionalità, miglioramenti e correzioni di bug.",
+      "fetchingVersion": "Verifica della versione..."
     }
   },
   "reader": {

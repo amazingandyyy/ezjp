@@ -117,7 +117,8 @@
       "version": "版本",
       "update": "有可用更新",
       "updateNow": "立即更新",
-      "updateDescription": "立即更新以獲取最新功能、改進和錯誤修復。"
+      "updateDescription": "立即更新以獲取最新功能、改進和錯誤修復。",
+      "fetchingVersion": "正在檢查版本..."
     }
   },
   "reader": {
