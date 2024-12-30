@@ -407,7 +407,7 @@ export default function NewsList() {
                 <span className="mx-1.5">/</span>
                 <span>{finishedStats.total}</span>
                 <span className="ml-2 text-xs opacity-75">
-                  {t('navbar.profile.finishedThisWeek')}
+                  {t('explorer.finishedThisWeek')}
                 </span>
               </div>
               <button

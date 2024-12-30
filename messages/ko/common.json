@@ -138,6 +138,7 @@
     "readAllToday": "오늘의 모든 기사를 읽었습니다",
     "showAll": "모든 기사 표시",
     "hideFinished": "완료된 기사 숨기기",
+    "finishedThisWeek": "이번 주에 완료",
     "noImage": {
       "mainichi": "마이니치 뉴스에는 이미지가 없습니다",
       "nhk": "NHK 뉴스에는 이미지가 없습니다",
@@ -185,8 +186,7 @@
       "startStreak": "연속 기록 시작하기",
       "days": "일",
       "day1": "1일차",
-      "keepStreak": "연속 기록을 유지하려면 최소 1개의 기사를 읽으세요",
-      "finishedThisWeek": "이번 주에 완료"
+      "keepStreak": "연속 기록을 유지하려면 최소 1개의 기사를 읽으세요"
     }
   }
-} 
+}

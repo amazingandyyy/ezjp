@@ -138,6 +138,7 @@
     "readAllToday": "您已讀完今天所有的文章",
     "showAll": "顯示所有文章",
     "hideFinished": "隱藏已讀",
+    "finishedThisWeek": "本週已讀",
     "noImage": {
       "mainichi": "每日新聞沒有圖片",
       "nhk": "NHK新聞沒有圖片",
@@ -185,8 +186,7 @@
       "startStreak": "開始連續紀錄",
       "days": "天",
       "day1": "第1天",
-      "keepStreak": "至少閱讀一篇文章來保持連續紀錄",
-      "finishedThisWeek": "本週已讀"
+      "keepStreak": "至少閱讀一篇文章來保持連續紀錄"
     }
   }
-} 
+}

@@ -138,6 +138,7 @@
     "readAllToday": "You've read all of today's articles",
     "showAll": "Show all articles",
     "hideFinished": "Hide finished",
+    "finishedThisWeek": "finished this week",
     "noImage": {
       "mainichi": "Mainichi news has no image",
       "nhk": "NHK news has no image",
@@ -173,8 +174,7 @@
       "startStreak": "Start your streak",
       "days": "days",
       "day1": "Day 1",
-      "keepStreak": "Read at least one article to keep your streak going",
-      "finishedThisWeek": "finished this week"
+      "keepStreak": "Read at least one article to keep your streak going"
     },
     "menu": {
       "allNews": "All News",
@@ -189,4 +189,4 @@
       "install": "Install the latest version of EZJP News"
     }
   }
-} 
+}

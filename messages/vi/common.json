@@ -138,6 +138,7 @@
     "readAllToday": "Bạn đã đọc tất cả bài viết hôm nay",
     "showAll": "Hiển thị tất cả bài viết",
     "hideFinished": "Ẩn đã hoàn thành",
+    "finishedThisWeek": "đã hoàn thành tuần này",
     "noImage": {
       "mainichi": "Tin Mainichi không có hình ảnh",
       "nhk": "Tin NHK không có hình ảnh",
@@ -185,8 +186,7 @@
       "startStreak": "Bắt đầu chuỗi",
       "days": "ngày",
       "day1": "Ngày 1",
-      "keepStreak": "Đọc ít nhất một bài viết để duy trì chuỗi của bạn",
-      "finishedThisWeek": "đã hoàn thành tuần này"
+      "keepStreak": "Đọc ít nhất một bài viết để duy trì chuỗi của bạn"
     }
   }
-} 
+}

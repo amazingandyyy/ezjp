@@ -138,6 +138,7 @@
     "readAllToday": "Vous avez lu tous les articles d'aujourd'hui",
     "showAll": "Afficher tous les articles",
     "hideFinished": "Masquer les terminés",
+    "finishedThisWeek": "terminés cette semaine",
     "noImage": {
       "mainichi": "L'actualité Mainichi n'a pas d'image",
       "nhk": "L'actualité NHK n'a pas d'image",
@@ -185,8 +186,7 @@
       "startStreak": "Commencez votre série",
       "days": "jours",
       "day1": "Jour 1",
-      "keepStreak": "Lisez au moins un article pour maintenir votre série",
-      "finishedThisWeek": "terminés cette semaine"
+      "keepStreak": "Lisez au moins un article pour maintenir votre série"
     }
   }
-} 
+}

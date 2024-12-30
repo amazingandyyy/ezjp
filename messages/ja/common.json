@@ -138,6 +138,7 @@
     "readAllToday": "今日の記事をすべて読みました",
     "showAll": "すべての記事を表示",
     "hideFinished": "読了済みを非表示",
+    "finishedThisWeek": "今週読了",
     "noImage": {
       "mainichi": "毎日新聞の記事には画像がありません",
       "nhk": "NHKの記事には画像がありません",
@@ -185,8 +186,7 @@
       "startStreak": "継続記録を始める",
       "days": "日",
       "day1": "1日目",
-      "keepStreak": "継続記録を保つために少なくとも1記事を読みましょう",
-      "finishedThisWeek": "今週読了"
+      "keepStreak": "継続記録を保つために少なくとも1記事を読みましょう"
     }
   }
-} 
+}
