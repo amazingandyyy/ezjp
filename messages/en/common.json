@@ -144,5 +144,49 @@
       "unknown": "Unknown source has no image",
       "worthReading": "content inside still worth reading"
     }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "Show News List",
+      "hide": "Hide News List"
+    },
+    "join": "Join",
+    "theme": {
+      "switchToLight": "Switch to Light Mode",
+      "switchToDark": "Switch to Dark Mode",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "profile": {
+      "setup": "Set up your username",
+      "required": "Required",
+      "makeEasier": "Make your profile easier to find and share",
+      "readingGoals": "Daily Reading Goals",
+      "articles": "Articles",
+      "readingTime": "Reading Time",
+      "goalComplete": "Daily goals completed! 🎉",
+      "goalExceeded": "Daily goals completed! Going above and beyond! 🚀",
+      "almostThere": "Almost there! {{remaining}} more minutes of reading",
+      "keepGoing": "Keep going! {{remaining}} more articles to go",
+      "todayTarget": "Today's target: {{articles}} articles and {{minutes}} minutes",
+      "extendStreak": "Extend your streak",
+      "startStreak": "Start your streak",
+      "days": "days",
+      "day1": "Day 1",
+      "keepStreak": "Read at least one article to keep your streak going",
+      "finishedThisWeek": "finished this week"
+    },
+    "menu": {
+      "allNews": "All News",
+      "settings": "Settings",
+      "admin": "Admin (restricted)",
+      "download": "Download App",
+      "signOut": "Sign Out"
+    },
+    "update": {
+      "available": "Update Available",
+      "new": "New",
+      "install": "Install the latest version of EZJP News"
+    }
   }
 } 

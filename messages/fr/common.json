@@ -41,7 +41,7 @@
       "username": "Nom d'utilisateur",
       "japaneseLevel": "Niveau de japonais",
       "googleAccount": "Compte Google",
-      "accountSecured": "Votre compte est sécurisé avec la connexion Google",
+      "accountSecured": "Votre compte est sécurisé avec Google Sign In",
       "selfIntroduction": "Présentation",
       "noIntroduction": "Pas de présentation",
       "duolingoProfile": "Profil Duolingo",
@@ -54,11 +54,11 @@
         "n1": "N1 (Expert)",
         "native": "Natif",
         "descriptions": {
-          "n5": "Très nouveau en japonais. Peut comprendre et utiliser des expressions familières quotidiennes et des phrases très basiques.",
-          "n4": "Compréhension élémentaire du japonais utilisé dans des situations quotidiennes. Peut lire des passages simples et suivre des conversations lentes.",
+          "n5": "Débute en japonais. Peut comprendre et utiliser des expressions familières et des phrases très basiques.",
+          "n4": "Compréhension basique du japonais utilisé dans des situations quotidiennes. Peut lire des passages simples et suivre des conversations lentes.",
           "n3": "Compréhension du japonais utilisé dans des situations quotidiennes jusqu'à un certain degré. Peut lire des journaux avec un vocabulaire de base.",
           "n2": "Capacité à comprendre le japonais utilisé dans des situations quotidiennes et dans diverses circonstances. Peut lire les journaux et suivre les informations télévisées.",
-          "n1": "Capacité à comprendre le japonais utilisé dans diverses circonstances. Peut lire couramment les journaux et les magazines.",
+          "n1": "Capacité à comprendre le japonais utilisé dans une variété de circonstances. Peut lire couramment les journaux et les magazines.",
           "native": "Maîtrise native ou quasi-native du japonais."
         }
       }
@@ -81,7 +81,7 @@
     },
     "goals": {
       "title": "Objectifs de lecture",
-      "description": "Définissez vos objectifs de lecture quotidiens et suivez vos progrès",
+      "description": "Définissez vos objectifs quotidiens de lecture et suivez vos progrès",
       "articles": {
         "title": "Objectif quotidien d'articles",
         "description": "Défiez-vous de lire un nombre spécifique d'articles chaque jour. Commencez petit et augmentez progressivement à mesure que vous gagnez en confiance.",
@@ -126,7 +126,7 @@
     "translate": "Traduire",
     "original": "Original",
     "save": "Sauvegarder l'article",
-    "unsave": "Retirer l'article",
+    "unsave": "Retirer des sauvegardés",
     "saved": "Article sauvegardé !",
     "unsaved": "Article retiré des sauvegardés"
   },
@@ -137,12 +137,56 @@
     "allCaughtUp": "Tout est à jour !",
     "readAllToday": "Vous avez lu tous les articles d'aujourd'hui",
     "showAll": "Afficher tous les articles",
-    "hideFinished": "Masquer les lus",
+    "hideFinished": "Masquer les terminés",
     "noImage": {
-      "mainichi": "L'article de Mainichi n'a pas d'image",
-      "nhk": "L'article de NHK n'a pas d'image",
+      "mainichi": "L'actualité Mainichi n'a pas d'image",
+      "nhk": "L'actualité NHK n'a pas d'image",
       "unknown": "La source inconnue n'a pas d'image",
       "worthReading": "le contenu vaut toujours la peine d'être lu"
+    }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "Afficher la liste des actualités",
+      "hide": "Masquer la liste des actualités"
+    },
+    "join": "Rejoindre",
+    "theme": {
+      "switchToLight": "Passer au mode clair",
+      "switchToDark": "Passer au mode sombre",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "menu": {
+      "allNews": "Toutes les actualités",
+      "settings": "Paramètres",
+      "admin": "Admin (restreint)",
+      "download": "Télécharger l'application",
+      "signOut": "Se déconnecter"
+    },
+    "update": {
+      "available": "Mise à jour disponible",
+      "new": "Nouveau",
+      "install": "Installer la dernière version d'EZJP News"
+    },
+    "profile": {
+      "setup": "Configurez votre nom d'utilisateur",
+      "required": "Requis",
+      "makeEasier": "Rendez votre profil plus facile à trouver et à partager",
+      "readingGoals": "Objectifs quotidiens de lecture",
+      "articles": "Articles",
+      "readingTime": "Temps de lecture",
+      "goalComplete": "Objectifs quotidiens atteints ! 🎉",
+      "goalExceeded": "Objectifs atteints ! Vous vous surpassez ! 🚀",
+      "almostThere": "Presque là ! {{remaining}} minutes de lecture restantes",
+      "keepGoing": "Continuez ! Plus que {{remaining}} articles",
+      "todayTarget": "Objectif du jour : {{articles}} articles et {{minutes}} minutes",
+      "extendStreak": "Prolongez votre série",
+      "startStreak": "Commencez votre série",
+      "days": "jours",
+      "day1": "Jour 1",
+      "keepStreak": "Lisez au moins un article pour maintenir votre série",
+      "finishedThisWeek": "terminés cette semaine"
     }
   }
 } 

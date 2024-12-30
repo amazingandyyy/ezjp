@@ -12,7 +12,7 @@
     "cancel": "Abbrechen",
     "loading": "Lädt...",
     "error": "Ein Fehler ist aufgetreten",
-    "success": "Erfolgreich!",
+    "success": "Erfolg!",
     "edit": "Bearbeiten",
     "required": "Erforderlich",
     "verified": "Verifiziert",
@@ -41,9 +41,9 @@
       "username": "Benutzername",
       "japaneseLevel": "Japanisch-Niveau",
       "googleAccount": "Google-Konto",
-      "accountSecured": "Ihr Konto ist mit Google-Anmeldung gesichert",
+      "accountSecured": "Ihr Konto ist mit Google Sign In gesichert",
       "selfIntroduction": "Selbstvorstellung",
-      "noIntroduction": "Keine Vorstellung vorhanden",
+      "noIntroduction": "Keine Selbstvorstellung",
       "duolingoProfile": "Duolingo-Profil",
       "noDuolingo": "Kein Duolingo-Profil verknüpft",
       "jlptLevels": {
@@ -54,12 +54,12 @@
         "n1": "N1 (Experte)",
         "native": "Muttersprachler",
         "descriptions": {
-          "n5": "Sehr neu in Japanisch. Kann vertraute, alltägliche Ausdrücke und sehr einfache Sätze verstehen und verwenden.",
-          "n4": "Grundlegendes Verständnis von Japanisch in Alltagssituationen. Kann einfache Texte lesen und langsamen Gesprächen folgen.",
-          "n3": "Verständnis von Japanisch in Alltagssituationen bis zu einem gewissen Grad. Kann Zeitungen mit grundlegendem Vokabular lesen.",
+          "n5": "Beginnt mit Japanisch. Kann alltägliche Ausdrücke und sehr grundlegende Sätze verstehen und verwenden.",
+          "n4": "Grundlegendes Verständnis des in Alltagssituationen verwendeten Japanisch. Kann einfache Texte lesen und langsamen Gesprächen folgen.",
+          "n3": "Verständnis des in Alltagssituationen verwendeten Japanisch bis zu einem gewissen Grad. Kann Zeitungen mit grundlegendem Vokabular lesen.",
           "n2": "Fähigkeit, Japanisch in Alltagssituationen und verschiedenen Umständen zu verstehen. Kann Zeitungen lesen und Fernsehnachrichten folgen.",
-          "n1": "Fähigkeit, Japanisch in verschiedenen Situationen zu verstehen. Kann Zeitungen und Zeitschriften fließend lesen.",
-          "native": "Muttersprachliche oder nahezu muttersprachliche Beherrschung des Japanischen."
+          "n1": "Fähigkeit, Japanisch in einer Vielzahl von Situationen zu verstehen. Kann Zeitungen und Zeitschriften fließend lesen.",
+          "native": "Muttersprachliche oder fast muttersprachliche Beherrschung des Japanischen."
         }
       }
     },
@@ -81,15 +81,15 @@
     },
     "goals": {
       "title": "Leseziele",
-      "description": "Legen Sie Ihre täglichen Leseziele fest und verfolgen Sie Ihren Fortschritt",
+      "description": "Legen Sie Ihre täglichen Leseziele fest und verfolgen Sie Ihre Fortschritte",
       "articles": {
         "title": "Tägliches Artikelziel",
-        "description": "Fordern Sie sich selbst heraus, täglich eine bestimmte Anzahl von Artikeln zu lesen. Beginnen Sie klein und steigern Sie sich allmählich, wenn Sie mehr Selbstvertrauen gewinnen.",
+        "description": "Fordern Sie sich heraus, jeden Tag eine bestimmte Anzahl von Artikeln zu lesen. Beginnen Sie mit wenigen und steigern Sie sich allmählich, wenn Sie mehr Selbstvertrauen gewinnen.",
         "current": "Artikel"
       },
       "time": {
         "title": "Tägliches Lesezeitenziel",
-        "description": "Reservieren Sie Zeit für Leseübungen. Selbst wenige Minuten konzentriertes Lesen pro Tag können Ihr Verständnis erheblich verbessern.",
+        "description": "Reservieren Sie Zeit für Leseübungen. Auch wenige Minuten konzentriertes Lesen jeden Tag können Ihr Verständnis erheblich verbessern.",
         "current": "Minuten",
         "custom": "Benutzerdefiniert"
       }
@@ -100,7 +100,7 @@
         "title": "Leseverlauf zurücksetzen",
         "description": "Löscht Ihren gesamten Verlauf gelesener Artikel und setzt die Lesestatistiken zurück. Diese Aktion kann nicht rückgängig gemacht werden.",
         "button": "Leseverlauf zurücksetzen",
-        "warning": "Warnung: Sie sind dabei, Ihren gesamten Leseverlauf zu löschen.\n\nDies umfasst:\n- Alle als gelesen markierten Artikel\n- Ihre Lesefortschrittsverfolgung\n- Ihre Streak-Aufzeichnungen (beste und aktuelle Streak)\n\nDiese Aktion ist PERMANENT und KANN NICHT rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "warning": "Warnung: Sie sind dabei, Ihren gesamten Leseverlauf zu löschen.\n\nDies umfasst:\n- Alle als abgeschlossen markierten Artikel\n- Ihre Lesefortschrittsverfolgung\n- Ihre Serien-Rekorde (sowohl beste als auch aktuelle Serie)\n\nDiese Aktion ist PERMANENT und KANN NICHT rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
         "confirmText": "leseverlauf zurücksetzen"
       },
       "savedArticles": {
@@ -126,7 +126,7 @@
     "translate": "Übersetzen",
     "original": "Original",
     "save": "Artikel speichern",
-    "unsave": "Artikel nicht mehr speichern",
+    "unsave": "Aus Gespeicherten entfernen",
     "saved": "Artikel gespeichert!",
     "unsaved": "Artikel aus Gespeicherten entfernt"
   },
@@ -134,15 +134,59 @@
     "title": "Alle Nachrichten",
     "todayNews": "Heutige Nachrichten",
     "previousNews": "Vorherige Nachrichten",
-    "allCaughtUp": "Alles erledigt!",
+    "allCaughtUp": "Alles aufgeholt!",
     "readAllToday": "Sie haben alle Artikel von heute gelesen",
     "showAll": "Alle Artikel anzeigen",
-    "hideFinished": "Gelesene ausblenden",
+    "hideFinished": "Abgeschlossene ausblenden",
     "noImage": {
       "mainichi": "Mainichi-Nachricht hat kein Bild",
       "nhk": "NHK-Nachricht hat kein Bild",
       "unknown": "Unbekannte Quelle hat kein Bild",
-      "worthReading": "der Inhalt ist trotzdem lesenswert"
+      "worthReading": "Inhalt ist trotzdem lesenswert"
+    }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "Nachrichtenliste anzeigen",
+      "hide": "Nachrichtenliste ausblenden"
+    },
+    "join": "Beitreten",
+    "theme": {
+      "switchToLight": "Zu hellem Design wechseln",
+      "switchToDark": "Zu dunklem Design wechseln",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "menu": {
+      "allNews": "Alle Nachrichten",
+      "settings": "Einstellungen",
+      "admin": "Admin (eingeschränkt)",
+      "download": "App herunterladen",
+      "signOut": "Abmelden"
+    },
+    "update": {
+      "available": "Update verfügbar",
+      "new": "Neu",
+      "install": "Neueste Version von EZJP News installieren"
+    },
+    "profile": {
+      "setup": "Legen Sie Ihren Benutzernamen fest",
+      "required": "Erforderlich",
+      "makeEasier": "Machen Sie Ihr Profil leichter auffindbar und teilbar",
+      "readingGoals": "Tägliche Leseziele",
+      "articles": "Artikel",
+      "readingTime": "Lesezeit",
+      "goalComplete": "Tagesziele erreicht! 🎉",
+      "goalExceeded": "Ziele erreicht! Sie übertreffen sich selbst! 🚀",
+      "almostThere": "Fast geschafft! Noch {{remaining}} Minuten Lesezeit",
+      "keepGoing": "Weiter so! Noch {{remaining}} Artikel",
+      "todayTarget": "Heutiges Ziel: {{articles}} Artikel und {{minutes}} Minuten",
+      "extendStreak": "Serie verlängern",
+      "startStreak": "Serie beginnen",
+      "days": "Tage",
+      "day1": "Tag 1",
+      "keepStreak": "Lesen Sie mindestens einen Artikel, um Ihre Serie fortzusetzen",
+      "finishedThisWeek": "diese Woche abgeschlossen"
     }
   }
 } 

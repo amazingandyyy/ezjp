@@ -13,14 +13,14 @@
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
     "success": "성공!",
-    "edit": "수정",
+    "edit": "편집",
     "required": "필수",
     "verified": "인증됨",
-    "noUsername": "사용자 이름 없음",
+    "noUsername": "사용자 이름이 설정되지 않음",
     "setUsername": "사용자 이름 설정",
     "viewProfile": "프로필 보기",
     "checkingUpdates": "업데이트 확인 중...",
-    "upToDate": "최신 버전",
+    "upToDate": "최신 버전입니다",
     "updateAvailable": "업데이트 가능",
     "checkForUpdates": "업데이트 확인",
     "installUpdate": "업데이트 설치",
@@ -41,11 +41,11 @@
       "username": "사용자 이름",
       "japaneseLevel": "일본어 수준",
       "googleAccount": "구글 계정",
-      "accountSecured": "구글 로그인으로 계정이 보호되고 있습니다",
+      "accountSecured": "구글 로그인으로 보호된 계정입니다",
       "selfIntroduction": "자기소개",
-      "noIntroduction": "자기소개가 없습니다",
+      "noIntroduction": "자기소개가 설정되지 않음",
       "duolingoProfile": "듀오링고 프로필",
-      "noDuolingo": "연결된 듀오링고 프로필이 없습니다",
+      "noDuolingo": "듀오링고 프로필이 연결되지 않음",
       "jlptLevels": {
         "n5": "N5 (초급)",
         "n4": "N4 (기초)",
@@ -54,12 +54,12 @@
         "n1": "N1 (최상급)",
         "native": "원어민",
         "descriptions": {
-          "n5": "일본어를 처음 배우는 단계. 일상적인 표현과 매우 기본적인 문장을 이해하고 사용할 수 있습니다.",
-          "n4": "일상적인 상황에서 사용되는 기본적인 일본어를 이해. 간단한 문장을 읽고 천천히 하는 대화를 따라갈 수 있습니다.",
+          "n5": "일본어를 막 시작한 단계. 일상적인 표현과 매우 기본적인 문구를 이해하고 사용할 수 있습니다.",
+          "n4": "일상적인 상황에서 사용되는 기본적인 일본어를 이해. 간단한 문장을 읽고 천천한 대화를 따라갈 수 있습니다.",
           "n3": "일상적인 상황에서 사용되는 일본어를 어느 정도 이해. 기본적인 어휘가 포함된 신문을 읽을 수 있습니다.",
           "n2": "일상적인 상황과 다양한 상황에서 사용되는 일본어를 이해. 신문을 읽고 TV 뉴스를 따라갈 수 있습니다.",
           "n1": "다양한 상황에서 사용되는 일본어를 이해. 신문과 잡지를 유창하게 읽을 수 있습니다.",
-          "native": "일본어 원어민 또는 그에 준하는 수준의 능력."
+          "native": "일본어 원어민 또는 그에 준하는 능력."
         }
       }
     },
@@ -68,7 +68,7 @@
       "interface": "인터페이스 언어",
       "interfaceDescription": "애플리케이션 인터페이스에 사용할 언어를 선택하세요",
       "translation": "번역 언어",
-      "translationDescription": "기사 번역에 사용할 선호 언어를 선택하세요"
+      "translationDescription": "기사 번역에 사용할 언어를 선택하세요"
     },
     "appearance": {
       "title": "외관",
@@ -84,12 +84,12 @@
       "description": "일일 독서 목표를 설정하고 진행 상황을 추적하세요",
       "articles": {
         "title": "일일 기사 목표",
-        "description": "매일 특정 수의 기사를 읽는 도전을 해보세요. 작은 수에서 시작하여 자신감이 생기면 점차 늘려가세요.",
+        "description": "매일 읽을 기사 수를 설정하세요. 적은 수에서 시작하여 자신감이 생기면 점차 늘려가세요.",
         "current": "기사"
       },
       "time": {
         "title": "일일 독서 시간 목표",
-        "description": "독서 연습을 위한 시간을 확보하세요. 매일 몇 분이라도 집중해서 읽으면 이해력이 크게 향상될 수 있습니다.",
+        "description": "독서 연습을 위한 시간을 확보하세요. 매일 몇 분이라도 집중해서 읽으면 이해력이 크게 향상될니다.",
         "current": "분",
         "custom": "사용자 지정"
       }
@@ -100,12 +100,12 @@
         "title": "독서 기록 초기화",
         "description": "완료한 기사 기록과 독서 통계를 모두 삭제합니다. 이 작업은 취소할 수 없습니다.",
         "button": "독서 기록 초기화",
-        "warning": "경고: 모든 독서 기록을 삭제하려고 합니다.\n\n다음이 포함됩니다:\n- 완료로 표시된 모든 기사\n- 독서 진행 상황 추적\n- 연속 기록 (최고 기록과 현재 기록 모두)\n\n이 작업은 영구적이며 취소할 수 없습니다. 계속하시겠습니까?",
+        "warning": "경고: 모든 독서 기록을 삭제하려고 합니다.\n\n다음이 포함됩니다:\n- 완료로 표시된 모든 기사\n- 독서 진행 상황 추적\n- 연속 기록 (최고 기록과 현재 기록)\n\n이 작업은 영구적이며 취소할 수 없습니다. 계속하시겠습니까?",
         "confirmText": "독서 기록 초기화"
       },
       "savedArticles": {
         "title": "저장된 기사 초기화",
-        "description": "저장된 모든 기사를 삭제합니다. 이 작업은 취소할 수 없습니다.",
+        "description": "저장한 모든 기사를 삭제합니다. 이 작업은 취소할 수 없습니다.",
         "button": "저장된 기사 초기화",
         "warning": "경고: 저장된 모든 기사를 삭제하려고 합니다.\n\n다음이 포함됩니다:\n- 나중에 읽기 위해 저장한 모든 기사\n- 저장된 기사\n\n이 작업은 영구적이며 취소할 수 없습니다. 계속하시겠습니까?",
         "confirmText": "저장된 기사 초기화"
@@ -117,7 +117,7 @@
       "version": "버전",
       "update": "업데이트 가능",
       "updateNow": "지금 업데이트",
-      "updateDescription": "최신 기능, 개선 사항 및 버그 수정을 받으려면 지금 업데이트하세요."
+      "updateDescription": "최신 기능, 개선 사항 및 버그 수정을 적용하려면 업데이트하세요."
     }
   },
   "reader": {
@@ -128,7 +128,7 @@
     "save": "기사 저장",
     "unsave": "기사 저장 취소",
     "saved": "기사가 저장되었습니다!",
-    "unsaved": "저장된 기사에서 제거되었습니다"
+    "unsaved": "기사가 저장 목록에서 제거되었습니다"
   },
   "explorer": {
     "title": "모든 뉴스",
@@ -136,13 +136,57 @@
     "previousNews": "이전 뉴스",
     "allCaughtUp": "모두 읽었습니다!",
     "readAllToday": "오늘의 모든 기사를 읽었습니다",
-    "showAll": "모든 기사 보기",
-    "hideFinished": "읽은 기사 숨기기",
+    "showAll": "모든 기사 표시",
+    "hideFinished": "완료된 기사 숨기기",
     "noImage": {
       "mainichi": "마이니치 뉴스에는 이미지가 없습니다",
       "nhk": "NHK 뉴스에는 이미지가 없습니다",
       "unknown": "알 수 없는 출처의 이미지가 없습니다",
       "worthReading": "내용은 읽을 가치가 있습니다"
+    }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "뉴스 목록 표시",
+      "hide": "뉴스 목록 숨기기"
+    },
+    "join": "가입하기",
+    "theme": {
+      "switchToLight": "라이트 모드로 전환",
+      "switchToDark": "다크 모드로 전환",
+      "light": "라이트",
+      "dark": "다크"
+    },
+    "menu": {
+      "allNews": "모든 뉴스",
+      "settings": "설정",
+      "admin": "관리자 (제한됨)",
+      "download": "앱 다운로드",
+      "signOut": "로그아웃"
+    },
+    "update": {
+      "available": "업데이트 가능",
+      "new": "신규",
+      "install": "EZJP 뉴스의 최신 버전 설치"
+    },
+    "profile": {
+      "setup": "사용자 이름 설정",
+      "required": "필수",
+      "makeEasier": "프로필을 쉽게 찾고 공유할 수 있게 합니다",
+      "readingGoals": "오늘의 독서 목표",
+      "articles": "기사",
+      "readingTime": "독서 시간",
+      "goalComplete": "오늘의 목표 달성! 🎉",
+      "goalExceeded": "목표 달성! 더 높이 도전하세요! 🚀",
+      "almostThere": "거의 다 왔어요! {{remaining}}분 남았습니다",
+      "keepGoing": "계속 하세요! {{remaining}}개의 기사가 남았습니다",
+      "todayTarget": "오늘의 목표: {{articles}}개의 기사와 {{minutes}}분",
+      "extendStreak": "연속 기록 이어가기",
+      "startStreak": "연속 기록 시작하기",
+      "days": "일",
+      "day1": "1일차",
+      "keepStreak": "연속 기록을 유지하려면 최소 1개의 기사를 읽으세요",
+      "finishedThisWeek": "이번 주에 완료"
     }
   }
 } 

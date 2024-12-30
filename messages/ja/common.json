@@ -144,5 +144,49 @@
       "unknown": "この記事には画像がありません",
       "worthReading": "中身は読む価値があります"
     }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "ニュース一覧を表示",
+      "hide": "ニュース一覧を非表示"
+    },
+    "join": "参加する",
+    "theme": {
+      "switchToLight": "ライトモードに切り替え",
+      "switchToDark": "ダークモードに切り替え",
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "menu": {
+      "allNews": "すべてのニュース",
+      "settings": "設定",
+      "admin": "管理者（制限付き）",
+      "download": "アプリをダウンロード",
+      "signOut": "ログアウト"
+    },
+    "update": {
+      "available": "アップデートが利用可能です",
+      "new": "新規",
+      "install": "EZJPニュースの最新バージョンをインストール"
+    },
+    "profile": {
+      "setup": "ユーザー名を設定",
+      "required": "必須",
+      "makeEasier": "プロフィールを見つけやすく、共有しやすくします",
+      "readingGoals": "今日の読書目標",
+      "articles": "記事",
+      "readingTime": "読書時間",
+      "goalComplete": "今日の目標達成！🎉",
+      "goalExceeded": "目標達成！さらに上を目指して！🚀",
+      "almostThere": "あと少し！残り{{remaining}}分の読書",
+      "keepGoing": "頑張って！あと{{remaining}}記事",
+      "todayTarget": "今日の目標：{{articles}}記事と{{minutes}}分",
+      "extendStreak": "継続記録を伸ばす",
+      "startStreak": "継続記録を始める",
+      "days": "日",
+      "day1": "1日目",
+      "keepStreak": "継続記録を保つために少なくとも1記事を読みましょう",
+      "finishedThisWeek": "今週読了"
+    }
   }
 } 

@@ -11,7 +11,7 @@
     "delete": "Eliminar",
     "cancel": "Cancelar",
     "loading": "Cargando...",
-    "error": "Se produjo un error",
+    "error": "Ha ocurrido un error",
     "success": "¡Éxito!",
     "edit": "Editar",
     "required": "Requerido",
@@ -54,11 +54,11 @@
         "n1": "N1 (Experto)",
         "native": "Nativo",
         "descriptions": {
-          "n5": "Muy nuevo en japonés. Puede entender y usar expresiones cotidianas familiares y frases muy básicas.",
+          "n5": "Empezando con japonés. Puede entender y usar expresiones cotidianas y frases muy básicas.",
           "n4": "Comprensión básica del japonés usado en situaciones cotidianas. Puede leer pasajes simples y seguir conversaciones lentas.",
           "n3": "Comprensión del japonés usado en situaciones cotidianas hasta cierto punto. Puede leer periódicos con vocabulario básico.",
           "n2": "Capacidad para entender japonés usado en situaciones cotidianas y en diversas circunstancias. Puede leer periódicos y seguir noticias de TV.",
-          "n1": "Capacidad para entender japonés usado en diversas circunstancias. Puede leer periódicos y revistas con fluidez.",
+          "n1": "Capacidad para entender japonés usado en una variedad de circunstancias. Puede leer periódicos y revistas con fluidez.",
           "native": "Dominio nativo o casi nativo del japonés."
         }
       }
@@ -89,7 +89,7 @@
       },
       "time": {
         "title": "Objetivo diario de tiempo de lectura",
-        "description": "Reserva tiempo dedicado para la práctica de lectura. Incluso unos minutos de lectura concentrada cada día pueden mejorar significativamente tu comprensión.",
+        "description": "Reserva tiempo dedicado para la práctica de lectura. Incluso unos pocos minutos de lectura concentrada cada día pueden mejorar significativamente tu comprensión.",
         "current": "minutos",
         "custom": "Personalizado"
       }
@@ -100,14 +100,14 @@
         "title": "Restablecer historial de lectura",
         "description": "Elimina todo tu historial de artículos terminados y restablece las estadísticas de lectura. Esta acción no se puede deshacer.",
         "button": "Restablecer historial de lectura",
-        "warning": "Advertencia: Estás a punto de eliminar todo tu historial de lectura.\n\nEsto incluye:\n- Todos los artículos marcados como terminados\n- Tu seguimiento de progreso de lectura\n- Tus registros de racha (tanto la mejor como la actual)\n\nEsta acción es PERMANENTE y NO SE PUEDE deshacer. ¿Estás seguro de que deseas continuar?",
+        "warning": "Advertencia: Estás a punto de eliminar todo tu historial de lectura.\n\nEsto incluye:\n- Todos los artículos marcados como terminados\n- Tu seguimiento de progreso de lectura\n- Tus registros de racha (tanto la mejor como la actual)\n\nEsta acción es PERMANENTE y NO se puede deshacer. ¿Estás seguro de que quieres continuar?",
         "confirmText": "restablecer historial de lectura"
       },
       "savedArticles": {
         "title": "Restablecer artículos guardados",
         "description": "Elimina todos tus artículos guardados. Esta acción no se puede deshacer.",
         "button": "Restablecer artículos guardados",
-        "warning": "Advertencia: Estás a punto de eliminar todos tus artículos guardados.\n\nEsto incluye:\n- Todos los artículos que has guardado para más tarde\n- Tus artículos guardados\n\nEsta acción es PERMANENTE y NO SE PUEDE deshacer. ¿Estás seguro de que deseas continuar?",
+        "warning": "Advertencia: Estás a punto de eliminar todos tus artículos guardados.\n\nEsto incluye:\n- Todos los artículos que has guardado para más tarde\n- Tus artículos guardados\n\nEsta acción es PERMANENTE y NO se puede deshacer. ¿Estás seguro de que quieres continuar?",
         "confirmText": "restablecer artículos guardados"
       }
     },
@@ -134,15 +134,59 @@
     "title": "Todas las noticias",
     "todayNews": "Noticias de hoy",
     "previousNews": "Noticias anteriores",
-    "allCaughtUp": "¡Todo al día!",
+    "allCaughtUp": "¡Al día!",
     "readAllToday": "Has leído todos los artículos de hoy",
     "showAll": "Mostrar todos los artículos",
-    "hideFinished": "Ocultar leídos",
+    "hideFinished": "Ocultar terminados",
     "noImage": {
       "mainichi": "La noticia de Mainichi no tiene imagen",
       "nhk": "La noticia de NHK no tiene imagen",
       "unknown": "La fuente desconocida no tiene imagen",
       "worthReading": "el contenido aún vale la pena leerlo"
+    }
+  },
+  "navbar": {
+    "toggleNewsList": {
+      "show": "Mostrar lista de noticias",
+      "hide": "Ocultar lista de noticias"
+    },
+    "join": "Unirse",
+    "theme": {
+      "switchToLight": "Cambiar a modo claro",
+      "switchToDark": "Cambiar a modo oscuro",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "menu": {
+      "allNews": "Todas las noticias",
+      "settings": "Configuración",
+      "admin": "Administrador (restringido)",
+      "download": "Descargar aplicación",
+      "signOut": "Cerrar sesión"
+    },
+    "update": {
+      "available": "Actualización disponible",
+      "new": "Nuevo",
+      "install": "Instalar la última versión de EZJP News"
+    },
+    "profile": {
+      "setup": "Configura tu nombre de usuario",
+      "required": "Requerido",
+      "makeEasier": "Haz que tu perfil sea más fácil de encontrar y compartir",
+      "readingGoals": "Objetivos diarios de lectura",
+      "articles": "Artículos",
+      "readingTime": "Tiempo de lectura",
+      "goalComplete": "¡Objetivos diarios completados! 🎉",
+      "goalExceeded": "¡Objetivos completados! ¡Superándote! 🚀",
+      "almostThere": "¡Casi ahí! {{remaining}} minutos más de lectura",
+      "keepGoing": "¡Sigue así! {{remaining}} artículos más para terminar",
+      "todayTarget": "Objetivo de hoy: {{articles}} artículos y {{minutes}} minutos",
+      "extendStreak": "Extiende tu racha",
+      "startStreak": "Comienza tu racha",
+      "days": "días",
+      "day1": "Día 1",
+      "keepStreak": "Lee al menos un artículo para mantener tu racha",
+      "finishedThisWeek": "terminados esta semana"
     }
   }
 } 
