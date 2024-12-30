@@ -73,10 +73,9 @@
     "appearance": {
       "title": "외관",
       "theme": {
-        "title": "테마",
+        "title": "테면 모드",
         "light": "라이트",
-        "dark": "다크",
-        "system": "시스템"
+        "dark": "다크"
       }
     },
     "goals": {
@@ -157,6 +156,31 @@
       "translationFailed": "텍스트 번역 실패",
       "contentUnavailable": "기사 내용을 사용할 수 없습니다",
       "contentRemoved": "이 기사가 삭제되었거나 더 이상 접근할 수 없습니다"
+    },
+    "preferences": {
+      "title": "기사 리더 설정",
+      "fontSize": "글자 크기",
+      "furigana": "후리가나",
+      "furiganaToggle": {
+        "show": "후리가나 표시",
+        "hide": "후리가나 숨기기",
+        "hover": "마우스 오버 시 표시"
+      },
+      "readingSpeed": "읽기 속도",
+      "speeds": {
+        "slow": "느리게",
+        "relaxed": "여유롭게",
+        "normal": "보통",
+        "fast": "빠르게",
+        "veryFast": "매우 빠르게"
+      },
+      "theme": {
+        "title": "테마",
+        "light": "라이트",
+        "dark": "다크"
+      },
+      "voice": "음성",
+      "updating": "설정 업데이트 중..."
     }
   },
   "explorer": {

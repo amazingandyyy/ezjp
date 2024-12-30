@@ -2785,7 +2785,7 @@ function NewsReaderContent() {
                   : "bg-white text-gray-600"
               }`}
             >
-              Article Reader Preference
+              {t('reader.preferences.title')}
             </div>
           </button>
 
@@ -2810,7 +2810,7 @@ function NewsReaderContent() {
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
-                    Font Size
+                    {t('reader.preferences.fontSize')}
                     <LoadingIndicator
                       loading={updatingPreferences.font_size}
                       theme={preferenceState.theme}
@@ -2856,7 +2856,7 @@ function NewsReaderContent() {
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
-                    Speed
+                    {t('reader.preferences.readingSpeed')}
                     <LoadingIndicator
                       loading={updatingPreferences.preferred_speed}
                       theme={preferenceState.theme}
@@ -2905,11 +2905,11 @@ function NewsReaderContent() {
                       {/* Dots */}
                       <div className="absolute inset-x-0 flex justify-between px-1 pointer-events-none">
                         {[
-                          { speed: 0.7, label: "Slow" },
-                          { speed: 0.85, label: "Relaxed" },
-                          { speed: 1.0, label: "Normal" },
-                          { speed: 1.15, label: "Fast" },
-                          { speed: 1.3, label: "Very Fast" },
+                          { speed: 0.7, label: t('reader.preferences.speeds.slow') },
+                          { speed: 0.85, label: t('reader.preferences.speeds.relaxed') },
+                          { speed: 1.0, label: t('reader.preferences.speeds.normal') },
+                          { speed: 1.15, label: t('reader.preferences.speeds.fast') },
+                          { speed: 1.3, label: t('reader.preferences.speeds.veryFast') }
                         ].map(({ speed, label }) => (
                           <div
                             key={speed}
@@ -2933,11 +2933,11 @@ function NewsReaderContent() {
                     {/* Labels */}
                     <div className="flex justify-between px-1">
                       {[
-                        { speed: 0.7, label: "Slow" },
-                        { speed: 0.85, label: "Relaxed" },
-                        { speed: 1.0, label: "Normal" },
-                        { speed: 1.15, label: "Fast" },
-                        { speed: 1.3, label: "Very Fast" },
+                        { speed: 0.7, label: t('reader.preferences.speeds.slow') },
+                        { speed: 0.85, label: t('reader.preferences.speeds.relaxed') },
+                        { speed: 1.0, label: t('reader.preferences.speeds.normal') },
+                        { speed: 1.15, label: t('reader.preferences.speeds.fast') },
+                        { speed: 1.3, label: t('reader.preferences.speeds.veryFast') }
                       ].map(({ speed, label }) => (
                         <div key={speed} className="flex flex-col items-center">
                           <span
@@ -2981,7 +2981,7 @@ function NewsReaderContent() {
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
-                    Theme
+                    {t('reader.preferences.theme.title')}
                     <LoadingIndicator
                       loading={updatingPreferences.theme}
                       theme={preferenceState.theme}
@@ -2989,8 +2989,8 @@ function NewsReaderContent() {
                   </label>
                   <div className="flex gap-1">
                     {[
-                      { id: "light", icon: <FaSun />, title: "Light" },
-                      { id: "dark", icon: <FaMoon />, title: "Dark" },
+                      { id: "light", icon: <FaSun />, title: t('reader.preferences.theme.light') },
+                      { id: "dark", icon: <FaMoon />, title: t('reader.preferences.theme.dark') },
                     ].map((themeOption) => (
                       <button
                         key={themeOption.id}
@@ -3028,7 +3028,7 @@ function NewsReaderContent() {
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
-                    Furigana
+                    {t('reader.preferences.furigana')}
                     <LoadingIndicator
                       loading={updatingPreferences.show_furigana}
                       theme={preferenceState.theme}
@@ -3047,38 +3047,20 @@ function NewsReaderContent() {
                         : ""
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-base sm:text-sm">
-                        {preferenceState.show_furigana ? "Visible" : "Hidden"}
-                      </span>
-                      <ruby className="text-base sm:text-sm">
-                        日本語
-                        {preferenceState.show_furigana && (
-                          <rt className="transition-opacity duration-200">
-                            にほんご
-                          </rt>
-                        )}
-                      </ruby>
-                    </div>
-                    <div
-                      className={`relative inline-flex h-7 sm:h-6 w-12 sm:w-11 items-center rounded-full transition-colors duration-200 ease-in-out border ${
-                        preferenceState.show_furigana
-                          ? preferenceState.theme === "dark"
-                            ? "bg-green-500/20 border-green-500/30"
-                            : "bg-green-50 border-green-500/30"
-                          : preferenceState.theme === "dark"
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-gray-200 border-gray-300"
+                    <span>
+                      {preferenceState.show_furigana
+                        ? t('reader.preferences.furiganaToggle.hide')
+                        : t('reader.preferences.furiganaToggle.show')}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        preferenceState.theme === "dark"
+                          ? "text-gray-500"
+                          : "text-gray-400"
                       }`}
                     >
-                      <span
-                        className={`inline-block h-5 sm:h-4 w-5 sm:w-4 transform rounded-full transition-transform duration-200 ease-in-out border ${
-                          preferenceState.show_furigana
-                            ? "translate-x-6 bg-green-600 border-green-500"
-                            : "translate-x-1 bg-white border-gray-300"
-                        } shadow-sm`}
-                      />
-                    </div>
+                      {t('reader.preferences.furiganaToggle.hover')}
+                    </span>
                   </button>
                 </div>
 
@@ -3091,7 +3073,7 @@ function NewsReaderContent() {
                         : "[color-scheme:light] text-[rgb(19,31,36)]"
                     }`}
                   >
-                    Voice
+                    {t('reader.preferences.voice')}
                     <LoadingIndicator
                       loading={updatingPreferences.preferred_voice}
                       theme={preferenceState.theme}

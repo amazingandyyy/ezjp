@@ -73,7 +73,7 @@
     "appearance": {
       "title": "外観",
       "theme": {
-        "title": "テーマ",
+        "title": "表示モード",
         "light": "ライト",
         "dark": "ダーク",
         "system": "システム"
@@ -157,6 +157,31 @@
       "translationFailed": "テキストの翻訳に失敗しました",
       "contentUnavailable": "記事の内容が利用できません",
       "contentRemoved": "この記事は削除されたか、アクセスできなくなった可能性があります"
+    },
+    "preferences": {
+      "title": "記事リーダー設定",
+      "fontSize": "文字サイズ",
+      "furigana": "ふりがな",
+      "furiganaToggle": {
+        "show": "ふりがなを表示",
+        "hide": "ふりがなを非表示",
+        "hover": "ホバーで表示"
+      },
+      "readingSpeed": "読み上げ速度",
+      "speeds": {
+        "slow": "遅い",
+        "relaxed": "ゆっくり",
+        "normal": "普通",
+        "fast": "速い",
+        "veryFast": "とても速い"
+      },
+      "theme": {
+        "title": "表示モード",
+        "light": "ライト",
+        "dark": "ダーク"
+      },
+      "voice": "音声",
+      "updating": "設定を更新中..."
     }
   },
   "explorer": {

@@ -1,9 +1,11 @@
 import { REPEAT_MODES } from '../page';
 import { FaHeart } from 'react-icons/fa';
 import { useState } from 'react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 // Add LoadingIndicator component before NewsReaderContent
 const LoadingIndicator = ({ loading, theme }) => {
+  const { t } = useTranslation();
   if (!loading) return null;
   
   const spinnerColors = {
@@ -21,7 +23,7 @@ const LoadingIndicator = ({ loading, theme }) => {
       <div className="w-4 h-4 relative">
         <div className={`absolute inset-0 rounded-full border-2 animate-spin ${spinnerColors[theme]}`}></div>
       </div>
-      <span className={`text-xs ${textColors[theme]}`}>Updating preference...</span>
+      <span className={`text-xs ${textColors[theme]}`}>{t('reader.preferences.updating')}</span>
     </div>
   );
 };

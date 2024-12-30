@@ -157,6 +157,31 @@
       "translationFailed": "Error al traducir el texto",
       "contentUnavailable": "Contenido del artículo no disponible",
       "contentRemoved": "Este artículo puede haber sido eliminado o ya no es accesible"
+    },
+    "preferences": {
+      "title": "Preferencias del lector de artículos",
+      "fontSize": "Tamaño de fuente",
+      "furigana": "Furigana",
+      "furiganaToggle": {
+        "show": "Mostrar furigana",
+        "hide": "Ocultar furigana",
+        "hover": "Mostrar al pasar el cursor"
+      },
+      "readingSpeed": "Velocidad de lectura",
+      "speeds": {
+        "slow": "Lento",
+        "relaxed": "Relajado",
+        "normal": "Normal",
+        "fast": "Rápido",
+        "veryFast": "Muy rápido"
+      },
+      "theme": {
+        "title": "Tema",
+        "light": "Claro",
+        "dark": "Oscuro"
+      },
+      "voice": "Voz",
+      "updating": "Actualizando preferencias..."
     }
   },
   "explorer": {

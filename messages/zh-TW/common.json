@@ -73,7 +73,7 @@
     "appearance": {
       "title": "外觀",
       "theme": {
-        "title": "主題",
+        "title": "外觀模式",
         "light": "淺色",
         "dark": "深色",
         "system": "系統"
@@ -157,6 +157,31 @@
       "translationFailed": "文字翻譯失敗",
       "contentUnavailable": "文章內容不可用",
       "contentRemoved": "此文章可能已被移除或無法訪問"
+    },
+    "preferences": {
+      "title": "文章閱讀器設定",
+      "fontSize": "字體大小",
+      "furigana": "振假名",
+      "furiganaToggle": {
+        "show": "顯示振假名",
+        "hide": "隱藏振假名",
+        "hover": "滑鼠懸停時顯示"
+      },
+      "readingSpeed": "閱讀速度",
+      "speeds": {
+        "slow": "慢速",
+        "relaxed": "輕鬆",
+        "normal": "正常",
+        "fast": "快速",
+        "veryFast": "極快"
+      },
+      "theme": {
+        "title": "外觀",
+        "light": "淺色",
+        "dark": "深色"
+      },
+      "voice": "語音",
+      "updating": "更新設定中..."
     }
   },
   "explorer": {

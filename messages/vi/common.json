@@ -73,7 +73,7 @@
     "appearance": {
       "title": "Giao diện",
       "theme": {
-        "title": "Chủ đề",
+        "title": "Chế độ màu",
         "light": "Sáng",
         "dark": "Tối",
         "system": "Hệ thống"
@@ -157,6 +157,31 @@
       "translationFailed": "Không thể dịch văn bản",
       "contentUnavailable": "Nội dung bài viết không khả dụng",
       "contentRemoved": "Bài viết này có thể đã bị xóa hoặc không thể truy cập"
+    },
+    "preferences": {
+      "title": "Tùy chỉnh trình đọc bài viết",
+      "fontSize": "Cỡ chữ",
+      "furigana": "Furigana",
+      "furiganaToggle": {
+        "show": "Hiển furigana",
+        "hide": "Ẩn furigana",
+        "hover": "Hiện khi di chuột"
+      },
+      "readingSpeed": "Tốc độ đọc",
+      "speeds": {
+        "slow": "Chậm",
+        "relaxed": "Thư thả",
+        "normal": "Bình thường",
+        "fast": "Nhanh",
+        "veryFast": "Rất nhanh"
+      },
+      "theme": {
+        "title": "Giao diện",
+        "light": "Sáng",
+        "dark": "Tối"
+      },
+      "voice": "Giọng đọc",
+      "updating": "Đang cập nhật cài đặt..."
     }
   },
   "explorer": {

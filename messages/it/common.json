@@ -157,6 +157,31 @@
       "translationFailed": "Errore nella traduzione del testo",
       "contentUnavailable": "Contenuto dell'articolo non disponibile",
       "contentRemoved": "Questo articolo potrebbe essere stato rimosso o non è più accessibile"
+    },
+    "preferences": {
+      "title": "Preferenze lettore articoli",
+      "fontSize": "Dimensione del carattere",
+      "furigana": "Furigana",
+      "furiganaToggle": {
+        "show": "Mostra furigana",
+        "hide": "Nascondi furigana",
+        "hover": "Mostra al passaggio del mouse"
+      },
+      "readingSpeed": "Velocità di lettura",
+      "speeds": {
+        "slow": "Lento",
+        "relaxed": "Rilassato",
+        "normal": "Normale",
+        "fast": "Veloce",
+        "veryFast": "Molto veloce"
+      },
+      "theme": {
+        "title": "Tema",
+        "light": "Chiaro",
+        "dark": "Scuro"
+      },
+      "voice": "Voce",
+      "updating": "Aggiornamento delle preferenze..."
     }
   },
   "explorer": {

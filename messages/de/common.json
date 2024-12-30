@@ -157,6 +157,31 @@
       "translationFailed": "Fehler beim Übersetzen des Textes",
       "contentUnavailable": "Artikelinhalt nicht verfügbar",
       "contentRemoved": "Dieser Artikel wurde möglicherweise entfernt oder ist nicht mehr zugänglich"
+    },
+    "preferences": {
+      "title": "Artikel-Leseeinstellungen",
+      "fontSize": "Schriftgröße",
+      "furigana": "Furigana",
+      "furiganaToggle": {
+        "show": "Furigana anzeigen",
+        "hide": "Furigana ausblenden",
+        "hover": "Beim Überfahren anzeigen"
+      },
+      "readingSpeed": "Lesegeschwindigkeit",
+      "speeds": {
+        "slow": "Langsam",
+        "relaxed": "Entspannt",
+        "normal": "Normal",
+        "fast": "Schnell",
+        "veryFast": "Sehr schnell"
+      },
+      "theme": {
+        "title": "Design",
+        "light": "Hell",
+        "dark": "Dunkel"
+      },
+      "voice": "Stimme",
+      "updating": "Einstellungen werden aktualisiert..."
     }
   },
   "explorer": {
