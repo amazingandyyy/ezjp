@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
+import { marked } from 'marked';
 import { DEFAULT_READER_PREFERENCES } from '@/lib/constants';
 import { 
   FaPlay, 
@@ -1750,67 +1751,184 @@ function NewsReaderContent() {
               ${preferenceState.theme === "dark"
                 ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                 : "bg-green-50 text-green-700 hover:bg-green-100"
-              }`}
-            onClick={() => alert("Tutor feature coming soon!")}
+              }
+              ${loadingTutor[index] ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+            onClick={() => getTutorExplanation(sentenceToText(sentence), index)}
+            disabled={loadingTutor[index]}
           >
-            Tutor
-          </button>
-        </div>
-        
-        {/* Translation section */}
-        <div className={`mb-3 rounded-xl overflow-hidden ${
-          preferenceState.theme === "dark"
-            ? "bg-gray-800/30"
-            : "bg-gray-50"
-        }`}>
-          <div className={`p-6 ${
-            translations[index] 
-              ? preferenceState.theme === "dark"
-                ? "text-gray-200"
-                : "text-gray-700"
-              : preferenceState.theme === "dark"
-              ? "text-gray-400"
-              : "text-gray-500"
-          }`}>
-            {translations[index] ? (
-              <div className="space-y-3">
-                <div className={`text-sm font-medium ${
-                  preferenceState.theme === "dark"
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}>
-                  English Translation
+            {loadingTutor[index] ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 relative">
+                  <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                    preferenceState.theme === "dark"
+                      ? "border-green-400 border-r-transparent"
+                      : "border-green-700 border-r-transparent"
+                  }`}></div>
                 </div>
-                <div className={`${
-                  preferenceState.font_size === "medium"
-                    ? "text-base"
-                    : preferenceState.font_size === "large"
-                    ? "text-lg"
-                    : preferenceState.font_size === "x-large"
-                    ? "text-xl"
-                    : "text-2xl"
-                } leading-relaxed`}>
-                  {translations[index]}
-                </div>
+                <span>AI analyzing...</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
-                <span>Click the Translation button to see the English translation</span>
+                <span>AI Tutor</span>
               </div>
             )}
-          </div>
+          </button>
+        </div>
+        
+        {/* Translation section */}
+        <div className={`mb-3 rounded-xl ${
+          preferenceState.theme === "dark"
+            ? "bg-gray-800/30"
+            : "bg-gray-50"
+        }`}>
+          {translations[index] ? (
+            <div className="p-5 space-y-3">
+              <div className={`text-sm font-medium ${
+                preferenceState.theme === "dark"
+                  ? "text-gray-400"
+                  : "text-gray-500"
+              }`}>
+                English Translation
+              </div>
+              <div className={`${
+                preferenceState.font_size === "medium"
+                  ? "text-base"
+                  : preferenceState.font_size === "large"
+                  ? "text-lg"
+                  : preferenceState.font_size === "x-large"
+                  ? "text-xl"
+                  : "text-2xl"
+              } leading-relaxed tracking-wide`}>
+                {translations[index]}
+              </div>
+            </div>
+          ) : (
+            <div className={`flex items-center gap-2 p-5 ${
+              preferenceState.theme === "dark"
+                ? "text-gray-400"
+                : "text-gray-500"
+            }`}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span className="text-sm font-medium">Click translate to see english translation</span>
+            </div>
+          )}
         </div>
         <div className={`text-sm rounded-xl p-5 ${
           preferenceState.theme === "dark"
             ? "bg-gray-800/30"
             : "bg-gray-50"
         }`}>
-          <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-            AI tutor explanations will appear here
+          <div className={`prose ${preferenceState.theme === "dark" ? "prose-invert" : ""} max-w-none
+            prose-headings:font-bold prose-headings:tracking-tight
+            prose-h1:text-xl prose-h1:mt-0 prose-h1:mb-4 prose-h1:pb-2 prose-h1:border-b ${
+              preferenceState.theme === "dark" 
+                ? "prose-h1:border-gray-700" 
+                : "prose-h1:border-gray-200"
+            }
+            prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3
+            prose-p:text-base prose-p:leading-relaxed prose-p:my-3
+            prose-li:text-base prose-li:my-1
+            prose-strong:text-base prose-strong:font-semibold
+            prose-em:text-gray-500 prose-em:font-normal
+            [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
+            [&_td]:border [&_td]:p-2 [&_td]:text-sm [&_td]:align-middle
+            [&_th]:border [&_th]:p-2 [&_th]:text-sm [&_th]:font-bold [&_th]:align-middle
+            ${preferenceState.theme === "dark" 
+              ? "[&_td]:border-gray-700 [&_th]:border-gray-700 [&_th]:bg-gray-800/50"
+              : "[&_td]:border-gray-200 [&_th]:border-gray-200 [&_th]:bg-gray-100"}
+            [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-4
+            [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-4
+            [&_code]:text-sm [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded
+            ${preferenceState.theme === "dark"
+              ? "[&_code]:bg-gray-800 [&_code]:text-gray-200"
+              : "[&_code]:bg-gray-100 [&_code]:text-gray-800"}
+          `}>
+            {tutorExplanations[index] ? (
+              <div className="space-y-6">
+                {/* Translation section with no horizontal scroll */}
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight mb-3">Translation</h1>
+                  <div className="text-base leading-relaxed" dangerouslySetInnerHTML={{ 
+                    __html: marked(tutorExplanations[index].split('# Cultural Context')[0].replace('# Translation\n', '')) 
+                  }} />
+                </div>
+                
+                {/* Cultural Context section with no horizontal scroll */}
+                {tutorExplanations[index].includes('# Cultural Context') && (
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">Cultural Context</h1>
+                    <div className="text-base leading-relaxed" dangerouslySetInnerHTML={{ 
+                      __html: marked(
+                        tutorExplanations[index]
+                          .split('# Cultural Context')[1]
+                          .split('# Important Grammar Concepts')[0]
+                          .replace(/^\s*\n/gm, '')
+                      ) 
+                    }} />
+                  </div>
+                )}
+
+                {/* Important Grammar Concepts section with horizontal scroll if needed */}
+                {tutorExplanations[index].includes('# Important Grammar Concepts') && (
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">Important Grammar Concepts</h1>
+                    <div className="overflow-x-auto -mx-5">
+                      <div className="px-5 min-w-[320px]" dangerouslySetInnerHTML={{ 
+                        __html: marked(
+                          tutorExplanations[index]
+                            .split('# Important Grammar Concepts')[1]
+                            .split('# Key Vocabulary')[0]
+                            .replace(/^\s*\n/gm, '')
+                        ) 
+                      }} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Vocabulary section with horizontal scroll for table */}
+                {tutorExplanations[index].includes('# Key Vocabulary') && (
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight mb-3">Key Vocabulary</h1>
+                    <div className="overflow-x-auto -mx-5">
+                      <div className="px-5 min-w-[600px]" dangerouslySetInnerHTML={{ 
+                        __html: marked(
+                          tutorExplanations[index]
+                            .split('# Key Vocabulary')[1]
+                            .replace(/^\s*\n/gm, '')
+                        ) 
+                      }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className={`${preferenceState.theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+                {loadingTutor[index] ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>AI Tutor is analyzing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span>Click for AI Tutor analysis</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2191,6 +2309,8 @@ function NewsReaderContent() {
   // Add these state variables near other state declarations
   const [translations, setTranslations] = useState({});
   const [loadingTranslations, setLoadingTranslations] = useState({});
+  const [tutorExplanations, setTutorExplanations] = useState({});
+  const [loadingTutor, setLoadingTutor] = useState({});
 
   // Add this function near other utility functions
   const translateSentence = async (sentenceText, index) => {
@@ -2226,6 +2346,42 @@ function NewsReaderContent() {
       }));
     } finally {
       setLoadingTranslations(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  // Add this function near other utility functions
+  const getTutorExplanation = async (sentenceText, index) => {
+    if (tutorExplanations[index] || loadingTutor[index]) return;
+    
+    try {
+      setLoadingTutor(prev => ({ ...prev, [index]: true }));
+      
+      const response = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: sentenceText }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || error.error || 'Tutor analysis failed');
+      }
+
+      const data = await response.json();
+      setTutorExplanations(prev => ({
+        ...prev,
+        [index]: data.explanation
+      }));
+    } catch (error) {
+      console.error('Tutor error:', error);
+      setTutorExplanations(prev => ({
+        ...prev,
+        [index]: `Analysis error: ${error.message}`
+      }));
+    } finally {
+      setLoadingTutor(prev => ({ ...prev, [index]: false }));
     }
   };
 
@@ -3494,12 +3650,12 @@ function NewsReaderContent() {
                       key={pIndex}
                       className={`mb-6 px-2 py-1 rounded-md ${
                         preferenceState.font_size === "medium"
-                          ? "text-lg leading-relaxed"
+                          ? "text-lg"
                           : preferenceState.font_size === "large"
-                          ? "text-xl leading-relaxed"
+                          ? "text-xl"
                           : preferenceState.font_size === "x-large"
-                          ? "text-2xl leading-relaxed"
-                          : "text-3xl leading-relaxed"
+                          ? "text-2xl"
+                          : "text-3xl"
                       }`}
                     >
                       {sentences.map((sentence, sIndex) => {
