@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import {
   FaBook,
   FaUserCircle,
@@ -16,6 +16,7 @@ import Image from 'next/image';
 import useSystemStore from '@/lib/stores/system';
 import useStatsStore from '@/lib/stores/stats';
 import { supabase } from '@/lib/supabase';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 
 export default function Navbar({ 
   showSidebar, 
@@ -24,6 +25,7 @@ export default function Navbar({
   hideNewsListButton = false
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, profile, signInWithGoogle, signOut } = useAuth();
   const { showUpdatePrompt, applyUpdate } = useUpdate();
   const { version, fetchVersion } = useSystemStore();
@@ -32,6 +34,38 @@ export default function Navbar({
   const profileRef = useRef(null);
   const [showProfile, setShowProfile] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
+  const [handledLangParam, setHandledLangParam] = useState(false);
+
+  // Add language query parameter handler
+  useEffect(() => {
+    const lang = searchParams.get('lang');
+
+    if (lang && SUPPORTED_LANGUAGES[lang] && user && !handledLangParam && profile) {
+      // Only update if the language is different from the current one
+      if (profile.ui_language !== lang) {
+        const updateLanguage = async () => {
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .update({ ui_language: lang })
+              .eq('id', user.id);
+
+            if (error) throw error;
+            
+            // Remove the lang parameter and reload
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('lang');
+            window.location.href = newUrl.toString();
+          } catch (error) {
+            console.error('Error updating language:', error);
+          }
+        };
+
+        updateLanguage();
+      }
+      setHandledLangParam(true);
+    }
+  }, [user, searchParams, profile, handledLangParam]);
 
   // Update stats when profile is opened
   useEffect(() => {
