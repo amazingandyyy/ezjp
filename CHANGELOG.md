@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/amazingandyyy/ezjp/compare/v1.23.0...v1.24.0) (2024-12-30)
+
+
+### Features
+
+* integrate AI tutor functionality and update dependencies ([0695459](https://github.com/amazingandyyy/ezjp/commit/06954599f87ea0de5cee9ea8da1b7dadcc062666))
+
 # [1.23.0](https://github.com/amazingandyyy/ezjp/compare/v1.22.0...v1.23.0) (2024-12-30)
 
 
