@@ -1,3 +1,10 @@
+# [1.34.0](https://github.com/amazingandyyy/ezjp/compare/v1.33.0...v1.34.0) (2024-12-30)
+
+
+### Features
+
+* enhance Navbar localization and update translation files ([5d84a6d](https://github.com/amazingandyyy/ezjp/commit/5d84a6d02bc00c2354037fdd250ffbf6473fc103))
+
 # [1.33.0](https://github.com/amazingandyyy/ezjp/compare/v1.32.0...v1.33.0) (2024-12-30)
 
 
