@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
+import { createJSTDate } from '@/lib/utils/date';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -88,10 +89,19 @@ class NHKEasyNews {
     
     if (match) {
       const [_, year, month, day, hour, minute] = match;
-      return new Date(year, month - 1, day, hour, minute).toISOString();
+      return createJSTDate(parseInt(year), parseInt(month), parseInt(day), parseInt(hour), parseInt(minute)).toISOString();
     }
     
-    return new Date(dateText).toISOString();
+    // If no match, try to parse the date text directly
+    try {
+      const date = new Date(dateText);
+      if (!isNaN(date.getTime())) {
+        return createJSTDate(date.toISOString()).toISOString();
+      }
+    } catch (e) {
+      console.error('Error parsing date:', e);
+    }
+    return null;
   }
 
   static parseImages($) {
@@ -315,9 +325,28 @@ class MainichiMaisho {
     console.log('Parsing Mainichi date...');
     const dateElement = $('meta[name="firstcreate"]');
     console.log('Date element found:', dateElement.length > 0);
-    const date = dateElement.attr('content');
-    console.log('Parsed date:', date);
-    return date;
+    const dateStr = dateElement.attr('content');
+    console.log('Raw date string:', dateStr);
+    
+    if (!dateStr) return null;
+
+    // Parse the date string (expected format: YYYY-MM-DD HH:mm:ss)
+    const match = dateStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+    if (match) {
+      const [_, year, month, day, hour, minute] = match;
+      return createJSTDate(parseInt(year), parseInt(month), parseInt(day), parseInt(hour), parseInt(minute)).toISOString();
+    }
+    
+    // Fallback to direct parsing if format doesn't match
+    try {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        return createJSTDate(date.toISOString()).toISOString();
+      }
+    } catch (e) {
+      console.error('Error parsing Mainichi date:', e);
+    }
+    return null;
   }
 
   static parseImages($) {

@@ -5,60 +5,10 @@ import axios from "axios";
 import { FaHeart, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
+import useStatsStore from '@/lib/stores/stats';
+import { formatRelativeTime, formatJapaneseDate, createJSTDate } from '@/lib/utils/date';
+import { getNewsSource } from '@/lib/utils/urls';
 import Navbar from '../components/Navbar';
-
-// Add helper function to create JST date
-const createJSTDate = (isoString) => {
-  // Parse ISO string to UTC date
-  const date = new Date(isoString);
-  // Add 9 hours to convert UTC to JST
-  return new Date(date.getTime() + (9 * 60 * 60 * 1000));
-};
-
-const formatRelativeTime = (dateStr) => {
-  if (!dateStr) return '';
-  try {
-    // Create date in JST from ISO string
-    const jstDate = createJSTDate(dateStr);
-    const now = new Date();
-    const jstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-
-    // Debug log for date parsing
-    console.log('formatRelativeTime debug:', {
-      input: dateStr,
-      jstDate: jstDate.toISOString(),
-      localJstDate: jstDate.toString(),
-      jstNow: jstNow.toISOString(),
-      localNow: now.toString(),
-      isToday: isToday(dateStr)
-    });
-
-    const diffInMilliseconds = jstNow.getTime() - jstDate.getTime();
-    const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    // Calculate remainders
-    const remainingHours = Math.abs(diffInHours % 24);
-    const remainingMinutes = Math.abs(diffInMinutes % 60);
-
-    return diffInDays >= 7 
-      ? `${Math.floor(diffInDays / 7)}週間前`
-      : diffInDays > 0
-      ? `${diffInDays}日${remainingHours}時間前`
-      : remainingHours > 0
-      ? `${remainingHours}時間${remainingMinutes}分前`
-      : remainingMinutes > 0
-      ? `${remainingMinutes}分前`
-      : diffInSeconds > 0
-      ? '1分前'
-      : 'たった今';
-  } catch (e) {
-    console.error('Error formatting date:', e, dateStr);
-    return dateStr;
-  }
-};
 
 const isToday = (dateStr) => {
   if (!dateStr) return false;
@@ -66,7 +16,7 @@ const isToday = (dateStr) => {
     // Create date in JST from ISO string
     const jstDate = createJSTDate(dateStr);
     const now = new Date();
-    const jstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const jstNow = createJSTDate(now.toISOString());
 
     // Calculate time difference in hours
     const diffInMilliseconds = jstNow.getTime() - jstDate.getTime();
@@ -76,15 +26,6 @@ const isToday = (dateStr) => {
     return diffInHours < 24;
   } catch (e) {
     console.error('Error parsing date:', e, dateStr);
-    return false;
-  }
-};
-
-// Add isMainichiUrl helper function at the top level
-const isMainichiUrl = (url) => {
-  try {
-    return url?.includes('mainichi.jp');
-  } catch (e) {
     return false;
   }
 };
@@ -665,7 +606,19 @@ const NewsCard = ({ news, theme, finishedUrls, archivedUrls, onClick }) => {
             <div className={`text-center relative transition-all duration-300 group-hover:scale-[1.02] group-hover:text-gray-500 dark:group-hover:text-gray-300 ${
               theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
             }`}>
-              <p className="text-sm font-medium">{isMainichiUrl(news.url) ? 'Mainichi' : 'NHK'} news has no image</p>
+              <p className="text-sm font-medium">
+                {(() => {
+                  const source = getNewsSource(news.url);
+                  switch (source) {
+                    case 'mainichi':
+                      return 'Mainichi';
+                    case 'nhk':
+                      return 'NHK';
+                    default:
+                      return 'Unknown';
+                  }
+                })()} news has no image
+              </p>
               <p className="text-sm font-medium">content inside still worth reading</p>
             </div>
             <div className="absolute inset-0 bg-white/[0.02] dark:bg-black/[0.02] backdrop-blur-[0.2px] pointer-events-none transition-opacity duration-300 group-hover:opacity-75" />

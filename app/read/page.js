@@ -21,6 +21,7 @@ import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import useStatsStore from '@/lib/stores/stats';
 import { formatRelativeTime, formatJapaneseDate } from '@/lib/utils/date';
+import { getNewsSource, getHostname, isValidUrl } from '@/lib/utils/urls';
 
 // Add import for Navbar
 import Navbar from '../components/Navbar';
@@ -448,16 +449,7 @@ const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
   );
 };
 
-// Add this helper function to check if URL is from NHK
-const isNHKUrl = (url) => {
-  try {
-    return url?.includes('www3.nhk.or.jp');
-  } catch (e) {
-    return false;
-  }
-};
-
-// Update NHKLogo component to be smaller
+// Add NHKLogo component
 const NHKLogo = ({ className, theme }) => (
   <img 
     src="/icons/NHK_logo_2020.png" 
@@ -474,27 +466,6 @@ const MainichiLogo = ({ className, theme }) => (
     className={`h-4 w-auto ${className} ${theme === 'dark' ? 'brightness-[1.5] contrast-[1.2] grayscale invert opacity-90' : ''}`}
   />
 );
-
-// Add this helper function to check if URL is from Mainichi
-const isMainichiUrl = (url) => {
-  try {
-    return url?.includes('mainichi.jp');
-  } catch (e) {
-    return false;
-  }
-};
-
-// Add helper function to safely get hostname
-const getHostname = (url) => {
-  if (!url) return '';
-  try {
-    return new URL(url).hostname;
-  } catch (e) {
-    // If URL is invalid, try to extract domain using regex
-    const match = url.match(/^(?:https?:\/\/)?([^\/]+)/i);
-    return match ? match[1] : url;
-  }
-};
 
 // Add ProfileDropdown component near the top with other components
 const ProfileDropdown = ({ show, onClose, theme, user, profile, onSignOut }) => {
@@ -2730,13 +2701,9 @@ function NewsReaderContent() {
     fetchArticleId();
   }, [sourceUrl]);
 
-  // Add this near other state declarations
-  // const audioManager = useMemo(() => new AudioManager(), []);
-
   // Add cleanup
   useEffect(() => {
     return () => {
-      // audioManager.unload();
       // Clean up cached audio URLs
       Object.values(audioCache).forEach(url => {
         URL.revokeObjectURL(url);
@@ -3628,21 +3595,29 @@ function NewsReaderContent() {
                         className={`inline-flex items-center gap-1.5 min-w-0 truncate transition-all duration-200 hover:opacity-80`}
                         title={url ? getHostname(url) : "Open original article"}
                       >
-                        {isNHKUrl(url) ? (
-                          <NHKLogo 
-                            className="opacity-90 flex-shrink-0 transition-opacity duration-200" 
-                            theme={preferenceState.theme}
-                          />
-                        ) : isMainichiUrl(url) ? (
-                          <MainichiLogo 
-                            className="opacity-90 flex-shrink-0 transition-opacity duration-200" 
-                            theme={preferenceState.theme}
-                          />
-                        ) : (
-                          <FaExternalLinkAlt className="w-3 h-3 flex-shrink-0" />
-                        )}
+                        {(() => {
+                          const source = getNewsSource(url);
+                          switch (source) {
+                            case 'nhk':
+                              return <NHKLogo className="opacity-90 flex-shrink-0 transition-opacity duration-200" theme={preferenceState.theme} />;
+                            case 'mainichi':
+                              return <MainichiLogo className="opacity-90 flex-shrink-0 transition-opacity duration-200" theme={preferenceState.theme} />;
+                            default:
+                              return <FaExternalLinkAlt className="w-3 h-3 flex-shrink-0" />;
+                          }
+                        })()}
                         <span className="font-medium truncate">
-                          {isNHKUrl(url) ? "NEWS WEB EASY" : isMainichiUrl(url) ? "小学生新聞" : getHostname(url)}
+                          {(() => {
+                            const source = getNewsSource(url);
+                            switch (source) {
+                              case 'nhk':
+                                return "NEWS WEB EASY";
+                              case 'mainichi':
+                                return "小学生新聞";
+                              default:
+                                return getHostname(url);
+                            }
+                          })()}
                         </span>
                       </a>
                     </div>
@@ -3818,20 +3793,17 @@ function NewsReaderContent() {
                           ? "text-gray-500" 
                           : "text-gray-400"
                       }`}>
-                        {isNHKUrl(url) ? (
-                          <>
-                            Content copyright © {new Date().getFullYear()} NHK.
-                          </>
-                        ) : isMainichiUrl(url) ? (
-                          <>
-                            Content copyright © {new Date().getFullYear()} The Mainichi Newspapers. 
-                            All articles and photos on this site are protected by copyright law.
-                          </>
-                        ) : (
-                          <>
-                            Content copyright © {new Date().getFullYear()} {getHostname(url)}.
-                          </>
-                        )}
+                        {(() => {
+                          const source = getNewsSource(url);
+                          switch (source) {
+                            case 'nhk':
+                              return <>Content copyright © {new Date().getFullYear()} NHK.</>;
+                            case 'mainichi':
+                              return <>Content copyright © {new Date().getFullYear()} The Mainichi Newspapers. All articles and photos on this site are protected by copyright law.</>;
+                            default:
+                              return <>Content copyright © {new Date().getFullYear()} {getHostname(url)}.</>;
+                          }
+                        })()}
                         <a 
                           href={url} 
                           target="_blank" 
