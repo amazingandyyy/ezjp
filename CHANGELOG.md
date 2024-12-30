@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/amazingandyyy/ezjp/compare/v1.27.0...v1.28.0) (2024-12-30)
+
+
+### Features
+
+* support translation into multiple languages ([1551d77](https://github.com/amazingandyyy/ezjp/commit/1551d7765e8ca2ceae03128d2774a221432ef991))
+
 # [1.27.0](https://github.com/amazingandyyy/ezjp/compare/v1.26.0...v1.27.0) (2024-12-30)
 
 
