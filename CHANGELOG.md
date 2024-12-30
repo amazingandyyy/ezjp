@@ -1,3 +1,10 @@
+# [1.30.0](https://github.com/amazingandyyy/ezjp/compare/v1.29.0...v1.30.0) (2024-12-30)
+
+
+### Features
+
+* implement translation functionality in NewsList component ([e387c96](https://github.com/amazingandyyy/ezjp/commit/e387c963cb1cb9eb4d74f4ef8b0a8b71b67b4c40))
+
 # [1.29.0](https://github.com/amazingandyyy/ezjp/compare/v1.28.0...v1.29.0) (2024-12-30)
 
 
