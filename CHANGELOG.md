@@ -1,3 +1,10 @@
+## [1.31.1](https://github.com/amazingandyyy/ezjp/compare/v1.31.0...v1.31.1) (2024-12-30)
+
+
+### Bug Fixes
+
+* update translation keys for consistency across languages ([a9efaed](https://github.com/amazingandyyy/ezjp/commit/a9efaede85b29804f5562731df39508b121bc9e4))
+
 # [1.31.0](https://github.com/amazingandyyy/ezjp/compare/v1.30.0...v1.31.0) (2024-12-30)
 
 
