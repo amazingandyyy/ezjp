@@ -1,4 +1,3 @@
-import { formatJapaneseDate } from '@/lib/utils/date';
 import { REPEAT_MODES } from '../page';
 import { FaHeart } from 'react-icons/fa';
 import { useState } from 'react';
@@ -42,6 +41,19 @@ const RubyText = ({ part, preferenceState }) => {
   );
 };
 
+// Add this function near other utility functions
+  const renderTitle = (title) => {
+    if (!Array.isArray(title)) return null;
+    return title.map((part, index) => {
+      if (part.type === 'ruby') {
+        return <RubyText key={index} part={part} preferenceState={preferenceState} />;
+      } else if (part.type === 'text') {
+        return <span key={index}>{part.content}</span>;
+      }
+      return null;
+    });
+  };
+
 // Add helper function to process content
 const processContent = (content) => {
   if (!Array.isArray(content)) return [];
@@ -61,31 +73,6 @@ const processContent = (content) => {
     return null;
   }).filter(Boolean);
 };
-
-
-// Add helper function to render content
-const renderContent = (content) => {
-  if (!Array.isArray(content)) return null;
-  return content.map((paragraph, pIndex) => {
-    if (paragraph.type !== 'paragraph') return null;
-    return (
-      <p
-        key={pIndex}
-        className="mb-6"
-      >
-        {paragraph.content.map((part, index) => {
-          if (part.type === 'ruby') {
-            return <RubyText key={index} part={part} preferenceState={preferenceState} />;
-          } else if (part.type === 'text') {
-            return <span key={index}>{part.content}</span>;
-          }
-          return null;
-        })}
-      </p>
-    );
-  });
-};
-
 
 // Update RepeatIcon component
 const RepeatIcon = ({ className, mode, theme }) => {
@@ -435,5 +422,6 @@ export {
   MotivationalMessage,
   ConfirmationModal,
   NHKLogo,
-  MainichiLogo
+  MainichiLogo,
+  renderTitle
 }
