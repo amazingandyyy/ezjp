@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/amazingandyyy/ezjp/compare/v1.25.0...v1.26.0) (2024-12-30)
+
+
+### Features
+
+* enhance AI tutor functionality with follow-up questions and model tracking ([b95617e](https://github.com/amazingandyyy/ezjp/commit/b95617ea9773ebccd654fd639fb96db8eabb035b))
+
 # [1.25.0](https://github.com/amazingandyyy/ezjp/compare/v1.24.0...v1.25.0) (2024-12-30)
 
 
