@@ -129,7 +129,35 @@
     "save": "Sauvegarder l'article",
     "unsave": "Retirer des sauvegardés",
     "saved": "Article sauvegardé !",
-    "unsaved": "Article retiré des sauvegardés"
+    "unsaved": "Article retiré des sauvegardés",
+    "translationLanguage": "Langue de traduction",
+    "clickToTranslate": "Cliquez sur traduire pour voir la traduction",
+    "loadingVoices": "Chargement des voix...",
+    "markAsFinished": "Marquer comme terminé",
+    "finishedReading": "Lecture terminée",
+    "learningMode": {
+      "enable": "Activer le mode apprentissage",
+      "disable": "Désactiver le mode apprentissage"
+    },
+    "navigation": {
+      "previous": "Phrase précédente",
+      "next": "Phrase suivante"
+    },
+    "playback": {
+      "loading": "Chargement de la voix...",
+      "play": "Lire",
+      "pause": "Pause"
+    },
+    "repeat": {
+      "none": "Pas de répétition",
+      "one": "Répéter la phrase actuelle",
+      "all": "Répéter toutes les phrases"
+    },
+    "errors": {
+      "translationFailed": "Échec de la traduction du texte",
+      "contentUnavailable": "Contenu de l'article non disponible",
+      "contentRemoved": "Cet article a peut-être été supprimé ou n'est plus accessible"
+    }
   },
   "explorer": {
     "title": "Toutes les actualités",

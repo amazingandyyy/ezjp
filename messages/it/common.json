@@ -123,13 +123,41 @@
   },
   "reader": {
     "loading": "Caricamento articolo...",
-    "error": "Impossibile caricare l'articolo",
+    "error": "Errore nel caricamento dell'articolo",
     "translate": "Traduci",
     "original": "Originale",
     "save": "Salva articolo",
     "unsave": "Rimuovi dai salvati",
     "saved": "Articolo salvato!",
-    "unsaved": "Articolo rimosso dai salvati"
+    "unsaved": "Articolo rimosso dai salvati",
+    "translationLanguage": "Lingua di traduzione",
+    "clickToTranslate": "Clicca su traduci per vedere la traduzione",
+    "loadingVoices": "Caricamento voci...",
+    "markAsFinished": "Segna come letto",
+    "finishedReading": "Lettura completata",
+    "learningMode": {
+      "enable": "Attiva modalità apprendimento",
+      "disable": "Disattiva modalità apprendimento"
+    },
+    "navigation": {
+      "previous": "Frase precedente",
+      "next": "Frase successiva"
+    },
+    "playback": {
+      "loading": "Caricamento voce...",
+      "play": "Riproduci",
+      "pause": "Pausa"
+    },
+    "repeat": {
+      "none": "Nessuna ripetizione",
+      "one": "Ripeti frase corrente",
+      "all": "Ripeti tutte le frasi"
+    },
+    "errors": {
+      "translationFailed": "Errore nella traduzione del testo",
+      "contentUnavailable": "Contenuto dell'articolo non disponibile",
+      "contentRemoved": "Questo articolo potrebbe essere stato rimosso o non è più accessibile"
+    }
   },
   "explorer": {
     "title": "Tutte le notizie",

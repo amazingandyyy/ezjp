@@ -125,11 +125,39 @@
     "loading": "Đang tải bài viết...",
     "error": "Không thể tải bài viết",
     "translate": "Dịch",
-    "original": "Bản gốc",
+    "original": "Nguyên bản",
     "save": "Lưu bài viết",
     "unsave": "Bỏ lưu",
     "saved": "Đã lưu bài viết!",
-    "unsaved": "Đã xóa bài viết khỏi mục đã lưu"
+    "unsaved": "Đã xóa bài viết khỏi danh sách đã lưu",
+    "translationLanguage": "Ngôn ngữ dịch",
+    "clickToTranslate": "Nhấn nút dịch để xem bản dịch",
+    "loadingVoices": "Đang tải giọng đọc...",
+    "markAsFinished": "Đánh dấu đã đọc",
+    "finishedReading": "Đã đọc xong",
+    "learningMode": {
+      "enable": "Bật chế độ học tập",
+      "disable": "Tắt chế độ học tập"
+    },
+    "navigation": {
+      "previous": "Câu trước",
+      "next": "Câu tiếp theo"
+    },
+    "playback": {
+      "loading": "Đang tải giọng đọc...",
+      "play": "Phát",
+      "pause": "Tạm dừng"
+    },
+    "repeat": {
+      "none": "Không lặp lại",
+      "one": "Lặp lại câu hiện tại",
+      "all": "Lặp lại tất cả câu"
+    },
+    "errors": {
+      "translationFailed": "Không thể dịch văn bản",
+      "contentUnavailable": "Nội dung bài viết không khả dụng",
+      "contentRemoved": "Bài viết này có thể đã bị xóa hoặc không thể truy cập"
+    }
   },
   "explorer": {
     "title": "Tất cả tin tức",

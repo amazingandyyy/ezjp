@@ -122,14 +122,42 @@
     }
   },
   "reader": {
-    "loading": "載入文章中...",
-    "error": "無法載入文章",
+    "loading": "正在載入文章...",
+    "error": "載入文章失敗",
     "translate": "翻譯",
     "original": "原文",
     "save": "儲存文章",
-    "unsave": "取消儲存文章",
+    "unsave": "取消儲存",
     "saved": "文章已儲存！",
-    "unsaved": "文章已從已儲存中移除"
+    "unsaved": "文章已從儲存列表中移除",
+    "translationLanguage": "翻譯語言",
+    "clickToTranslate": "點擊翻譯查看譯文",
+    "loadingVoices": "正在載入語音...",
+    "markAsFinished": "標記為已讀",
+    "finishedReading": "已讀完",
+    "learningMode": {
+      "enable": "啟用學習模式",
+      "disable": "停用學習模式"
+    },
+    "navigation": {
+      "previous": "上一句",
+      "next": "下一句"
+    },
+    "playback": {
+      "loading": "正在載入語音...",
+      "play": "播放",
+      "pause": "暫停"
+    },
+    "repeat": {
+      "none": "不重複",
+      "one": "重複當前句子",
+      "all": "重複所有句子"
+    },
+    "errors": {
+      "translationFailed": "文字翻譯失敗",
+      "contentUnavailable": "文章內容不可用",
+      "contentRemoved": "此文章可能已被移除或無法訪問"
+    }
   },
   "explorer": {
     "title": "所有新聞",

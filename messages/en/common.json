@@ -127,9 +127,37 @@
     "translate": "Translate",
     "original": "Original",
     "save": "Save Article",
-    "unsave": "Unsave Article",
+    "unsave": "Remove from Saved",
     "saved": "Article saved!",
-    "unsaved": "Article removed from saved"
+    "unsaved": "Article removed from saved",
+    "translationLanguage": "Translation Language",
+    "clickToTranslate": "Click translate to see translation",
+    "loadingVoices": "Loading voices...",
+    "markAsFinished": "Mark as Finished",
+    "finishedReading": "Finished Reading",
+    "learningMode": {
+      "enable": "Enable Learning Mode",
+      "disable": "Disable Learning Mode"
+    },
+    "navigation": {
+      "previous": "Previous Sentence",
+      "next": "Next Sentence"
+    },
+    "playback": {
+      "loading": "Loading Voice...",
+      "play": "Play",
+      "pause": "Pause"
+    },
+    "repeat": {
+      "none": "No Repeat",
+      "one": "Repeat Current Sentence",
+      "all": "Repeat All Sentences"
+    },
+    "errors": {
+      "translationFailed": "Failed to translate text",
+      "contentUnavailable": "Article content not available",
+      "contentRemoved": "This article may have been removed or is no longer accessible"
+    }
   },
   "explorer": {
     "title": "All News",

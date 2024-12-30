@@ -2581,7 +2581,7 @@ function NewsReaderContent() {
       setTranslations(prev => ({ ...prev, [index]: translation }));
     } catch (error) {
       console.error('Translation error:', error);
-      setToastMessage('Failed to translate text');
+      setToastMessage(t('reader.errors.translationFailed'));
       setShowToast(true);
     } finally {
       setLoadingTranslations(prev => ({ ...prev, [index]: false }));
@@ -2702,7 +2702,7 @@ function NewsReaderContent() {
           : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
         }`}
       >
-        {isLearningMode ? "Disable Learning Mode" : "Enable Learning Mode"}
+        {isLearningMode ? t('reader.learningMode.disable') : t('reader.learningMode.enable')}
       </div>
     </div>
   );
@@ -3128,7 +3128,7 @@ function NewsReaderContent() {
                     ))}
                     {availableVoices.length === 0 && (
                       <option value="" disabled>
-                        Loading voices...
+                        {t('reader.loadingVoices')}
                       </option>
                     )}
                   </select>
@@ -3139,7 +3139,7 @@ function NewsReaderContent() {
                   <label className={`text-base sm:text-sm font-medium flex items-center ${
                     preferenceState.theme === "dark" ? "" : "[color-scheme:light] text-[rgb(19,31,36)]"
                   }`}>
-                    Translation Language
+                    {t('reader.translationLanguage')}
                     <LoadingIndicator
                       loading={updatingPreferences.preferred_translation_language}
                       theme={preferenceState.theme}
@@ -3760,67 +3760,24 @@ function NewsReaderContent() {
         <main className={mainContentClasses}>
           {loadingArticle ? (
             <div className="mt-16 animate-[pulse_1s_cubic-bezier(0.4,0,0.6,1)_infinite] space-y-8">
-              {/* Title placeholder */}
-              <div className="space-y-2">
-                <div className="h-8 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-4/5"></div>
-                <div className="h-4 bg-gray-100/80 dark:bg-gray-800/40 rounded w-32"></div>
-              </div>
-
-              {/* Image placeholder */}
-              <div className="m-0 aspect-video bg-gray-100/80 dark:bg-gray-800/40 rounded-lg max-w-xl mx-auto"></div>
-
-              {/* Progress bar placeholder */}
-              <div className="mt-6 flex items-center gap-3">
-                <div className="h-3 bg-gray-100/80 dark:bg-gray-800/40 rounded-full w-48"></div>
-                <div className="h-4 bg-gray-100/80 dark:bg-gray-800/40 rounded w-16"></div>
-              </div>
-
-              {/* Content paragraphs placeholder - reduced to 2 paragraphs */}
-              <div className="mt-8 space-y-6">
-                {[...Array(2)].map((_, i) => (
-                  <div key={i} className="space-y-3">
-                    <div className="h-6 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-full"></div>
-                    <div className="h-6 bg-gray-100/80 dark:bg-gray-800/40 rounded-lg w-11/12"></div>
-                  </div>
-                ))}
-              </div>
+              {t('reader.loading')}
             </div>
           ) : error ? (
             <div className="mt-8 mb-24 sm:mb-28 flex flex-col items-center justify-center gap-4">
-              <div
-                className={`p-3 rounded-full ${
-                  preferenceState.theme === "dark"
-                    ? "bg-gray-800"
-                    : "bg-gray-100"
-                }`}
-              >
-                <svg
-                  className={`w-6 h-6 ${
-                    preferenceState.theme === "dark"
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className={`text-lg font-medium ${
+                preferenceState.theme === "dark"
+                  ? "text-gray-300"
+                  : "text-gray-700"
+              }`}>
+                {t('reader.errors.contentUnavailable')}
               </div>
-              <div
-                className={`text-lg font-medium ${
-                  preferenceState.theme === "dark"
-                    ? "text-gray-300"
-                    : "text-gray-700"
-                }`}
-              >
-                {error}
-              </div>
+              <p className={`text-sm ${
+                preferenceState.theme === "dark"
+                  ? "text-gray-400"
+                  : "text-gray-500"
+              }`}>
+                {t('reader.errors.contentRemoved')}
+              </p>
             </div>
           ) : newsContent?.length > 0 ? (
             <div className="mt-4 p-0 rounded relative">
@@ -4150,9 +4107,7 @@ function NewsReaderContent() {
                                 />
                               </svg>
                               <span className="font-medium">
-                                {isFinished
-                                  ? "Finished Reading"
-                                  : "Mark as Finished"}
+                                {isFinished ? t('reader.finishedReading') : t('reader.markAsFinished')}
                               </span>
                             </>
                           )}
@@ -4326,13 +4281,12 @@ function NewsReaderContent() {
               <div
                 className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                ${
-                  preferenceState.theme === "dark"
-                    ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
-                    : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+                ${preferenceState.theme === "dark"
+                  ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+                  : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
                 }`}
               >
-                {isArchived ? "Remove from Saved" : "Save Article"}
+                {isArchived ? t('reader.unsave') : t('reader.save')}
               </div>
             </div>
 
@@ -4362,13 +4316,12 @@ function NewsReaderContent() {
                 <div
                   className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
                   opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                  ${
-                    preferenceState.theme === "dark"
-                      ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
-                      : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+                  ${preferenceState.theme === "dark"
+                    ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+                    : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
                   }`}
                 >
-                  Previous Sentence
+                  {t('reader.navigation.previous')}
                 </div>
               </div>
 
@@ -4398,17 +4351,16 @@ function NewsReaderContent() {
                 <div
                   className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
                   opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                  ${
-                    preferenceState.theme === "dark"
-                      ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
-                      : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+                  ${preferenceState.theme === "dark"
+                    ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+                    : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
                   }`}
                 >
                   {isVoiceLoading
-                    ? "Loading Voice..."
+                    ? t('reader.playback.loading')
                     : isPlaying
-                    ? "Pause"
-                    : "Play"}
+                    ? t('reader.playback.pause')
+                    : t('reader.playback.play')}
                 </div>
               </div>
 
@@ -4431,13 +4383,12 @@ function NewsReaderContent() {
                 <div
                   className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
                   opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                  ${
-                    preferenceState.theme === "dark"
-                      ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
-                      : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+                  ${preferenceState.theme === "dark"
+                    ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+                    : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
                   }`}
                 >
-                  Next Sentence
+                  {t('reader.navigation.next')}
                 </div>
               </div>
             </div>
@@ -4469,17 +4420,16 @@ function NewsReaderContent() {
               <div
                 className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap pointer-events-none
                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                ${
-                  preferenceState.theme === "dark"
-                    ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
-                    : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
+                ${preferenceState.theme === "dark"
+                  ? "bg-gray-800 text-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.25)] border border-gray-700"
+                  : "bg-white text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200"
                 }`}
               >
                 {repeatMode === REPEAT_MODES.NONE
-                  ? "No Repeat"
+                  ? t('reader.repeat.none')
                   : repeatMode === REPEAT_MODES.ONE
-                  ? "Repeat Current Sentence"
-                  : "Repeat All Sentences"}
+                  ? t('reader.repeat.one')
+                  : t('reader.repeat.all')}
               </div>
             </div>
           </div>

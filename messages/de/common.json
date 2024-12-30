@@ -129,7 +129,35 @@
     "save": "Artikel speichern",
     "unsave": "Aus Gespeicherten entfernen",
     "saved": "Artikel gespeichert!",
-    "unsaved": "Artikel aus Gespeicherten entfernt"
+    "unsaved": "Artikel aus Gespeicherten entfernt",
+    "translationLanguage": "Übersetzungssprache",
+    "clickToTranslate": "Klicken Sie auf Übersetzen, um die Übersetzung zu sehen",
+    "loadingVoices": "Stimmen werden geladen...",
+    "markAsFinished": "Als gelesen markieren",
+    "finishedReading": "Gelesen",
+    "learningMode": {
+      "enable": "Lernmodus aktivieren",
+      "disable": "Lernmodus deaktivieren"
+    },
+    "navigation": {
+      "previous": "Vorheriger Satz",
+      "next": "Nächster Satz"
+    },
+    "playback": {
+      "loading": "Stimme wird geladen...",
+      "play": "Abspielen",
+      "pause": "Pause"
+    },
+    "repeat": {
+      "none": "Keine Wiederholung",
+      "one": "Aktuellen Satz wiederholen",
+      "all": "Alle Sätze wiederholen"
+    },
+    "errors": {
+      "translationFailed": "Fehler beim Übersetzen des Textes",
+      "contentUnavailable": "Artikelinhalt nicht verfügbar",
+      "contentRemoved": "Dieser Artikel wurde möglicherweise entfernt oder ist nicht mehr zugänglich"
+    }
   },
   "explorer": {
     "title": "Alle Nachrichten",
