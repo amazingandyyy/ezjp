@@ -1,3 +1,10 @@
+## [1.43.1](https://github.com/amazingandyyy/ezjp/compare/v1.43.0...v1.43.1) (2024-12-31)
+
+
+### Bug Fixes
+
+* **onboarding:** pass user ID to updateProfile and handle final step completion ([f1dc5a2](https://github.com/amazingandyyy/ezjp/commit/f1dc5a22336663dc6f789f95bbf18edfc83ffc71))
+
 # [1.43.0](https://github.com/amazingandyyy/ezjp/compare/v1.42.0...v1.43.0) (2024-12-31)
 
 
