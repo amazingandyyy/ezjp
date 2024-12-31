@@ -1,3 +1,10 @@
+## [1.44.1](https://github.com/amazingandyyy/ezjp/compare/v1.44.0...v1.44.1) (2024-12-31)
+
+
+### Bug Fixes
+
+* **next.config.js:** disable locale detection for improved localization control ([ecfc523](https://github.com/amazingandyyy/ezjp/commit/ecfc523ed8ca64bb450ed81c1f22c06fd8e917b0))
+
 # [1.44.0](https://github.com/amazingandyyy/ezjp/compare/v1.43.1...v1.44.0) (2024-12-31)
 
 
