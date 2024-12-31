@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Accueil",
     "saved": "Sauvegardés",
     "settings": "Paramètres"
   },
   "common": {
-    "signIn": "Se connecter",
     "signOut": "Se déconnecter",
     "save": "Sauvegarder",
-    "delete": "Supprimer",
     "cancel": "Le garder ! 🌟",
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Thème",
         "light": "Clair",
-        "dark": "Sombre",
-        "system": "Système"
+        "dark": "Sombre"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Informations sur votre version installée et les mises à jour disponibles.",
       "version": "Version",
       "update": "Mise à jour disponible",
-      "updateNow": "Mettre à jour maintenant",
       "updateDescription": "Mettez à jour maintenant pour obtenir les dernières fonctionnalités, améliorations et corrections de bugs.",
       "fetchingVersion": "Vérification de la version..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Chargement de l'article...",
     "error": "Échec du chargement de l'article",
-    "translate": "Traduire",
-    "original": "Original",
     "save": "Sauvegarder l'article",
     "unsave": "Retirer des sauvegardés",
     "saved": "Article sauvegardé !",
-    "unsaved": "Article retiré des sauvegardés",
     "translationLanguage": "Langue de traduction",
-    "clickToTranslate": "Cliquez sur traduire pour voir la traduction",
     "loadingVoices": "Chargement des voix...",
     "markAsFinished": "Marquer comme terminé",
     "finishedReading": "Lecture terminée",
@@ -218,8 +209,6 @@
     },
     "join": "Rejoindre",
     "theme": {
-      "switchToLight": "Passer au mode clair",
-      "switchToDark": "Passer au mode sombre",
       "light": "Clair",
       "dark": "Sombre"
     },

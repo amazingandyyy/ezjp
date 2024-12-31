@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Startseite",
     "saved": "Gespeichert",
     "settings": "Einstellungen"
   },
   "common": {
-    "signIn": "Anmelden",
     "signOut": "Abmelden",
     "save": "Speichern",
-    "delete": "Löschen",
     "cancel": "Beibehalten! 🌟",
     "loading": "Lädt...",
     "error": "Ein Fehler ist aufgetreten",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Design",
         "light": "Hell",
-        "dark": "Dunkel",
-        "system": "System"
+        "dark": "Dunkel"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Informationen über Ihre installierte Version und verfügbare Updates.",
       "version": "Version",
       "update": "Update verfügbar",
-      "updateNow": "Jetzt aktualisieren",
       "updateDescription": "Aktualisieren Sie jetzt, um die neuesten Funktionen, Verbesserungen und Fehlerbehebungen zu erhalten.",
       "fetchingVersion": "Version wird geprüft..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Artikel wird geladen...",
     "error": "Fehler beim Laden des Artikels",
-    "translate": "Übersetzen",
-    "original": "Original",
     "save": "Artikel speichern",
     "unsave": "Aus Gespeicherten entfernen",
     "saved": "Artikel gespeichert!",
-    "unsaved": "Artikel aus Gespeicherten entfernt",
     "translationLanguage": "Übersetzungssprache",
-    "clickToTranslate": "Klicken Sie auf Übersetzen, um die Übersetzung zu sehen",
     "loadingVoices": "Stimmen werden geladen...",
     "markAsFinished": "Als gelesen markieren",
     "finishedReading": "Gelesen",
@@ -218,8 +209,6 @@
     },
     "join": "Beitreten",
     "theme": {
-      "switchToLight": "Zu hellem Design wechseln",
-      "switchToDark": "Zu dunklem Design wechseln",
       "light": "Hell",
       "dark": "Dunkel"
     },

@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Trang chủ",
     "saved": "Đã lưu",
     "settings": "Cài đặt"
   },
   "common": {
-    "signIn": "Đăng nhập",
     "signOut": "Đăng xuất",
     "save": "Lưu",
-    "delete": "Xóa",
     "cancel": "Giữ nguyên! 🌟",
     "loading": "Đang tải...",
     "error": "Đã xảy ra lỗi",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Chế độ màu",
         "light": "Sáng",
-        "dark": "Tối",
-        "system": "Hệ thống"
+        "dark": "Tối"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Thông tin về phiên bản đã cài đặt và các bản cập nhật có sẵn.",
       "version": "Phiên bản",
       "update": "Có bản cập nhật mới",
-      "updateNow": "Cập nhật ngay",
       "updateDescription": "Cập nhật ngay để nhận các tính năng mới nhất, cải tiến và sửa lỗi.",
       "fetchingVersion": "Đang kiểm tra phiên bản..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Đang tải bài viết...",
     "error": "Không thể tải bài viết",
-    "translate": "Dịch",
-    "original": "Nguyên bản",
     "save": "Lưu bài viết",
     "unsave": "Bỏ lưu",
     "saved": "Đã lưu bài viết!",
-    "unsaved": "Đã xóa bài viết khỏi danh sách đã lưu",
     "translationLanguage": "Ngôn ngữ dịch",
-    "clickToTranslate": "Nhấn nút dịch để xem bản dịch",
     "loadingVoices": "Đang tải giọng đọc...",
     "markAsFinished": "Đánh dấu đã đọc",
     "finishedReading": "Đã đọc xong",
@@ -218,8 +209,6 @@
     },
     "join": "Tham gia",
     "theme": {
-      "switchToLight": "Chuyển sang chế độ sáng",
-      "switchToDark": "Chuyển sang chế độ tối",
       "light": "Sáng",
       "dark": "Tối"
     },

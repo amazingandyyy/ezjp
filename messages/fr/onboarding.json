@@ -17,7 +17,6 @@
     "title": "Ravi de vous rencontrer ! 👋",
     "description": "Choisissez un nom unique qui vous représente dans notre communauté d'apprentissage. Vous pourrez le modifier plus tard.",
     "username": {
-      "label": "Nom d'utilisateur",
       "placeholder": "Entrez votre nom d'utilisateur"
     }
   },
@@ -36,35 +35,33 @@
     "title": "Fixez votre objectif quotidien ! 🎯",
     "description": "Les petits pas mènent aux grandes réussites ! Choisissez un objectif de lecture adapté à votre emploi du temps. Vous pourrez l'ajuster plus tard.",
     "readingTime": {
-      "title": "Temps de lecture quotidien",
-      "description": "Combien de temps souhaitez-vous consacrer à la lecture des actualités japonaises chaque jour ?",
       "5": "5 minutes",
       "10": "10 minutes",
       "15": "15 minutes",
       "30": "30 minutes",
-      "60": "1 heure"
+      "60": "1 heure",
+      "title": "Temps de lecture quotidien",
+      "description": "Combien de temps souhaitez-vous consacrer à la lecture des actualités japonaises chaque jour ?"
     },
     "articles": {
-      "title": "Objectif d'articles quotidien",
-      "description": "Combien d'articles souhaitez-vous lire chaque jour ?",
       "1": "1 article",
       "3": "3 articles",
       "5": "5 articles",
-      "10": "10 articles"
+      "10": "10 articles",
+      "title": "Objectif d'articles quotidien",
+      "description": "Combien d'articles souhaitez-vous lire chaque jour ?"
     }
   },
   "buttons": {
     "back": "← Retour",
     "next": "Suivant →",
-    "finish": "Commencer à lire ! 🎉",
-    "saving": "Enregistrement... 🚀"
+    "finish": "Commencer à lire ! 🎉"
   },
   "errors": {
     "username": {
       "required": "Le nom d'utilisateur est requis",
       "taken": "Ce nom d'utilisateur est déjà pris",
       "invalid": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des tirets bas"
-    },
-    "general": "Une erreur est survenue. Veuillez réessayer."
+    }
   }
-} 
+}

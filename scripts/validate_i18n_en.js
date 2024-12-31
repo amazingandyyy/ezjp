@@ -8,7 +8,12 @@ function getAllKeysWithValues(obj, parentKey = '') {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       return [...acc, ...getAllKeysWithValues(value, currentKey)];
     }
-    return [...acc, { key: currentKey, value }];
+    return [...acc, { 
+      key: currentKey, 
+      value,
+      isNumericKey: /^\d+$/.test(key),
+      parentKey: parentKey
+    }];
   }, []);
 }
 
@@ -27,13 +32,121 @@ function findJsFiles(dir, fileList = []) {
 }
 
 // Function to find key usage in a file
-function findKeyUsageInFile(filePath, key) {
+function findKeyUsageInFile(filePath, key, isNumericKey = false, parentKey = '') {
   const content = fs.readFileSync(filePath, 'utf8');
-  // Look for t('key') or t("key") patterns
-  const pattern1 = `t('${key}')`;
-  const pattern2 = `t("${key}")`;
+  // Escape special characters in the key for regex safety
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   
-  return (content.includes(pattern1) || content.includes(pattern2));
+  // Handle dynamic key construction patterns
+  const keyParts = key.split('.');
+  const lastPart = keyParts[keyParts.length - 1];
+
+  // If this is a numeric key, check if its parent object is used with string interpolation
+  if (isNumericKey && parentKey) {
+    const escapedParentKey = parentKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parentPatterns = [
+      // Template literal with variable interpolation in JSX
+      `\\{t\\(\`${escapedParentKey}\\.\\$\\{[^}]+\\}\`\\)\\}`,   // {t(`parentKey.${var}`)}
+      `\\{t\`${escapedParentKey}\\.\\$\\{[^}]+\\}\`\\}`,         // {t`parentKey.${var}`}
+      // Previous patterns
+      `t\`${escapedParentKey}\\.\\$\\{[^}]+\\}\``,             // t`parentKey.${var}`
+      `t\\(\`${escapedParentKey}\\.\\$\\{[^}]+\\}\`\\)`,       // t(`parentKey.${var}`)
+      `t\\('${escapedParentKey}\\.\\$\\{[^}]+\\}'\\)`,         // t('parentKey.${var}')
+      `t\\("${escapedParentKey}\\.\\$\\{[^}]+\\}"\\)`,         // t("parentKey.${var}")
+      // String concatenation
+      `t\\(${escapedParentKey} \\+ [^)]+\\)`,                  // t(parentKey + something)
+      `t\\('${escapedParentKey}\\.' \\+ [^)]+\\)`,             // t('parentKey.' + something)
+      `t\\("${escapedParentKey}\\." \\+ [^)]+\\)`,             // t("parentKey." + something)
+      // Array/object access
+      `${escapedParentKey}\\[\\$\\{[^}]+\\}\\]`,              // parentKey[${var}]
+      `${escapedParentKey}\\[[^\\]]+\\]`,                      // parentKey[anything]
+    ];
+    
+    const hasParentUsage = parentPatterns.some(pattern => {
+      try {
+        return new RegExp(pattern).test(content);
+      } catch (e) {
+        console.warn(`Invalid regex pattern for parent key "${parentKey}":`, e.message);
+        return false;
+      }
+    });
+    
+    if (hasParentUsage) {
+      return true;
+    }
+  }
+
+  const patterns = [
+    // JSX patterns with curly braces
+    `\\{t\\(\`${escapedKey}\`\\)\\}`,                         // {t(`key`)}
+    `\\{t\`${escapedKey}\`\\}`,                               // {t`key`}
+    `\\{t\\('${escapedKey}'\\)\\}`,                           // {t('key')}
+    `\\{t\\("${escapedKey}"\\)\\}`,                           // {t("key")}
+    // Previous patterns
+    `t\\('${escapedKey}'\\)`,                                 // t('key')
+    `t\\("${escapedKey}"\\)`,                                 // t("key")
+    `t\`${escapedKey}\``,                                     // t`key`
+    `t\\(\`${escapedKey}\`\\)`,                               // t(`key`)
+    `'${escapedKey}'`,                                        // Direct key usage
+    `"${escapedKey}"`,                                        // Direct key usage
+    `\`${escapedKey}\``,                                      // Template string
+    `\\['${escapedKey}'\\]`,                                  // Object access
+    `\\["${escapedKey}"\\]`,                                  // Object access
+    `t\\(${key.split('.').map(part => `'${part}'`).join(' \\+ "\\." \\+ ')}\\)`, // Dynamic key construction
+    `useTranslation\\('${escapedKey}'\\)`,                    // Hook usage
+    `getTranslation\\('${escapedKey}'\\)`,                    // Function call
+    // Dynamic variable-based patterns
+    `\\{t\\(\`[^$]*\\$\\{[^}]+\\}\\.${escapedKey}\`\\)\\}`,  // {t(`${var}.key`)}
+    `\\{t\`[^$]*\\$\\{[^}]+\\}\\.${escapedKey}\`\\}`,        // {t`${var}.key`}
+    `t\`[^$]*\\$\\{[^}]+\\}\\.${escapedKey}\``,              // t`${var}.key`
+    `t\\(\`[^$]*\\$\\{[^}]+\\}\\.${escapedKey}\`\\)`,        // t(`${var}.key`)
+    `t\\([^)]*\\.${escapedKey}[^)]*\\)`,                     // t(something.key)
+    `\\$\\{t\\([^)]*\\.${escapedKey}[^)]*\\)\\}`,            // ${t(something.key)}
+    `t\\([^)]*\\.${lastPart}[^)]*\\)`,                       // t(something.lastPart)
+    `\\$\\{t\\([^)]*\\.${lastPart}[^)]*\\)\\}`,             // ${t(something.lastPart)}
+  ];
+  
+  return patterns.some(pattern => {
+    try {
+      return new RegExp(pattern).test(content);
+    } catch (e) {
+      console.warn(`Invalid regex pattern for key "${key}":`, e.message);
+      return false;
+    }
+  });
+}
+
+// Function to remove a key from an object using dot notation
+function removeKey(obj, key) {
+  const parts = key.split('.');
+  let current = obj;
+  
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!(parts[i] in current)) return;
+    current = current[parts[i]];
+  }
+  
+  delete current[parts[parts.length - 1]];
+  
+  // Clean up empty objects
+  for (let i = parts.length - 2; i >= 0; i--) {
+    current = obj;
+    for (let j = 0; j < i; j++) {
+      current = current[parts[j]];
+    }
+    if (Object.keys(current[parts[i]]).length === 0) {
+      delete current[parts[i]];
+    }
+  }
+}
+
+// Function to remove keys from a language file
+function removeKeysFromFile(filePath, keysToRemove) {
+  if (!fs.existsSync(filePath)) return;
+  
+  const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  keysToRemove.forEach(key => removeKey(content, key));
+  fs.writeFileSync(filePath, JSON.stringify(content, null, 2) + '\n');
 }
 
 // Main execution
@@ -70,8 +183,8 @@ console.log(`Found ${jsFiles.length} JS files to analyze`);
 
 // Create a map of key usage
 const keyUsage = {};
-allKeysWithValues.forEach(({ key, value, file: sourceFile }) => {
-  const usedIn = jsFiles.filter(file => findKeyUsageInFile(file, key))
+allKeysWithValues.forEach(({ key, value, file: sourceFile, isNumericKey, parentKey }) => {
+  const usedIn = jsFiles.filter(file => findKeyUsageInFile(file, key, isNumericKey, parentKey))
     .map(file => path.relative(process.cwd(), file));
   
   if (usedIn.length > 0) {
@@ -121,8 +234,21 @@ console.log('='.repeat(50));
 const usedKeys = new Set(Object.keys(keyUsage));
 const unusedKeys = allKeysWithValues.filter(({ key }) => !usedKeys.has(key));
 
-unusedKeys.sort((a, b) => a.key.localeCompare(b.key))
-  .forEach(({ key, value, file }) => {
+// Group unused keys by source file
+const unusedByFile = {};
+unusedKeys.forEach(({ key, value, file }) => {
+  if (!unusedByFile[file]) unusedByFile[file] = [];
+  unusedByFile[file].push({ key, value });
+});
+
+// Remove unused keys from all language files
+const languageDirs = fs.readdirSync(messagesDir)
+  .map(dir => path.join(messagesDir, dir))
+  .filter(dir => fs.statSync(dir).isDirectory());
+
+Object.entries(unusedByFile).sort().forEach(([file, keys]) => {
+  console.log(`\n📄 ${file}:`);
+  keys.sort((a, b) => a.key.localeCompare(b.key)).forEach(({ key, value }) => {
     const valuePreview = typeof value === 'string'
       ? value.length > 50
         ? value.slice(0, 47) + '...'
@@ -131,12 +257,21 @@ unusedKeys.sort((a, b) => a.key.localeCompare(b.key))
     
     console.log(`\n❌ ${key}:`);
     console.log(`  Value: ${valuePreview}`);
-    console.log(`  From: ${file}`);
   });
+  
+  // Remove keys from all language files
+  languageDirs.forEach(langDir => {
+    const langFile = path.join(langDir, file);
+    const langName = path.basename(langDir);
+    console.log(`  🗑️  Removing from ${langName}/${file}`);
+    removeKeysFromFile(langFile, keys.map(k => k.key));
+  });
+});
 
 // Summary
 console.log('\nSummary:');
 console.log(`Total keys: ${allKeysWithValues.length}`);
 console.log(`Used keys: ${Object.keys(keyUsage).length}`);
 console.log(`Unused keys: ${unusedKeys.length}`);
-console.log(`Files using translations: ${Object.keys(usageByFile).length}`); 
+console.log(`Files using translations: ${Object.keys(usageByFile).length}`);
+console.log(`\nRemoved ${unusedKeys.length} unused keys from all language files.`);

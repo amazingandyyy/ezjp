@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Home",
     "saved": "Salvati",
     "settings": "Impostazioni"
   },
   "common": {
-    "signIn": "Accedi",
     "signOut": "Esci",
     "save": "Salva",
-    "delete": "Elimina",
     "cancel": "Mantienilo! 🌟",
     "loading": "Caricamento...",
     "error": "Si è verificato un errore",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Tema",
         "light": "Chiaro",
-        "dark": "Scuro",
-        "system": "Sistema"
+        "dark": "Scuro"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Informazioni sulla tua versione installata e gli aggiornamenti disponibili.",
       "version": "Versione",
       "update": "Aggiornamento disponibile",
-      "updateNow": "Aggiorna ora",
       "updateDescription": "Aggiorna ora per ottenere le ultime funzionalità, miglioramenti e correzioni di bug.",
       "fetchingVersion": "Verifica della versione..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Caricamento articolo...",
     "error": "Errore nel caricamento dell'articolo",
-    "translate": "Traduci",
-    "original": "Originale",
     "save": "Salva articolo",
     "unsave": "Rimuovi dai salvati",
     "saved": "Articolo salvato!",
-    "unsaved": "Articolo rimosso dai salvati",
     "translationLanguage": "Lingua di traduzione",
-    "clickToTranslate": "Clicca su traduci per vedere la traduzione",
     "loadingVoices": "Caricamento voci...",
     "markAsFinished": "Segna come letto",
     "finishedReading": "Lettura completata",
@@ -218,8 +209,6 @@
     },
     "join": "Unisciti",
     "theme": {
-      "switchToLight": "Passa al tema chiaro",
-      "switchToDark": "Passa al tema scuro",
       "light": "Chiaro",
       "dark": "Scuro"
     },

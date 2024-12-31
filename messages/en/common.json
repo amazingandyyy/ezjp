@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Home",
     "saved": "Saved",
     "settings": "Settings"
   },
   "common": {
-    "signIn": "Sign In",
     "signOut": "Sign Out",
     "save": "Save",
-    "delete": "Delete",
     "cancel": "Keep it! 🌟",
     "loading": "Loading...",
     "error": "An error occurred",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Theme",
         "light": "Light",
-        "dark": "Dark",
-        "system": "System"
+        "dark": "Dark"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Information about your installed version and available updates.",
       "version": "Version",
       "update": "Update Available",
-      "updateNow": "Update Now",
       "updateDescription": "Update now to get the latest features, improvements, and bug fixes.",
       "fetchingVersion": "Checking version..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Loading article...",
     "error": "Failed to load article",
-    "translate": "Translate",
-    "original": "Original",
     "save": "Save Article",
     "unsave": "Remove from Saved",
     "saved": "Article saved!",
-    "unsaved": "Article removed from saved",
     "translationLanguage": "Translation Language",
-    "clickToTranslate": "Click translate to see translation",
     "loadingVoices": "Loading voices...",
     "markAsFinished": "Mark as Finished",
     "finishedReading": "Finished Reading",
@@ -242,8 +233,6 @@
     },
     "join": "Join",
     "theme": {
-      "switchToLight": "Switch to Light Mode",
-      "switchToDark": "Switch to Dark Mode",
       "light": "Light",
       "dark": "Dark"
     },

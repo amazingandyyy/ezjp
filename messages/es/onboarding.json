@@ -17,7 +17,6 @@
     "title": "¡Encantado de conocerte! 👋",
     "description": "Elige un nombre único que te represente en nuestra comunidad de aprendizaje. Podrás cambiarlo más tarde.",
     "username": {
-      "label": "Nombre de usuario",
       "placeholder": "Ingresa tu nombre de usuario"
     }
   },
@@ -36,35 +35,33 @@
     "title": "¡Establece tu objetivo diario! 🎯",
     "description": "¡Los pequeños pasos llevan a grandes logros! Elige un objetivo de lectura que se ajuste a tu horario. Podrás ajustarlo más tarde.",
     "readingTime": {
-      "title": "Tiempo de lectura diario",
-      "description": "¿Cuánto tiempo quieres dedicar a leer noticias en japonés cada día?",
       "5": "5 minutos",
       "10": "10 minutos",
       "15": "15 minutos",
       "30": "30 minutos",
-      "60": "1 hora"
+      "60": "1 hora",
+      "title": "Tiempo de lectura diario",
+      "description": "¿Cuánto tiempo quieres dedicar a leer noticias en japonés cada día?"
     },
     "articles": {
-      "title": "Objetivo de artículos diarios",
-      "description": "¿Cuántos artículos quieres leer cada día?",
       "1": "1 artículo",
       "3": "3 artículos",
       "5": "5 artículos",
-      "10": "10 artículos"
+      "10": "10 artículos",
+      "title": "Objetivo de artículos diarios",
+      "description": "¿Cuántos artículos quieres leer cada día?"
     }
   },
   "buttons": {
     "back": "← Atrás",
     "next": "Siguiente →",
-    "finish": "¡Empezar a leer! 🎉",
-    "saving": "Guardando... 🚀"
+    "finish": "¡Empezar a leer! 🎉"
   },
   "errors": {
     "username": {
       "required": "El nombre de usuario es obligatorio",
       "taken": "Este nombre de usuario ya está en uso",
       "invalid": "El nombre de usuario solo puede contener letras, números y guiones bajos"
-    },
-    "general": "Ha ocurrido un error. Por favor, inténtalo de nuevo."
+    }
   }
-} 
+}

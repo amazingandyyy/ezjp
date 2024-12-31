@@ -1,14 +1,11 @@
 {
   "navigation": {
-    "home": "Inicio",
     "saved": "Guardados",
     "settings": "Configuración"
   },
   "common": {
-    "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
     "save": "Guardar",
-    "delete": "Eliminar",
     "cancel": "¡Mantenerlo! 🌟",
     "loading": "Cargando...",
     "error": "Ha ocurrido un error",
@@ -75,8 +72,7 @@
       "theme": {
         "title": "Tema",
         "light": "Claro",
-        "dark": "Oscuro",
-        "system": "Sistema"
+        "dark": "Oscuro"
       }
     },
     "goals": {
@@ -116,7 +112,6 @@
       "description": "Información sobre tu versión instalada y actualizaciones disponibles.",
       "version": "Versión",
       "update": "Actualización disponible",
-      "updateNow": "Actualizar ahora",
       "updateDescription": "Actualiza ahora para obtener las últimas funciones, mejoras y correcciones de errores.",
       "fetchingVersion": "Comprobando versión..."
     }
@@ -124,14 +119,10 @@
   "reader": {
     "loading": "Cargando artículo...",
     "error": "Error al cargar el artículo",
-    "translate": "Traducir",
-    "original": "Original",
     "save": "Guardar artículo",
     "unsave": "Quitar de guardados",
     "saved": "¡Artículo guardado!",
-    "unsaved": "Artículo eliminado de guardados",
     "translationLanguage": "Idioma de traducción",
-    "clickToTranslate": "Haz clic en traducir para ver la traducción",
     "loadingVoices": "Cargando voces...",
     "markAsFinished": "Marcar como terminado",
     "finishedReading": "Lectura terminada",
@@ -218,8 +209,6 @@
     },
     "join": "Unirse",
     "theme": {
-      "switchToLight": "Cambiar a modo claro",
-      "switchToDark": "Cambiar a modo oscuro",
       "light": "Claro",
       "dark": "Oscuro"
     },
