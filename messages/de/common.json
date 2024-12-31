@@ -215,7 +215,8 @@
           "basic": "Nur Premium",
           "free": "Nur Premium"
         }
-      }
+      },
+      "processing": "Wird verarbeitet..."
     }
   },
   "reader": {

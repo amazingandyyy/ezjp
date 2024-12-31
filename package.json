@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "fetch-news": "./scripts/fetch-nhk-news.sh",
-    "migrate": "npx supabase db push"
+    "migrate": "npx supabase db push",
+    "stripe:hook": "stripe listen --forward-to http://localhost:3000/api/stripe/webhook"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^5.7.0",

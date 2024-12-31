@@ -153,6 +153,7 @@
       "currentPlan": "Plan Actual",
       "basicPlan": "Plan Gratuito",
       "premiumPlan": "Plan Premium",
+      "processing": "Procesando...",
       "pricing": {
         "free": "Gratis",
         "premiumPrice": "aprox. 12 €",

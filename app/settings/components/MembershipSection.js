@@ -22,8 +22,8 @@ const getPlans = (t, isPremium, billingInterval) => [
       { name: 'features.wordBank', notAvailable: true }
     ],
     buttonAction: null,
-    buttonText: t('settings.membership.currentPlan'),
-    buttonDisabled: !isPremium
+    buttonText: isPremium ? t('settings.membership.basicPlan') : t('settings.membership.currentPlan'),
+    buttonDisabled: true
   },
   {
     name: t('settings.membership.premiumPlan'),
@@ -45,40 +45,82 @@ export default function MembershipSection({ theme = 'light' }) {
   const { user, signInWithGoogle } = useAuth();
   const [billingInterval, setBillingInterval] = useState('yearly');
   const isDark = theme === 'dark';
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const plans = getPlans(t, isPremium, billingInterval);
 
   const handleSubscribe = async () => {
     try {
-      if (!user) {
-        await signInWithGoogle();
+      setIsLoading(true);
+
+      if (!user?.id) {
+        throw new Error('Not logged in');
+      }
+
+      // Create checkout session
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          billingInterval,
+          userId: user.id 
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (response.status === 400 && data.error === 'Active subscription exists') {
+          alert(t('settings.membership.errors.activeSubscriptionExists'));
+          return;
+        }
+        throw new Error(data.error || 'Failed to start checkout process');
+      }
+
+      // If premium status was restored, reload the page
+      if (data.message === 'Premium status restored') {
+        alert(t('settings.membership.premiumRestored'));
+        window.location.reload();
         return;
       }
 
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe failed to load');
+      if (!data.url) throw new Error('No checkout URL received');
 
-      // Create Stripe Checkout Session on the client
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [{
-          price: billingInterval === 'yearly' 
-            ? process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID 
-            : process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID,
-          quantity: 1,
-        }],
-        mode: 'subscription',
-        successUrl: `${window.location.origin}/settings?section=membership&checkout=success`,
-        cancelUrl: `${window.location.origin}/settings?section=membership&checkout=cancelled`,
-        customerEmail: user.email,
-      });
-
-      if (error) {
-        console.error('Error starting checkout:', error);
-        alert(t('settings.membership.checkoutError'));
-      }
+      // Redirect to Stripe
+      window.location.href = data.url;
     } catch (error) {
       console.error('Error:', error);
-      alert(t('settings.membership.checkoutError'));
+      alert('Failed to start checkout process');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRestoreMembership = async () => {
+    try {
+      setIsRestoring(true);
+      
+      const response = await fetch('/api/stripe/restore-membership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to restore membership');
+      }
+
+      // Refresh the page to update membership status
+      window.location.reload();
+    } catch (error) {
+      console.error('Error restoring membership:', error);
+      alert(error.message);
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -193,8 +235,8 @@ export default function MembershipSection({ theme = 'light' }) {
                           ? "bg-green-500/20 border-green-500/30 text-green-400"
                           : "bg-green-50 border-green-500/30 text-green-600"
                         : isDark
-                        ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400"
-                        : "bg-yellow-50 border-yellow-500/30 text-yellow-600"
+                          ? "bg-yellow-900/80 border-yellow-500/30 text-yellow-400"
+                          : "bg-yellow-50 border-yellow-500/30 text-yellow-600"
                     }`}
                   >
                     <FaCheck
@@ -204,8 +246,8 @@ export default function MembershipSection({ theme = 'light' }) {
                             ? "text-green-400"
                             : "text-green-600"
                           : isDark
-                          ? "text-yellow-400"
-                          : "text-yellow-600"
+                            ? "text-yellow-400"
+                            : "text-yellow-600"
                       }`}
                     />
                     <span className="text-sm font-medium">
@@ -513,14 +555,38 @@ export default function MembershipSection({ theme = 'light' }) {
                   {t("settings.membership.currentPlan")}
                 </button>
               ) : (
-                <button
-                  onClick={handleSubscribe}
-                  className="w-full rounded-lg bg-yellow-500 px-4 py-2 text-center font-semibold text-white shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-                >
-                  {billingInterval === "monthly"
-                    ? t("settings.membership.monthlySubscribe")
-                    : t("settings.membership.yearlySubscribe")}
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={isLoading}
+                    className={`w-full rounded-lg px-4 py-3 text-center font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                      isLoading 
+                        ? "bg-yellow-400 cursor-not-allowed"
+                        : "bg-yellow-500 hover:bg-yellow-600"
+                    }`}
+                  >
+                    {isLoading 
+                      ? t("settings.membership.processing")
+                      : billingInterval === "monthly"
+                        ? t("settings.membership.monthlySubscribe")
+                        : t("settings.membership.yearlySubscribe")
+                    }
+                  </button>
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={isLoading}
+                    className={`w-full px-4 py-2 text-sm font-medium rounded-lg ${
+                      isDark
+                        ? "text-gray-400 hover:text-gray-300"
+                        : "text-gray-600 hover:text-gray-800"
+                    } hover:underline`}
+                  >
+                    {isLoading 
+                      ? t("settings.membership.processing")
+                      : t("settings.membership.restoreMembership")
+                    }
+                  </button>
+                </div>
               )}
             </div>
           ))}

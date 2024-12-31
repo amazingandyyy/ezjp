@@ -169,6 +169,7 @@
       "premiumLabel": "高級",
       "basicLabel": "基本",
       "allFreeFeatures": "包含免費方案所有功能，另加：",
+      "processing": "正在處理中...",
       "features": {
         "freeFeatures": "免費方案功能",
         "newsBrowsing": "最新新聞文章",
@@ -186,7 +187,8 @@
         "aiTutor": "互動式AI家教，逐句詳細解說文法、詞彙和文化背景",
         "wordBank": "儲存單字並稍後複習",
         "customLists": "建立並管理自訂單字清單",
-        "progress": "追蹤閱讀進度和學習統計"
+        "progress": "追蹤閱讀進度和學習統計",
+        "freeFeatures": "包含免費方案的所有基本功能"
       },
       "limits": {
         "newsBrowsing": {

@@ -173,6 +173,7 @@
       "featureRequest": "Hai una funzionalità in mente?",
       "suggestFeature": "Suggeriscila qui",
       "checkoutError": "Si è verificato un errore durante l'avvio del processo di pagamento. Per favore riprova.",
+      "processing": "Elaborazione in corso...",
       "features": {
         "freeFeatures": "Funzionalità Gratuite",
         "newsBrowsing": "Articoli di Notizie Recenti",

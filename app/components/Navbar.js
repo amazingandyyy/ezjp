@@ -8,6 +8,9 @@ import {
   FaUser,
   FaFire,
   FaCheck,
+  FaMoon,
+  FaSun,
+  FaCrown,
 } from "react-icons/fa";
 import { useAuth } from '@/lib/AuthContext';
 import { useUpdate } from '@/app/sw-register';
@@ -473,8 +476,12 @@ export default function Navbar({
                             ? "shadow-lg shadow-gray-900/50"
                             : "shadow-lg shadow-gray-400/50"
                           : theme === "dark"
-                            ? "border-2 border-gray-700"
-                            : "border-2 border-gray-200"
+                            ? profile?.role_level > 0
+                              ? "border-2 border-amber-300/60"
+                              : "border-2 border-gray-700"
+                            : profile?.role_level > 0
+                              ? "border-2 border-amber-300"
+                              : "border-2 border-gray-200"
                       }`}
                     />
                   ) : (
@@ -484,8 +491,12 @@ export default function Navbar({
                           ? "shadow-lg shadow-gray-900/50"
                           : "shadow-lg shadow-gray-400/50"
                         : theme === "dark"
-                          ? "border-2 border-gray-700"
-                          : "border-2 border-gray-200"
+                          ? profile?.role_level > 0
+                            ? "border-2 border-amber-300/60"
+                            : "border-2 border-gray-700"
+                          : profile?.role_level > 0
+                            ? "border-2 border-amber-300"
+                            : "border-2 border-gray-200"
                       }
                       ${theme === "dark"
                         ? "bg-gray-800 text-gray-200"
@@ -563,6 +574,18 @@ export default function Navbar({
                         >
                           {profile?.username ? user.email : t('common.noUsername')}
                         </p>
+                        {profile?.role_level > 0 && (
+                          <div className={`flex items-center gap-1.5 mt-1.5`}>
+                            <div className={`px-2 py-0.5 text-[10px] font-medium rounded-md flex items-center gap-1 ${
+                              theme === "dark"
+                                ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                                : "bg-yellow-50 text-yellow-600 border border-yellow-200"
+                            }`}>
+                              <FaCrown className="w-2.5 h-2.5" />
+                              {profile.role_level === 1 ? "Premium" : profile.role_level >= 10 ? "Admin" : "Member"}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

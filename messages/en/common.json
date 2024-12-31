@@ -176,6 +176,7 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "currentPlan": "Current Plan",
+      "freePlan": "Free Plan",
       "monthlySubscribe": "Subscribe Monthly",
       "yearlySubscribe": "Subscribe Yearly",
       "yearlyDiscount": "Save 33% with yearly billing",
@@ -185,6 +186,7 @@
       "premiumLabel": "Premium",
       "basicLabel": "Basic",
       "allFreeFeatures": "All features in Free Plan, plus:",
+      "processing": "Processing...",
       "features": {
         "freeFeatures": "Free Plan Features",
         "newsBrowsing": "All Latest News Articles",
@@ -226,7 +228,11 @@
       "comingSoon": "Coming Soon",
       "featureRequest": "Have a feature in mind?",
       "suggestFeature": "Suggest it here",
-      "checkoutError": "There was an error starting the checkout process. Please try again."
+      "checkoutError": "There was an error starting the checkout process. Please try again.",
+      "restoreMembership": "Restore Previous Membership",
+      "restoringMembership": "Restoring...",
+      "membershipRestored": "Membership restored successfully",
+      "restoreError": "Could not restore membership"
     }
   },
   "reader": {
