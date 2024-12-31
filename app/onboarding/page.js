@@ -136,7 +136,7 @@ export default function OnboardingPage() {
       if (field === 'ui_language') {
         console.log('Setting UI language to:', value);
         // Force a reload of translations
-        const updatedProfile = await updateProfile(updates);
+        const updatedProfile = await updateProfile(updates, user.id);
         if (!updatedProfile) throw new Error(t('errors.updateFailed'));
         
         // Update form data and step status
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
         throw new Error(t('errors.level.invalid'));
       }
 
-      const updatedProfile = await updateProfile(updates);
+      const updatedProfile = await updateProfile(updates, user.id);
       if (!updatedProfile) throw new Error(t('errors.updateFailed'));
 
       // Update form data and step status
@@ -194,11 +194,23 @@ export default function OnboardingPage() {
   // Handle final step completion
   const handleComplete = async () => {
     try {
+      // If on the reading time step, mark all steps complete and go to explore
+      if (currentStep === 4) {
+        setStepStatus({
+          1: { completed: true, saving: false },
+          2: { completed: true, saving: false },
+          3: { completed: true, saving: false },
+          4: { completed: true, saving: false }
+        });
+        router.push("/explorer");
+        return;
+      }
+
       const updates = {
         onboarding_completed: true
       };
       
-      const updatedProfile = await updateProfile(updates);
+      const updatedProfile = await updateProfile(updates, user.id);
       if (!updatedProfile) throw new Error(t('errors.updateFailed'));
       
       router.push('/');
