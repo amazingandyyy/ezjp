@@ -1,3 +1,10 @@
+# [1.44.0](https://github.com/amazingandyyy/ezjp/compare/v1.43.1...v1.44.0) (2024-12-31)
+
+
+### Features
+
+* **Navbar:** add username check and redirect to onboarding; update localization for news list ([191f7a7](https://github.com/amazingandyyy/ezjp/commit/191f7a77ef04bd81246a29c9f9b49cabb80b3816))
+
 ## [1.43.1](https://github.com/amazingandyyy/ezjp/compare/v1.43.0...v1.43.1) (2024-12-31)
 
 
