@@ -1010,15 +1010,20 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className={`text-lg font-bold tracking-tight ${
-                    theme === "dark" ? "text-white" : "text-gray-900"
-                  }`}>
+                  <h2
+                    className={`text-lg font-bold tracking-tight ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Recent AI Tutor Sessions (Last 10)
                   </h2>
-                  <p className={`mt-1 text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Latest tutor interactions with detailed token and cost breakdown
+                  <p
+                    className={`mt-1 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Latest tutor interactions with detailed token and cost
+                    breakdown
                   </p>
                 </div>
               </div>
@@ -1177,6 +1182,347 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
+              {/* Advanced Analytics Section */}
+              {aiTutorStats && (
+                <div className="mt-8">
+                  <h2
+                    className={`text-lg font-bold tracking-tight mb-4 ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Advanced Analytics
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Follow-up Rate Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Follow-up Engagement
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p
+                            className={`text-2xl font-bold ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {aiTutorStats?.analytics?.followUpRate?.toFixed(
+                              1
+                            ) || "0.0"}
+                            %
+                          </p>
+                          <p
+                            className={`text-sm ${
+                              theme === "dark"
+                                ? "text-gray-500"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            Questions with follow-ups
+                          </p>
+                        </div>
+                        <div
+                          className={`p-3 rounded-xl ${
+                            theme === "dark" ? "bg-blue-500/10" : "bg-blue-50"
+                          }`}
+                        >
+                          <FaComments
+                            className={
+                              theme === "dark"
+                                ? "text-blue-400 w-6 h-6"
+                                : "text-blue-600 w-6 h-6"
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Token Usage Comparison Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Token Usage Analysis
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span
+                            className={
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }
+                          >
+                            Initial Questions
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {Math.round(
+                              aiTutorStats?.analytics?.avgTokensPerSession
+                                ?.initial?.total || 0
+                            )}{" "}
+                            tokens
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span
+                            className={
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }
+                          >
+                            Follow-ups
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {Math.round(
+                              aiTutorStats?.analytics?.avgTokensPerSession
+                                ?.followUp?.total || 0
+                            )}{" "}
+                            tokens
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Model Distribution Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Model Usage Distribution
+                      </h3>
+                      <div className="space-y-2">
+                        {Object.entries(
+                          aiTutorStats?.analytics?.modelUsage || {}
+                        ).map(([model, count]) => (
+                          <div key={model} className="flex justify-between">
+                            <span
+                              className={
+                                theme === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-600"
+                              }
+                            >
+                              {model.split("-")[0]}
+                            </span>
+                            <span
+                              className={`font-medium ${
+                                theme === "dark"
+                                  ? "text-white"
+                                  : "text-gray-900"
+                              }`}
+                            >
+                              {(
+                                (count /
+                                  (aiTutorStats?.sessions?.length || 1)) *
+                                100
+                              ).toFixed(1)}
+                              %
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Response Time Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Average Response Time
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p
+                            className={`text-2xl font-bold ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {(
+                              (aiTutorStats?.analytics?.avgResponseTime || 0) /
+                              1000
+                            ).toFixed(1)}
+                            s
+                          </p>
+                          <p
+                            className={`text-sm ${
+                              theme === "dark"
+                                ? "text-gray-500"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            Between messages
+                          </p>
+                        </div>
+                        <div
+                          className={`p-3 rounded-xl ${
+                            theme === "dark" ? "bg-green-500/10" : "bg-green-50"
+                          }`}
+                        >
+                          <FaClock
+                            className={
+                              theme === "dark"
+                                ? "text-green-400 w-6 h-6"
+                                : "text-green-600 w-6 h-6"
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cost Efficiency Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Cost Analysis
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span
+                            className={
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }
+                          >
+                            Initial Questions
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            $
+                            {(
+                              aiTutorStats?.analytics?.costAnalysis
+                                ?.initialVsFollowUp?.initial || 0
+                            ).toFixed(4)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span
+                            className={
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-600"
+                            }
+                          >
+                            Follow-ups
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              theme === "dark" ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            $
+                            {(
+                              aiTutorStats?.analytics?.costAnalysis
+                                ?.initialVsFollowUp?.followUp || 0
+                            ).toFixed(4)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Usage Pattern Card */}
+                    <div
+                      className={`p-6 rounded-xl ${
+                        theme === "dark"
+                          ? "bg-gray-800/50 border border-gray-700/50"
+                          : "bg-white border border-gray-100"
+                      }`}
+                    >
+                      <h3
+                        className={`text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Usage Pattern
+                      </h3>
+                      <div className="h-24">
+                        <div className="flex h-full items-end gap-1">
+                          {(
+                            aiTutorStats?.analytics?.timeAnalysis
+                              ?.hourlyDistribution || Array(24).fill(0)
+                          ).map((count, hour) => {
+                            const maxCount = Math.max(
+                              ...(aiTutorStats?.analytics?.timeAnalysis
+                                ?.hourlyDistribution || [0])
+                            );
+                            const height =
+                              count > 0 ? (count / maxCount) * 100 : 0;
+                            return (
+                              <div
+                                key={hour}
+                                className={`flex-1 ${
+                                  theme === "dark"
+                                    ? "bg-blue-500/20"
+                                    : "bg-blue-100"
+                                } rounded-t`}
+                                style={{ height: `${height}%` }}
+                                title={`${hour}:00 - ${count} sessions`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="mt-2 text-xs text-center text-gray-500">
+                        24-hour activity distribution
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -2795,209 +3141,6 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-
-          {/* Advanced Analytics Section */}
-          {aiTutorStats && (
-            <div className="mt-8">
-              <h2 className={`text-lg font-bold tracking-tight mb-4 ${
-                theme === "dark" ? "text-white" : "text-gray-900"
-              }`}>
-                Advanced Analytics
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Follow-up Rate Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Follow-up Engagement
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className={`text-2xl font-bold ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        {aiTutorStats?.analytics?.followUpRate?.toFixed(1) || '0.0'}%
-                      </p>
-                      <p className={`text-sm ${
-                        theme === "dark" ? "text-gray-500" : "text-gray-400"
-                      }`}>
-                        Questions with follow-ups
-                      </p>
-                    </div>
-                    <div className={`p-3 rounded-xl ${
-                      theme === "dark" ? "bg-blue-500/10" : "bg-blue-50"
-                    }`}>
-                      <FaComments className={
-                        theme === "dark" ? "text-blue-400 w-6 h-6" : "text-blue-600 w-6 h-6"
-                      } />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Token Usage Comparison Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Token Usage Analysis
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Initial Questions</span>
-                      <span className={`font-medium ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        {Math.round(aiTutorStats?.analytics?.avgTokensPerSession?.initial?.total || 0)} tokens
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Follow-ups</span>
-                      <span className={`font-medium ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        {Math.round(aiTutorStats?.analytics?.avgTokensPerSession?.followUp?.total || 0)} tokens
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Model Distribution Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Model Usage Distribution
-                  </h3>
-                  <div className="space-y-2">
-                    {Object.entries(aiTutorStats?.analytics?.modelUsage || {}).map(([model, count]) => (
-                      <div key={model} className="flex justify-between">
-                        <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-                          {model.split('-')[0]}
-                        </span>
-                        <span className={`font-medium ${
-                          theme === "dark" ? "text-white" : "text-gray-900"
-                        }`}>
-                          {((count / (aiTutorStats?.sessions?.length || 1)) * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Response Time Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Average Response Time
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className={`text-2xl font-bold ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        {((aiTutorStats?.analytics?.avgResponseTime || 0) / 1000).toFixed(1)}s
-                      </p>
-                      <p className={`text-sm ${
-                        theme === "dark" ? "text-gray-500" : "text-gray-400"
-                      }`}>
-                        Between messages
-                      </p>
-                    </div>
-                    <div className={`p-3 rounded-xl ${
-                      theme === "dark" ? "bg-green-500/10" : "bg-green-50"
-                    }`}>
-                      <FaClock className={
-                        theme === "dark" ? "text-green-400 w-6 h-6" : "text-green-600 w-6 h-6"
-                      } />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Cost Efficiency Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Cost Analysis
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Initial Questions</span>
-                      <span className={`font-medium ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        ${(aiTutorStats?.analytics?.costAnalysis?.initialVsFollowUp?.initial || 0).toFixed(4)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>Follow-ups</span>
-                      <span className={`font-medium ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}>
-                        ${(aiTutorStats?.analytics?.costAnalysis?.initialVsFollowUp?.followUp || 0).toFixed(4)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Usage Pattern Card */}
-                <div className={`p-6 rounded-xl ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 border border-gray-700/50"
-                    : "bg-white border border-gray-100"
-                }`}>
-                  <h3 className={`text-sm font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}>
-                    Usage Pattern
-                  </h3>
-                  <div className="h-24">
-                    <div className="flex h-full items-end gap-1">
-                      {(aiTutorStats?.analytics?.timeAnalysis?.hourlyDistribution || Array(24).fill(0)).map((count, hour) => {
-                        const maxCount = Math.max(...(aiTutorStats?.analytics?.timeAnalysis?.hourlyDistribution || [0]));
-                        const height = count > 0 ? (count / maxCount) * 100 : 0;
-                        return (
-                          <div
-                            key={hour}
-                            className={`flex-1 ${
-                              theme === "dark" ? "bg-blue-500/20" : "bg-blue-100"
-                            } rounded-t`}
-                            style={{ height: `${height}%` }}
-                            title={`${hour}:00 - ${count} sessions`}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-center text-gray-500">
-                    24-hour activity distribution
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
