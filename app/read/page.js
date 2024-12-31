@@ -3034,17 +3034,16 @@ function NewsReaderContent() {
                       theme={preferenceState.theme}
                     />
                   </label>
-                  <button
-                    onClick={toggleFurigana}
-                    disabled={updatingPreferences.show_furigana}
+                  <div
+                    onClick={!updatingPreferences.show_furigana ? toggleFurigana : undefined}
                     className={`w-full flex items-center justify-between px-4 py-3 sm:px-3 sm:py-2 rounded transition-all duration-200 border ${
                       preferenceState.theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-600"
-                        : "[color-scheme:light] bg-white border-gray-300 text-gray-600 hover:border-gray-400"
+                        ? "bg-gray-800/50 border-gray-700/50 text-gray-300 hover:border-gray-600/50"
+                        : "[color-scheme:light] bg-gray-50/80 border-gray-200/80 text-gray-600 hover:border-gray-300"
                     } ${
                       updatingPreferences.show_furigana
                         ? "opacity-50 cursor-not-allowed"
-                        : ""
+                        : "cursor-pointer"
                     }`}
                   >
                     <span>
@@ -3052,16 +3051,47 @@ function NewsReaderContent() {
                         ? t('reader.preferences.furiganaToggle.hide')
                         : t('reader.preferences.furiganaToggle.show')}
                     </span>
-                    <span
-                      className={`text-xs ${
-                        preferenceState.theme === "dark"
-                          ? "text-gray-500"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {t('reader.preferences.furiganaToggle.hover')}
-                    </span>
-                  </button>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`text-xs ${
+                          preferenceState.theme === "dark"
+                            ? "text-gray-500"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {t('reader.preferences.furiganaToggle.hover')}
+                      </span>
+                      <div
+                        className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-300 ease-in-out ${
+                          preferenceState.show_furigana
+                            ? preferenceState.theme === "dark"
+                              ? "bg-green-500/20 border-green-500/30"
+                              : "bg-green-100 border-green-200"
+                            : preferenceState.theme === "dark"
+                            ? "bg-gray-700/50 border-gray-600/50"
+                            : "bg-gray-200 border-gray-300"
+                        } ${
+                          updatingPreferences.show_furigana
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none absolute top-[1px] left-[1px] inline-block h-3 w-3 transform rounded-full shadow-sm ring-0 transition duration-300 ease-in-out ${
+                            preferenceState.show_furigana ? "translate-x-3" : "translate-x-0"
+                          } ${
+                            preferenceState.show_furigana
+                              ? preferenceState.theme === "dark"
+                                ? "bg-green-500"
+                                : "bg-green-600"
+                              : preferenceState.theme === "dark"
+                              ? "bg-gray-400"
+                              : "bg-white"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Voice selection control */}
