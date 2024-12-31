@@ -1,3 +1,10 @@
+# [1.41.0](https://github.com/amazingandyyy/ezjp/compare/v1.40.0...v1.41.0) (2024-12-31)
+
+
+### Features
+
+* enhance admin page analytics with conversation tracking and response time calculations ([575cff1](https://github.com/amazingandyyy/ezjp/commit/575cff1b72d7e422b17e1e74c972fa83b57e2e8f))
+
 # [1.40.0](https://github.com/amazingandyyy/ezjp/compare/v1.39.0...v1.40.0) (2024-12-31)
 
 
