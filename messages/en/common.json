@@ -62,9 +62,10 @@
       "profile": "Profile",
       "language": "Language",
       "appearance": "Appearance",
-      "goals": "Reader's Goals",
+      "goals": "Reading Goals",
       "data": "Data Management",
-      "software": "Software Information"
+      "software": "Software Information",
+      "membership": "Membership"
     },
     "profile": {
       "title": "Profile Information",
@@ -147,6 +148,82 @@
       "update": "Update Available",
       "updateDescription": "Update now to get the latest features, improvements, and bug fixes.",
       "fetchingVersion": "Checking version..."
+    },
+    "premium": {
+      "title": "Premium Features",
+      "activePremium": "Premium Member",
+      "enjoyBenefits": "Enjoy unlimited access to all premium features",
+      "freeTier": "Free Features",
+      "upgradePremium": "Upgrade to Premium",
+      "unlockBenefits": "Unlock unlimited access to premium features",
+      "subscribe": "Subscribe Now",
+      "aiTutor": "AI Tutor",
+      "aiTutorDesc": "Get personalized help understanding Japanese text",
+      "premiumVoice": "Premium Voice",
+      "premiumVoiceDesc": "High-quality natural Japanese voice synthesis",
+      "checkoutSuccess": "Successfully subscribed to premium!",
+      "checkoutCancelled": "Subscription cancelled"
+    },
+    "membership": {
+      "title": "Membership Plans",
+      "freePlan": "Free Plan",
+      "premiumPlan": "Premium Plan",
+      "free": "Free",
+      "premiumPrice": "$12",
+      "yearlyPrice": "$8",
+      "month": "month",
+      "year": "year",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "currentPlan": "Current Plan",
+      "monthlySubscribe": "Subscribe Monthly",
+      "yearlySubscribe": "Subscribe Yearly",
+      "yearlyDiscount": "Save 33% with yearly billing",
+      "unlimitedAccess": "Unlock all premium features",
+      "unlimited": "Unlimited",
+      "premiumOnly": "Premium feature only",
+      "premiumLabel": "Premium",
+      "basicLabel": "Basic",
+      "allFreeFeatures": "All features in Free Plan, plus:",
+      "features": {
+        "freeFeatures": "Free Plan Features",
+        "newsBrowsing": "All Latest News Articles",
+        "translation": "Translation",
+        "voice": "Japanese Voice",
+        "aiTutor": "AI Tutor",
+        "wordBank": "Word Bank"
+      },
+      "descriptions": {
+        "newsBrowsing": "Free unlimited access to Japanese news articles",
+        "translation": "Japanese to English translation on each sentence",
+        "voice": "Japanese voice for content reading",
+        "aiTutor": "LLM powered Tutor on each sentence",
+        "wordBank": "Save words and review them later",
+        "freeFeatures": "All features in Free Plan, plus:"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "free": "Free forever",
+          "premium": "Free forever"
+        },
+        "translation": {
+          "free": "Unlimited",
+          "premium": "Unlimited"
+        },
+        "voice": {
+          "free": "Basic Japanese voice",
+          "premium": "GenAI powered high quality voices"
+        },
+        "aiTutor": {
+          "free": "Premium feature only",
+          "premium": "Unlimited access"
+        },
+        "wordBank": {
+          "free": "Premium feature only",
+          "premium": "Coming soon"
+        }
+      },
+      "comingSoon": "Coming Soon"
     }
   },
   "reader": {
