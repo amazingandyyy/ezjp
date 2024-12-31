@@ -863,8 +863,21 @@ function DownloadContent() {
 export default function Download() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 pt-32 pb-32">
+          <div className="max-w-4xl mx-auto space-y-24">
+            <div className="animate-pulse space-y-8">
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl mb-6"></div>
+                <div className="h-8 w-64 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
+                <div className="h-4 w-96 bg-gray-200 dark:bg-gray-800 rounded"></div>
+              </div>
+              <div className="flex justify-center">
+                <div className="h-12 w-48 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     }>
       <DownloadContent />
