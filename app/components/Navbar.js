@@ -466,12 +466,28 @@ export default function Navbar({
             >
               {user ? (
                 <div className="flex items-center gap-2 py-2 rounded-xl transition-colors">
-                  {profile?.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt={t('navbar.profile.avatar')}
-                      className={`w-8 h-8 rounded-xl object-cover transition-all duration-200 hover:scale-105 ${
-                        showProfile 
+                  <div className="relative">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={t('navbar.profile.avatar')}
+                        className={`w-8 h-8 rounded-xl object-cover transition-all duration-200 hover:scale-105 ${
+                          showProfile 
+                            ? theme === "dark"
+                              ? "shadow-lg shadow-gray-900/50"
+                              : "shadow-lg shadow-gray-400/50"
+                            : theme === "dark"
+                              ? profile?.role_level > 0
+                                ? "border-2 border-amber-300/60"
+                                : "border-2 border-gray-700"
+                              : profile?.role_level > 0
+                                ? "border-2 border-amber-300"
+                                : "border-2 border-gray-200"
+                        }`}
+                      />
+                    ) : (
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105
+                        ${showProfile 
                           ? theme === "dark"
                             ? "shadow-lg shadow-gray-900/50"
                             : "shadow-lg shadow-gray-400/50"
@@ -482,30 +498,25 @@ export default function Navbar({
                             : profile?.role_level > 0
                               ? "border-2 border-amber-300"
                               : "border-2 border-gray-200"
-                      }`}
-                    />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105
-                      ${showProfile 
-                        ? theme === "dark"
-                          ? "shadow-lg shadow-gray-900/50"
-                          : "shadow-lg shadow-gray-400/50"
-                        : theme === "dark"
-                          ? profile?.role_level > 0
-                            ? "border-2 border-amber-300/60"
-                            : "border-2 border-gray-700"
-                          : profile?.role_level > 0
-                            ? "border-2 border-amber-300"
-                            : "border-2 border-gray-200"
-                      }
-                      ${theme === "dark"
-                        ? "bg-gray-800 text-gray-200"
-                        : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      <FaUser className="w-4 h-4" />
-                    </div>
-                  )}
+                        }
+                        ${theme === "dark"
+                          ? "bg-gray-800 text-gray-200"
+                          : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        <FaUser className="w-4 h-4" />
+                      </div>
+                    )}
+                    {profile?.role_level > 0 && (
+                      <div className={`absolute -top-1.5 -right-1.5 p-1 rounded-full ${
+                        theme === "dark"
+                          ? "bg-gray-800 text-amber-300"
+                          : "bg-white text-amber-400"
+                      }`}>
+                        <FaCrown className="w-2.5 h-2.5" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="px-4 py-2 text-sm font-medium flex items-center gap-2">
