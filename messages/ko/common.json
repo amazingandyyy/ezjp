@@ -147,6 +147,75 @@
       "update": "업데이트 가능",
       "updateDescription": "최신 기능, 개선 사항 및 버그 수정을 적용하려면 업데이트하세요.",
       "fetchingVersion": "버전 확인 중..."
+    },
+    "membership": {
+      "title": "멤버십 플랜",
+      "currentPlan": "현재 플랜",
+      "basicPlan": "무료 플랜",
+      "premiumPlan": "프리미엄 플랜",
+      "free": "무료",
+      "premiumPrice": "약 ₩12,000",
+      "yearlyPrice": "약 ₩8,000",
+      "month": "월",
+      "year": "년",
+      "monthly": "월간",
+      "yearly": "연간",
+      "monthlySubscribe": "월간 구독하기",
+      "yearlySubscribe": "연간 구독하기",
+      "yearlyDiscount": "연간 구독 시 33% 할인",
+      "unlimitedAccess": "모든 프리미엄 기능 이용 가능",
+      "unlimited": "무제한",
+      "premiumOnly": "프리미엄 전용",
+      "premiumLabel": "프리미엄",
+      "basicLabel": "기본",
+      "allFreeFeatures": "무료 플랜의 모든 기능에 추가로:",
+      "comingSoon": "출시 예정",
+      "featureRequest": "원하는 기능이 있으신가요?",
+      "suggestFeature": "여기서 제안하기",
+      "checkoutError": "결제 프로세스를 시작하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
+      "features": {
+        "newsBrowsing": "최신 뉴스 기사",
+        "translation": "번역",
+        "voice": "일본어 음성",
+        "aiTutor": "AI 튜터",
+        "wordBank": "단어장",
+        "freeFeatures": "무료 플랜 기능"
+      },
+      "descriptions": {
+        "newsBrowsing": "일본어 뉴스 기사 무제한 이용",
+        "translation": "각 문장의 일본어에서 영어로 번역",
+        "voice": "콘텐츠 음성 읽기",
+        "aiTutor": "문장별로 문법, 어휘, 문화적 맥락을 자세히 설명해주는 대화형 AI 튜터",
+        "wordBank": "단어 저장 및 복습",
+        "freeFeatures": "무료 플랜의 모든 기능에 추가로:"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "premium": "영구 무료",
+          "basic": "영구 무료",
+          "free": "영구 무료"
+        },
+        "translation": {
+          "premium": "무제한",
+          "basic": "무제한",
+          "free": "무제한"
+        },
+        "voice": {
+          "premium": "생성 AI 기반 고품질 음성",
+          "basic": "기본 일본어 음성",
+          "free": "기본 일본어 음성"
+        },
+        "aiTutor": {
+          "premium": "무제한 이용",
+          "basic": "프리미엄 전용",
+          "free": "사용 불가"
+        },
+        "wordBank": {
+          "premium": "출시 예정",
+          "basic": "프리미엄 전용",
+          "free": "사용 불가"
+        }
+      }
     }
   },
   "reader": {

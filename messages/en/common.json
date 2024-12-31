@@ -166,7 +166,7 @@
     },
     "membership": {
       "title": "Membership Plans",
-      "freePlan": "Free Plan",
+      "basicPlan": "Free Plan",
       "premiumPlan": "Premium Plan",
       "free": "Free",
       "premiumPrice": "$12",
@@ -197,22 +197,22 @@
         "newsBrowsing": "Free unlimited access to Japanese news articles",
         "translation": "Japanese to English translation on each sentence",
         "voice": "Japanese voice for content reading",
-        "aiTutor": "LLM powered Tutor on each sentence",
+        "aiTutor": "Interactive AI tutor that helps you understand Japanese grammar, vocabulary, and cultural context in each sentence",
         "wordBank": "Save words and review them later",
         "freeFeatures": "All features in Free Plan, plus:"
       },
       "limits": {
         "newsBrowsing": {
-          "free": "Free forever",
-          "premium": "Free forever"
+          "premium": "Forever free",
+          "basic": "Forever free"
         },
         "translation": {
-          "free": "Unlimited",
-          "premium": "Unlimited"
+          "premium": "Unlimited",
+          "basic": "Unlimited"
         },
         "voice": {
-          "free": "Basic Japanese voice",
-          "premium": "GenAI powered high quality voices"
+          "premium": "Generative AI-powered high-quality voices",
+          "basic": "Basic Japanese voice"
         },
         "aiTutor": {
           "free": "Premium feature only",
@@ -223,7 +223,10 @@
           "premium": "Coming soon"
         }
       },
-      "comingSoon": "Coming Soon"
+      "comingSoon": "Coming Soon",
+      "featureRequest": "Have a feature in mind?",
+      "suggestFeature": "Suggest it here",
+      "checkoutError": "There was an error starting the checkout process. Please try again."
     }
   },
   "reader": {

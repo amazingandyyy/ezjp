@@ -147,6 +147,90 @@
       "update": "有可用更新",
       "updateDescription": "立即更新以獲取最新功能、改進和錯誤修復。",
       "fetchingVersion": "正在檢查版本..."
+    },
+    "membership": {
+      "title": "會員方案",
+      "currentPlan": "目前方案",
+      "basicPlan": "免費方案",
+      "premiumPlan": "高級方案",
+      "free": "免費",
+      "premiumPrice": "約NT$360",
+      "yearlyPrice": "約NT$240",
+      "month": "月",
+      "year": "年",
+      "monthly": "月付",
+      "yearly": "年付",
+      "yearlyDiscount": "年付可省33%",
+      "yearlySubscribe": "訂閱年付方案",
+      "monthlySubscribe": "訂閱月付方案",
+      "unlimitedAccess": "解鎖所有高級功能",
+      "unlimited": "無限制",
+      "premiumOnly": "高級會員專屬",
+      "premiumLabel": "高級",
+      "basicLabel": "基本",
+      "allFreeFeatures": "包含免費方案所有功能，另加：",
+      "features": {
+        "freeFeatures": "免費方案功能",
+        "newsBrowsing": "最新新聞文章",
+        "translation": "翻譯",
+        "voice": "日語語音",
+        "aiTutor": "AI家教",
+        "wordBank": "單字本",
+        "customLists": "自訂單字清單",
+        "progress": "學習進度追蹤"
+      },
+      "descriptions": {
+        "newsBrowsing": "無限制瀏覽日語新聞文章",
+        "translation": "每句話的日語到英語翻譯",
+        "voice": "內容語音朗讀",
+        "aiTutor": "互動式AI家教，逐句詳細解說文法、詞彙和文化背景",
+        "wordBank": "儲存單字並稍後複習",
+        "customLists": "建立並管理自訂單字清單",
+        "progress": "追蹤閱讀進度和學習統計"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "premium": "永久免費",
+          "basic": "永久免費",
+          "free": "永久免費"
+        },
+        "translation": {
+          "premium": "無限制",
+          "basic": "無限制",
+          "free": "無限制"
+        },
+        "voice": {
+          "premium": "生成式AI驅動高品質語音",
+          "basic": "基本日語語音",
+          "free": "基本日語語音"
+        },
+        "aiTutor": {
+          "premium": "無限制使用",
+          "basic": "高級會員專屬",
+          "free": "高級會員專屬"
+        },
+        "wordBank": {
+          "premium": "即將推出",
+          "basic": "高級會員專屬",
+          "free": "高級會員專屬"
+        },
+        "customLists": {
+          "premium": "無限制",
+          "basic": "最多3個清單",
+          "free": "最多1個清單"
+        },
+        "progress": {
+          "premium": "完整統計和進度追蹤",
+          "basic": "基本進度追蹤",
+          "free": "基本進度追蹤"
+        }
+      },
+      "comingSoon": "即將推出",
+      "featureRequest": "有想要的功能嗎？",
+      "suggestFeature": "在此提出建議",
+      "checkoutError": "開始結帳時發生錯誤。請再試一次。",
+      "managePlan": "管理訂閱",
+      "cancelPlan": "取消訂閱"
     }
   },
   "reader": {
@@ -252,6 +336,8 @@
       "download": "下載應用程式",
       "signOut": "登出"
     },
+    "currentPlan": "目前方案",
+    "yearlySubscribe": "年度訂閱",
     "update": {
       "available": "有可用更新",
       "new": "新版本",

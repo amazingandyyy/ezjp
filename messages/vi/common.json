@@ -147,6 +147,74 @@
       "update": "Có bản cập nhật mới",
       "updateDescription": "Cập nhật ngay để nhận các tính năng mới nhất, cải tiến và sửa lỗi.",
       "fetchingVersion": "Đang kiểm tra phiên bản..."
+    },
+    "membership": {
+      "title": "Gói Thành Viên",
+      "currentPlan": "Gói hiện tại",
+      "basicPlan": "Gói Miễn Phí",
+      "premiumPlan": "Gói Premium",
+      "free": "Miễn phí",
+      "premiumPrice": "khoảng 280.000₫",
+      "yearlyPrice": "khoảng 190.000₫",
+      "month": "tháng",
+      "year": "năm",
+      "monthly": "Hàng tháng",
+      "yearly": "Hàng năm",
+      "monthlySubscribe": "Đăng ký hàng tháng",
+      "yearlySubscribe": "Đăng ký hàng năm",
+      "yearlyDiscount": "Tiết kiệm 33% với gói năm",
+      "unlimitedAccess": "Mở khóa tất cả tính năng premium",
+      "unlimited": "Không giới hạn",
+      "premiumOnly": "Chỉ dành cho Premium",
+      "premiumLabel": "Premium",
+      "basicLabel": "Cơ bản",
+      "allFreeFeatures": "Tất cả tính năng của gói Miễn phí, cộng thêm:",
+      "features": {
+        "freeFeatures": "Tính năng Miễn phí",
+        "newsBrowsing": "Tin tức mới nhất",
+        "translation": "Dịch thuật",
+        "voice": "Giọng nói tiếng Nhật",
+        "aiTutor": "Gia sư AI",
+        "wordBank": "Sổ từ vựng"
+      },
+      "descriptions": {
+        "newsBrowsing": "Truy cập không giới hạn tin tức tiếng Nhật",
+        "translation": "Dịch từ tiếng Nhật sang tiếng Anh cho từng câu",
+        "voice": "Đọc nội dung bằng giọng nói",
+        "aiTutor": "Gia sư AI tương tác giúp bạn hiểu ngữ pháp, từ vựng và ngữ cảnh văn hóa trong từng câu",
+        "wordBank": "Lưu từ và ôn tập sau"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "free": "Miễn phí vĩnh viễn",
+          "basic": "Miễn phí vĩnh viễn",
+          "premium": "Miễn phí vĩnh viễn"
+        },
+        "translation": {
+          "free": "Không giới hạn",
+          "basic": "Không giới hạn",
+          "premium": "Không giới hạn"
+        },
+        "voice": {
+          "free": "Giọng nói tiếng Nhật cơ bản",
+          "basic": "Giọng nói tiếng Nhật cơ bản",
+          "premium": "Giọng nói chất lượng cao từ AI"
+        },
+        "aiTutor": {
+          "free": "Chỉ dành cho Premium",
+          "basic": "Chỉ dành cho Premium",
+          "premium": "Truy cập không giới hạn"
+        },
+        "wordBank": {
+          "free": "Chỉ dành cho Premium",
+          "basic": "Chỉ dành cho Premium",
+          "premium": "Sắp ra mắt"
+        }
+      },
+      "comingSoon": "Sắp ra mắt",
+      "featureRequest": "Bạn muốn thêm tính năng mới?",
+      "suggestFeature": "Đề xuất tại đây",
+      "checkoutError": "Đã xảy ra lỗi khi bắt đầu quá trình thanh toán. Vui lòng thử lại."
     }
   },
   "reader": {
@@ -250,7 +318,9 @@
       "settings": "Cài đặt",
       "admin": "Quản trị (hạn chế)",
       "download": "Tải ứng dụng",
-      "signOut": "Đăng xuất"
+      "signOut": "Đăng xuất",
+      "currentPlan": "Gói hiện tại",
+      "yearlySubscribe": "Đăng ký gói năm"
     },
     "update": {
       "available": "Có bản cập nhật mới",

@@ -147,6 +147,75 @@
       "update": "Mise à jour disponible",
       "updateDescription": "Mettez à jour maintenant pour obtenir les dernières fonctionnalités, améliorations et corrections de bugs.",
       "fetchingVersion": "Vérification de la version..."
+    },
+    "membership": {
+      "title": "Plans d'Abonnement",
+      "currentPlan": "Plan Actuel",
+      "basicPlan": "Plan Gratuit",
+      "premiumPlan": "Plan Premium",
+      "free": "Gratuit",
+      "premiumPrice": "env. 12 €",
+      "yearlyPrice": "env. 8 €",
+      "month": "mois",
+      "year": "an",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "monthlySubscribe": "S'abonner Mensuellement",
+      "yearlySubscribe": "S'abonner Annuellement",
+      "yearlyDiscount": "Économisez 33% avec la facturation annuelle",
+      "unlimitedAccess": "Débloquez toutes les fonctionnalités premium",
+      "unlimited": "Illimité",
+      "premiumOnly": "Premium Uniquement",
+      "premiumLabel": "Premium",
+      "basicLabel": "Basique",
+      "allFreeFeatures": "Toutes les fonctionnalités du Plan Gratuit, plus :",
+      "features": {
+        "freeFeatures": "Fonctionnalités Gratuites",
+        "newsBrowsing": "Articles d'Actualités Récents",
+        "translation": "Traduction",
+        "voice": "Voix Japonaise",
+        "aiTutor": "Tuteur IA",
+        "wordBank": "Banque de Mots"
+      },
+      "descriptions": {
+        "newsBrowsing": "Accès illimité aux articles en japonais avec mises à jour quotidiennes",
+        "translation": "Traduction japonais-anglais professionnelle pour chaque phrase",
+        "voice": "Lecture vocale du contenu avec voix naturelle",
+        "aiTutor": "Assistant IA personnel pour l'apprentissage du japonais",
+        "wordBank": "Système complet de révision de vocabulaire personnalisé",
+        "freeFeatures": "Toutes les fonctionnalités du Plan Gratuit, plus :"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "free": "5 articles par jour",
+          "basic": "10 articles par jour",
+          "premium": "Accès illimité"
+        },
+        "translation": {
+          "free": "100 phrases par jour",
+          "basic": "500 phrases par jour",
+          "premium": "Illimité"
+        },
+        "voice": {
+          "free": "Voix basique limitée",
+          "basic": "Voix japonaise standard",
+          "premium": "Voix haute qualité générée par IA"
+        },
+        "aiTutor": {
+          "free": "5 questions par jour",
+          "basic": "20 questions par jour",
+          "premium": "Accès illimité"
+        },
+        "wordBank": {
+          "free": "100 mots maximum",
+          "basic": "500 mots maximum",
+          "premium": "Stockage illimité"
+        }
+      },
+      "comingSoon": "Bientôt disponible",
+      "featureRequest": "Une fonctionnalité en tête ?",
+      "suggestFeature": "Suggérez-la ici",
+      "checkoutError": "Une erreur s'est produite lors du démarrage du processus de paiement. Veuillez réessayer."
     }
   },
   "reader": {

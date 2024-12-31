@@ -147,6 +147,83 @@
       "update": "Actualización disponible",
       "updateDescription": "Actualiza ahora para obtener las últimas funciones, mejoras y correcciones de errores.",
       "fetchingVersion": "Comprobando versión..."
+    },
+    "membership": {
+      "title": "Planes de Membresía",
+      "currentPlan": "Plan Actual",
+      "basicPlan": "Plan Gratuito",
+      "premiumPlan": "Plan Premium",
+      "pricing": {
+        "free": "Gratis",
+        "premiumPrice": "aprox. 12 €",
+        "yearlyPrice": "aprox. 8 €",
+        "month": "mes",
+        "year": "año",
+        "monthly": "Mensual",
+        "yearly": "Anual"
+      },
+      "actions": {
+        "monthlySubscribe": "Suscribirse Mensualmente",
+        "yearlySubscribe": "Suscribirse Anualmente"
+      },
+      "labels": {
+        "premiumLabel": "Premium",
+        "basicLabel": "Básico",
+        "premiumOnly": "Solo Premium",
+        "unlimited": "Ilimitado",
+        "yearlyDiscount": "Ahorra 33% con facturación anual",
+        "unlimitedAccess": "Desbloquea todas las funciones premium",
+        "allFreeFeatures": "Todas las funciones del Plan Gratuito, más:"
+      },
+      "features": {
+        "freeFeatures": "Funciones Gratuitas",
+        "newsBrowsing": "Artículos de Noticias Recientes",
+        "translation": "Traducción",
+        "voice": "Voz en Japonés",
+        "aiTutor": "Tutor de IA",
+        "wordBank": "Banco de Palabras"
+      },
+      "descriptions": {
+        "newsBrowsing": "Acceso ilimitado a artículos en japonés",
+        "translation": "Traducción de japonés a inglés en cada oración",
+        "voice": "Lectura de contenido por voz",
+        "aiTutor": "Tutor de IA interactivo que te ayuda a entender la gramática, el vocabulario y el contexto cultural en cada oración",
+        "wordBank": "Guarda palabras y repásalas después",
+        "freeFeatures": "Todas las funciones del Plan Gratuito, más:"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "premium": "Ilimitado",
+          "basic": "Ilimitado",
+          "free": "Ilimitado"
+        },
+        "translation": {
+          "premium": "Ilimitado",
+          "basic": "Ilimitado",
+          "free": "Ilimitado"
+        },
+        "voice": {
+          "premium": "Voces de alta calidad con IA generativa",
+          "basic": "Voz japonesa básica",
+          "free": "No disponible"
+        },
+        "aiTutor": {
+          "premium": "Acceso ilimitado",
+          "basic": "No disponible",
+          "free": "No disponible"
+        },
+        "wordBank": {
+          "premium": "Próximamente",
+          "basic": "No disponible",
+          "free": "No disponible"
+        }
+      },
+      "misc": {
+        "comingSoon": "Próximamente",
+        "featureRequest": "¿Tienes una función en mente?",
+        "suggestFeature": "Sugiérela aquí",
+        "checkoutError": "Hubo un error al iniciar el proceso de pago. Por favor, inténtalo de nuevo."
+      }
     }
   },
   "reader": {
@@ -251,6 +328,10 @@
       "admin": "Administrador (restringido)",
       "download": "Descargar aplicación",
       "signOut": "Cerrar sesión"
+    },
+    "membership": {
+      "currentPlan": "Plan actual",
+      "yearlySubscribe": "Suscripción anual"
     },
     "update": {
       "available": "Actualización disponible",

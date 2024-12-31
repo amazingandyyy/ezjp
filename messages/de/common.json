@@ -147,6 +147,75 @@
       "update": "Update verfügbar",
       "updateDescription": "Aktualisieren Sie jetzt, um die neuesten Funktionen, Verbesserungen und Fehlerbehebungen zu erhalten.",
       "fetchingVersion": "Version wird geprüft..."
+    },
+    "membership": {
+      "title": "Mitgliedschaftspläne",
+      "currentPlan": "Aktueller Plan",
+      "basicPlan": "Kostenloser Plan",
+      "premiumPlan": "Premium-Plan",
+      "free": "Kostenlos",
+      "premiumPrice": "ca. 12 €",
+      "yearlyPrice": "ca. 8 €",
+      "month": "Monat",
+      "year": "Jahr",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "monthlySubscribe": "Monatlich abonnieren",
+      "yearlySubscribe": "Jährlich abonnieren",
+      "yearlyDiscount": "33% sparen mit Jahresabo",
+      "unlimitedAccess": "Alle Premium-Funktionen freischalten",
+      "unlimited": "Unbegrenzt",
+      "premiumOnly": "Nur Premium",
+      "premiumLabel": "Premium",
+      "basicLabel": "Basis",
+      "allFreeFeatures": "Alle Funktionen des kostenlosen Plans, plus:",
+      "comingSoon": "Demnächst verfügbar",
+      "featureRequest": "Eine Funktion im Sinn?",
+      "suggestFeature": "Hier vorschlagen",
+      "checkoutError": "Beim Starten des Zahlungsvorgangs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "features": {
+        "freeFeatures": "Kostenlose Funktionen",
+        "newsBrowsing": "Aktuelle Nachrichtenartikel",
+        "translation": "Übersetzung",
+        "voice": "Japanische Stimme",
+        "aiTutor": "KI-Tutor",
+        "wordBank": "Wörterbuch"
+      },
+      "descriptions": {
+        "freeFeatures": "Alle Funktionen des kostenlosen Plans, plus:",
+        "newsBrowsing": "Unbegrenzter Zugriff auf japanische Nachrichtenartikel",
+        "translation": "Japanisch-Englisch-Übersetzung für jeden Satz",
+        "voice": "Sprachausgabe für Inhalte",
+        "aiTutor": "Interaktiver KI-Tutor, der Ihnen hilft, Grammatik, Vokabeln und kulturellen Kontext in jedem Satz zu verstehen",
+        "wordBank": "Wörter speichern und später wiederholen"
+      },
+      "limits": {
+        "newsBrowsing": {
+          "premium": "Für immer kostenlos",
+          "basic": "Für immer kostenlos",
+          "free": "Für immer kostenlos"
+        },
+        "translation": {
+          "premium": "Unbegrenzt",
+          "basic": "Unbegrenzt",
+          "free": "Unbegrenzt"
+        },
+        "voice": {
+          "premium": "KI-generierte hochwertige Stimmen",
+          "basic": "Basis-Japanischstimme",
+          "free": "Basis-Japanischstimme"
+        },
+        "aiTutor": {
+          "premium": "Unbegrenzter Zugriff",
+          "basic": "Nur Premium",
+          "free": "Nur Premium"
+        },
+        "wordBank": {
+          "premium": "Demnächst verfügbar",
+          "basic": "Nur Premium",
+          "free": "Nur Premium"
+        }
+      }
     }
   },
   "reader": {
@@ -277,7 +346,9 @@
       "keepStreak": "Lesen Sie mindestens einen Artikel, um Ihre Serie fortzusetzen",
       "streak": "Serie",
       "today": "heute",
-      "read": "Gelesen"
+      "read": "Gelesen",
+      "currentPlan": "Aktueller Plan",
+      "yearlySubscribe": "Jährlich abonnieren"
     },
     "logo": {
       "title": "EZJP News"
