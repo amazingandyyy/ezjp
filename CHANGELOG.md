@@ -1,3 +1,10 @@
+# [1.42.0](https://github.com/amazingandyyy/ezjp/compare/v1.41.0...v1.42.0) (2024-12-31)
+
+
+### Features
+
+* add onboarding page for user setup and preferences ([7d3966f](https://github.com/amazingandyyy/ezjp/commit/7d3966f8e5564bc0b482a74b742f37aeb8d06609))
+
 # [1.41.0](https://github.com/amazingandyyy/ezjp/compare/v1.40.0...v1.41.0) (2024-12-31)
 
 
