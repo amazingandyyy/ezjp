@@ -276,7 +276,8 @@
       "day1": "Giorno 1",
       "keepStreak": "Leggi almeno un articolo per mantenere la tua serie",
       "streak": "Serie",
-      "read": "Letti"
+      "today": "oggi",
+      "read": "Letto"
     },
     "logo": {
       "title": "EZJP News"

@@ -266,7 +266,7 @@ function SettingsContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className={`text-sm ${profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-          {t('common.loading')}
+          Loading...
         </div>
       </div>
     );
@@ -750,7 +750,7 @@ function SettingsContent() {
                         }`} />
                         {!isProfileLoaded ? (
                           <span className={profileData.currentTheme === "dark" ? "text-gray-400" : "text-gray-600"}>
-                            {t('common.loading')}
+                            Loading...
                           </span>
                         ) : profileData.username ? (
                           <div className="flex flex-col gap-1">

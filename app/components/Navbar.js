@@ -250,70 +250,93 @@ export default function Navbar({
   }, [refreshStats]);
 
   // Memoize the stats display
-  const StatsDisplay = useMemo(() => (
-    <div className="px-4 py-3">
-      <div className="grid grid-cols-2 gap-8">
-        <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
-            theme === "dark"
-              ? "bg-orange-500/20 text-orange-400"
-              : "bg-orange-100 text-orange-600"
-          }`}>
-            <FaFire className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <p className={`text-2xl font-bold ${
-                theme === "dark" ? "text-gray-100" : "text-gray-900"
-              }`}>
-                {stats.currentStreak}
-              </p>
-              <p className={`text-xs font-medium ${
-                theme === "dark" ? "text-orange-400/90" : "text-orange-600/90"
-              }`}>
-                day{stats.currentStreak !== 1 ? 's' : ''}
-              </p>
+  const StatsDisplay = useMemo(
+    () => (
+      <div className="px-4 py-3">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="flex items-start gap-3">
+            <div
+              className={`w-10 h-10 flex items-center justify-center rounded-xl ${
+                theme === "dark"
+                  ? "bg-orange-500/20 text-orange-400"
+                  : "bg-orange-100 text-orange-600"
+              }`}
+            >
+              <FaFire className="w-5 h-5" />
             </div>
-            <p className={`text-xs ${
-              theme === "dark" ? "text-gray-400" : "text-gray-500"
-            }`}>
-              {t('navbar.profile.streak')}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${
-            theme === "dark"
-              ? "bg-green-500/20 text-green-400"
-              : "bg-green-100 text-green-600"
-          }`}>
-            <FaCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <p className={`text-2xl font-bold ${
-                theme === "dark" ? "text-gray-100" : "text-gray-900"
-              }`}>
-                {stats.totalFinishedArticles}
-              </p>
-              {stats.todayFinishedArticles > 0 && (
-                <p className={`text-xs font-medium ${
-                  theme === "dark" ? "text-green-400/90" : "text-green-600/90"
-                }`}>
-                  +{stats.todayFinishedArticles} {t('navbar.profile.today')}
+            <div>
+              <div className="flex items-baseline gap-1.5">
+                <p
+                  className={`text-2xl font-bold ${
+                    theme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }`}
+                >
+                  {stats.currentStreak}
                 </p>
-              )}
+                <p
+                  className={`text-xs font-medium ${
+                    theme === "dark"
+                      ? "text-orange-400/90"
+                      : "text-orange-600/90"
+                  }`}
+                >
+                  {t("navbar.profile.days")}
+                </p>
+              </div>
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                {t("navbar.profile.streak")}
+              </p>
             </div>
-            <p className={`text-xs ${
-              theme === "dark" ? "text-gray-400" : "text-gray-500"
-            }`}>
-              {t('navbar.profile.read')}
-            </p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div
+              className={`w-10 h-10 flex items-center justify-center rounded-xl ${
+                theme === "dark"
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-green-100 text-green-600"
+              }`}
+            >
+              <FaCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-baseline gap-1.5">
+                <p
+                  className={`text-2xl font-bold ${
+                    theme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }`}
+                >
+                  {stats.totalFinishedArticles}
+                </p>
+                {stats.todayFinishedArticles > 0 && (
+                  <p
+                    className={`text-xs font-medium ${
+                      theme === "dark"
+                        ? "text-green-400/90"
+                        : "text-green-600/90"
+                    }`}
+                  >
+                    +{stats.todayFinishedArticles} {t("navbar.profile.today")}
+                  </p>
+                )}
+              </div>
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                {t("navbar.profile.read")}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  ), [theme, stats]);
+    ),
+    [theme, stats]
+  );
 
   // Handle theme update
   const handleUpdate = async (field, value) => {
