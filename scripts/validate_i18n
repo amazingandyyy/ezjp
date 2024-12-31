@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Run the validation script on English first
+node "$SCRIPT_DIR/validate_i18n_en.js" 
+
+# Run the validation script, validate all languages against English
+node "$SCRIPT_DIR/validate_i18n.js" 

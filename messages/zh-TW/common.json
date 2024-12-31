@@ -255,6 +255,9 @@
       "keepStreak": "至少閱讀一篇文章來保持連續紀錄",
       "streak": "連續紀錄",
       "read": "已讀"
+    },
+    "logo": {
+      "title": "EZJP News"
     }
   }
 }

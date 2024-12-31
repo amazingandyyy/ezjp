@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "title": "Sẵn sàng đọc tin tức tiếng Nhật? 🎯",
+    "subtitle": "Không cần Google Translate nữa - hãy cùng đọc tin tức tiếng Nhật một cách thú vị! ✨"
+  },
+  "steps": {
+    "language": "Ngôn ngữ",
+    "profile": "Hồ sơ",
+    "level": "Trình độ",
+    "goals": "Mục tiêu"
+  },
+  "languageStep": {
+    "title": "Bắt đầu nào! 🌈",
+    "description": "Trước khi khám phá thế giới tin tức tiếng Nhật, hãy chọn ngôn ngữ giao diện bạn thích nhé."
+  },
+  "profileStep": {
+    "title": "Rất vui được gặp bạn! 👋",
+    "description": "Hãy chọn một tên độc đáo để đại diện cho bạn trong cộng đồng học tập. Bạn có thể thay đổi sau này.",
+    "username": {
+      "label": "Tên người dùng",
+      "placeholder": "Nhập tên người dùng"
+    }
+  },
+  "levelStep": {
+    "title": "Trình độ tiếng Nhật của bạn? 📚",
+    "description": "Đừng lo lắng nếu bạn mới bắt đầu! Chúng tôi sẽ điều chỉnh nội dung và công cụ học tập phù hợp với trình độ của bạn.",
+    "levels": {
+      "n5": "N5 (Sơ cấp)",
+      "n4": "N4 (Cơ bản)",
+      "n3": "N3 (Trung cấp)",
+      "n2": "N2 (Cao cấp)",
+      "n1": "N1 (Thành thạo)"
+    }
+  },
+  "goalsStep": {
+    "title": "Đặt mục tiêu hàng ngày! 🎯",
+    "description": "Những bước nhỏ dẫn đến thành công lớn! Hãy chọn mục tiêu phù hợp với lịch trình của bạn. Bạn có thể điều chỉnh sau này.",
+    "readingTime": {
+      "title": "Thời gian đọc mỗi ngày",
+      "description": "Bạn muốn dành bao nhiêu thời gian để đọc tin tức tiếng Nhật mỗi ngày?",
+      "5": "5 phút",
+      "10": "10 phút",
+      "15": "15 phút",
+      "30": "30 phút",
+      "60": "1 giờ"
+    },
+    "articles": {
+      "title": "Số bài đọc mỗi ngày",
+      "description": "Bạn muốn đọc bao nhiêu bài mỗi ngày?",
+      "1": "1 bài",
+      "3": "3 bài",
+      "5": "5 bài",
+      "10": "10 bài"
+    }
+  },
+  "buttons": {
+    "back": "← Quay lại",
+    "next": "Bước tiếp! →",
+    "finish": "Bắt đầu đọc! 🎉",
+    "saving": "Đang lưu... 🚀"
+  },
+  "errors": {
+    "username": {
+      "required": "Vui lòng nhập tên người dùng",
+      "taken": "Tên người dùng này đã được sử dụng",
+      "invalid": "Tên người dùng chỉ có thể chứa chữ cái, số và dấu gạch dưới"
+    },
+    "general": "Đã xảy ra lỗi. Vui lòng thử lại."
+  }
+} 

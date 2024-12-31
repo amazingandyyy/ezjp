@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "title": "Prêt pour les actualités en japonais ? 🎯",
+    "subtitle": "Fini les aventures avec Google Traduction - rendons la lecture des actualités japonaises amusante ! ✨"
+  },
+  "steps": {
+    "language": "Langue",
+    "profile": "Profil",
+    "level": "Niveau",
+    "goals": "Objectifs"
+  },
+  "languageStep": {
+    "title": "Commençons par ici ! 🌈",
+    "description": "Pour une meilleure expérience, choisissez votre langue d'interface. Vous pourrez la modifier à tout moment."
+  },
+  "profileStep": {
+    "title": "Ravi de vous rencontrer ! 👋",
+    "description": "Choisissez un nom unique qui vous représente dans notre communauté d'apprentissage. Vous pourrez le modifier plus tard.",
+    "username": {
+      "label": "Nom d'utilisateur",
+      "placeholder": "Entrez votre nom d'utilisateur"
+    }
+  },
+  "levelStep": {
+    "title": "Quel est votre niveau en japonais ? 📚",
+    "description": "Pas d'inquiétude si vous débutez ! Nous adapterons le contenu à votre niveau.",
+    "levels": {
+      "n5": "N5 (Débutant)",
+      "n4": "N4 (Élémentaire)",
+      "n3": "N3 (Intermédiaire)",
+      "n2": "N2 (Avancé)",
+      "n1": "N1 (Expert)"
+    }
+  },
+  "goalsStep": {
+    "title": "Fixez votre objectif quotidien ! 🎯",
+    "description": "Les petits pas mènent aux grandes réussites ! Choisissez un objectif de lecture adapté à votre emploi du temps. Vous pourrez l'ajuster plus tard.",
+    "readingTime": {
+      "title": "Temps de lecture quotidien",
+      "description": "Combien de temps souhaitez-vous consacrer à la lecture des actualités japonaises chaque jour ?",
+      "5": "5 minutes",
+      "10": "10 minutes",
+      "15": "15 minutes",
+      "30": "30 minutes",
+      "60": "1 heure"
+    },
+    "articles": {
+      "title": "Objectif d'articles quotidien",
+      "description": "Combien d'articles souhaitez-vous lire chaque jour ?",
+      "1": "1 article",
+      "3": "3 articles",
+      "5": "5 articles",
+      "10": "10 articles"
+    }
+  },
+  "buttons": {
+    "back": "← Retour",
+    "next": "Suivant →",
+    "finish": "Commencer à lire ! 🎉",
+    "saving": "Enregistrement... 🚀"
+  },
+  "errors": {
+    "username": {
+      "required": "Le nom d'utilisateur est requis",
+      "taken": "Ce nom d'utilisateur est déjà pris",
+      "invalid": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des tirets bas"
+    },
+    "general": "Une erreur est survenue. Veuillez réessayer."
+  }
+} 

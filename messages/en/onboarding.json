@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "title": "Ready for Japanese News? 🎯",
+    "subtitle": "No more Google Translate adventures - let's make reading Japanese news fun! ✨"
+  },
+  "steps": {
+    "language": "Language",
+    "profile": "Profile",
+    "level": "Level",
+    "goals": "Goals"
+  },
+  "languageStep": {
+    "title": "First Things First! 🌈",
+    "description": "Before we dive into the exciting world of Japanese news, let's make sure you're comfy with the navigation. Pick your preferred language - we promise not to use any kanji here! 😉"
+  },
+  "profileStep": {
+    "title": "Nice to Meet You! 👋",
+    "description": "Choose a unique name that represents you in our learning community. You can always change this later.",
+    "username": {
+      "label": "Username",
+      "placeholder": "Enter your username"
+    }
+  },
+  "levelStep": {
+    "title": "What's Your Japanese Level? 📚",
+    "description": "Don't worry if you're just starting out! We'll adjust the content and learning tools to match your level perfectly.",
+    "levels": {
+      "n5": "N5 (Beginner)",
+      "n4": "N4 (Basic)",
+      "n3": "N3 (Intermediate)",
+      "n2": "N2 (Advanced)",
+      "n1": "N1 (Expert)"
+    }
+  },
+  "goalsStep": {
+    "title": "Set Your Daily Goals! 🎯",
+    "description": "Small steps lead to big achievements! Choose your daily goals that fit your schedule. You can always adjust these later.",
+    "readingTime": {
+      "title": "Daily Reading Time",
+      "description": "How much time would you like to spend reading Japanese news each day?",
+      "5": "5 minutes",
+      "10": "10 minutes",
+      "15": "15 minutes",
+      "30": "30 minutes",
+      "60": "1 hour"
+    },
+    "articles": {
+      "title": "Daily Article Goal",
+      "description": "How many articles would you like to read each day?",
+      "1": "1 article",
+      "3": "3 articles",
+      "5": "5 articles",
+      "10": "10 articles"
+    }
+  },
+  "buttons": {
+    "back": "← Go Back",
+    "next": "Next Step! →",
+    "finish": "Time to Read! 🎉",
+    "saving": "Working on it... 🚀"
+  },
+  "errors": {
+    "username": {
+      "required": "Username is required",
+      "taken": "This username is already taken",
+      "invalid": "Username can only contain letters, numbers, and underscores"
+    },
+    "general": "Something went wrong. Please try again."
+  }
+} 

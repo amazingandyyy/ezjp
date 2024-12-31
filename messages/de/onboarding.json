@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "title": "Bereit für japanische Nachrichten? 🎯",
+    "subtitle": "Schluss mit Google Translate-Abenteuern - machen wir das Lesen japanischer Nachrichten unterhaltsam! ✨"
+  },
+  "steps": {
+    "language": "Sprache",
+    "profile": "Profil",
+    "level": "Niveau",
+    "goals": "Ziele"
+  },
+  "languageStep": {
+    "title": "Fangen wir hier an! 🌈",
+    "description": "Für die beste Erfahrung, wähle deine Anzeigesprache. Du kannst sie jederzeit ändern."
+  },
+  "profileStep": {
+    "title": "Schön dich kennenzulernen! 👋",
+    "description": "Wähle einen einzigartigen Namen, der dich in unserer Lerngemeinschaft repräsentiert. Du kannst ihn später ändern.",
+    "username": {
+      "label": "Benutzername",
+      "placeholder": "Gib deinen Benutzernamen ein"
+    }
+  },
+  "levelStep": {
+    "title": "Wie gut ist dein Japanisch? 📚",
+    "description": "Keine Sorge, wenn du Anfänger bist! Wir passen die Inhalte an dein Niveau an.",
+    "levels": {
+      "n5": "N5 (Anfänger)",
+      "n4": "N4 (Grundlagen)",
+      "n3": "N3 (Mittelstufe)",
+      "n2": "N2 (Fortgeschritten)",
+      "n1": "N1 (Experte)"
+    }
+  },
+  "goalsStep": {
+    "title": "Setze dein Tagesziel! 🎯",
+    "description": "Kleine Schritte führen zu großen Erfolgen! Wähle ein Leseziel, das zu deinem Zeitplan passt. Du kannst es später anpassen.",
+    "readingTime": {
+      "title": "Tägliche Lesezeit",
+      "description": "Wie viel Zeit möchtest du täglich mit dem Lesen japanischer Nachrichten verbringen?",
+      "5": "5 Minuten",
+      "10": "10 Minuten",
+      "15": "15 Minuten",
+      "30": "30 Minuten",
+      "60": "1 Stunde"
+    },
+    "articles": {
+      "title": "Tägliches Artikelziel",
+      "description": "Wie viele Artikel möchtest du täglich lesen?",
+      "1": "1 Artikel",
+      "3": "3 Artikel",
+      "5": "5 Artikel",
+      "10": "10 Artikel"
+    }
+  },
+  "buttons": {
+    "back": "← Zurück",
+    "next": "Weiter →",
+    "finish": "Los geht's! 🎉",
+    "saving": "Wird gespeichert... 🚀"
+  },
+  "errors": {
+    "username": {
+      "required": "Benutzername ist erforderlich",
+      "taken": "Dieser Benutzername ist bereits vergeben",
+      "invalid": "Benutzername darf nur Buchstaben, Zahlen und Unterstriche enthalten"
+    },
+    "general": "Ein Fehler ist aufgetreten. Bitte versuche es erneut."
+  }
+} 

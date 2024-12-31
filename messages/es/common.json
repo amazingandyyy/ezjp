@@ -255,6 +255,9 @@
       "keepStreak": "Lee al menos un artículo para mantener tu racha",
       "streak": "Racha",
       "read": "Leídos"
+    },
+    "logo": {
+      "title": "EZJP News"
     }
   }
 }

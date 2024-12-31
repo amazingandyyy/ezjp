@@ -255,6 +255,9 @@
       "keepStreak": "Đọc ít nhất một bài viết để duy trì chuỗi ngày",
       "streak": "Chuỗi ngày",
       "read": "Đã đọc"
+    },
+    "logo": {
+      "title": "EZJP News"
     }
   }
 }

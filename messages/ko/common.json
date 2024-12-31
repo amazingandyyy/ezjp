@@ -75,7 +75,8 @@
       "theme": {
         "title": "테면 모드",
         "light": "라이트",
-        "dark": "다크"
+        "dark": "다크",
+        "system": "시스템"
       }
     },
     "goals": {
@@ -254,6 +255,9 @@
       "keepStreak": "연속 기록을 유지하려면 최소 한 개의 기사를 읽으세요",
       "streak": "연속 기록",
       "read": "읽음"
+    },
+    "logo": {
+      "title": "EZJP News"
     }
   }
 }
