@@ -9,7 +9,7 @@
     "signOut": "로그아웃",
     "save": "저장",
     "delete": "삭제",
-    "cancel": "취소",
+    "cancel": "이대로 유지! 🌟",
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
     "success": "성공!",
@@ -181,6 +181,17 @@
       },
       "voice": "음성",
       "updating": "설정 업데이트 중..."
+    },
+    "unfinish": {
+      "title": "잠깐만요! 확실한가요?",
+      "subtitle": "축하 애니메이션을 다시 보고 싶다면:",
+      "readAnother": "다른 기사를 읽어보세요!",
+      "keepProgress": "읽기 진행 상황을 기록하세요 📈",
+      "buildStreak": "연속 기록을 이어가세요 🔥",
+      "consequences": "이 기사를 미독으로 표시하면",
+      "removeFromList": "읽은 기사 목록에서 제거됩니다",
+      "resetProgress": "이 기사의 진행 상황이 초기화됩니다",
+      "confirm": "미독으로 표시"
     }
   },
   "explorer": {

@@ -9,7 +9,7 @@
     "signOut": "Đăng xuất",
     "save": "Lưu",
     "delete": "Xóa",
-    "cancel": "Hủy",
+    "cancel": "Giữ nguyên! 🌟",
     "loading": "Đang tải...",
     "error": "Đã xảy ra lỗi",
     "success": "Thành công!",
@@ -182,6 +182,17 @@
       },
       "voice": "Giọng đọc",
       "updating": "Đang cập nhật cài đặt..."
+    },
+    "unfinish": {
+      "title": "Khoan đã! Bạn chắc chứ?",
+      "subtitle": "Nếu bạn chỉ muốn xem lại hiệu ứng chúc mừng:",
+      "readAnother": "Đọc một bài khác để xem lại!",
+      "keepProgress": "Theo dõi tiến độ của bạn 📈",
+      "buildStreak": "Duy trì chuỗi đọc của bạn 🔥",
+      "consequences": "Đánh dấu bài này chưa đọc sẽ",
+      "removeFromList": "Xóa khỏi danh sách bài đã đọc",
+      "resetProgress": "Đặt lại tiến độ cho bài này",
+      "confirm": "Đánh dấu chưa đọc"
     }
   },
   "explorer": {

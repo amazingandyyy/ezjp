@@ -9,7 +9,7 @@
     "signOut": "Esci",
     "save": "Salva",
     "delete": "Elimina",
-    "cancel": "Annulla",
+    "cancel": "Mantienilo! 🌟",
     "loading": "Caricamento...",
     "error": "Si è verificato un errore",
     "success": "Successo!",
@@ -182,6 +182,17 @@
       },
       "voice": "Voce",
       "updating": "Aggiornamento delle preferenze..."
+    },
+    "unfinish": {
+      "title": "Aspetta! Sei sicuro?",
+      "subtitle": "Se vuoi solo rivedere l'animazione di celebrazione:",
+      "readAnother": "Leggi un altro articolo per rivederla!",
+      "keepProgress": "Tieni traccia dei tuoi progressi 📈",
+      "buildStreak": "Mantieni la tua serie di letture 🔥",
+      "consequences": "Segnare questo articolo come non letto",
+      "removeFromList": "Lo rimuoverà dai tuoi articoli completati",
+      "resetProgress": "Resetterà i tuoi progressi per questo articolo",
+      "confirm": "Segna come non letto"
     }
   },
   "explorer": {

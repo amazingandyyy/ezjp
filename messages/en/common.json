@@ -9,7 +9,7 @@
     "signOut": "Sign Out",
     "save": "Save",
     "delete": "Delete",
-    "cancel": "Cancel",
+    "cancel": "Keep it! 🌟",
     "loading": "Loading...",
     "error": "An error occurred",
     "success": "Success!",
@@ -182,6 +182,17 @@
       },
       "voice": "Voice",
       "updating": "Updating preferences..."
+    },
+    "unfinish": {
+      "title": "Wait! Are you sure?",
+      "subtitle": "If you just want to see the celebration animation again:",
+      "readAnother": "Read another article to see it again!",
+      "keepProgress": "Keep your progress tracked 📈",
+      "buildStreak": "Build your reading streak 🔥",
+      "consequences": "Unfinishing this article will",
+      "removeFromList": "Remove it from your finished articles",
+      "resetProgress": "Reset your progress for this article",
+      "confirm": "Unfinish Article"
     }
   },
   "explorer": {

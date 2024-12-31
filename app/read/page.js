@@ -2745,6 +2745,29 @@ function NewsReaderContent() {
     }
   };
 
+  if (loadingArticle) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white/80 dark:bg-[rgb(19,31,36)]/80 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 relative">
+            <div className={`absolute inset-0 rounded-full border-2 animate-spin ${
+              preferenceState.theme === "dark"
+                ? "border-gray-300 border-r-transparent"
+                : "border-gray-400 border-r-transparent"
+            }`}></div>
+          </div>
+          <span className={`text-sm font-medium ${
+            preferenceState.theme === "dark"
+              ? "text-gray-300"
+              : "text-gray-600"
+          }`}>
+            {t('reader.loading')}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       <Navbar

@@ -1,5 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useRef, useEffect, useState, Suspense } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FaDownload, FaBook, FaDesktop, FaMobile, FaCheck, FaExternalLinkAlt, FaChrome, FaEdge, FaSafari, FaWindows, FaApple, FaAndroid, FaEllipsisV, FaShareAlt, FaSync } from 'react-icons/fa';
 import { useAuth } from '@/lib/AuthContext';
 import Navbar from '@/app/components/Navbar';
@@ -50,7 +52,8 @@ function MobileDesktopIcon({ className }) {
   );
 }
 
-export default function Download() {
+// Create a separate component for the search params functionality
+function DownloadContent() {
   const { profile } = useAuth();
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -60,6 +63,7 @@ export default function Download() {
   const [showOpenAppHint, setShowOpenAppHint] = useState(false);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const theme = profile?.theme || 'system';
+  const searchParams = useSearchParams();
 
   // Check if device is mobile
   useEffect(() => {
@@ -852,5 +856,18 @@ export default function Download() {
         </div>
       )}
     </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function Download() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    }>
+      <DownloadContent />
+    </Suspense>
   );
 } 

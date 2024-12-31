@@ -312,90 +312,54 @@ const MotivationalMessage = ({ show, theme }) => {
 };
 
 // Update the ConfirmationModal component
-const ConfirmationModal = ({ show, onConfirm, onCancel, theme }) => {
+function ConfirmationModal({ show, onConfirm, onCancel, theme }) {
+  const { t } = useTranslation();
   if (!show) return null;
-
+  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
-      <div className={`
-        relative w-[90%] max-w-md p-6 rounded-2xl shadow-xl
-        animate-[bounceIn_0.5s_cubic-bezier(0.68,-0.55,0.265,1.55)]
-        ${theme === 'dark' 
-          ? 'bg-gray-800 border border-gray-700' 
-          : 'bg-white border border-gray-200'
-        }
-      `}>
-        <div className={`text-xl font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-          Wait! Are you sure?
-        </div>
-        
-        <div className={`mb-6 space-y-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          <p className="text-sm">
-            If you just want to see the celebration animation again:
-          </p>
-          <div className="pl-4 space-y-2">
-            <p className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              Read another article to see it again! 
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              Keep your progress tracked 📈
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="text-green-500"></span>
-              Build your reading streak 🔥
-            </p>
-          </div>
-          
-          <div className="mt-4">
-            <p className="text-sm font-medium">
-              Unfinishing this article will:
-            </p>
-            <div className="pl-4 mt-2 space-y-2">
-              <p className="flex items-center gap-2">
-                <span className="text-red-500">•</span>
-                Remove it from your finished articles
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="text-red-500">•</span>
-                Reset your progress for this article
-              </p>
-            </div>
-          </div>
-        </div>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel}></div>
+      <div className={`relative w-full max-w-md p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+        <h2 className={`text-lg font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+          {t('reader.unfinish.title')}
+        </h2>
+        <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          {t('reader.unfinish.subtitle')}
+        </p>
+        <ul className={`list-disc list-inside text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          <li>{t('reader.unfinish.readAnother')}</li>
+          <li>{t('reader.unfinish.keepProgress')}</li>
+          <li>{t('reader.unfinish.buildStreak')}</li>
+        </ul>
+        <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          {t('reader.unfinish.consequences')}:
+        </p>
+        <ul className={`list-disc list-inside text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          <li>{t('reader.unfinish.removeFromList')}</li>
+          <li>{t('reader.unfinish.resetProgress')}</li>
+        </ul>
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className={`
-              px-4 py-2 rounded-lg font-medium
-              ${theme === 'dark' 
-                ? 'bg-green-600 text-white hover:bg-green-500' 
-                : 'bg-green-500 text-white hover:bg-green-400'
-              }
-            `}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors
+              ${theme === 'dark'
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-700 hover:bg-gray-100'
+              }`}
           >
-            Keep it! 🌟
+            Cancel
           </button>
           <button
             onClick={onConfirm}
-            className={`
-              px-4 py-2 rounded-lg font-medium
-              ${theme === 'dark'
-                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                : 'bg-red-50 text-red-600 hover:bg-red-100'
-              }
-            `}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
           >
-            Unfinish Article
+            {t('reader.unfinish.confirm')}
           </button>
         </div>
       </div>
     </div>
   );
-};
+}
 
 // Add NHKLogo component
 const NHKLogo = ({ className, theme }) => (

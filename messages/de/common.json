@@ -9,7 +9,7 @@
     "signOut": "Abmelden",
     "save": "Speichern",
     "delete": "Löschen",
-    "cancel": "Abbrechen",
+    "cancel": "Beibehalten! 🌟",
     "loading": "Lädt...",
     "error": "Ein Fehler ist aufgetreten",
     "success": "Erfolg!",
@@ -182,6 +182,17 @@
       },
       "voice": "Stimme",
       "updating": "Einstellungen werden aktualisiert..."
+    },
+    "unfinish": {
+      "title": "Warte! Bist du sicher?",
+      "subtitle": "Wenn du nur die Erfolgsanimation noch einmal sehen möchtest:",
+      "readAnother": "Lies einen anderen Artikel, um sie wieder zu sehen!",
+      "keepProgress": "Behalte deinen Fortschritt im Auge 📈",
+      "buildStreak": "Baue deine Lesestreaks aus 🔥",
+      "consequences": "Wenn du diesen Artikel als ungelesen markierst",
+      "removeFromList": "Wird er aus deinen gelesenen Artikeln entfernt",
+      "resetProgress": "Wird dein Fortschritt für diesen Artikel zurückgesetzt",
+      "confirm": "Als ungelesen markieren"
     }
   },
   "explorer": {
