@@ -171,8 +171,8 @@
       "basicLabel": "ベーシック",
       "allFreeFeatures": "無料プランの全機能に加えて：",
       "comingSoon": "近日公開",
-      "featureRequest": "ほしい機能がありますか？",
-      "suggestFeature": "ここで提案",
+      "featureRequest": "新機能のリクエストはありますか？",
+      "suggestFeature": "こちらから提案",
       "features": {
         "freeFeatures": "無料プランの機能",
         "newsBrowsing": "最新ニュース記事",
