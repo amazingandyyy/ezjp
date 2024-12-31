@@ -1,3 +1,10 @@
+# [1.40.0](https://github.com/amazingandyyy/ezjp/compare/v1.39.0...v1.40.0) (2024-12-31)
+
+
+### Features
+
+* improve loading states and localization in Download and NewsReader components ([ff2f715](https://github.com/amazingandyyy/ezjp/commit/ff2f7156c9893f961c4ad83c1bb31bbea184e5ce))
+
 # [1.39.0](https://github.com/amazingandyyy/ezjp/compare/v1.38.0...v1.39.0) (2024-12-31)
 
 
