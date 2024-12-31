@@ -1,6 +1,7 @@
 import './globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
 import ServiceWorkerRegistration from './sw-register';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'EZJP News',
@@ -31,6 +32,13 @@ export default function RootLayout({ children }) {
               })();
             `,
           }}
+        />
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="72fee403-5be8-4238-80c4-c099815f73d8"
+          data-domains="easy-jp-news.vercel.app"
+          strategy="afterInteractive"
         />
       </head>
       <body suppressHydrationWarning>
