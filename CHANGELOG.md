@@ -1,3 +1,10 @@
+# [1.37.0](https://github.com/amazingandyyy/ezjp/compare/v1.36.0...v1.37.0) (2024-12-31)
+
+
+### Features
+
+* enhance localization in NewsReaderContent and LoadingIndicator components ([fc278b9](https://github.com/amazingandyyy/ezjp/commit/fc278b9ae134161e093f5f8953042bab9d69aa9b))
+
 # [1.36.0](https://github.com/amazingandyyy/ezjp/compare/v1.35.0...v1.36.0) (2024-12-30)
 
 
