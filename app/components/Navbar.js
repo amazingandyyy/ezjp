@@ -300,7 +300,7 @@ export default function Navbar({
                 <p className={`text-xs font-medium ${
                   theme === "dark" ? "text-green-400/90" : "text-green-600/90"
                 }`}>
-                  +{stats.todayFinishedArticles} today
+                  +{stats.todayFinishedArticles} {t('navbar.profile.today')}
                 </p>
               )}
             </div>
@@ -598,7 +598,7 @@ export default function Navbar({
                                 <p className={`text-xs font-medium ${
                                   theme === "dark" ? "text-green-400/90" : "text-green-600/90"
                                 }`}>
-                                  +{stats.todayFinishedArticles} today
+                                  +{stats.todayFinishedArticles} {t('navbar.profile.today')}
                                 </p>
                               )}
                             </div>

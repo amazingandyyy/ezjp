@@ -17,7 +17,9 @@
       },
       "recent": {
         "title": "Récents",
-        "empty": "Pas de nouvelles pour le moment"
+        "empty": "Pas de nouvelles pour le moment",
+        "loading": "Chargement des nouvelles...",
+        "failed": "Échec du chargement des nouvelles. Veuillez réessayer."
       },
       "more": {
         "title": "Plus",

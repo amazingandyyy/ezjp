@@ -17,7 +17,9 @@
       },
       "recent": {
         "title": "Recent Articles",
-        "empty": "No recent articles"
+        "empty": "All articles have been read",
+        "loading": "Loading news...",
+        "failed": "Failed to load news. Please try again."
       },
       "more": {
         "title": "More News",

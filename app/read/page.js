@@ -3257,7 +3257,7 @@ function NewsReaderContent() {
                       : "text-gray-800"
                   }`}
                 >
-                  News List
+                  {t('newsListDrawer.title')}
                 </h2>
                 <button
                   onClick={() => setShowSidebar(false)}
@@ -3324,7 +3324,7 @@ function NewsReaderContent() {
                       />
                     </svg>
                   </div>
-                  <span className="font-medium">Show All News</span>
+                  <span className="font-medium">{t('newsListDrawer.title')}</span>
                 </div>
                 <svg
                   className="w-5 h-5"
@@ -3375,7 +3375,7 @@ function NewsReaderContent() {
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
                     </svg>
-                    Unread
+                    {t('newsListDrawer.tabs.unread')}
                   </button>
                   <button
                     onClick={() => setSidebarView("read")}
@@ -3403,7 +3403,7 @@ function NewsReaderContent() {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Read
+                    {t('newsListDrawer.status.finished')}
                   </button>
                   <button
                     onClick={() => setSidebarView("saved")}
@@ -3419,7 +3419,7 @@ function NewsReaderContent() {
                       }`}
                   >
                     <FaHeart className="w-3.5 h-3.5" />
-                    Saved
+                    {t('newsListDrawer.tabs.saved')}
                   </button>
                 </div>
               )}
@@ -3459,7 +3459,7 @@ function NewsReaderContent() {
                               : "text-gray-500"
                           }`}
                         >
-                          Loading news...
+                          {t('newsListDrawer.sections.recent.loading')}
                         </span>
                       </div>
                     ) : recentNewsError ? (
@@ -3478,7 +3478,7 @@ function NewsReaderContent() {
                           />
                         </svg>
                         <p className="text-sm text-red-500 text-center font-medium">
-                          Failed to load news. Please try again.
+                          {t('newsListDrawer.sections.recent.failed')}
                         </p>
                       </div>
                     ) : recentNews?.length > 0 ? (
@@ -3612,7 +3612,7 @@ function NewsReaderContent() {
                                     : "bg-gray-100/80 hover:bg-gray-200/80 text-gray-600"
                                 }`}
                             >
-                              <span className="font-medium">More News</span>
+                              <span className="font-medium">{t('newsListDrawer.sections.more.title')}</span>
                               <svg
                                 className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                                 viewBox="0 0 24 24"
@@ -3655,7 +3655,7 @@ function NewsReaderContent() {
                                     : "text-gray-500"
                                 }
                               >
-                                All articles have been read
+                                {t('newsListDrawer.sections.recent.empty')}
                               </span>
                             </div>
                           )
@@ -3807,7 +3807,7 @@ function NewsReaderContent() {
                             : "text-gray-500"
                         }
                       >
-                        No read articles yet
+                        {t('newsListDrawer.sections.recent.empty')}
                       </span>
                     </div>
                   )

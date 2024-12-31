@@ -425,7 +425,7 @@ export default function NewsList() {
                   <FaEyeSlash className="w-4 h-4 text-gray-400" />
                 )}
                 <span className="text-sm font-medium">
-                  {hideFinished ? t('explorer.showAll') : t('explorer.hideFinished')}
+                  {hideFinished ? t('newsListDrawer.tabs.all') : t('newsListDrawer.status.finished')}
                 </span>
               </button>
             </div>

@@ -17,7 +17,9 @@
       },
       "recent": {
         "title": "Gần đây",
-        "empty": "Không có tin tức mới"
+        "empty": "Không có tin tức mới",
+        "loading": "Đang tải tin tức...",
+        "failed": "Không thể tải tin tức. Vui lòng thử lại."
       },
       "more": {
         "title": "Xem thêm",

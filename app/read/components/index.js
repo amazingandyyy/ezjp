@@ -112,6 +112,8 @@ const RepeatIcon = ({ className, mode, theme }) => {
 
 // Add SavedNewsList component before NewsReaderContent
 const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) => {
+  const { t } = useTranslation();
+  
   const parseTitle = (title) => {
     try {
       // If title is a string that looks like JSON, parse it
@@ -143,7 +145,7 @@ const SavedNewsList = ({ news, theme, sourceUrl, onNewsClick, finishedUrls }) =>
           theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
         }`} />
         <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
-          No saved articles yet
+          {t('newsListDrawer.sections.saved.empty')}
         </span>
       </div>
     );

@@ -17,7 +17,9 @@
       },
       "recent": {
         "title": "Recientes",
-        "empty": "No hay noticias recientes"
+        "empty": "No hay noticias recientes",
+        "loading": "Cargando noticias...",
+        "failed": "Error al cargar las noticias. Por favor, inténtelo de nuevo."
       },
       "more": {
         "title": "Más",
