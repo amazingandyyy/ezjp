@@ -1,3 +1,10 @@
+# [1.38.0](https://github.com/amazingandyyy/ezjp/compare/v1.37.0...v1.38.0) (2024-12-31)
+
+
+### Features
+
+* improve furigana toggle functionality in NewsReaderContent component ([004296c](https://github.com/amazingandyyy/ezjp/commit/004296c7d6da662dca592af45ff88b931448cabb))
+
 # [1.37.0](https://github.com/amazingandyyy/ezjp/compare/v1.36.0...v1.37.0) (2024-12-31)
 
 
