@@ -1,3 +1,10 @@
+# [1.43.0](https://github.com/amazingandyyy/ezjp/compare/v1.42.0...v1.43.0) (2024-12-31)
+
+
+### Features
+
+* enhance onboarding experience with multi-step setup and localization support ([c206c86](https://github.com/amazingandyyy/ezjp/commit/c206c86e9eaadec79d9e2806117fa6daa2a8b946))
+
 # [1.42.0](https://github.com/amazingandyyy/ezjp/compare/v1.41.0...v1.42.0) (2024-12-31)
 
 
