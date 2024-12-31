@@ -3,6 +3,37 @@
     "saved": "保存済み",
     "settings": "設定"
   },
+  "newsListDrawer": {
+    "title": "ニュース",
+    "tabs": {
+      "all": "すべて",
+      "unread": "未読",
+      "saved": "保存済み"
+    },
+    "sections": {
+      "saved": {
+        "title": "保存済み",
+        "empty": "保存済みのニュースはありません"
+      },
+      "recent": {
+        "title": "最近",
+        "empty": "新着ニュースはありません"
+      },
+      "more": {
+        "title": "もっと見る",
+        "empty": "ニュースはありません"
+      }
+    },
+    "status": {
+      "read": "既読",
+      "unread": "未読",
+      "saved": "保存済み",
+      "finished": "完了"
+    },
+    "time": {
+      "today": "今日"
+    }
+  },
   "common": {
     "signOut": "ログアウト",
     "save": "保存",

@@ -3,6 +3,37 @@
     "saved": "Đã lưu",
     "settings": "Cài đặt"
   },
+  "newsListDrawer": {
+    "title": "Tin tức mới",
+    "tabs": {
+      "all": "Tất cả",
+      "unread": "Chưa đọc",
+      "saved": "Đã lưu"
+    },
+    "sections": {
+      "saved": {
+        "title": "Đã lưu",
+        "empty": "Chưa có tin tức nào được lưu"
+      },
+      "recent": {
+        "title": "Gần đây",
+        "empty": "Không có tin tức mới"
+      },
+      "more": {
+        "title": "Xem thêm",
+        "empty": "Không có tin tức nào khác"
+      }
+    },
+    "status": {
+      "read": "Đã đọc",
+      "unread": "Chưa đọc",
+      "saved": "Đã lưu",
+      "finished": "Đã hoàn thành"
+    },
+    "time": {
+      "today": "Hôm nay"
+    }
+  },
   "common": {
     "signOut": "Đăng xuất",
     "save": "Lưu",

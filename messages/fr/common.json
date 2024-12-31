@@ -3,6 +3,37 @@
     "saved": "Sauvegardés",
     "settings": "Paramètres"
   },
+  "newsListDrawer": {
+    "title": "Actualités",
+    "tabs": {
+      "all": "Tout",
+      "unread": "Non lu",
+      "saved": "Sauvegardé"
+    },
+    "sections": {
+      "saved": {
+        "title": "Sauvegardés",
+        "empty": "Aucun article sauvegardé"
+      },
+      "recent": {
+        "title": "Récents",
+        "empty": "Pas de nouvelles pour le moment"
+      },
+      "more": {
+        "title": "Plus",
+        "empty": "Pas plus d'articles"
+      }
+    },
+    "status": {
+      "read": "Lu",
+      "unread": "Non lu",
+      "saved": "Sauvegardé",
+      "finished": "Terminé"
+    },
+    "time": {
+      "today": "Aujourd'hui"
+    }
+  },
   "common": {
     "signOut": "Se déconnecter",
     "save": "Sauvegarder",

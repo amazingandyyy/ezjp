@@ -3,6 +3,37 @@
     "saved": "Saved",
     "settings": "Settings"
   },
+  "newsListDrawer": {
+    "title": "News List",
+    "tabs": {
+      "all": "All News",
+      "unread": "Unread",
+      "saved": "Saved"
+    },
+    "sections": {
+      "saved": {
+        "title": "Saved Articles",
+        "empty": "No saved articles yet"
+      },
+      "recent": {
+        "title": "Recent Articles",
+        "empty": "No recent articles"
+      },
+      "more": {
+        "title": "More News",
+        "empty": "No more articles available"
+      }
+    },
+    "status": {
+      "read": "Read",
+      "unread": "Unread",
+      "saved": "Saved",
+      "finished": "Finished"
+    },
+    "time": {
+      "today": "Today"
+    }
+  },
   "common": {
     "signOut": "Sign Out",
     "save": "Save",

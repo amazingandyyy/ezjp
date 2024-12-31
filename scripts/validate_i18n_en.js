@@ -260,12 +260,12 @@ Object.entries(unusedByFile).sort().forEach(([file, keys]) => {
   });
   
   // Remove keys from all language files
-  languageDirs.forEach(langDir => {
-    const langFile = path.join(langDir, file);
-    const langName = path.basename(langDir);
-    console.log(`  🗑️  Removing from ${langName}/${file}`);
-    removeKeysFromFile(langFile, keys.map(k => k.key));
-  });
+  // languageDirs.forEach(langDir => {
+  //   const langFile = path.join(langDir, file);
+  //   const langName = path.basename(langDir);
+  //   console.log(`  🗑️  Removing from ${langName}/${file}`);
+  //   removeKeysFromFile(langFile, keys.map(k => k.key));
+  // });
 });
 
 // Summary

@@ -3,6 +3,37 @@
     "saved": "Guardados",
     "settings": "Configuración"
   },
+  "newsListDrawer": {
+    "title": "Noticias",
+    "tabs": {
+      "all": "Todas",
+      "unread": "No leídas",
+      "saved": "Guardadas"
+    },
+    "sections": {
+      "saved": {
+        "title": "Guardadas",
+        "empty": "No hay noticias guardadas"
+      },
+      "recent": {
+        "title": "Recientes",
+        "empty": "No hay noticias recientes"
+      },
+      "more": {
+        "title": "Más",
+        "empty": "No hay más noticias"
+      }
+    },
+    "status": {
+      "read": "Leída",
+      "unread": "No leída",
+      "saved": "Guardada",
+      "finished": "Terminada"
+    },
+    "time": {
+      "today": "Hoy"
+    }
+  },
   "common": {
     "signOut": "Cerrar sesión",
     "save": "Guardar",

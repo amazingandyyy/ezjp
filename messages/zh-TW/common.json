@@ -3,6 +3,37 @@
     "saved": "已儲存",
     "settings": "設定"
   },
+  "newsListDrawer": {
+    "title": "新聞列表",
+    "tabs": {
+      "all": "全部",
+      "unread": "未讀",
+      "saved": "已儲存"
+    },
+    "sections": {
+      "saved": {
+        "title": "已儲存的新聞",
+        "empty": "沒有已儲存的新聞"
+      },
+      "recent": {
+        "title": "最近新聞",
+        "empty": "沒有最近新聞"
+      },
+      "more": {
+        "title": "更多新聞",
+        "empty": "沒有更多新聞"
+      }
+    },
+    "status": {
+      "read": "已讀",
+      "unread": "未讀",
+      "saved": "已儲存",
+      "finished": "已完成"
+    },
+    "time": {
+      "today": "今天"
+    }
+  },
   "common": {
     "signOut": "登出",
     "save": "儲存",

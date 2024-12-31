@@ -3,6 +3,37 @@
     "saved": "Gespeichert",
     "settings": "Einstellungen"
   },
+  "newsListDrawer": {
+    "title": "Neuigkeiten",
+    "tabs": {
+      "all": "Alle",
+      "unread": "Ungelesen",
+      "saved": "Gespeichert"
+    },
+    "sections": {
+      "saved": {
+        "title": "Gespeicherte Artikel",
+        "empty": "Keine gespeicherten Artikel"
+      },
+      "recent": {
+        "title": "Kürzlich",
+        "empty": "Keine kürzlichen Artikel"
+      },
+      "more": {
+        "title": "Mehr",
+        "empty": "Keine weiteren Artikel"
+      }
+    },
+    "status": {
+      "read": "Gelesen",
+      "unread": "Ungelesen",
+      "saved": "Gespeichert",
+      "finished": "Abgeschlossen"
+    },
+    "time": {
+      "today": "Heute"
+    }
+  },
   "common": {
     "signOut": "Abmelden",
     "save": "Speichern",

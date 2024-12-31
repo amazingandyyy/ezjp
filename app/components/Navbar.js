@@ -337,6 +337,13 @@ export default function Navbar({
     fetchVersion();
   }, [fetchVersion]);
 
+  // Add useEffect to check for username and redirect
+  useEffect(() => {
+    if (user && profile && !profile.username && router.pathname !== '/onboarding') {
+      router.push('/onboarding');
+    }
+  }, [user, profile, router]);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16">
       <div

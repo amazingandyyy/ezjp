@@ -3,6 +3,37 @@
     "saved": "Salvati",
     "settings": "Impostazioni"
   },
+  "newsListDrawer": {
+    "title": "Le tue notizie",
+    "tabs": {
+      "all": "Tutte",
+      "unread": "Non lette",
+      "saved": "Salvate"
+    },
+    "sections": {
+      "saved": {
+        "title": "Salvate",
+        "empty": "Non hai ancora salvato nessuna notizia"
+      },
+      "recent": {
+        "title": "Recenti",
+        "empty": "Non hai ancora nessuna notizia"
+      },
+      "more": {
+        "title": "Altro",
+        "empty": "Non ci sono altre notizie"
+      }
+    },
+    "status": {
+      "read": "Letta",
+      "unread": "Non letta",
+      "saved": "Salvata",
+      "finished": "Finita"
+    },
+    "time": {
+      "today": "Oggi"
+    }
+  },
   "common": {
     "signOut": "Esci",
     "save": "Salva",

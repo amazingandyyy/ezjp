@@ -3,6 +3,37 @@
     "saved": "저장됨",
     "settings": "설정"
   },
+  "newsListDrawer": {
+    "title": "뉴스",
+    "tabs": {
+      "all": "전체",
+      "unread": "읽지 않음",
+      "saved": "저장됨"
+    },
+    "sections": {
+      "saved": {
+        "title": "저장된 뉴스",
+        "empty": "저장된 뉴스가 없습니다"
+      },
+      "recent": {
+        "title": "최근 뉴스",
+        "empty": "최근 뉴스가 없습니다"
+      },
+      "more": {
+        "title": "더 보기",
+        "empty": "더 이상 뉴스가 없습니다"
+      }
+    },
+    "status": {
+      "read": "읽음",
+      "unread": "읽지 않음",
+      "saved": "저장됨",
+      "finished": "완료"
+    },
+    "time": {
+      "today": "오늘"
+    }
+  },
   "common": {
     "signOut": "로그아웃",
     "save": "저장",
