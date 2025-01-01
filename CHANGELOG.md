@@ -1,3 +1,11 @@
+## [1.45.1](https://github.com/amazingandyyy/ezjp/compare/v1.45.0...v1.45.1) (2025-01-01)
+
+
+### Bug Fixes
+
+* update Japanese voice localization in common.json for enhanced clarity and quality ([0747d84](https://github.com/amazingandyyy/ezjp/commit/0747d84b8cfcb6fefa966a4e51f9a47237cff61e))
+* update MembershipSection button functionality and improve voice localization ([4a8a229](https://github.com/amazingandyyy/ezjp/commit/4a8a2299b53209f8486754c98d1ea0964c0327f2))
+
 # [1.45.0](https://github.com/amazingandyyy/ezjp/compare/v1.44.1...v1.45.0) (2025-01-01)
 
 
