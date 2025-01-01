@@ -1,3 +1,10 @@
+# [1.49.0](https://github.com/amazingandyyy/ezjp/compare/v1.48.0...v1.49.0) (2025-01-01)
+
+
+### Features
+
+* add translation functionality and premium status check in NewsReaderContent ([a62b893](https://github.com/amazingandyyy/ezjp/commit/a62b893051fde94a503a9def7b03d807a5f85c0e))
+
 # [1.48.0](https://github.com/amazingandyyy/ezjp/compare/v1.47.0...v1.48.0) (2025-01-01)
 
 
