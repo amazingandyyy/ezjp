@@ -478,7 +478,7 @@ export default function Navbar({
                               : "shadow-lg shadow-gray-400/50"
                             : theme === "dark"
                               ? profile?.role_level > 0
-                                ? "border-2 border-amber-300/60"
+                                ? "border-2 border-amber-300"
                                 : "border-2 border-gray-700"
                               : profile?.role_level > 0
                                 ? "border-2 border-amber-300"
@@ -493,7 +493,7 @@ export default function Navbar({
                             : "shadow-lg shadow-gray-400/50"
                           : theme === "dark"
                             ? profile?.role_level > 0
-                              ? "border-2 border-amber-300/60"
+                              ? "border-2 border-amber-300"
                               : "border-2 border-gray-700"
                             : profile?.role_level > 0
                               ? "border-2 border-amber-300"
@@ -508,12 +508,12 @@ export default function Navbar({
                       </div>
                     )}
                     {profile?.role_level > 0 && (
-                      <div className={`absolute -top-1.5 -right-1.5 p-1 rounded-full ${
+                      <div className={`absolute -top-1.5 -right-1.5 p-1 rounded-md shadow-lg ${
                         theme === "dark"
-                          ? "bg-gray-800 text-amber-300"
-                          : "bg-white text-amber-400"
+                          ? "bg-gradient-to-br from-amber-200 via-amber-300 to-amber-400 text-amber-900 ring-1 ring-amber-200/50"
+                          : "bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 text-amber-900 ring-1 ring-amber-300/50"
                       }`}>
-                        <FaCrown className="w-2.5 h-2.5" />
+                        <FaCrown className="w-2 h-2" />
                       </div>
                     )}
                   </div>

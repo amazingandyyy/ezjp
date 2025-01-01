@@ -120,6 +120,8 @@ export default function OnboardingPage() {
     // Only allow navigation to completed steps or the current step
     if (step < currentStep || step === currentStep || stepStatus[step - 1]?.completed) {
       setCurrentStep(step);
+      // Scroll to top immediately
+      window.scrollTo(0, 0);
     }
   };
 

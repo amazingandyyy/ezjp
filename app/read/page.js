@@ -2620,8 +2620,18 @@ function NewsReaderContent() {
       return;
     }
     
-    // Check if user is premium
-    if (!user?.role_level) {
+    // Add debug logging
+    console.log('Debug - User and Profile info:', {
+      userId: user?.id,
+      roleLevel: profile?.role_level,
+      userObject: user,
+      profileObject: profile,
+      preferredLanguage: preferenceState.preferred_translation_language
+    });
+    
+    // Check if user is premium using profile.role_level
+    if (!profile?.role_level) {
+      console.log('Debug - Access denied: No role_level found in profile');
       setToastMessage("Premium feature: Sign up for premium to access AI tutor");
       setShowToast(true);
       setTimeout(() => {
@@ -2629,6 +2639,8 @@ function NewsReaderContent() {
       }, 5000);
       return;
     }
+
+    console.log('Debug - Access granted: role_level =', profile.role_level);
     
     // If it's a follow-up question, add it to conversations immediately
     if (followUpQuestion) {
@@ -2658,7 +2670,8 @@ function NewsReaderContent() {
           articleId: currentArticleId,
           sentenceIndex: index,
           userId: user?.id,
-          followUpQuestion
+          followUpQuestion,
+          lang: preferenceState.preferred_translation_language
         }),
       });
 
