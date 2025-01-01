@@ -1,3 +1,10 @@
+# [1.45.0](https://github.com/amazingandyyy/ezjp/compare/v1.44.1...v1.45.0) (2025-01-01)
+
+
+### Features
+
+* enhance voice selection and premium feature handling in NewsReaderContent ([47c783a](https://github.com/amazingandyyy/ezjp/commit/47c783ae72e9f61fcae1db09ec0a11fe5211617f))
+
 ## [1.44.1](https://github.com/amazingandyyy/ezjp/compare/v1.44.0...v1.44.1) (2024-12-31)
 
 
