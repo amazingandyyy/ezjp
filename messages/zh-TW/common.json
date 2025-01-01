@@ -174,7 +174,7 @@
         "freeFeatures": "免費方案功能",
         "newsBrowsing": "最新新聞文章",
         "translation": "翻譯",
-        "voice": "日語語音",
+        "voice": "進階日語語音",
         "aiTutor": "AI家教",
         "wordBank": "單字本",
         "customLists": "自訂單字清單",
@@ -183,7 +183,7 @@
       "descriptions": {
         "newsBrowsing": "無限制瀏覽日語新聞文章",
         "translation": "每句話的日語到英語翻譯",
-        "voice": "內容語音朗讀",
+        "voice": "高品質日語語音，具有自然發音",
         "aiTutor": "互動式AI家教，逐句詳細解說文法、詞彙和文化背景",
         "wordBank": "儲存單字並稍後複習",
         "customLists": "建立並管理自訂單字清單",
@@ -202,9 +202,9 @@
           "free": "無限制"
         },
         "voice": {
-          "premium": "生成式AI驅動高品質語音",
-          "basic": "基本日語語音",
-          "free": "基本日語語音"
+          "premium": "AI驅動的高品質自然語音",
+          "basic": "標準日語語音",
+          "free": "標準日語語音"
         },
         "aiTutor": {
           "premium": "無限制使用",
