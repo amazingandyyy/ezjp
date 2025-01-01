@@ -235,8 +235,8 @@ export default function MembershipSection({ theme = 'light' }) {
                           ? "bg-green-500/20 border-green-500/30 text-green-400"
                           : "bg-green-50 border-green-500/30 text-green-600"
                         : isDark
-                          ? "bg-gray-800/80 border-gray-700/50 text-gray-300"
-                          : "bg-green-50 border-green-200 text-green-600"
+                        ? "bg-gray-800/80 border-gray-700/50 text-gray-300"
+                        : "bg-green-50 border-green-200 text-green-600"
                     }`}
                   >
                     <FaCheck
@@ -246,8 +246,8 @@ export default function MembershipSection({ theme = 'light' }) {
                             ? "text-green-400"
                             : "text-green-600"
                           : isDark
-                            ? "text-gray-300"
-                            : "text-green-600"
+                          ? "text-gray-300"
+                          : "text-green-600"
                       }`}
                     />
                     <span className="text-sm font-medium">
@@ -268,9 +268,9 @@ export default function MembershipSection({ theme = 'light' }) {
                         : plan.isCurrentPlan
                         ? isDark
                           ? "bg-gray-700 text-gray-300"
-                          : "bg-yellow-100 text-yellow-600"
+                          : "bg-gradient-to-br from-yellow-400/90 via-yellow-500/90 to-yellow-600/90 text-yellow-100 shadow-lg shadow-yellow-500/20"
                         : isDark
-                        ? "bg-gray-700 text-gray-300"
+                        ? "bg-gradient-to-br from-yellow-400/90 via-yellow-500/90 to-yellow-600/90 text-yellow-100 shadow-lg shadow-yellow-500/20"
                         : "bg-yellow-100 text-yellow-600"
                     }`}
                   >
@@ -402,9 +402,7 @@ export default function MembershipSection({ theme = 'light' }) {
                       ) : feature.includesAll ? (
                         <svg
                           className={`w-3 h-3 ${
-                            isDark
-                              ? "text-yellow-400"
-                              : "text-yellow-600"
+                            isDark ? "text-yellow-400" : "text-yellow-600"
                           }`}
                           fill="none"
                           viewBox="0 0 24 24"
@@ -572,17 +570,16 @@ export default function MembershipSection({ theme = 'light' }) {
                     onClick={handleSubscribe}
                     disabled={isLoading}
                     className={`w-full rounded-lg px-4 py-3 text-center font-medium text-white shadow-sm transition-all duration-200 ${
-                      isLoading 
+                      isLoading
                         ? "bg-yellow-400/90 cursor-not-allowed"
                         : "bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
                     }`}
                   >
-                    {isLoading 
+                    {isLoading
                       ? t("settings.membership.processing")
                       : billingInterval === "monthly"
-                        ? t("settings.membership.monthlySubscribe")
-                        : t("settings.membership.yearlySubscribe")
-                    }
+                      ? t("settings.membership.monthlySubscribe")
+                      : t("settings.membership.yearlySubscribe")}
                   </button>
                   <button
                     onClick={handleRestoreMembership}
@@ -593,10 +590,9 @@ export default function MembershipSection({ theme = 'light' }) {
                         : "text-gray-500 hover:text-gray-700"
                     } hover:underline`}
                   >
-                    {isLoading 
+                    {isLoading
                       ? t("settings.membership.processing")
-                      : t("settings.membership.restoreMembership")
-                    }
+                      : t("settings.membership.restoreMembership")}
                   </button>
                 </div>
               )}
