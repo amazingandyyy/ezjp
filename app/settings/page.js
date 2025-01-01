@@ -293,7 +293,12 @@ function SettingsContent() {
           updateData = { username: value.trim() };
           break;
         case 'japanese_level':
-          updateData = { japanese_level: value };
+          const normalizedLevel = value.toUpperCase();
+          if (!['N5', 'N4', 'N3', 'N2', 'N1', 'NATIVE'].includes(normalizedLevel)) {
+            setError(t('settings.profile.errors.invalidLevel'));
+            return;
+          }
+          updateData = { japanese_level: normalizedLevel };
           break;
         case 'self_introduction':
           updateData = { self_introduction: value.trim() };
@@ -1009,42 +1014,42 @@ function SettingsContent() {
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         {
-                          level: "n5",
+                          level: "N5",
                           displayLevel: t("settings.profile.jlptLevels.n5"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.n5"
                           ),
                         },
                         {
-                          level: "n4",
+                          level: "N4",
                           displayLevel: t("settings.profile.jlptLevels.n4"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.n4"
                           ),
                         },
                         {
-                          level: "n3",
+                          level: "N3",
                           displayLevel: t("settings.profile.jlptLevels.n3"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.n3"
                           ),
                         },
                         {
-                          level: "n2",
+                          level: "N2",
                           displayLevel: t("settings.profile.jlptLevels.n2"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.n2"
                           ),
                         },
                         {
-                          level: "n1",
+                          level: "N1",
                           displayLevel: t("settings.profile.jlptLevels.n1"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.n1"
                           ),
                         },
                         {
-                          level: "native",
+                          level: "NATIVE",
                           displayLevel: t("settings.profile.jlptLevels.native"),
                           description: t(
                             "settings.profile.jlptLevels.descriptions.native"

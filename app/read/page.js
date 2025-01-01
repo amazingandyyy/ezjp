@@ -300,7 +300,27 @@ function NewsReaderContent() {
   };
 
   // Handle voice change
-  const handleVoiceChange = async (newVoice) => {
+  const handleVoiceChange = async (voiceName) => {
+    if ((voiceName.includes("Neural2") || voiceName.includes("Wavenet")) && !isPremium) {
+      setToastMessage({
+        type: "info",
+        title: t("reader.premiumFeature"),
+        message: t("reader.upgradeForPremiumVoices"),
+        action: {
+          label: t("reader.upgrade"),
+          onClick: () => router.push("/settings?section=membership")
+        }
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+      return;
+    }
+
+    setUpdatingPreferences((prev) => ({
+      ...prev,
+      preferred_voice: true,
+    }));
+
     try {
       setUpdatingPreferences(prev => ({ ...prev, voice: true }));
       setIsVoiceLoading(true);
@@ -320,7 +340,7 @@ function NewsReaderContent() {
       if (user) {
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ preferred_voice: newVoice })
+          .update({ preferred_voice: voiceName })
           .eq('id', user.id);
 
         if (updateError) throw updateError;
@@ -329,7 +349,7 @@ function NewsReaderContent() {
       // Update local state and wait for it to be reflected
       setPreferenceState(prev => ({
         ...prev,
-        preferred_voice: newVoice
+        preferred_voice: voiceName
       }));
 
       // Wait for state update to be reflected
@@ -349,7 +369,7 @@ function NewsReaderContent() {
           body: JSON.stringify({
             text: sentenceText,
             speed: preferenceState.preferred_speed,
-            voice: newVoice, // Use new voice directly
+            voice: voiceName, // Use new voice directly
             userId: user?.id,
             articleId: currentArticleId,
             sentenceIndex: currentSentence,
@@ -375,7 +395,7 @@ function NewsReaderContent() {
         };
 
         // Cache the new audio
-        const cacheKey = `${sentenceText}_${newVoice}_${preferenceState.preferred_speed}`;
+        const cacheKey = `${sentenceText}_${voiceName}_${preferenceState.preferred_speed}`;
         setAudioCache(prev => ({
           ...prev,
           [cacheKey]: url
@@ -3183,15 +3203,30 @@ function NewsReaderContent() {
                         : ""
                     }`}
                   >
-                    {availableVoices.map((voice) => (
-                      <option key={voice.name} value={voice.name}>
-                        {voice.displayName} (
-                        {(voice.ssmlGender || "unspecified").toLowerCase()})
-                        {(voice.name.includes("Neural2") ||
-                          voice.name.includes("Wavenet")) &&
-                          " (Premium)"}
-                      </option>
-                    ))}
+                    {availableVoices.map((voice) => {
+                      const isPremiumVoice = voice.name.includes("Neural2") || voice.name.includes("Wavenet");
+                      return (
+                        <option 
+                          key={voice.name} 
+                          value={voice.name}
+                          className={`${
+                            isPremiumVoice && !isPremium
+                              ? preferenceState.theme === "dark"
+                                ? "text-yellow-400"
+                                : "text-yellow-600"
+                              : ""
+                          }`}
+                        >
+                          {voice.displayName} (
+                          {(voice.ssmlGender || "unspecified").toLowerCase()})
+                          {isPremiumVoice && (
+                            isPremium
+                              ? " (Premium)"
+                              : " (Premium Only)"
+                          )}
+                        </option>
+                      );
+                    })}
                     {availableVoices.length === 0 && (
                       <option value="" disabled>
                         {t("reader.loadingVoices")}
