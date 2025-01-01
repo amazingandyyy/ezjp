@@ -1,3 +1,12 @@
+# [1.46.0](https://github.com/amazingandyyy/ezjp/compare/v1.45.1...v1.46.0) (2025-01-01)
+
+
+### Features
+
+* enhance follow-up question handling and vocabulary table formatting in tutor API ([fc215d1](https://github.com/amazingandyyy/ezjp/commit/fc215d125bde04e0ccb4a999c3d7def3946287a3))
+* enhance footer and navbar styling, improve onboarding experience, and add debug logging ([dcefad1](https://github.com/amazingandyyy/ezjp/commit/dcefad1e6885eecd8707dcfe5e7664affd08d568))
+* enhance layout with footer and theme management ([62e4659](https://github.com/amazingandyyy/ezjp/commit/62e465911089dba70dcf4041f0d17110808766d5))
+
 ## [1.45.1](https://github.com/amazingandyyy/ezjp/compare/v1.45.0...v1.45.1) (2025-01-01)
 
 
