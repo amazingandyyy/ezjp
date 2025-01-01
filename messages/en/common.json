@@ -191,14 +191,14 @@
         "freeFeatures": "Free Plan Features",
         "newsBrowsing": "All Latest News Articles",
         "translation": "Translation",
-        "voice": "Japanese Voice",
+        "voice": "Advanced Japanese Voice",
         "aiTutor": "AI Tutor",
         "wordBank": "Word Bank"
       },
       "descriptions": {
         "newsBrowsing": "Free unlimited access to Japanese news articles",
         "translation": "Japanese to English translation on each sentence",
-        "voice": "Japanese voice for content reading",
+        "voice": "High-quality Japanese voice with natural pronunciation",
         "aiTutor": "Interactive AI tutor that helps you understand Japanese grammar, vocabulary, and cultural context in each sentence",
         "wordBank": "Save words and review them later",
         "freeFeatures": "All features in Free Plan, plus:"
@@ -213,8 +213,8 @@
           "basic": "Unlimited"
         },
         "voice": {
-          "premium": "Generative AI-powered high-quality voices",
-          "basic": "Basic Japanese voice"
+          "premium": "High-quality AI-powered natural voices",
+          "basic": "Standard Japanese voice"
         },
         "aiTutor": {
           "free": "Premium feature only",

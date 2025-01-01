@@ -174,14 +174,14 @@
         "freeFeatures": "Fonctionnalités Gratuites",
         "newsBrowsing": "Articles d'Actualités Récents",
         "translation": "Traduction",
-        "voice": "Voix Japonaise",
+        "voice": "Voix Japonaise Avancée",
         "aiTutor": "Tuteur IA",
         "wordBank": "Banque de Mots"
       },
       "descriptions": {
         "newsBrowsing": "Accès illimité aux articles en japonais avec mises à jour quotidiennes",
         "translation": "Traduction japonais-anglais professionnelle pour chaque phrase",
-        "voice": "Lecture vocale du contenu avec voix naturelle",
+        "voice": "Voix japonaise de haute qualité avec prononciation naturelle",
         "aiTutor": "Assistant IA personnel pour l'apprentissage du japonais",
         "wordBank": "Système complet de révision de vocabulaire personnalisé",
         "freeFeatures": "Toutes les fonctionnalités du Plan Gratuit, plus :"
@@ -198,9 +198,9 @@
           "premium": "Illimité"
         },
         "voice": {
-          "free": "Voix basique limitée",
+          "premium": "Voix de haute qualité avec IA naturelle",
           "basic": "Voix japonaise standard",
-          "premium": "Voix haute qualité générée par IA"
+          "free": "Voix japonaise standard"
         },
         "aiTutor": {
           "free": "5 questions par jour",

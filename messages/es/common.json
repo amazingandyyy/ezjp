@@ -180,17 +180,16 @@
         "freeFeatures": "Funciones Gratuitas",
         "newsBrowsing": "Artículos de Noticias Recientes",
         "translation": "Traducción",
-        "voice": "Voz en Japonés",
+        "voice": "Voz Japonesa Avanzada",
         "aiTutor": "Tutor de IA",
         "wordBank": "Banco de Palabras"
       },
       "descriptions": {
         "newsBrowsing": "Acceso ilimitado a artículos en japonés",
         "translation": "Traducción de japonés a inglés en cada oración",
-        "voice": "Lectura de contenido por voz",
+        "voice": "Voz japonesa de alta calidad con pronunciación natural",
         "aiTutor": "Tutor de IA interactivo que te ayuda a entender la gramática, el vocabulario y el contexto cultural en cada oración",
-        "wordBank": "Guarda palabras y repásalas después",
-        "freeFeatures": "Todas las funciones del Plan Gratuito, más:"
+        "wordBank": "Guarda palabras y repásalas después"
       },
       "limits": {
         "newsBrowsing": {
@@ -204,8 +203,8 @@
           "free": "Ilimitado"
         },
         "voice": {
-          "premium": "Voces de alta calidad con IA generativa",
-          "basic": "Voz japonesa básica",
+          "premium": "Voces de alta calidad con IA natural",
+          "basic": "Voz japonesa estándar",
           "free": "No disponible"
         },
         "aiTutor": {

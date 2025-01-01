@@ -582,7 +582,7 @@ export default function MembershipSection({ theme = 'light' }) {
                       : t("settings.membership.yearlySubscribe")}
                   </button>
                   <button
-                    onClick={handleRestoreMembership}
+                    onClick={handleSubscribe}
                     disabled={isLoading}
                     className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                       isDark
@@ -590,9 +590,7 @@ export default function MembershipSection({ theme = 'light' }) {
                         : "text-gray-500 hover:text-gray-700"
                     } hover:underline`}
                   >
-                    {isLoading
-                      ? t("settings.membership.processing")
-                      : t("settings.membership.restoreMembership")}
+                    {t("settings.membership.restoreMembership")}
                   </button>
                 </div>
               )}

@@ -177,17 +177,16 @@
         "freeFeatures": "無料プランの機能",
         "newsBrowsing": "最新ニュース記事",
         "translation": "翻訳",
-        "voice": "日本語音声",
+        "voice": "高度な日本語音声",
         "aiTutor": "AIチューター",
         "wordBank": "単語帳"
       },
       "descriptions": {
         "newsBrowsing": "日本語ニュース記事への無制限アクセス",
         "translation": "各文の日本語から英語への翻訳",
-        "voice": "コンテンツの音声読み上げ",
+        "voice": "自然な発音の高品質な日本語音声",
         "aiTutor": "文ごとに文法、語彙、文化的な背景を詳しく解説するインタラクティブなAIチューター",
-        "wordBank": "単語を保存して後で復習",
-        "freeFeatures": "無料プランの全機能に加えて："
+        "wordBank": "単語を保存して後で復習"
       },
       "limits": {
         "newsBrowsing": {
@@ -201,9 +200,9 @@
           "free": "無制限"
         },
         "voice": {
-          "premium": "生成AI搭載の高品質音声",
-          "basic": "基本的な日本語音声",
-          "free": "基本的な日本語音声"
+          "premium": "AI搭載の高品質な自然音声",
+          "basic": "標準的な日本語音声",
+          "free": "標準的な日本語音声"
         },
         "aiTutor": {
           "premium": "無制限アクセス",

@@ -177,7 +177,7 @@
       "features": {
         "newsBrowsing": "최신 뉴스 기사",
         "translation": "번역",
-        "voice": "일본어 음성",
+        "voice": "고급 일본어 음성",
         "aiTutor": "AI 튜터",
         "wordBank": "단어장",
         "freeFeatures": "무료 플랜 기능"
@@ -185,10 +185,9 @@
       "descriptions": {
         "newsBrowsing": "일본어 뉴스 기사 무제한 이용",
         "translation": "각 문장의 일본어에서 영어로 번역",
-        "voice": "콘텐츠 음성 읽기",
+        "voice": "자연스러운 발음의 고품질 일본어 음성",
         "aiTutor": "문장별로 문법, 어휘, 문화적 맥락을 자세히 설명해주는 대화형 AI 튜터",
-        "wordBank": "단어 저장 및 복습",
-        "freeFeatures": "무료 플랜의 모든 기능에 추가로:"
+        "wordBank": "단어 저장 및 복습"
       },
       "limits": {
         "newsBrowsing": {
@@ -202,9 +201,9 @@
           "free": "무제한"
         },
         "voice": {
-          "premium": "생성 AI 기반 고품질 음성",
-          "basic": "기본 일본어 음성",
-          "free": "기본 일본어 음성"
+          "premium": "AI 기반 고품질 자연 음성",
+          "basic": "표준 일본어 음성",
+          "free": "표준 일본어 음성"
         },
         "aiTutor": {
           "premium": "무제한 이용",

@@ -178,7 +178,7 @@
         "freeFeatures": "Funzionalità Gratuite",
         "newsBrowsing": "Articoli di Notizie Recenti",
         "translation": "Traduzione",
-        "voice": "Voce Giapponese",
+        "voice": "Voce Giapponese Avanzata",
         "aiTutor": "Tutor AI",
         "wordBank": "Banca delle Parole"
       },
@@ -186,7 +186,7 @@
         "freeFeatures": "Tutte le funzionalità del Piano Gratuito, più:",
         "newsBrowsing": "Accesso illimitato agli articoli in giapponese",
         "translation": "Traduzione dal giapponese all'inglese per ogni frase",
-        "voice": "Lettura vocale dei contenuti",
+        "voice": "Voce giapponese di alta qualità con pronuncia naturale",
         "aiTutor": "Tutor AI interattivo che ti aiuta a comprendere la grammatica, il vocabolario e il contesto culturale in ogni frase",
         "wordBank": "Salva le parole e ripassale dopo"
       },
@@ -202,9 +202,9 @@
           "basic": "Illimitato"
         },
         "voice": {
-          "free": "Limitato",
-          "premium": "Voci di alta qualità con AI generativa",
-          "basic": "Voce giapponese base"
+          "free": "Voce giapponese standard",
+          "premium": "Voci di alta qualità con AI naturale",
+          "basic": "Voce giapponese standard"
         },
         "aiTutor": {
           "free": "Non disponibile",
