@@ -2592,7 +2592,9 @@ function NewsReaderContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           text,
-          target: preferenceState.preferred_translation_language
+          target: preferenceState.preferred_translation_language,
+          articleId: currentArticleId,
+          sentenceIndex: index
         }),
       });
 
