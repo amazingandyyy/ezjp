@@ -2001,6 +2001,7 @@ function NewsReaderContent() {
                           __html: marked(
                             tutorExplanations[index]
                               .split("# Key Vocabulary")[1]
+                              .split("\n\n")[0]
                               .replace(/^\s*\n/gm, "")
                           ),
                         }}

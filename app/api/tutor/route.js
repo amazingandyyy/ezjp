@@ -75,6 +75,7 @@ Guidelines:
 - Maintain consistent formatting
 - Be concise but thorough
 - ALL responses must be in <LANGUAGE>
+- Always add two newlines after the vocabulary table
 
 For follow-up questions:
 - Be conversational and natural, like a friendly tutor chatting with a student
@@ -112,10 +113,21 @@ export async function POST(request) {
 
     if (followUpQuestion) {
       console.log('Follow-up question:', followUpQuestion);
+      const followUpSystemPrompt = `You are continuing to help the user understand Japanese text. Your role is to provide brief, natural responses that are easy to understand.
+
+IMPORTANT RULES:
+1. You MUST respond ONLY in ${fullLanguage}
+2. Do not use any other language
+3. Keep responses conversational (2-3 sentences)
+4. Use a friendly, tutoring tone
+5. No markdown formatting needed
+
+Remember: ALL communication must be in ${fullLanguage}`;
+
       messages.push(
-        { role: "system", content: `For follow-up questions, give brief, natural responses without any markdown formatting or sections. Keep answers conversational and concise (2-3 sentences). Use a friendly tone. IMPORTANT: You MUST respond in ${fullLanguage} only.` },
-        { role: "assistant", content: `I'll continue helping you understand this sentence in ${fullLanguage}.` },
-        { role: "user", content: `${followUpQuestion} (Please respond in ${fullLanguage})` }
+        { role: "system", content: followUpSystemPrompt },
+        { role: "assistant", content: `I'll continue our discussion in ${fullLanguage}.` },
+        { role: "user", content: followUpQuestion }
       );
     }
 
