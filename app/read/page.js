@@ -2600,6 +2600,16 @@ function NewsReaderContent() {
       return;
     }
     
+    // Check if user is premium
+    if (!user?.role_level || user.role_level <= 0) {
+      setToastMessage("Premium feature: Sign up for premium to access AI tutor");
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+      return;
+    }
+    
     // If it's a follow-up question, add it to conversations immediately
     if (followUpQuestion) {
       setConversations(prev => ({
@@ -4580,12 +4590,15 @@ function NewsReaderContent() {
             }`}
             onClick={() => {
               setShowToast(false);
-              const ref = toastMessage.includes("save articles")
-                ? "heart"
-                : toastMessage.includes("track your reading")
-                ? "finished"
-                : "reader-preference";
-              router.push(`/join?theme=dark&ref=${ref}`);
+              if (toastMessage.includes("Premium feature")) {
+                router.push("/settings?section=membership&ref=ai_tutor");
+              } else if (toastMessage.includes("save articles")) {
+                router.push('/join?theme=dark&ref=heart');
+              } else if (toastMessage.includes("track your reading")) {
+                router.push('/join?theme=dark&ref=finished');
+              } else {
+                router.push('/join?theme=dark&ref=reader-preference');
+              }
             }}
           >
             <div

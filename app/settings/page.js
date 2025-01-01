@@ -98,6 +98,27 @@ function SettingsContent() {
   console.log('User:', user);
   console.log('Profile:', profile);
 
+  // Add separate useEffect for initial scroll
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section) {
+      // Add a small delay to ensure the DOM is ready
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          const navHeight = 120;
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - navHeight;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+          setActiveSection(section);
+        }
+      }, 100);
+    }
+  }, [searchParams]);
+
   // Add scroll tracking
   useEffect(() => {
     // Set up intersection observer
@@ -122,22 +143,6 @@ function SettingsContent() {
     // Observe all section elements
     const sections = document.querySelectorAll('[id="profile"], [id="membership"], [id="language"], [id="appearance"], [id="goals"], [id="data"], [id="software"]');
     sections.forEach((section) => observer.observe(section));
-
-    // Handle initial section from URL
-    const section = searchParams.get('section');
-    if (section) {
-      const element = document.getElementById(section);
-      if (element) {
-        const navHeight = 120;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navHeight;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-        setActiveSection(section);
-      }
-    }
 
     // Cleanup observer
     return () => {

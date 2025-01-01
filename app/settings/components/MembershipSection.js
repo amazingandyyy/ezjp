@@ -18,8 +18,8 @@ const getPlans = (t, isPremium, billingInterval) => [
       { name: 'features.newsBrowsing', limit: t('settings.membership.limits.newsBrowsing.basic'), basic: true },
       { name: 'features.translation', limit: t('settings.membership.limits.translation.basic'), basic: true },
       { name: 'features.voice', limit: t('settings.membership.limits.voice.basic'), basic: true },
-      { name: 'features.aiTutor', notAvailable: true },
-      { name: 'features.wordBank', notAvailable: true }
+      // { name: 'features.aiTutor', notAvailable: true },
+      // { name: 'features.wordBank', notAvailable: true }
     ],
     buttonAction: null,
     buttonText: isPremium ? t('settings.membership.basicPlan') : t('settings.membership.currentPlan'),
@@ -215,8 +215,8 @@ export default function MembershipSection({ theme = 'light' }) {
               className={`relative p-8 rounded-2xl border ${
                 plan.isCurrentPlan && !plan.price
                   ? isDark
-                    ? "border-yellow-500/30 bg-gradient-to-b from-yellow-500/20 to-yellow-500/5 shadow-lg shadow-yellow-500/10"
-                    : "border-yellow-500/30 bg-gradient-to-b from-yellow-50 to-transparent shadow-lg"
+                    ? "border-gray-700/50 bg-gradient-to-b from-gray-700/20 to-gray-700/5 shadow-lg shadow-gray-500/10"
+                    : "border-gray-200 bg-gradient-to-b from-gray-50 to-transparent shadow-lg"
                   : plan.price
                   ? isDark
                     ? "border-gray-700/50 bg-gray-800/50"
@@ -235,8 +235,8 @@ export default function MembershipSection({ theme = 'light' }) {
                           ? "bg-green-500/20 border-green-500/30 text-green-400"
                           : "bg-green-50 border-green-500/30 text-green-600"
                         : isDark
-                          ? "bg-yellow-900/80 border-yellow-500/30 text-yellow-400"
-                          : "bg-yellow-50 border-yellow-500/30 text-yellow-600"
+                          ? "bg-gray-800/80 border-gray-700/50 text-gray-300"
+                          : "bg-gray-100 border-gray-200 text-gray-600"
                     }`}
                   >
                     <FaCheck
@@ -246,8 +246,8 @@ export default function MembershipSection({ theme = 'light' }) {
                             ? "text-green-400"
                             : "text-green-600"
                           : isDark
-                            ? "text-yellow-400"
-                            : "text-yellow-600"
+                            ? "text-gray-300"
+                            : "text-gray-600"
                       }`}
                     />
                     <span className="text-sm font-medium">
@@ -267,11 +267,11 @@ export default function MembershipSection({ theme = 'light' }) {
                           : "bg-green-100 text-green-600"
                         : plan.isCurrentPlan
                         ? isDark
-                          ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-white shadow-lg shadow-yellow-500/20"
-                          : "bg-gradient-to-br from-yellow-400 to-yellow-500 text-white shadow-lg shadow-yellow-500/20"
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-600"
                         : isDark
-                        ? "bg-gradient-to-br from-yellow-500/80 to-yellow-600/80 text-white shadow-lg shadow-yellow-500/20"
-                        : "bg-gradient-to-br from-yellow-400 to-yellow-500 text-white shadow-lg shadow-yellow-500/20"
+                        ? "bg-gray-700 text-gray-300"
+                        : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     {plan.price ? (
@@ -285,8 +285,8 @@ export default function MembershipSection({ theme = 'light' }) {
                       className={`text-lg font-medium ${
                         plan.isCurrentPlan && !plan.price
                           ? isDark
-                            ? "text-yellow-400"
-                            : "text-yellow-600"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                           : isDark
                           ? "text-gray-200"
                           : "text-gray-900"
@@ -299,11 +299,11 @@ export default function MembershipSection({ theme = 'light' }) {
                         className={`text-sm ${
                           plan.isCurrentPlan
                             ? isDark
-                              ? "text-yellow-400/80"
-                              : "text-yellow-600"
+                              ? "text-gray-400"
+                              : "text-gray-600"
                             : isDark
-                            ? "text-yellow-400/80"
-                            : "text-yellow-600"
+                            ? "text-gray-400"
+                            : "text-gray-600"
                         }`}
                       >
                         {t("settings.membership.unlimitedAccess")}
@@ -379,8 +379,8 @@ export default function MembershipSection({ theme = 'light' }) {
                             ? "bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30"
                             : "bg-gradient-to-br from-green-100 to-green-200 border border-green-300"
                           : isDark
-                          ? "bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 border border-yellow-500/30"
-                          : "bg-gradient-to-br from-yellow-100 to-yellow-200 border border-yellow-300"
+                          ? "bg-gradient-to-br from-gray-600/20 to-gray-700/20 border border-gray-600/30"
+                          : "bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300"
                       }`}
                     >
                       {feature.notAvailable ? (
@@ -402,7 +402,13 @@ export default function MembershipSection({ theme = 'light' }) {
                       ) : feature.includesAll ? (
                         <svg
                           className={`w-3 h-3 ${
-                            isDark ? "text-yellow-400" : "text-yellow-600"
+                            plan.price
+                              ? isDark
+                                ? "text-green-400"
+                                : "text-green-600"
+                              : isDark
+                              ? "text-gray-300"
+                              : "text-gray-600"
                           }`}
                           fill="none"
                           viewBox="0 0 24 24"
@@ -548,8 +554,8 @@ export default function MembershipSection({ theme = 'light' }) {
                   disabled
                   className={`w-full px-4 py-3 rounded-xl text-sm font-medium ${
                     isDark
-                      ? "bg-yellow-500/20 text-yellow-400 cursor-not-allowed border border-yellow-500/30"
-                      : "bg-yellow-50 text-yellow-600 cursor-not-allowed border border-yellow-200"
+                      ? "bg-gray-700/50 text-gray-400 cursor-not-allowed border border-gray-600/30"
+                      : "bg-gray-100 text-gray-600 cursor-not-allowed border border-gray-200"
                   }`}
                 >
                   {t("settings.membership.currentPlan")}
