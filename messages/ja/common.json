@@ -286,6 +286,14 @@
       "removeFromList": "読了リストから削除されます",
       "resetProgress": "この記事の進捗がリセットされます",
       "confirm": "未読に戻す"
+    },
+    "translation": {
+      "clickToTranslate": "クリックして{{language}}の翻訳を表示",
+      "clickForAITutor": "AIチューターの分析を表示"
+    },
+    "buttons": {
+      "read": "読む",
+      "aiTutor": "AIチューター"
     }
   },
   "explorer": {

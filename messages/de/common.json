@@ -287,6 +287,14 @@
       "removeFromList": "Wird er aus deinen gelesenen Artikeln entfernt",
       "resetProgress": "Wird dein Fortschritt für diesen Artikel zurückgesetzt",
       "confirm": "Als ungelesen markieren"
+    },
+    "translation": {
+      "clickToTranslate": "Klicken Sie für die {{language}}-Übersetzung",
+      "clickForAITutor": "Klicken Sie für die KI-Tutor-Analyse"
+    },
+    "buttons": {
+      "read": "Lesen",
+      "aiTutor": "KI-Tutor"
     }
   },
   "explorer": {

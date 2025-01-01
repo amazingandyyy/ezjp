@@ -286,6 +286,14 @@
       "removeFromList": "Xóa khỏi danh sách bài đã đọc",
       "resetProgress": "Đặt lại tiến độ cho bài này",
       "confirm": "Đánh dấu chưa đọc"
+    },
+    "translation": {
+      "clickToTranslate": "Nhấp để xem bản dịch {{language}}",
+      "clickForAITutor": "Nhấp để xem phân tích của Trợ giảng AI"
+    },
+    "buttons": {
+      "read": "Đọc",
+      "aiTutor": "Trợ giảng AI"
     }
   },
   "explorer": {

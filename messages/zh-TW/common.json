@@ -303,6 +303,14 @@
       "removeFromList": "從已讀清單中移除",
       "resetProgress": "重置此文章的閱讀進度",
       "confirm": "標記為未讀"
+    },
+    "translation": {
+      "clickToTranslate": "點擊查看{{language}}翻譯",
+      "clickForAITutor": "點擊查看AI導師分析"
+    },
+    "buttons": {
+      "read": "閱讀",
+      "aiTutor": "AI助教"
     }
   },
   "explorer": {

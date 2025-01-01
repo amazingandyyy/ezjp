@@ -287,6 +287,14 @@
       "removeFromList": "Le retirer de vos articles terminés",
       "resetProgress": "Réinitialiser votre progression pour cet article",
       "confirm": "Marquer comme non lu"
+    },
+    "translation": {
+      "clickToTranslate": "Cliquez pour voir la traduction en {{language}}",
+      "clickForAITutor": "Cliquez pour voir l'analyse du Tuteur IA"
+    },
+    "buttons": {
+      "read": "Lire",
+      "aiTutor": "Tuteur IA"
     }
   },
   "explorer": {

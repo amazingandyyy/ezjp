@@ -303,6 +303,14 @@
       "removeFromList": "Remove it from your finished articles",
       "resetProgress": "Reset your progress for this article",
       "confirm": "Unfinish Article"
+    },
+    "translation": {
+      "clickToTranslate": "Click translate to see {{language}} translation",
+      "clickForAITutor": "Click for AI Tutor analysis"
+    },
+    "buttons": {
+      "read": "Read",
+      "aiTutor": "AI Tutor"
     }
   },
   "explorer": {

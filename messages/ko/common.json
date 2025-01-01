@@ -286,6 +286,14 @@
       "removeFromList": "읽은 기사 목록에서 제거됩니다",
       "resetProgress": "이 기사의 진행 상황이 초기화됩니다",
       "confirm": "미독으로 표시"
+    },
+    "translation": {
+      "clickToTranslate": "클릭하여 {{language}} 번역 보기",
+      "clickForAITutor": "AI 튜터 분석 보기"
+    },
+    "buttons": {
+      "read": "읽기",
+      "aiTutor": "AI 튜터"
     }
   },
   "explorer": {
