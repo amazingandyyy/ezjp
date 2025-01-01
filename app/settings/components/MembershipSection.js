@@ -215,8 +215,8 @@ export default function MembershipSection({ theme = 'light' }) {
               className={`relative p-8 rounded-2xl border ${
                 plan.isCurrentPlan && !plan.price
                   ? isDark
-                    ? "border-gray-700/50 bg-gradient-to-b from-gray-700/20 to-gray-700/5 shadow-lg shadow-gray-500/10"
-                    : "border-gray-200 bg-gradient-to-b from-gray-50 to-transparent shadow-lg"
+                    ? "border-yellow-500/30 bg-gradient-to-b from-yellow-500/10 to-yellow-500/5 shadow-lg shadow-yellow-500/10"
+                    : "border-yellow-500/30 bg-gradient-to-b from-yellow-50 to-transparent shadow-lg shadow-yellow-500/10"
                   : plan.price
                   ? isDark
                     ? "border-gray-700/50 bg-gray-800/50"
@@ -229,14 +229,14 @@ export default function MembershipSection({ theme = 'light' }) {
               {plan.isCurrentPlan && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <div
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border backdrop-blur-sm ${
                       plan.price
                         ? isDark
                           ? "bg-green-500/20 border-green-500/30 text-green-400"
                           : "bg-green-50 border-green-500/30 text-green-600"
                         : isDark
-                        ? "bg-gray-800/80 border-gray-700/50 text-gray-300"
-                        : "bg-green-50 border-green-200 text-green-600"
+                        ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400 shadow-sm"
+                        : "bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm"
                     }`}
                   >
                     <FaCheck
@@ -246,8 +246,8 @@ export default function MembershipSection({ theme = 'light' }) {
                             ? "text-green-400"
                             : "text-green-600"
                           : isDark
-                          ? "text-gray-300"
-                          : "text-green-600"
+                          ? "text-yellow-400"
+                          : "text-yellow-700"
                       }`}
                     />
                     <span className="text-sm font-medium">
@@ -558,8 +558,8 @@ export default function MembershipSection({ theme = 'light' }) {
                   disabled
                   className={`w-full px-4 py-3 rounded-xl text-sm font-medium ${
                     isDark
-                      ? "bg-gray-700/50 text-gray-400 cursor-not-allowed border border-gray-600/30"
-                      : "bg-gray-100 text-gray-600 cursor-not-allowed border border-gray-200"
+                      ? "bg-yellow-500/10 text-yellow-400 cursor-not-allowed border border-yellow-500/30"
+                      : "bg-yellow-50 text-yellow-600 cursor-not-allowed border border-yellow-500/30"
                   }`}
                 >
                   {t("settings.membership.currentPlan")}

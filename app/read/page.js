@@ -2621,7 +2621,7 @@ function NewsReaderContent() {
     }
     
     // Check if user is premium
-    if (!user?.role_level || user.role_level <= 0) {
+    if (!user?.role_level) {
       setToastMessage("Premium feature: Sign up for premium to access AI tutor");
       setShowToast(true);
       setTimeout(() => {

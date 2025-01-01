@@ -483,7 +483,7 @@ function SettingsContent() {
           </div>
         </div>
       )}
-      <Navbar theme={profileData.currentTheme} />
+      <Navbar theme={profileData.currentTheme} hideNewsListButton={true} />
 
       <div className="container mx-auto px-4 pt-24 pb-32 flex-1">
         <div className="max-w-4xl mx-auto">
@@ -565,10 +565,10 @@ function SettingsContent() {
                       const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
                       window.history.replaceState({}, "", newUrl);
                     }}
-                    className={`flex items-center gap-2 px-1 py-2 whitespace-nowrap text-sm font-medium transition-all duration-200 border-b-2 ${
+                    className={`flex items-center gap-2 px-1 py-2 whitespace-nowrap text-sm font-medium transition-all duration-200 ${
                       activeSection === section.id
                         ? profileData.currentTheme === "dark"
-                          ? "text-white border-white"
+                          ? "text-white"
                           : "text-gray-900 border-gray-900"
                         : profileData.currentTheme === "dark"
                         ? "text-gray-400 hover:text-gray-300 border-transparent"
