@@ -1,3 +1,10 @@
+# [1.47.0](https://github.com/amazingandyyy/ezjp/compare/v1.46.0...v1.47.0) (2025-01-01)
+
+
+### Features
+
+* implement localization for buttons and translation prompts in NewsReaderContent ([cccd137](https://github.com/amazingandyyy/ezjp/commit/cccd1374dad808b45156746ae6c0545441202131))
+
 # [1.46.0](https://github.com/amazingandyyy/ezjp/compare/v1.45.1...v1.46.0) (2025-01-01)
 
 
