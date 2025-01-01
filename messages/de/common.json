@@ -252,6 +252,10 @@
       "contentUnavailable": "Artikelinhalt nicht verfügbar",
       "contentRemoved": "Dieser Artikel wurde möglicherweise entfernt oder ist nicht mehr zugänglich"
     },
+    "messages": {
+      "translationComplete": "Alle Sätze erfolgreich übersetzt",
+      "translationError": "Einige Sätze konnten nicht übersetzt werden"
+    },
     "preferences": {
       "title": "Artikel-Leseeinstellungen",
       "fontSize": "Schriftgröße",
@@ -294,7 +298,10 @@
     },
     "buttons": {
       "read": "Lesen",
-      "aiTutor": "KI-Tutor"
+      "aiTutor": "KI-Tutor",
+      "translateAll": "Alles übersetzen",
+      "translatingAll": "Übersetzung läuft...",
+      "translateAllSentences": "Alle Sätze übersetzen"
     }
   },
   "explorer": {

@@ -268,6 +268,10 @@
       "contentUnavailable": "Article content not available",
       "contentRemoved": "This article may have been removed or is no longer accessible"
     },
+    "messages": {
+      "translationComplete": "All sentences translated successfully",
+      "translationError": "Failed to translate some sentences"
+    },
     "preferences": {
       "title": "Article Reader Preferences",
       "fontSize": "Font Size",
@@ -310,7 +314,10 @@
     },
     "buttons": {
       "read": "Read",
-      "aiTutor": "AI Tutor"
+      "aiTutor": "AI Tutor",
+      "translateAll": "Translate All",
+      "translatingAll": "Translating...",
+      "translateAllSentences": "Translate All Sentences"
     }
   },
   "explorer": {

@@ -252,6 +252,10 @@
       "contentUnavailable": "Contenuto dell'articolo non disponibile",
       "contentRemoved": "Questo articolo potrebbe essere stato rimosso o non è più accessibile"
     },
+    "messages": {
+      "translationComplete": "Tutte le frasi tradotte con successo",
+      "translationError": "Impossibile tradurre alcune frasi"
+    },
     "preferences": {
       "title": "Preferenze lettore articoli",
       "fontSize": "Dimensione del carattere",
@@ -294,7 +298,10 @@
     },
     "buttons": {
       "read": "Leggi",
-      "aiTutor": "Tutor AI"
+      "aiTutor": "Tutor AI",
+      "translateAll": "Traduci tutto",
+      "translatingAll": "Traduzione in corso...",
+      "translateAllSentences": "Traduci tutte le frasi"
     }
   },
   "explorer": {

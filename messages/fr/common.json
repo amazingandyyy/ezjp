@@ -252,6 +252,10 @@
       "contentUnavailable": "Contenu de l'article non disponible",
       "contentRemoved": "Cet article a peut-être été supprimé ou n'est plus accessible"
     },
+    "messages": {
+      "translationComplete": "Toutes les phrases ont été traduites avec succès",
+      "translationError": "Échec de la traduction de certaines phrases"
+    },
     "preferences": {
       "title": "Préférences du lecteur d'articles",
       "fontSize": "Taille de police",
@@ -294,7 +298,10 @@
     },
     "buttons": {
       "read": "Lire",
-      "aiTutor": "Tuteur IA"
+      "aiTutor": "Tuteur IA",
+      "translateAll": "Tout traduire",
+      "translatingAll": "Traduction en cours...",
+      "translateAllSentences": "Traduire toutes les phrases"
     }
   },
   "explorer": {

@@ -25,6 +25,7 @@ import useStatsStore from '@/lib/stores/stats';
 import { formatJapaneseDate } from '@/lib/utils/date';
 import { getNewsSource, getHostname } from '@/lib/utils/urls';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { toast } from 'react-hot-toast';
 
 import {
   LoadingIndicator,
@@ -63,6 +64,7 @@ function NewsReaderContent() {
   const sourceUrl = searchParams.get('source');
   const { user, signOut, profile } = useAuth();
   const { t } = useTranslation();
+  const [isPremium, setIsPremium] = useState(false);
 
   // All state declarations
   const [url, setUrl] = useState('');
@@ -1778,7 +1780,7 @@ function NewsReaderContent() {
                   ></div>
                 </div>
               ) : (
-                `Translate to ${SUPPORTED_LANGUAGES[preferenceState.preferred_translation_language]}`
+                `${SUPPORTED_LANGUAGES[preferenceState.preferred_translation_language]}`
               )}
             </button>
           </div>
@@ -1837,15 +1839,6 @@ function NewsReaderContent() {
         >
           {translations[index] ? (
             <div className="p-5 space-y-3">
-              <div
-                className={`text-sm font-medium ${
-                  preferenceState.theme === "dark"
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                English Translation
-              </div>
               <div
                 className={`${
                   preferenceState.font_size === "medium"
@@ -2791,6 +2784,57 @@ function NewsReaderContent() {
     }
   };
 
+  // Add this near other state declarations
+  const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+
+  // Add translateAll function
+  const translateAll = async () => {
+    if (!sentences?.length || isTranslatingAll) return;
+    
+    setIsTranslatingAll(true);
+    try {
+      // Create an array of promises for each sentence
+      const translationPromises = sentences.map((sentence, index) => 
+        translateSentence(sentenceToText(sentence), index)
+      );
+
+      // Wait for all translations to complete
+      await Promise.allSettled(translationPromises);
+    } catch (error) {
+      console.error('Translation error:', error);
+      setToastMessage(t('reader.messages.translationError'));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setIsTranslatingAll(false);
+    }
+  };
+
+  // Add useEffect to check premium status
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('is_premium')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) throw error;
+          setIsPremium(data?.is_premium || false);
+        } catch (error) {
+          console.error('Error checking premium status:', error);
+          setIsPremium(false);
+        }
+      } else {
+        setIsPremium(false);
+      }
+    };
+
+    checkPremiumStatus();
+  }, [user]);
+
   return (
     <div className={`min-h-screen ${themeClasses.main}`}>
       <Navbar
@@ -3220,10 +3264,12 @@ function NewsReaderContent() {
                     }`}
                   >
                     {availableVoices.map((voice) => {
-                      const isPremiumVoice = voice.name.includes("Neural2") || voice.name.includes("Wavenet");
+                      const isPremiumVoice =
+                        voice.name.includes("Neural2") ||
+                        voice.name.includes("Wavenet");
                       return (
-                        <option 
-                          key={voice.name} 
+                        <option
+                          key={voice.name}
                           value={voice.name}
                           className={`${
                             isPremiumVoice && !isPremium
@@ -3235,11 +3281,8 @@ function NewsReaderContent() {
                         >
                           {voice.displayName} (
                           {(voice.ssmlGender || "unspecified").toLowerCase()})
-                          {isPremiumVoice && (
-                            isPremium
-                              ? " (Premium)"
-                              : " (Premium Only)"
-                          )}
+                          {isPremiumVoice &&
+                            (isPremium ? " (Premium)" : " (Premium Only)")}
                         </option>
                       );
                     })}
@@ -3318,7 +3361,7 @@ function NewsReaderContent() {
                       : "text-gray-800"
                   }`}
                 >
-                  {t('newsListDrawer.title')}
+                  {t("newsListDrawer.title")}
                 </h2>
                 <button
                   onClick={() => setShowSidebar(false)}
@@ -3385,7 +3428,9 @@ function NewsReaderContent() {
                       />
                     </svg>
                   </div>
-                  <span className="font-medium">{t('newsListDrawer.title')}</span>
+                  <span className="font-medium">
+                    {t("newsListDrawer.title")}
+                  </span>
                 </div>
                 <svg
                   className="w-5 h-5"
@@ -3436,7 +3481,7 @@ function NewsReaderContent() {
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
                     </svg>
-                    {t('newsListDrawer.tabs.unread')}
+                    {t("newsListDrawer.tabs.unread")}
                   </button>
                   <button
                     onClick={() => setSidebarView("read")}
@@ -3464,7 +3509,7 @@ function NewsReaderContent() {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    {t('newsListDrawer.status.finished')}
+                    {t("newsListDrawer.status.finished")}
                   </button>
                   <button
                     onClick={() => setSidebarView("saved")}
@@ -3480,7 +3525,7 @@ function NewsReaderContent() {
                       }`}
                   >
                     <FaHeart className="w-3.5 h-3.5" />
-                    {t('newsListDrawer.tabs.saved')}
+                    {t("newsListDrawer.tabs.saved")}
                   </button>
                 </div>
               )}
@@ -3520,7 +3565,7 @@ function NewsReaderContent() {
                               : "text-gray-500"
                           }`}
                         >
-                          {t('newsListDrawer.sections.recent.loading')}
+                          {t("newsListDrawer.sections.recent.loading")}
                         </span>
                       </div>
                     ) : recentNewsError ? (
@@ -3539,7 +3584,7 @@ function NewsReaderContent() {
                           />
                         </svg>
                         <p className="text-sm text-red-500 text-center font-medium">
-                          {t('newsListDrawer.sections.recent.failed')}
+                          {t("newsListDrawer.sections.recent.failed")}
                         </p>
                       </div>
                     ) : recentNews?.length > 0 ? (
@@ -3673,7 +3718,9 @@ function NewsReaderContent() {
                                     : "bg-gray-100/80 hover:bg-gray-200/80 text-gray-600"
                                 }`}
                             >
-                              <span className="font-medium">{t('newsListDrawer.sections.more.title')}</span>
+                              <span className="font-medium">
+                                {t("newsListDrawer.sections.more.title")}
+                              </span>
                               <svg
                                 className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                                 viewBox="0 0 24 24"
@@ -3716,7 +3763,7 @@ function NewsReaderContent() {
                                     : "text-gray-500"
                                 }
                               >
-                                {t('newsListDrawer.sections.recent.empty')}
+                                {t("newsListDrawer.sections.recent.empty")}
                               </span>
                             </div>
                           )
@@ -3868,7 +3915,7 @@ function NewsReaderContent() {
                             : "text-gray-500"
                         }
                       >
-                        {t('newsListDrawer.sections.recent.empty')}
+                        {t("newsListDrawer.sections.recent.empty")}
                       </span>
                     </div>
                   )
@@ -4126,6 +4173,54 @@ function NewsReaderContent() {
                             : `0 / ${sentences.length}`}
                         </span>
                       </div>
+
+                      {/* Translate All button */}
+                      {isLearningMode && (
+                        <button
+                          onClick={translateAll}
+                          disabled={isTranslatingAll || !sentences.length}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 mr-2
+                  ${
+                    preferenceState.theme === "dark"
+                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                      : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  }
+                  ${isTranslatingAll ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                        >
+                          {isTranslatingAll ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 relative">
+                                <div
+                                  className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                                    preferenceState.theme === "dark"
+                                      ? "border-blue-400 border-r-transparent"
+                                      : "border-blue-700 border-r-transparent"
+                                  }`}
+                                ></div>
+                              </div>
+                              <span>{t("reader.buttons.translatingAll")}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                                />
+                              </svg>
+                              <span>{t("reader.buttons.translateAllSentences")}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -4644,11 +4739,11 @@ function NewsReaderContent() {
               if (toastMessage.includes("Premium feature")) {
                 router.push("/settings?section=membership&ref=ai_tutor");
               } else if (toastMessage.includes("save articles")) {
-                router.push('/join?theme=dark&ref=heart');
+                router.push("/join?theme=dark&ref=heart");
               } else if (toastMessage.includes("track your reading")) {
-                router.push('/join?theme=dark&ref=finished');
+                router.push("/join?theme=dark&ref=finished");
               } else {
-                router.push('/join?theme=dark&ref=reader-preference');
+                router.push("/join?theme=dark&ref=reader-preference");
               }
             }}
           >
@@ -4721,6 +4816,54 @@ function NewsReaderContent() {
         onCancel={() => setShowConfirmUnfinish(false)}
         theme={preferenceState.theme}
       />
+
+      {/* Add this inside the learning mode button group, after the existing translation button */}
+      {isLearningMode && (
+        <button
+          onClick={translateAll}
+          disabled={isTranslatingAll || !sentences.length}
+          className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+            ${
+              preferenceState.theme === "dark"
+                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            }
+            ${isTranslatingAll ? "opacity-50 cursor-not-allowed" : ""}
+          `}
+        >
+          {isTranslatingAll ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 relative">
+                <div
+                  className={`absolute inset-0 rounded-full border-2 animate-spin ${
+                    preferenceState.theme === "dark"
+                      ? "border-blue-400 border-r-transparent"
+                      : "border-blue-700 border-r-transparent"
+                  }`}
+                ></div>
+              </div>
+              <span>{t("reader.buttons.translatingAll")}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                />
+              </svg>
+              <span>{t("reader.buttons.translateAll")}</span>
+            </div>
+          )}
+        </button>
+      )}
     </div>
   );
 }
