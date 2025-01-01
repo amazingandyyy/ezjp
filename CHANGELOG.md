@@ -1,3 +1,10 @@
+# [1.48.0](https://github.com/amazingandyyy/ezjp/compare/v1.47.0...v1.48.0) (2025-01-01)
+
+
+### Features
+
+* add caching for translations and create translations table ([6c4ed33](https://github.com/amazingandyyy/ezjp/commit/6c4ed334c75c0659b7ca5e50c950ff7379fe527e))
+
 # [1.47.0](https://github.com/amazingandyyy/ezjp/compare/v1.46.0...v1.47.0) (2025-01-01)
 
 
