@@ -3,7 +3,6 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSun, FaMoon, FaUser, FaCheck, FaTimes, FaCheckCircle, FaIdBadge } from 'react-icons/fa';
 import { useAuth } from '@/lib/AuthContext';
-import { useUpdate } from '@/app/sw-register';
 import { supabase } from '@/lib/supabase';
 import { getSystemTheme, getCurrentTheme } from '@/lib/utils/theme';
 import { SUPPORTED_LANGUAGES } from '@/lib/constants';
@@ -16,7 +15,6 @@ function SettingsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, signOut, profile, updateProfile } = useAuth();
-  const { showUpdatePrompt, applyUpdate } = useUpdate();
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);

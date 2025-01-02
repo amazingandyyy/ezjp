@@ -13,7 +13,6 @@ import {
   FaCrown,
 } from "react-icons/fa";
 import { useAuth } from '@/lib/AuthContext';
-import { useUpdate } from '@/app/sw-register';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import Image from 'next/image';
 import useSystemStore from '@/lib/stores/system';
@@ -30,7 +29,6 @@ export default function Navbar({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, signInWithGoogle, signOut } = useAuth();
-  const { showUpdatePrompt, applyUpdate } = useUpdate();
   const { version, fetchVersion } = useSystemStore();
   const { stats, fetchStats } = useStatsStore();
   const { t } = useTranslation();
