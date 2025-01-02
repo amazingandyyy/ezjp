@@ -548,19 +548,25 @@ function SettingsContent() {
                     onClick={() => {
                       const element = document.getElementById(section.id);
                       const navHeight = 120;
-                      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                      const elementPosition =
+                        element.getBoundingClientRect().top +
+                        window.pageYOffset;
                       const offsetPosition = elementPosition - navHeight;
 
                       window.scrollTo({
                         top: offsetPosition,
                         behavior: "smooth",
                       });
-                      
+
                       // Update active section and URL when clicking navigation
                       setActiveSection(section.id);
-                      const searchParams = new URLSearchParams(window.location.search);
+                      const searchParams = new URLSearchParams(
+                        window.location.search
+                      );
                       searchParams.set("section", section.id);
-                      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+                      const newUrl = `${
+                        window.location.pathname
+                      }?${searchParams.toString()}`;
                       window.history.replaceState({}, "", newUrl);
                     }}
                     className={`flex items-center gap-2 px-1 py-2 whitespace-nowrap text-sm font-medium transition-all duration-200 ${
@@ -1225,9 +1231,7 @@ function SettingsContent() {
                               ? "bg-gray-700 border-gray-600 text-gray-100"
                               : "bg-white border-gray-200 text-gray-900"
                           } focus:outline-none focus:ring-2 focus:ring-green-500`}
-                          placeholder={t(
-                            "settings.profile.duolingoPlaceholder"
-                          )}
+                          placeholder="Duolingo username"
                         />
                         <div className="flex gap-2">
                           <button
@@ -1950,11 +1954,7 @@ function SettingsContent() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-10 h-10 flex items-center justify-center rounded-xl ${
-                            showUpdatePrompt
-                              ? profileData.currentTheme === "dark"
-                                ? "bg-blue-500/20 text-blue-400"
-                                : "bg-blue-100 text-blue-600"
-                              : profileData.currentTheme === "dark"
+                            profileData.currentTheme === "dark"
                               ? "bg-green-500/20 text-green-400"
                               : "bg-green-100 text-green-600"
                           }`}
@@ -1973,21 +1973,6 @@ function SettingsContent() {
                               <path
                                 d="M2 12C2 6.47715 6.47715 2 12 2V4C7.58172 4 4 7.58172 4 12H2Z"
                                 fill="currentColor"
-                              />
-                            </svg>
-                          ) : showUpdatePrompt ? (
-                            <svg
-                              className="w-5 h-5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
                               />
                             </svg>
                           ) : (
@@ -2017,8 +2002,6 @@ function SettingsContent() {
                           >
                             {isLoading
                               ? t("common.checkingUpdates")
-                              : showUpdatePrompt
-                              ? t("common.updateAvailable")
                               : t("common.upToDate")}
                           </p>
                           <div className="space-y-1">
@@ -2063,16 +2046,12 @@ function SettingsContent() {
                       </div>
                       <button
                         onClick={() => {
-                          if (showUpdatePrompt) {
-                            applyUpdate();
-                          } else {
-                            fetchVersion();
-                            setTimeout(() => {
-                              if (isLoading) {
-                                setIsLoading(false);
-                              }
-                            }, 3000);
-                          }
+                          fetchVersion();
+                          setTimeout(() => {
+                            if (isLoading) {
+                              setIsLoading(false);
+                            }
+                          }, 3000);
                         }}
                         disabled={isLoading}
                         className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -2080,10 +2059,6 @@ function SettingsContent() {
                             ? profileData.currentTheme === "dark"
                               ? "bg-gray-700/50 text-gray-400 cursor-not-allowed"
                               : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : showUpdatePrompt
-                            ? profileData.currentTheme === "dark"
-                              ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                              : "bg-blue-50 text-blue-600 hover:bg-blue-100"
                             : profileData.currentTheme === "dark"
                             ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
                             : "bg-green-50 text-green-600 hover:bg-green-100"
@@ -2091,61 +2066,9 @@ function SettingsContent() {
                       >
                         {isLoading
                           ? t("common.checking")
-                          : showUpdatePrompt
-                          ? t("common.installUpdate")
                           : t("common.checkForUpdates")}
                       </button>
                     </div>
-                    {showUpdatePrompt && (
-                      <div
-                        className={`mt-4 p-3 rounded-lg ${
-                          profileData.currentTheme === "dark"
-                            ? "bg-blue-500/10 border border-blue-500/20"
-                            : "bg-blue-50 border border-blue-200"
-                        }`}
-                      >
-                        <div className="flex items-start gap-2">
-                          <svg
-                            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                              profileData.currentTheme === "dark"
-                                ? "text-blue-400"
-                                : "text-blue-600"
-                            }`}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2v2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8v-2c0-5.523-4.477-10-10-10z"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <div>
-                            <p
-                              className={`text-sm font-medium ${
-                                profileData.currentTheme === "dark"
-                                  ? "text-blue-400"
-                                  : "text-blue-700"
-                              }`}
-                            >
-                              {t("settings.software.update")}
-                            </p>
-                            <p
-                              className={`text-xs mt-1 ${
-                                profileData.currentTheme === "dark"
-                                  ? "text-blue-400/80"
-                                  : "text-blue-600/80"
-                              }`}
-                            >
-                              {t("settings.software.updateDescription")}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
