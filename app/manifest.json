@@ -2,13 +2,15 @@
   "name": "EZJP News",
   "short_name": "EZJP",
   "description": "Learn Japanese through news articles",
-  "start_url": "/",
+  "start_url": "/explorer",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#22c55e",
+  "theme_color_dark": "#166534",
+  "background_color_dark": "#1f2937",
   "icons": [
     {
-      "src": "/images/icon.png",
+      "src": "/images/logo.png",
       "sizes": "32x32",
       "type": "image/png"
     },
@@ -36,7 +38,19 @@
       "icons": [{ "src": "/images/icon.png", "sizes": "32x32" }]
     }
   ],
-  "categories": ["education", "news"],
+  "categories": [
+    "education",
+    "news",
+    "japanese",
+    "reference",
+    "language"
+  ],
   "orientation": "any",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "og_image": {
+    "url": "/images/ezjp-homepage.png",
+    "type": "image/png",
+    "width": 1200,
+    "height": 630
+  }
 } 

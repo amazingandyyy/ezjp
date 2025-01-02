@@ -1922,9 +1922,6 @@ function NewsReaderContent() {
               <div className="space-y-6">
                 {/* Translation section with no horizontal scroll */}
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight mb-3">
-                    Translation
-                  </h1>
                   <div
                     className="text-base leading-relaxed"
                     dangerouslySetInnerHTML={{
@@ -1962,9 +1959,6 @@ function NewsReaderContent() {
                   "# Important Grammar Concepts"
                 ) && (
                   <div>
-                    <h1 className="text-xl font-bold tracking-tight mb-3">
-                      Important Grammar Concepts
-                    </h1>
                     <div className="overflow-x-auto -mx-5">
                       <div
                         className="px-5 min-w-[320px]"

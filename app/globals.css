@@ -1,5 +1,9 @@
 :root {
   color-scheme: light dark;
+  --theme-color: #22c55e;
+  --theme-color-dark: #166534;
+  --background-color: #ffffff;
+  --background-color-dark: #1f2937;
 }
 
 html {
@@ -7,7 +11,8 @@ html {
 }
 
 html.dark {
-  background-color: rgb(19,31,36);
+  background-color: var(--background-color-dark);
+  color-scheme: dark;
 }
 
 @tailwind base;

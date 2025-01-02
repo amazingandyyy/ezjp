@@ -18,6 +18,37 @@ export default function ServiceWorkerRegistration({ children }) {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
+      // Update manifest colors based on theme
+      const updateManifestColors = () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        const manifest = document.querySelector('link[rel="manifest"]');
+        if (manifest) {
+          const manifestData = {
+            ...JSON.parse(manifest.getAttribute('data-manifest')),
+            theme_color: isDark ? '#166534' : '#22c55e',
+            background_color: isDark ? '#1f2937' : '#ffffff'
+          };
+          manifest.setAttribute('data-manifest', JSON.stringify(manifestData));
+        }
+      };
+
+      // Initial theme setup
+      updateManifestColors();
+
+      // Watch for theme changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            updateManifestColors();
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
           registration.addEventListener('updatefound', () => {

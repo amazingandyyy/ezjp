@@ -8,6 +8,26 @@ import { getCurrentTheme } from '@/lib/utils/theme';
 export const metadata = {
   title: 'EZJP News',
   description: 'Learn Japanese through news articles',
+  openGraph: {
+    title: 'EZJP News',
+    description: 'Learn Japanese through news articles',
+    images: [
+      {
+        url: '/images/ezjp-homepage.png',
+        width: 1200,
+        height: 630,
+        alt: 'EZJP News - Learn Japanese through news articles',
+      }
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'EZJP News',
+    description: 'Learn Japanese through news articles',
+    images: ['/images/ezjp-homepage.png'],
+  }
 };
 
 export default function RootLayout({ children }) {
