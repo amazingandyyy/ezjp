@@ -13,7 +13,7 @@ export const metadata = {
     description: 'Learn Japanese through news articles',
     images: [
       {
-        url: '/images/ezjp-homepage.png',
+        url: '/images/og-image.png',
         width: 1200,
         height: 630,
         alt: 'EZJP News - Learn Japanese through news articles',
@@ -26,7 +26,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'EZJP News',
     description: 'Learn Japanese through news articles',
-    images: ['/images/ezjp-homepage.png'],
+    images: ['/images/og-image.png'],
   }
 };
 
