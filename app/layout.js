@@ -1,22 +1,21 @@
 import './globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
-import ServiceWorkerRegistration from './sw-register';
 import Script from 'next/script';
 import Footer from './components/Footer';
 import { getCurrentTheme } from '@/lib/utils/theme';
 
 export const metadata = {
   title: 'EZJP News',
-  description: 'Learn Japanese through news articles',
+  description: 'Learn Japanese Through EZJP News articles',
   openGraph: {
     title: 'EZJP News',
-    description: 'Learn Japanese through news articles',
+    description: 'Learn Japanese Through EZJP News articles',
     images: [
       {
         url: '/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'EZJP News - Learn Japanese through news articles',
+        alt: 'EZJP News - Learn Japanese Through EZJP News articles',
       }
     ],
     locale: 'en_US',
@@ -25,7 +24,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'EZJP News',
-    description: 'Learn Japanese through news articles',
+    description: 'Learn Japanese Through EZJP News articles',
     images: ['/images/og-image.png'],
   }
 };
@@ -84,12 +83,10 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen bg-gray-50 dark:bg-[rgb(19,31,36)] transition-colors duration-300">
         <AuthProvider>
-          <ServiceWorkerRegistration>
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer forceTheme="light" />
-          </ServiceWorkerRegistration>
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer forceTheme="light" />
         </AuthProvider>
       </body>
     </html>

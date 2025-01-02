@@ -29,7 +29,7 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${title} | EZJP`,
-    description: `${title} for EZJP - Learn Japanese Through News`,
+    description: `${title} for EZJP - Learn Japanese Through EZJP News`,
   };
 }
 

@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Legal Documents | EZJP',
-  description: 'Legal documents and policies for EZJP - Learn Japanese Through News',
+  description: 'Legal documents and policies for EZJP - Learn Japanese Through EZJP News',
 };
 
 const DOCUMENTS = [
