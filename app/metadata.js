@@ -1,10 +1,10 @@
 export const metadata = {
-  metadataBase: new URL('https://easy-jp-news.vercel.app'),
+  metadataBase: new URL('https://ezjp.amazyyy.com'),
   title: {
     template: '%s | EZJP',
-    default: 'EZJP - Learn Japanese Through News',
+    default: 'EZJP News',
   },
-  description: 'Improve your Japanese reading skills with AI-powered news articles. Practice with real Japanese content, get instant translations, and track your progress.',
+  description: 'Learn Japanese through news articles',
   keywords: ['japanese learning', 'news in japanese', 'japanese reading practice', 'learn japanese', 'japanese study', 'japanese news', 'japanese articles'],
   authors: [{ name: 'EZJP' }],
   icons: {
@@ -22,22 +22,16 @@ export const metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'EZJP - Learn Japanese Through News',
-    description: 'Improve your Japanese reading skills with AI-powered news articles. Practice with real Japanese content, get instant translations, and track your progress.',
-    url: 'https://easy-jp-news.vercel.app',
+    title: 'EZJP News',
+    description: 'Learn Japanese through news articles',
+    url: 'https://ezjp.amazyyy.com',
     siteName: 'EZJP',
     images: [
       {
-        url: '/images/ezjp-homepage.png',
+        url: '/images/og-image.png',
         width: 1200,
         height: 630,
         alt: 'EZJP - Learn Japanese Through News',
-      },
-      {
-        url: '/icons/ezjp-app.png',
-        width: 512,
-        height: 512,
-        alt: 'EZJP Logo',
       }
     ],
     locale: 'en_US',
@@ -45,10 +39,10 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EZJP - Learn Japanese Through News',
-    description: 'Improve your Japanese reading skills with AI-powered news articles. Practice with real Japanese content, get instant translations, and track your progress.',
-    images: ['/images/ezjp-homepage.png', '/icons/ezjp-app.png'],
-    creator: '@ezjpnews',
+    title: 'EZJP News',
+    description: 'Learn Japanese through news articles',
+    images: ['/images/og-image.png'],
+    creator: '@amazingandyyy',
   },
   robots: {
     index: true,
@@ -62,6 +56,6 @@ export const metadata = {
     },
   },
   verification: {
-    google: 'your-google-site-verification',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 }; 
