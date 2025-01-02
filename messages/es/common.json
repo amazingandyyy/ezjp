@@ -257,7 +257,18 @@
     "errors": {
       "translationFailed": "Error al traducir el texto",
       "contentUnavailable": "Contenido del artículo no disponible",
-      "contentRemoved": "Este artículo puede haber sido eliminado o ya no es accesible"
+      "contentRemoved": "Este artículo puede haber sido eliminado o ya no es accesible",
+      "failedToLoadVoices": "Error al cargar las voces",
+      "failedToChangeVoice": "Error al cambiar la voz",
+      "waitForArticleLoad": "Por favor, espere a que se cargue el artículo"
+    },
+    "messages": {
+      "translationComplete": "Todas las frases traducidas con éxito",
+      "translationError": "Error al traducir algunas frases",
+      "premiumVoicesOnly": "Las voces premium solo están disponibles con una suscripción premium",
+      "signInToSaveArticles": "Inicia sesión para guardar artículos",
+      "premiumFeatureAITutor": "El Tutor IA es una función premium",
+      "premiumFeatureAccess": "Esta función requiere una suscripción premium"
     },
     "preferences": {
       "title": "Preferencias del lector de artículos",

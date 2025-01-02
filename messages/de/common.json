@@ -250,11 +250,18 @@
     "errors": {
       "translationFailed": "Fehler beim Übersetzen des Textes",
       "contentUnavailable": "Artikelinhalt nicht verfügbar",
-      "contentRemoved": "Dieser Artikel wurde möglicherweise entfernt oder ist nicht mehr zugänglich"
+      "contentRemoved": "Dieser Artikel wurde möglicherweise entfernt oder ist nicht mehr zugänglich",
+      "failedToLoadVoices": "Fehler beim Laden der Stimmen",
+      "failedToChangeVoice": "Fehler beim Ändern der Stimme",
+      "waitForArticleLoad": "Bitte warten Sie, bis der Artikel geladen ist"
     },
     "messages": {
       "translationComplete": "Alle Sätze erfolgreich übersetzt",
-      "translationError": "Einige Sätze konnten nicht übersetzt werden"
+      "translationError": "Einige Sätze konnten nicht übersetzt werden",
+      "premiumVoicesOnly": "Premium-Stimmen sind nur mit einem Premium-Abonnement verfügbar",
+      "signInToSaveArticles": "Melden Sie sich an, um Artikel zu speichern",
+      "premiumFeatureAITutor": "Der KI-Tutor ist eine Premium-Funktion",
+      "premiumFeatureAccess": "Diese Funktion erfordert ein Premium-Abonnement"
     },
     "preferences": {
       "title": "Artikel-Leseeinstellungen",

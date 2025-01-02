@@ -249,7 +249,18 @@
     "errors": {
       "translationFailed": "テキストの翻訳に失敗しました",
       "contentUnavailable": "記事の内容が利用できません",
-      "contentRemoved": "この記事は削除されたか、アクセスできなくなった可能性があります"
+      "contentRemoved": "この記事は削除されたか、アクセスできなくなった可能性があります",
+      "failedToLoadVoices": "音声の読み込みに失敗しました",
+      "failedToChangeVoice": "音声の変更に失敗しました",
+      "waitForArticleLoad": "記事の読み込みが完了するまでお待ちください"
+    },
+    "messages": {
+      "translationComplete": "すべての文が正常に翻訳されました",
+      "translationError": "一部の文の翻訳に失敗しました",
+      "premiumVoicesOnly": "プレミアムの音声はプレミアム会員のみ利用可能です",
+      "signInToSaveArticles": "記事を保存するにはログインしてください",
+      "premiumFeatureAITutor": "AIチューターはプレミアム機能です",
+      "premiumFeatureAccess": "この機能を利用するにはプレミアム会員が必要です"
     },
     "preferences": {
       "title": "記事リーダー設定",

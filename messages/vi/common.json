@@ -249,7 +249,18 @@
     "errors": {
       "translationFailed": "Không thể dịch văn bản",
       "contentUnavailable": "Nội dung bài viết không khả dụng",
-      "contentRemoved": "Bài viết này có thể đã bị xóa hoặc không thể truy cập"
+      "contentRemoved": "Bài viết này có thể đã bị xóa hoặc không còn truy cập được",
+      "failedToLoadVoices": "Không thể tải giọng đọc",
+      "failedToChangeVoice": "Không thể thay đổi giọng đọc",
+      "waitForArticleLoad": "Vui lòng đợi bài viết tải xong"
+    },
+    "messages": {
+      "translationComplete": "Tất cả câu đã được dịch thành công",
+      "translationError": "Không thể dịch một số câu",
+      "premiumVoicesOnly": "Giọng đọc cao cấp chỉ có sẵn cho người dùng Premium",
+      "signInToSaveArticles": "Đăng nhập để lưu bài viết",
+      "premiumFeatureAITutor": "Gia sư AI là tính năng Premium",
+      "premiumFeatureAccess": "Tính năng này yêu cầu gói đăng ký Premium"
     },
     "preferences": {
       "title": "Tùy chỉnh trình đọc bài viết",

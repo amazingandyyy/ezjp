@@ -266,11 +266,18 @@
     "errors": {
       "translationFailed": "文字翻譯失敗",
       "contentUnavailable": "文章內容不可用",
-      "contentRemoved": "此文章可能已被移除或無法訪問"
+      "contentRemoved": "此文章可能已被移除或無法訪問",
+      "failedToLoadVoices": "載入語音失敗",
+      "failedToChangeVoice": "變更語音失敗",
+      "waitForArticleLoad": "請等待文章載入完成"
     },
     "messages": {
       "translationComplete": "所有句子翻譯完成",
-      "translationError": "部分句子翻譯失敗"
+      "translationError": "部分句子翻譯失敗",
+      "premiumVoicesOnly": "進階語音僅供高級會員使用",
+      "signInToSaveArticles": "請登入以儲存文章",
+      "premiumFeatureAITutor": "AI 家教為高級功能",
+      "premiumFeatureAccess": "此功能需要高級會員訂閱"
     },
     "preferences": {
       "title": "文章閱讀器設定",

@@ -266,11 +266,18 @@
     "errors": {
       "translationFailed": "Failed to translate text",
       "contentUnavailable": "Article content not available",
-      "contentRemoved": "This article may have been removed or is no longer accessible"
+      "contentRemoved": "This article may have been removed or is no longer accessible",
+      "failedToLoadVoices": "Failed to load voices",
+      "failedToChangeVoice": "Failed to change voice",
+      "waitForArticleLoad": "Please wait for the article to load"
     },
     "messages": {
       "translationComplete": "All sentences translated successfully",
-      "translationError": "Failed to translate some sentences"
+      "translationError": "Failed to translate some sentences",
+      "premiumVoicesOnly": "Premium voices are only available with a premium subscription",
+      "signInToSaveArticles": "Sign in to save articles",
+      "premiumFeatureAITutor": "AI Tutor is a premium feature",
+      "premiumFeatureAccess": "This feature requires a premium subscription"
     },
     "preferences": {
       "title": "Article Reader Preferences",

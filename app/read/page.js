@@ -279,7 +279,7 @@ function NewsReaderContent() {
           const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
           setTimeout(() => fetchVoices(retryCount + 1), delay);
         } else {
-          setAudioError('Failed to load voices. Please refresh the page or try again later.');
+          setAudioError(t('reader.errors.failedToLoadVoices'));
         }
       }
     };
@@ -301,30 +301,17 @@ function NewsReaderContent() {
     }
   };
 
-  // Handle voice change
+  // Update the handleVoiceChange function
   const handleVoiceChange = async (voiceName) => {
-    if ((voiceName.includes("Neural2") || voiceName.includes("Wavenet")) && !isPremium) {
-      setToastMessage({
-        type: "info",
-        title: t("reader.premiumFeature"),
-        message: t("reader.upgradeForPremiumVoices"),
-        action: {
-          label: t("reader.upgrade"),
-          onClick: () => router.push("/settings?section=membership")
-        }
-      });
+    // Check for premium voices - use profile.role_level instead of isPremium
+    if ((voiceName.includes("Neural2") || voiceName.includes("Wavenet")) && (!profile?.role_level || profile.role_level === 0)) {
+      setToastMessage(t("reader.messages.premiumVoicesOnly"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 5000);
       return;
     }
 
-    setUpdatingPreferences((prev) => ({
-      ...prev,
-      preferred_voice: true,
-    }));
-
     try {
-      setUpdatingPreferences(prev => ({ ...prev, voice: true }));
       setIsVoiceLoading(true);
       setIsPlaying(false);
       setIsPaused(false);
@@ -338,21 +325,29 @@ function NewsReaderContent() {
       });
       setAudioCache({});
 
-      // Update preference in database if user is logged in
-      if (user) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ preferred_voice: voiceName })
-          .eq('id', user.id);
-
-        if (updateError) throw updateError;
-      }
-
-      // Update local state and wait for it to be reflected
+      // Update local state first
       setPreferenceState(prev => ({
         ...prev,
         preferred_voice: voiceName
       }));
+
+      // Only update database if user is logged in
+      if (user) {
+        try {
+          setUpdatingPreferences(prev => ({ ...prev, preferred_voice: true }));
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ preferred_voice: voiceName })
+            .eq('id', user.id);
+
+          if (updateError) throw updateError;
+        } catch (error) {
+          console.error('Error updating voice preference:', error);
+          // Don't throw here - we still want to continue with voice change even if save fails
+        } finally {
+          setUpdatingPreferences(prev => ({ ...prev, preferred_voice: false }));
+        }
+      }
 
       // Wait for state update to be reflected
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -411,9 +406,8 @@ function NewsReaderContent() {
       }
     } catch (error) {
       console.error('Error in voice change:', error);
-      setAudioError('Failed to change voice. Please try again.');
+      setAudioError(t('reader.errors.failedToChangeVoice'));
     } finally {
-      setUpdatingPreferences(prev => ({ ...prev, voice: false }));
       setIsVoiceLoading(false);
     }
   };
@@ -1488,7 +1482,7 @@ function NewsReaderContent() {
   // Toggle save status
   const toggleSave = async () => {
     if (!user) {
-      setToastMessage('Tip: Sign in to save articles for later');
+      setToastMessage(t('reader.messages.signInToSaveArticles'));
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -2372,7 +2366,7 @@ function NewsReaderContent() {
   // Update the toggleFinished function
   const toggleFinished = async () => {
     if (!user) {
-      setToastMessage('Tip: Sign in to track your reading progress');
+      setToastMessage(t('reader.messages.signInToTrackProgress'));
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -2605,7 +2599,7 @@ function NewsReaderContent() {
     if (!currentArticleId) {
       setTutorExplanations(prev => ({
         ...prev,
-        [index]: `Please wait a moment for the article to load before requesting AI tutor analysis.`
+        [index]: t('reader.errors.waitForArticleLoad')
       }));
       return;
     }
@@ -2622,7 +2616,7 @@ function NewsReaderContent() {
     // Check if user is premium using profile.role_level
     if (!profile?.role_level) {
       console.log('Debug - Access denied: No role_level found in profile');
-      setToastMessage("Premium feature: Sign up for premium to access AI tutor");
+      setToastMessage(t('reader.messages.premiumFeatureAITutor'));
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -2770,7 +2764,7 @@ function NewsReaderContent() {
         ...prev,
         preferred_translation_language: language
       }));
-      setToastMessage('Tip: Sign in to remember your reader preferences');
+      setToastMessage(t("reader.messages.signInToSavePreferences"));
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -2796,7 +2790,7 @@ function NewsReaderContent() {
       await Promise.allSettled(translationPromises);
     } catch (error) {
       console.error('Translation error:', error);
-      setToastMessage(t('reader.messages.translationError'));
+      setToastMessage(t("reader.messages.premiumFeatureAccess"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } finally {

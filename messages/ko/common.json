@@ -249,7 +249,18 @@
     "errors": {
       "translationFailed": "텍스트 번역 실패",
       "contentUnavailable": "기사 내용을 사용할 수 없습니다",
-      "contentRemoved": "이 기사가 삭제되었거나 더 이상 접근할 수 없습니다"
+      "contentRemoved": "이 기사가 삭제되었거나 더 이상 접근할 수 없습니다",
+      "failedToLoadVoices": "음성 로드 실패",
+      "failedToChangeVoice": "음성 변경 실패",
+      "waitForArticleLoad": "기사가 로드될 때까지 기다려주세요"
+    },
+    "messages": {
+      "translationComplete": "모든 문장이 성공적으로 번역되었습니다",
+      "translationError": "일부 문장 번역 실패",
+      "premiumVoicesOnly": "프리미엄 음성은 프리미엄 구독자만 이용할 수 있습니다",
+      "signInToSaveArticles": "기사를 저장하려면 로그인하세요",
+      "premiumFeatureAITutor": "AI 튜터는 프리미엄 기능입니다",
+      "premiumFeatureAccess": "이 기능은 프리미엄 구독이 필요합니다"
     },
     "preferences": {
       "title": "기사 리더 설정",
