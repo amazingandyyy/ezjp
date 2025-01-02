@@ -1,3 +1,10 @@
+# [1.50.0](https://github.com/amazingandyyy/ezjp/compare/v1.49.0...v1.50.0) (2025-01-02)
+
+
+### Features
+
+* enhance theming and metadata for improved user experience ([c87893e](https://github.com/amazingandyyy/ezjp/commit/c87893e0f2de6edc42802ebb12f21a1ebaf1c890))
+
 # [1.49.0](https://github.com/amazingandyyy/ezjp/compare/v1.48.0...v1.49.0) (2025-01-01)
 
 
