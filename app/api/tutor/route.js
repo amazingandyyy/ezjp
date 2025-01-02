@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { PREMIUM_LIMITS } from '@/lib/constants';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -129,21 +130,41 @@ For follow-up questions:
 
 export async function POST(request) {
   try {
-    const { text, articleId, sentenceIndex, userId, followUpQuestion, lang = 'en' } = await request.json();
-    console.log('=== API Debug Info ===');
-    console.log('Request params:', { text, articleId, sentenceIndex, userId, followUpQuestion, lang });
+    const body = await request.json();
+    const { text, lang = 'en', userId, articleId, sentenceIndex, followUpQuestion } = body;
 
-    if (!text || !articleId || sentenceIndex === undefined) {
-      console.log('Missing required parameters:', { text, articleId, sentenceIndex });
-      return NextResponse.json(
-        { error: 'Missing required parameters' },
-        { status: 400 }
-      );
+    if (!text) {
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
+    }
+
+    if (!articleId || sentenceIndex === undefined) {
+      return NextResponse.json({
+        error: 'Article ID and sentence index are required',
+        details: 'The articleId and sentenceIndex parameters are missing'
+      }, { status: 400 });
+    }
+
+    // Check usage limits for authenticated users
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role_level')
+        .eq('id', userId)
+        .single();
+
+      const { data: aiTutorUsage } = await supabase
+        .rpc('get_monthly_ai_tutor_usage', { user_uuid: userId });
+
+      const monthlyLimit = profile?.role_level >= 1 ? PREMIUM_LIMITS.AI_TUTOR.PREMIUM : PREMIUM_LIMITS.AI_TUTOR.FREE;
+      if (aiTutorUsage >= monthlyLimit) {
+        return NextResponse.json({ 
+          error: 'Monthly AI tutor limit reached',
+          details: `You have used ${aiTutorUsage} out of ${monthlyLimit} AI tutor sessions this month.`
+        }, { status: 429 });
+      }
     }
 
     const fullLanguage = LANGUAGE_MAP[lang] || LANGUAGE_MAP['en'];
-    console.log('Language mapping:', { lang, fullLanguage });
-
     const promptWithLanguage = TUTOR_SYSTEM_PROMPT.replaceAll('<LANGUAGE>', fullLanguage);
 
     const messages = [
@@ -152,22 +173,10 @@ export async function POST(request) {
     ];
 
     if (followUpQuestion) {
-      console.log('Follow-up question:', followUpQuestion);
-      const followUpSystemPrompt = `You are continuing to help the user understand Japanese text. Your role is to provide brief, natural responses that are easy to understand.
-
-IMPORTANT RULES:
-1. You MUST respond ONLY in ${fullLanguage}
-2. Do not use any other language
-3. Keep responses conversational (2-3 sentences)
-4. Use a friendly, tutoring tone
-5. No markdown formatting needed
-
-Remember: ALL communication must be in ${fullLanguage}`;
-
       messages.push(
-        { role: "system", content: followUpSystemPrompt },
-        { role: "assistant", content: `I'll continue our discussion in ${fullLanguage}.` },
-        { role: "user", content: followUpQuestion }
+        { role: "system", content: `For follow-up questions, give brief, natural responses without any markdown formatting or sections. Keep answers conversational and concise (2-3 sentences). Use a friendly tone. IMPORTANT: You MUST respond in ${fullLanguage} only.` },
+        { role: "assistant", content: `I'll continue helping you understand this sentence in ${fullLanguage}.` },
+        { role: "user", content: `${followUpQuestion} (Please respond in ${fullLanguage})` }
       );
     }
 
@@ -223,33 +232,16 @@ Remember: ALL communication must be in ${fullLanguage}`;
       });
 
     if (insertError) {
-      console.error('Database insert error:', insertError);
-    } else {
-      console.log('Successfully inserted session into database');
+      console.error('Error inserting AI tutor session:', insertError);
     }
 
-    console.log('=== End API Debug Info ===');
-
-    return NextResponse.json({ 
-      explanation,
-      usage: {
-        input_tokens: prompt_tokens,
-        output_tokens: completion_tokens,
-        total_tokens: total_tokens,
-        costs: {
-          input_cost,
-          output_cost,
-          total_cost
-        }
-      }
-    });
+    return NextResponse.json({ explanation });
   } catch (error) {
-    console.error('Tutor API error:', error);
-    console.error('Error stack:', error.stack);
-    return NextResponse.json(
-      { error: 'Failed to generate explanation' },
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to generate explanation',
+      details: error.message
+    }, { status: 500 });
   }
 }
 

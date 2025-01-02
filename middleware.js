@@ -6,10 +6,6 @@ export async function middleware(req) {
   
   // Skip if no session token exists
   if (!req.cookies.get('sb-access-token')?.value) {
-    // Redirect to login for premium features
-    if (req.nextUrl.pathname.startsWith('/api/premium/')) {
-      return NextResponse.redirect(new URL('/join', req.url));
-    }
     return res;
   }
 
@@ -24,32 +20,6 @@ export async function middleware(req) {
       },
     }
   )
-
-  // Check premium status for premium API routes
-  if (req.nextUrl.pathname.startsWith('/api/premium/')) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        return NextResponse.redirect(new URL('/join', req.url));
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('premium_until')
-        .eq('id', session.user.id)
-        .single();
-
-      const now = new Date();
-      const premiumUntil = profile?.premium_until ? new Date(profile.premium_until) : null;
-      
-      if (!premiumUntil || premiumUntil <= now) {
-        return NextResponse.redirect(new URL('/settings', req.url));
-      }
-    } catch (error) {
-      console.error('Error checking premium status:', error);
-      return NextResponse.redirect(new URL('/join', req.url));
-    }
-  }
 
   await supabase.auth.getSession();
   return res;

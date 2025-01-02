@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { createClient } from '@supabase/supabase-js';
+import { PREMIUM_LIMITS } from '@/lib/constants';
 
 // Voice costs per character (Google Cloud TTS pricing)
 const VOICE_COSTS = {
@@ -94,6 +95,26 @@ export async function POST(req) {
         error: 'Article ID and sentence index are required',
         details: 'The articleId and sentenceIndex parameters are missing'
       }, { status: 400 });
+    }
+
+    // Check usage limits for authenticated users
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role_level')
+        .eq('id', userId)
+        .single();
+
+      const { data: ttsUsage } = await supabase
+        .rpc('get_monthly_tts_usage', { user_uuid: userId });
+
+      const monthlyLimit = profile?.role_level >= 1 ? PREMIUM_LIMITS.TTS.PREMIUM : PREMIUM_LIMITS.TTS.FREE;
+      if (ttsUsage >= monthlyLimit) {
+        return NextResponse.json({ 
+          error: 'Monthly TTS character limit reached',
+          details: `You have used ${ttsUsage} out of ${monthlyLimit} characters this month.`
+        }, { status: 429 });
+      }
     }
 
     // Validate and clamp speed between 0.25 and 4.0 (Google's limits)
