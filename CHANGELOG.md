@@ -1,3 +1,10 @@
+# [1.51.0](https://github.com/amazingandyyy/ezjp/compare/v1.50.0...v1.51.0) (2025-01-02)
+
+
+### Features
+
+* implement legal documents layout and update footer links ([81816b0](https://github.com/amazingandyyy/ezjp/commit/81816b07776277824eb2a44e3ff0273e2e2ea747))
+
 # [1.50.0](https://github.com/amazingandyyy/ezjp/compare/v1.49.0...v1.50.0) (2025-01-02)
 
 
