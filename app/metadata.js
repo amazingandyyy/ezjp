@@ -28,7 +28,7 @@ export const metadata = {
     siteName: 'EZJP',
     images: [
       {
-        url: '/og-image.png',
+        url: '/images/ezjp-homepage.png',
         width: 1200,
         height: 630,
         alt: 'EZJP - Learn Japanese Through News',
@@ -47,7 +47,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'EZJP - Learn Japanese Through News',
     description: 'Improve your Japanese reading skills with AI-powered news articles. Practice with real Japanese content, get instant translations, and track your progress.',
-    images: ['/og-image.png', '/icons/ezjp-app.png'],
+    images: ['/images/ezjp-homepage.png', '/icons/ezjp-app.png'],
     creator: '@ezjpnews',
   },
   robots: {

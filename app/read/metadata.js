@@ -19,9 +19,6 @@ export async function generateMetadata({ searchParams }) {
       return {};
     }
 
-    const ogImageUrl = new URL(`/read/opengraph-image`, 'https://easy-jp-news.vercel.app');
-    ogImageUrl.searchParams.set('source', encodeURIComponent(sourceUrl));
-
     return {
       title: `${article.title} | EZJP News`,
       description: article.description,
@@ -30,7 +27,7 @@ export async function generateMetadata({ searchParams }) {
         description: article.description,
         images: [
           {
-            url: ogImageUrl.toString(),
+            url: '/images/ezjp-homepage.png',
             width: 1200,
             height: 630,
             alt: article.title,
@@ -41,7 +38,7 @@ export async function generateMetadata({ searchParams }) {
         card: 'summary_large_image',
         title: article.title,
         description: article.description,
-        images: [ogImageUrl.toString()],
+        images: ['/images/ezjp-homepage.png'],
       }
     };
   } catch (error) {
