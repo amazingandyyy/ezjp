@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }) {
         description: article.description,
         images: [
           {
-            url: '/images/ezjp-homepage.png',
+            url: '/images/og-image.png',
             width: 1200,
             height: 630,
             alt: article.title,
@@ -38,7 +38,7 @@ export async function generateMetadata({ searchParams }) {
         card: 'summary_large_image',
         title: article.title,
         description: article.description,
-        images: ['/images/ezjp-homepage.png'],
+        images: ['/images/og-image.png'],
       }
     };
   } catch (error) {
