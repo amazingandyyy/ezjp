@@ -11,6 +11,9 @@ const OUTPUT_DIR = path.join('public', 'sources', 'mainichi.jp', 'maisho');
 const ARCHIVE_DIR = path.join(OUTPUT_DIR, 'archive');
 const TEMP_FILE = path.join('/tmp', 'mainichi-news-list-new.json');
 
+// Configuration
+const FORCE_REFRESH = process.argv.includes('--force'); // Allow force refresh via command line
+
 // Add delay between requests to be respectful
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -183,13 +186,20 @@ async function main() {
     
     // Load existing news
     const existingNews = await loadExistingNews();
-    const existingIds = new Set(existingNews.map(article => article.news_id));
     
     console.log('📰 Fetching article list...');
     const newArticles = await fetchArticleList();
     
-    // Filter out articles we already have
-    const uniqueNewArticles = newArticles.filter(article => !existingIds.has(article.news_id));
+    if (FORCE_REFRESH) {
+      console.log('🔄 Force refresh requested, processing all articles...');
+    }
+    
+    // Filter articles based on whether they're already in our list (unless force refresh)
+    const existingIds = new Set(existingNews.map(article => article.news_id));
+    const uniqueNewArticles = newArticles.filter(article => {
+      const isNew = !existingIds.has(article.news_id);
+      return FORCE_REFRESH || isNew;
+    });
     
     if (uniqueNewArticles.length === 0) {
       console.log('📭 No new articles found.');
@@ -211,11 +221,10 @@ async function main() {
       } catch (error) {
         console.error(`Error processing article ${article.news_web_url}:`, error.message);
       }
-      // Add delay between articles
       await delay(2000);
     }
     
-    // Combine with existing articles and sort by date
+    // Combine all articles and sort by date
     const allArticles = [...existingNews, ...processedNewArticles]
       .sort((a, b) => new Date(b.news_prearranged_time) - new Date(a.news_prearranged_time));
     
@@ -228,7 +237,7 @@ async function main() {
     // Check if current file exists and if content is different
     const currentFileExists = await fs.access(outputPath).then(() => true).catch(() => false);
     
-    if (currentFileExists) {
+    if (currentFileExists && !FORCE_REFRESH) {
       const filesAreIdentical = await compareFiles(outputPath, TEMP_FILE);
       if (!filesAreIdentical) {
         // Content is different, archive the current version
@@ -242,16 +251,22 @@ async function main() {
         const formattedContent = JSON.stringify(allArticles, null, 2);
         await fs.writeFile(formattedOutputPath, formattedContent, 'utf8');
         console.log(`📰 Added ${processedNewArticles.length} new articles and archived previous version`);
+        console.log(`📊 Total articles in list: ${allArticles.length}`);
       } else {
         console.log('📭 No changes in news data.');
         await fs.unlink(TEMP_FILE);
       }
     } else {
-      // First time run, just save the files
+      // First time run or force refresh
       await fs.rename(TEMP_FILE, outputPath);
       const formattedContent = JSON.stringify(allArticles, null, 2);
       await fs.writeFile(formattedOutputPath, formattedContent, 'utf8');
-      console.log('📰 Initial news data saved.');
+      if (FORCE_REFRESH) {
+        console.log('🔄 Force refresh complete.');
+      } else {
+        console.log('📰 Initial news data saved.');
+      }
+      console.log(`📊 Total articles in list: ${allArticles.length}`);
     }
     
     // Clean up old archives (keep last 24 hours)
