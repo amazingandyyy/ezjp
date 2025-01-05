@@ -25,7 +25,7 @@ jobs:
         run: npm ci
 
       - name: Run fetch script
-        run: node scripts/fetch-mainichi-news.js
+        run: node scripts/fetch-mainichi-news.js --force
 
       - name: Check for changes
         id: check_changes
