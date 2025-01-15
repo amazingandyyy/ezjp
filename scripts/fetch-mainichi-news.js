@@ -226,6 +226,14 @@ async function main() {
     
     // Combine all articles and sort by date
     const allArticles = [...existingNews, ...processedNewArticles]
+      .reduce((acc, article) => {
+        // Only add if article with same news_id doesn't exist
+        const exists = acc.some(a => a.news_id === article.news_id);
+        if (!exists) {
+          acc.push(article);
+        }
+        return acc;
+      }, [])
       .sort((a, b) => new Date(b.news_prearranged_time) - new Date(a.news_prearranged_time));
     
     // Save to temp file first
